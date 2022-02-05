@@ -1,0 +1,48 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build debug",
+            "type": "process",
+            "command": "make",
+            "args": ["build"],
+            "windows": {
+                "command": "C:/raylib/mingw/bin/mingw32-make.exe",
+                "args": [],
+            },
+            "osx": {
+                "args": [],
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build release",
+            "type": "process",
+            "command": "make",
+            "args": ["build"],
+            "windows": {
+                "command": "C:/raylib/mingw/bin/mingw32-make.exe",
+                "args": [],
+            },
+            "osx": {
+                "args": [
+                    "RAYLIB_PATH=<path_to_raylib>/raylib",
+                    "PROJECT_NAME=${fileBasenameNoExtension}",
+                    "OBJS=${fileBasenameNoExtension}.c"
+                ],
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+    ]
+}
