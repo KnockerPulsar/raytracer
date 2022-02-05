@@ -42,7 +42,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "program": "${workspaceFolder}/RaylibPong",
+            "program": "${workspaceFolder}/bin/RaylibPong",
             "MIMode": "gdb",
             "windows": {
               "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
