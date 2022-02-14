@@ -18,29 +18,35 @@ using raytracer::HittableList, raytracer::HitRecord, raytracer::Sphere, raytrace
 
 typedef raylib::Color clr;
 
-vec3 RayColor(const raytracer::Ray &r, const Hittable &world)
-{
-    HitRecord rec;
-    if (world.Hit(r, 0.0f, infinity, rec))
-    {
-        return (rec.normal + vec3(1.0, 1.0, 1.0)) * 0.5;
-    }
+vec3 RayColor(const raytracer::Ray& r, const Hittable& world, int depth) {
+  HitRecord rec;
 
-    vec3 unit_direction = r.direction.Normalize();
+  // Limit max recursion depth
+  if(depth <= 0) 
+    return vec3(0,0,0);
 
-    float t = 0.5 * (unit_direction.y + 1.0);
-    vec3 startColor(1.0, 1.0, 1.0), endColor(0.5, 0.7, 1.0);
+  if (world.Hit(r, 0.001f, infinity, rec)) {
+    vec3 target = rec.p + rec.normal + random_in_hemisphere(rec.normal);
+    return  RayColor(raytracer::Ray(rec.p, target-rec.p), world, depth-1) * 0.5;
+  }
 
-    return startColor * (1 - t) + endColor * t;
+  vec3 unit_direction = r.direction.Normalize();
+
+  float t = 0.5 * (unit_direction.y + 1.0);
+  vec3 startColor(1.0, 1.0, 1.0), endColor(0.5, 0.7, 1.0);
+
+  return startColor * (1 - t) + endColor * t;
 }
 
 int main(void)
 {
     // Window
-    const int image_width = 400;
+    const int image_width = 600;
     const float aspect_ratio = 16.0 / 9.0;
     const int image_height = (image_width / aspect_ratio);
-    const int samples_per_pixel = 4;
+    const int samples_per_pixel = 6;
+    const int max_depth = 50;
+
 
     Window window = Window(image_width, image_height, title);
     window.SetTargetFPS(60);
@@ -76,10 +82,25 @@ int main(void)
                     float v = (y + random_float()) / (image_height - 1);
                     raytracer::Ray r = cam.GetRay(u, v);
 
-                    pixel_color += RayColor(r, world);
+                    pixel_color += RayColor(r, world,max_depth);
                 }
 
                 pixel_color /= samples_per_pixel;
+
+// Seems that raylib doesn't assume gamma correction.
+// No real need for this part, but I'll leave it.
+#ifdef GAMMA_CORRECTION
+                // Gamma correction
+                auto [r,g,b] = pixel_color;
+                
+                float scale = 1.0 / samples_per_pixel;
+                r = sqrt(scale*r);
+                g = sqrt(scale*g);
+                b = sqrt(scale*b);
+
+                pixel_color = vec3(r,g,b);
+#endif
+
                 pixel_color *= 255;
                 clr clr(pixel_color.x, pixel_color.y, pixel_color.z, 255);
 
