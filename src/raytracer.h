@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmath>
+#include <math.h>
 #include <limits>
 #include <memory>
 #include <random>
@@ -72,5 +72,17 @@ inline vec3 random_in_hemisphere(const vec3& normal) {
   vec3 in_unit_sphere = random_in_unit_sphere();
   if (Vector3DotProduct(normal, in_unit_sphere) > 0.0)
     return in_unit_sphere;
-    else return -in_unit_sphere;
+  else
+    return -in_unit_sphere;
+}
+
+bool vec3_near_zero(const vec3& vec) {
+  const float smol = 1e-8;
+  return fabs(vec.x) < smol && fabs(vec.y) < smol && fabs(vec.z) < smol;
+}
+
+vec3 vec3_reflect(vec3& v, vec3& n) {
+  float b_scale = Vector3DotProduct(v, n);
+  vec3 b = n * b_scale;
+  return v - b * 2;
 }

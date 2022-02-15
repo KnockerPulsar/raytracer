@@ -1,12 +1,8 @@
 
 # Preprocessor defs
 # ggdb                 	-> enable debugging
-# DQUAD_COLLISION      	-> use quadtree collision over naive collision
-# DQUAD_COLLISION_DRAW 	-> draw collision quadtree recursively
-# DMAX_FPS=max fps 		-> The maximum FPS the main loop could run at.
-#						   -DMAX_FPS=0 is uncapped. FPS is capped at 60 if not specified
 # DGAMMA_CORRECTION		-> Turn gamma correction on or off. 
-defines := -ggdb -DQUAD_COLLISION 
+defines := -DGAMMA_CORRECTION
 
 # Define custom functions
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

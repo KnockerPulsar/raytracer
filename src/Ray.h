@@ -5,21 +5,15 @@
 
 typedef raylib::Vector3 vec3;
 
-namespace raytracer
-{
-    class Ray
-    {
+namespace raytracer {
+class Ray {
+ public:
+  vec3 origin, direction;
 
-    public:
-        vec3 origin, direction;
+  Ray(){}
+  Ray(vec3 org, vec3 dir) : origin(org), direction(dir) {}
+  vec3 At(float t) const { return Vector3Add(origin, direction * t); }
+  vec3 Origin() const { return origin; }
+};
 
-        
-        Ray(vec3 org, vec3 dir) : origin(org), direction(dir) {}
-        vec3 At(float t) const { return Vector3Add(origin, direction * t); }
-
-        vec3 Origin() const { return origin; }
-
-        
-    };
-
-}
+}  // namespace raytracer
