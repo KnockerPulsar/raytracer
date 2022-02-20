@@ -11,24 +11,24 @@ class Material {
  public:
   virtual bool scatter(const Ray& r_in,
                        HitRecord& rec,
-                       vec3& attenuation,
+                       Vec3& attenuation,
                        Ray& scattered) const = 0;
 };
 
 class Lambertian : public Material {
  private:
-  vec3 albedo;
+  Vec3 albedo;
 
  public:
-  Lambertian(const vec3 color) : albedo(color) {}
+  Lambertian(const Vec3 color) : albedo(color) {}
 
   virtual bool scatter(const Ray& r_in,
                        HitRecord& rec,
-                       vec3& attenuation,
+                       Vec3& attenuation,
                        Ray& scattered) const override {
-    vec3 scatter_dir = rec.normal + random_unit_vec();
+    Vec3 scatter_dir = rec.normal + Vec3::RandomUnitVec();
 
-    if (vec3_near_zero(scatter_dir))
+    if (scatter_dir.NearZero())
       scatter_dir = rec.normal;
 
     scattered = Ray(rec.p, scatter_dir);
@@ -39,20 +39,20 @@ class Lambertian : public Material {
 
 class Metal : public Material {
  public:
-  vec3 albedo;
+  Vec3 albedo;
   float fuzz;
 
-  Metal(const vec3& color, float f) : albedo(color), fuzz(f < 1 ? f : 1) {}
+  Metal(const Vec3& color, float f) : albedo(color), fuzz(f < 1 ? f : 1) {}
 
   bool scatter(const Ray& r_in,
                HitRecord& rec,
-               vec3& attenuation,
+               Vec3& attenuation,
                Ray& scattered) const override {
-    vec3 in_normalized = r_in.direction.Normalize();
-    vec3 reflected = vec3_reflect(in_normalized, rec.normal);
-    scattered = Ray(rec.p, reflected + random_in_unit_sphere() * fuzz);
+    Vec3 in_normalized = r_in.direction.Normalize();
+    Vec3 reflected = in_normalized.Reflect(rec.normal);
+    scattered = Ray(rec.p, reflected + Vec3::RandomInUnitSphere() * fuzz);
     attenuation = albedo;
-    return (scattered.direction.DotProduct(rec.normal) > 0);
+    return (Vec3::DotProd(scattered.direction, rec.normal) > 0);
   }
 };
 
