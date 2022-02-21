@@ -2,7 +2,7 @@
 # Preprocessor defs
 # ggdb                 	-> enable debugging
 # DGAMMA_CORRECTION		-> Turn gamma correction on or off. 
-defines := -DGAMMA_CORRECTION 
+defines := -DGAMMA_CORRECTION -g
 
 # Define custom functions
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

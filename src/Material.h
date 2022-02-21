@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Hittable.h"
-#include "raytracer.h"
 
 namespace raytracer {
 
@@ -56,4 +55,33 @@ class Metal : public Material {
   }
 };
 
-}  // namespace raytracer
+class Dielectric : public Material {
+ public:
+  float refractionIndex;
+
+  Dielectric(float refIdx) : refractionIndex(refIdx) {}
+  virtual bool scatter(const Ray& r_in,
+                       HitRecord& rec,
+                       Vec3& attenuation,
+                       Ray& scattered) const override {
+    attenuation = Vec3(1.0);
+    float refraction_ratio =
+        rec.front_face ? (1 / refractionIndex) : refractionIndex;
+
+    Vec3 unit_dir = r_in.direction.Normalize();
+    float cos_theta = fmin(Vec3::DotProd(-unit_dir, rec.normal), 1.0);
+    float sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+
+    bool cannot_refract = refraction_ratio*sin_theta > 1.0;
+    Vec3 dir;
+
+    if(cannot_refract)
+      dir = unit_dir.Reflect(rec.normal);
+    else
+      dir = unit_dir.Refract(rec.normal, refraction_ratio);
+
+    scattered = Ray(rec.p, dir);
+    return true;
+  }
+};
+};  // namespace raytracer

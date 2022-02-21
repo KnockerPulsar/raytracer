@@ -1,7 +1,7 @@
 #pragma once
 
 #include <raylib.h>
-#include "raytracer.h"
+#include "Vec3.h"
 
 namespace raytracer {
 class Ray {

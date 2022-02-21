@@ -1,4 +1,5 @@
 #include "Vec3.h"
+#include "Util.h"
 
 Vec3::Vec3() {}
 
@@ -17,6 +18,13 @@ Vec3 Vec3::Reflect(const Vec3& norm) const {
   float b_scale = Vec3::DotProd(norm, *this);
   Vec3 b = norm * b_scale;
   return *this - b * 2;
+}
+
+Vec3 Vec3::Refract(const Vec3& n, float etai_over_etat) {
+  float cos_theta = fmin(DotProd(-*this, n), 1.0);
+  Vec3 r_out_perp = etai_over_etat * (*this + cos_theta * n);
+  Vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.SqrLen())) * n;
+  return r_out_perp + r_out_parallel;
 }
 
 float Vec3::DotProd(const Vec3& left, const Vec3& right) {
@@ -64,4 +72,3 @@ Vec3 operator*(const Vec3& lVec3, const float rFloat) {
 Vec3 operator*(const float lFloat, const Vec3& rVec3) {
   return operator*(rVec3, lFloat);
 }
-

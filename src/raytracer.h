@@ -3,11 +3,10 @@
 #include <math.h>
 #include <limits>
 #include <memory>
-#include <raymath.h>
 
 #include "Ray.h"
-#include "Util.h"
 #include "Vec3.h"   
+#include "Util.h"
 
 // Usings
 using std::make_shared;

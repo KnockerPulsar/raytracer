@@ -5,7 +5,7 @@
         "version": "0.2.0",
         "configurations": [ 
           {
-            "name": "Run/Debug",
+            "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/RaylibPong",
@@ -32,6 +32,29 @@
               "miDebuggerPath": "/usr/bin/gdb",
             },
             "preLaunchTask": "build debug",
+          },
+          {
+            "name": "Run",
+            "type": "cppdbg",
+            "request": "launch",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "program": "${workspaceFolder}/bin/RaylibPong",
+            "MIMode": "gdb",
+            "windows": {
+              "program": "${workspaceFolder}/${fileBasenameNoExtension}.exe",
+              "miDebuggerPath": "C:/raylib/mingw/bin/gdb.exe"
+            },
+            "osx": {
+              "MIMode": "lldb"
+            },
+            "linux": {
+              "miDebuggerPath": "/usr/bin/gdb"
+            },
+            "preLaunchTask": "build release",
           }
         ]
       }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <raymath.h>
-#include "Util.h"
 
 class Vec3 : public Vector3 {
  public:
@@ -12,6 +11,7 @@ class Vec3 : public Vector3 {
 
   bool NearZero() const;
   Vec3 Reflect(const Vec3& norm) const;
+  Vec3 Refract(const Vec3& n, float etai_over_etat);
 
   inline Vec3 Normalize() const;
   inline float SqrLen() const;
