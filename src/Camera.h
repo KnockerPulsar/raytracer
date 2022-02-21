@@ -3,18 +3,27 @@
 
 namespace raytracer {
 class Camera {
- public:
-  Camera() {
-    float aspect_ratio = 16.0 / 9.0;
-    float viewport_height = 2.0;
-    float viewport_width = aspect_ratio * viewport_height;
-    float focal_length = 1.0f;
+public:
+  Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vUp,
+         float vFov, // vertical field-of-view in degrees
+         float aspectRatio) {
 
-    origin = Vec3::Zero();
-    horizontal = Vec3(viewport_width, 0, 0);
-    vertical = Vec3(0, viewport_height, 0);
-    lower_left_corner =
-        origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
+    float theta = DegressToRadians(vFov);
+
+    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
+    float h               = tan(theta / 2);
+    float viewport_height = 2.0 * h;
+    float viewport_width  = aspectRatio * viewport_height;
+
+    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
+    Vec3 w = (lookFrom - lookAt).Normalize();
+    Vec3 u = Vec3::CrsProd(vUp, w).Normalize();
+    Vec3 v = Vec3::CrsProd(w, u);
+
+    origin            = lookFrom;
+    horizontal        = viewport_width * u;
+    vertical          = viewport_height * v;
+    lower_left_corner = origin - horizontal / 2 - vertical / 2 - w;
   }
 
   Ray GetRay(float u, float v) {
@@ -22,7 +31,7 @@ class Camera {
                lower_left_corner + horizontal * u + vertical * v - origin);
   }
 
- private:
+private:
   Vec3 origin, lower_left_corner, horizontal, vertical;
 };
-}  // namespace raytracer
+} // namespace raytracer

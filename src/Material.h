@@ -7,81 +7,87 @@ namespace raytracer {
 struct HitRecord;
 
 class Material {
- public:
-  virtual bool scatter(const Ray& r_in,
-                       HitRecord& rec,
-                       Vec3& attenuation,
-                       Ray& scattered) const = 0;
+public:
+  virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+                       Ray &scattered) const = 0;
 };
 
 class Lambertian : public Material {
- private:
+private:
   Vec3 albedo;
 
- public:
+public:
   Lambertian(const Vec3 color) : albedo(color) {}
 
-  virtual bool scatter(const Ray& r_in,
-                       HitRecord& rec,
-                       Vec3& attenuation,
-                       Ray& scattered) const override {
+  virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+                       Ray &scattered) const override {
+
     Vec3 scatter_dir = rec.normal + Vec3::RandomUnitVec();
 
     if (scatter_dir.NearZero())
       scatter_dir = rec.normal;
 
-    scattered = Ray(rec.p, scatter_dir);
+    scattered   = Ray(rec.p, scatter_dir);
     attenuation = albedo;
     return true;
   }
 };
 
 class Metal : public Material {
- public:
-  Vec3 albedo;
+public:
+  Vec3  albedo;
   float fuzz;
 
-  Metal(const Vec3& color, float f) : albedo(color), fuzz(f < 1 ? f : 1) {}
+  Metal(const Vec3 &color, float f) : albedo(color), fuzz(f < 1 ? f : 1) {}
 
-  bool scatter(const Ray& r_in,
-               HitRecord& rec,
-               Vec3& attenuation,
-               Ray& scattered) const override {
+  bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+               Ray &scattered) const override {
     Vec3 in_normalized = r_in.direction.Normalize();
-    Vec3 reflected = in_normalized.Reflect(rec.normal);
-    scattered = Ray(rec.p, reflected + Vec3::RandomInUnitSphere() * fuzz);
+    Vec3 reflected     = in_normalized.Reflect(rec.normal);
+    scattered   = Ray(rec.p, reflected + Vec3::RandomInUnitSphere() * fuzz);
     attenuation = albedo;
     return (Vec3::DotProd(scattered.direction, rec.normal) > 0);
   }
 };
 
 class Dielectric : public Material {
- public:
+public:
   float refractionIndex;
 
   Dielectric(float refIdx) : refractionIndex(refIdx) {}
-  virtual bool scatter(const Ray& r_in,
-                       HitRecord& rec,
-                       Vec3& attenuation,
-                       Ray& scattered) const override {
-    attenuation = Vec3(1.0);
-    float refraction_ratio =
-        rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
-    Vec3 unit_dir = r_in.direction.Normalize();
+  virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+                       Ray &scattered) const override {
+
+    attenuation   = Vec3(1.0);
+    float ref_idx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
+
+    Vec3  unit_dir  = r_in.direction.Normalize();
     float cos_theta = fmin(Vec3::DotProd(-unit_dir, rec.normal), 1.0);
-    float sin_theta = sqrt(1.0 - cos_theta*cos_theta);
+    float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
-    bool cannot_refract = refraction_ratio*sin_theta > 1.0;
-    Vec3 dir;
+    bool  cannot_refract = ref_idx * sin_theta > 1.0;
+    float reflectance    = Reflectance(cos_theta, ref_idx);
+    Vec3  dir;
 
-    if(cannot_refract)
+    // Either reflect when the refraction index and sin_theta are large enought
+    // Or just reflect randomly.
+    // Otherwise, refract.
+    if (cannot_refract || reflectance > RandomFloat())
       dir = unit_dir.Reflect(rec.normal);
     else
-      dir = unit_dir.Refract(rec.normal, refraction_ratio);
+      dir = unit_dir.Refract(rec.normal, ref_idx);
 
     scattered = Ray(rec.p, dir);
     return true;
   }
+
+private:
+  static float Reflectance(float cos, float ref_idx) {
+    // Schlick's approx.
+    float r0 = (1 - ref_idx) / (1 + ref_idx);
+    r0       = r0 * r0;
+    return r0 + (1 - r0) * pow(1 - cos, 5);
+  }
 };
-};  // namespace raytracer
+}; // namespace raytracer

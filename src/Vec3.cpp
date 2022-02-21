@@ -14,21 +14,25 @@ bool Vec3::NearZero() const {
   return fabs(x) < smol && fabs(y) < smol && fabs(z) < smol;
 }
 
-Vec3 Vec3::Reflect(const Vec3& norm) const {
+Vec3 Vec3::Reflect(const Vec3 &norm) const {
   float b_scale = Vec3::DotProd(norm, *this);
-  Vec3 b = norm * b_scale;
+  Vec3  b       = norm * b_scale;
   return *this - b * 2;
 }
 
-Vec3 Vec3::Refract(const Vec3& n, float etai_over_etat) {
-  float cos_theta = fmin(DotProd(-*this, n), 1.0);
-  Vec3 r_out_perp = etai_over_etat * (*this + cos_theta * n);
-  Vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.SqrLen())) * n;
+Vec3 Vec3::Refract(const Vec3 &n, float etai_over_etat) {
+  float cos_theta      = fmin(DotProd(-*this, n), 1.0);
+  Vec3  r_out_perp     = etai_over_etat * (*this + cos_theta * n);
+  Vec3  r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.SqrLen())) * n;
   return r_out_perp + r_out_parallel;
 }
 
-float Vec3::DotProd(const Vec3& left, const Vec3& right) {
+float Vec3::DotProd(const Vec3 &left, const Vec3 &right) {
   return Vector3DotProduct(left, right);
+}
+
+Vec3 Vec3::CrsProd(const Vec3 &left, const Vec3 &right) {
+  return Vector3CrossProduct(left, right);
 }
 
 Vec3 Vec3::Random() {
@@ -50,11 +54,9 @@ Vec3 Vec3::RandomInUnitSphere() {
   }
 }
 
-Vec3 Vec3::RandomUnitVec() {
-  return RandomInUnitSphere().Normalize();
-}
+Vec3 Vec3::RandomUnitVec() { return RandomInUnitSphere().Normalize(); }
 
-Vec3 Vec3::RandomInHemisphere(const Vec3& normal) {
+Vec3 Vec3::RandomInHemisphere(const Vec3 &normal) {
   Vec3 in_unit_sphere = RandomInUnitSphere();
   if (DotProd(normal, in_unit_sphere) > 0.0)
     return in_unit_sphere;
@@ -64,11 +66,11 @@ Vec3 Vec3::RandomInHemisphere(const Vec3& normal) {
 
 // Binary operators
 
-Vec3 operator*(const Vec3& lVec3, const float rFloat) {
+Vec3 operator*(const Vec3 &lVec3, const float rFloat) {
   auto [x, y, z] = lVec3;
   return Vec3(x * rFloat, y * rFloat, z * rFloat);
 }
 
-Vec3 operator*(const float lFloat, const Vec3& rVec3) {
+Vec3 operator*(const float lFloat, const Vec3 &rVec3) {
   return operator*(rVec3, lFloat);
 }

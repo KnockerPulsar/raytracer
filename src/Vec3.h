@@ -28,6 +28,8 @@ class Vec3 : public Vector3 {
   inline Vec3& operator*=(const float);
 
   static float DotProd(const Vec3&, const Vec3&);
+  static Vec3 CrsProd(const Vec3&, const Vec3&);
+
   static inline Vec3 Random();
   static inline Vec3 Random(const float min, const float max);
   static Vec3 RandomInUnitSphere();
