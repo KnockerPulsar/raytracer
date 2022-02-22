@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <chrono>
 
 #include "Camera.h"
 #include "Clr.h"
@@ -95,11 +96,11 @@ HittableList CreateWorld2() {
 
 int main(void) {
   // Window
-  const int   image_width       = 400;
+  const int   image_width       = 320;
   const float aspect_ratio      = 16.0 / 9.0;
   const int   image_height      = (image_width / aspect_ratio);
-  const int   samples_per_pixel =30;
-  const int   max_depth         =20;
+  const int   samples_per_pixel =20;
+  const int   max_depth         =10;
 
   InitWindow(image_width, image_height, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
@@ -125,11 +126,13 @@ int main(void) {
     ClearBackground(MAGENTA);
     BeginDrawing();
 
+
+    auto start = std::chrono::high_resolution_clock::now();
     // Trace rays
     for (int y = image_height - 1; y >= 0; y--) {
       int currProgress = image_height - y + 1;
-      std::cout << "\33[2K\r" << ProgBar(currProgress, 0, image_height - 1, 40)
-                << ProgStr(currProgress, image_height - 1) << std::flush;
+      // std::cout << "\33[2K\r" << ProgBar(currProgress, 0, image_height - 1, 40)
+      //           << ProgStr(currProgress, image_height - 1) << std::flush;
 
       for (int x = 0; x < image_width; x++) {
         Vec3 pixel_color(0, 0, 0);
@@ -164,6 +167,10 @@ int main(void) {
         DrawPixel(x, raylib_y, clr);
       }
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+    std::cout << "\r Execution time:\t" <<  ms <<" ms" << std::flush;
 
     EndDrawing();
   }
