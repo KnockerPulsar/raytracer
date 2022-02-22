@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <thread>
 
 #include "Camera.h"
 #include "Clr.h"
@@ -9,6 +10,7 @@
 #include "raytracer.h"
 
 #define title "Raytracer"
+#define NUM_THREADS 12
 
 // X is the right axis
 // Y is the vertical (AKA Up) axis
@@ -18,16 +20,21 @@ using raytracer::HittableList, raytracer::HitRecord, raytracer::Sphere,
     raytracer::Hittable, raytracer::Dielectric, raytracer::Lambertian,
     raytracer::Metal;
 
-typedef Color clr;
+using std::string, std::thread, std::vector;
 
-std::string ProgStr(int currVal, int maxVal) {
+struct Pixel {
+  int  x, y;
+  Vec3 color;
+};
+
+string ProgStr(int currVal, int maxVal) {
   return "[ " + std::to_string(currVal) + " / " + std::to_string(maxVal) + " ]";
 }
 
-std::string ProgBar(int currVal, int minVal, int maxVal, int maxChars) {
+string ProgBar(int currVal, int minVal, int maxVal, int maxChars) {
   float percentage = (float)currVal / (maxVal - minVal);
   int   chars      = (int)(percentage * maxChars);
-  return std::string(chars, 'X');
+  return string(chars, 'X');
 }
 
 Vec3 RayColor(const raytracer::Ray &r, const Hittable &world, int depth) {
@@ -93,13 +100,45 @@ HittableList CreateWorld2() {
   return world;
 }
 
+void Trace(std::vector<Pixel> &threadJobs, int jobsStart, int jobsEnd,
+           raytracer::Camera &cam, HittableList &world, int max_depth,
+           int image_width, int image_height, int samples_per_pixel) {
+  for (int i = jobsStart; i < jobsEnd; i++) {
+    Pixel &job = threadJobs[i];
+
+    int x = job.x;
+    int y = job.y;
+    for (int s = 0; s < samples_per_pixel; s++) {
+      float          u   = (x + RandomFloat()) / (image_width - 1);
+      float          v   = (y + RandomFloat()) / (image_height - 1);
+      raytracer::Ray ray = cam.GetRay(u, v);
+      job.color += RayColor(ray, world, max_depth);
+
+#ifdef GAMMA_CORRECTION
+      // Gamma correction
+      float r = job.color.x, g = job.color.y, b = job.color.z;
+
+      float scale = 1.0 / samples_per_pixel;
+      r           = sqrt(scale * r);
+      g           = sqrt(scale * g);
+      b           = sqrt(scale * b);
+
+      job.color = Vec3(r, g, b) * samples_per_pixel;
+#else
+      job.color /= samples_per_pixel;
+#endif
+
+    }
+  }
+}
+
 int main(void) {
   // Window
   const int   image_width       = 400;
   const float aspect_ratio      = 16.0 / 9.0;
   const int   image_height      = (image_width / aspect_ratio);
-  const int   samples_per_pixel =30;
-  const int   max_depth         =20;
+  const int   samples_per_pixel = 200;
+  const int   max_depth         = 5;
 
   InitWindow(image_width, image_height, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
@@ -109,11 +148,23 @@ int main(void) {
 
   // Camera
   Vec3 lookFrom = Vec3(-2, 2, 1);
-  Vec3 moveDir = Vec3(1,0,0);
+  Vec3 moveDir  = Vec3(1, 0, 0);
+
+  vector<thread> threads;
+  vector<Pixel>  pixelJobs =
+      vector(image_width * image_height, Pixel{0, 0, Vec3::Zero()});
+  raytracer::Camera cam;
+
+  // Prepare pixel jobs
+  for (int y = 0; y < image_height; y++) {
+    for (int x = 0; x < image_width; x++) {
+      pixelJobs[x + image_width * y] = Pixel{x, y, Vec3::Zero()};
+    }
+  }
 
   while (!WindowShouldClose()) {
-    raytracer::Camera cam(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), 45,
-                          aspect_ratio);
+    cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), 45,
+                            aspect_ratio);
 
     if (lookFrom.x < -5)
       moveDir = Vec3(1, 0, 0);
@@ -122,51 +173,48 @@ int main(void) {
 
     lookFrom += moveDir;
 
+    for (int t = 0; t < NUM_THREADS; t++) {
+      int jobsStart = t * (pixelJobs.size() / NUM_THREADS);
+      int jobsEnd   = (t + 1) * (pixelJobs.size() / NUM_THREADS);
+
+      threads.push_back(
+          thread(Trace, std::ref(pixelJobs), jobsStart, jobsEnd, std::ref(cam), std::ref(world), max_depth,
+                 image_width, image_height, samples_per_pixel));
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+      threads[i].join();
+    }
+
+    threads.clear();
+
     ClearBackground(MAGENTA);
     BeginDrawing();
 
     // Trace rays
-    for (int y = image_height - 1; y >= 0; y--) {
-      int currProgress = image_height - y + 1;
-      std::cout << "\33[2K\r" << ProgBar(currProgress, 0, image_height - 1, 40)
-                << ProgStr(currProgress, image_height - 1) << std::flush;
+    // for (int y = image_height - 1; y >= 0; y--) {
+    //   int currProgress = image_height - y + 1;
+    //   std::cout << "\33[2K\r" << ProgBar(currProgress, 0, image_height - 1,
+    //   40)
+    //             << ProgStr(currProgress, image_height - 1) << std::flush;
 
-      for (int x = 0; x < image_width; x++) {
-        Vec3 pixel_color(0, 0, 0);
+    // for (int x = 0; x < image_width; x++) {
+    // Vec3 pixel_color(0, 0, 0);
 
-        for (int s = 0; s < samples_per_pixel; s++) {
-          float          u = (x + RandomFloat()) / (image_width - 1);
-          float          v = (y + RandomFloat()) / (image_height - 1);
-          raytracer::Ray r = cam.GetRay(u, v);
+    for (auto &&pixel : pixelJobs) {
+      Clr clr = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
 
-          pixel_color += RayColor(r, world, max_depth);
-        }
-
-#ifdef GAMMA_CORRECTION
-        // Gamma correction
-        auto [r, g, b] = pixel_color;
-
-        float scale = 1.0 / samples_per_pixel;
-        r           = sqrt(scale * r);
-        g           = sqrt(scale * g);
-        b           = sqrt(scale * b);
-
-        pixel_color = Vec3(r, g, b);
-#else
-        pixel_color /= samples_per_pixel;
-#endif
-
-        Clr clr = Clr::FromFloat(pixel_color.x, pixel_color.y, pixel_color.z);
-
-        // This is since raylib starts the vertical axis at the top left
-        // While the tutorial assumes it on the bottom right
-        int raylib_y = image_height - y - 1;
-        DrawPixel(x, raylib_y, clr);
-      }
+      // This is since raylib starts the vertical axis at the top left
+      // While the tutorial assumes it on the bottom right
+      int raylib_y = image_height - pixel.y - 1;
+      DrawPixel(pixel.x, raylib_y, clr);
     }
+
+    // }
 
     EndDrawing();
   }
+  // }
 
   return 0;
 }

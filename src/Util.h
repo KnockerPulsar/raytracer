@@ -18,3 +18,4 @@ inline float RandomFloat(float min, float max) {
   return min + (max - min) * RandomFloat();
 }
 
+
