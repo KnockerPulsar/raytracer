@@ -1,4 +1,5 @@
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <thread>
 
@@ -20,7 +21,8 @@ using raytracer::HittableList, raytracer::HitRecord, raytracer::Sphere,
     raytracer::Hittable, raytracer::Dielectric, raytracer::Lambertian,
     raytracer::Metal;
 
-using std::string, std::thread, std::vector;
+using std::string, std::thread, std::vector, std::chrono::high_resolution_clock,
+    std::chrono::duration_cast, std::chrono::milliseconds;
 
 struct Pixel {
   int  x, y;
@@ -41,8 +43,9 @@ Vec3 RayColor(const raytracer::Ray &r, const Hittable &world, int depth) {
   HitRecord rec;
 
   // Limit max recursion depth
-  if (depth <= 0)
+  if (depth <= 0) {
     return Vec3::Zero();
+  }
 
   if (world.Hit(r, 0.001f, infinity, rec)) {
     raytracer::Ray scattered;
@@ -102,43 +105,48 @@ HittableList CreateWorld2() {
 
 void Trace(std::vector<Pixel> &threadJobs, int jobsStart, int jobsEnd,
            raytracer::Camera &cam, HittableList &world, int max_depth,
-           int image_width, int image_height, int samples_per_pixel) {
+           int image_width, int image_height, int samples_per_pixel,
+           long &thread_time) {
+  auto start = high_resolution_clock::now();
   for (int i = jobsStart; i < jobsEnd; i++) {
+
     Pixel &job = threadJobs[i];
 
     int x = job.x;
     int y = job.y;
+
     for (int s = 0; s < samples_per_pixel; s++) {
       float          u   = (x + RandomFloat()) / (image_width - 1);
       float          v   = (y + RandomFloat()) / (image_height - 1);
       raytracer::Ray ray = cam.GetRay(u, v);
       job.color += RayColor(ray, world, max_depth);
+    }
 
 #ifdef GAMMA_CORRECTION
-      // Gamma correction
-      float r = job.color.x, g = job.color.y, b = job.color.z;
+    // Gamma correction
+    float r = job.color.x, g = job.color.y, b = job.color.z;
 
-      float scale = 1.0 / samples_per_pixel;
-      r           = sqrt(scale * r);
-      g           = sqrt(scale * g);
-      b           = sqrt(scale * b);
+    float scale = 1.0 / samples_per_pixel;
+    r           = sqrt(scale * r);
+    g           = sqrt(scale * g);
+    b           = sqrt(scale * b);
 
-      job.color = Vec3(r, g, b) * samples_per_pixel;
+    job.color = Vec3(r, g, b);
 #else
-      job.color /= samples_per_pixel;
+    job.color /= samples_per_pixel;
 #endif
-
-    }
   }
+  auto stop   = high_resolution_clock::now();
+  thread_time = duration_cast<std::chrono::milliseconds>(stop - start).count();
 }
 
 int main(void) {
   // Window
-  const int   image_width       = 400;
+  const int   image_width       = 320;
   const float aspect_ratio      = 16.0 / 9.0;
   const int   image_height      = (image_width / aspect_ratio);
-  const int   samples_per_pixel = 200;
-  const int   max_depth         = 5;
+  const int   samples_per_pixel = 20;
+  const int   max_depth         = 10;
 
   InitWindow(image_width, image_height, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
@@ -148,12 +156,15 @@ int main(void) {
 
   // Camera
   Vec3 lookFrom = Vec3(-2, 2, 1);
-  Vec3 moveDir  = Vec3(1, 0, 0);
+  Vec3 moveDir  = Vec3(0.1, 0, 0);
 
   vector<thread> threads;
-  vector<Pixel>  pixelJobs =
+  vector<long>   thread_time(NUM_THREADS, 0);
+
+  vector<Pixel> pixelJobs =
       vector(image_width * image_height, Pixel{0, 0, Vec3::Zero()});
-  raytracer::Camera cam;
+  raytracer::Camera cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1),
+                                            Vec3(0, 1, 0), 45, aspect_ratio);
 
   // Prepare pixel jobs
   for (int y = 0; y < image_height; y++) {
@@ -163,27 +174,36 @@ int main(void) {
   }
 
   while (!WindowShouldClose()) {
-    cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), 45,
-                            aspect_ratio);
 
     if (lookFrom.x < -5)
-      moveDir = Vec3(1, 0, 0);
+      moveDir = Vec3(0.1, 0, 0);
     else if (lookFrom.x > 5)
-      moveDir = Vec3(-1, 0, 0);
+      moveDir = Vec3(-0.1, 0, 0);
 
-    lookFrom += moveDir;
+    lookFrom += moveDir * GetFrameTime();
 
     for (int t = 0; t < NUM_THREADS; t++) {
-      int jobsStart = t * (pixelJobs.size() / NUM_THREADS);
-      int jobsEnd   = (t + 1) * (pixelJobs.size() / NUM_THREADS);
+      int totalJobs = pixelJobs.size();
+      int jobsStart = t * totalJobs / NUM_THREADS;
+      int jobsEnd   = (t + 1) * totalJobs / NUM_THREADS;
 
-      threads.push_back(
-          thread(Trace, std::ref(pixelJobs), jobsStart, jobsEnd, std::ref(cam), std::ref(world), max_depth,
-                 image_width, image_height, samples_per_pixel));
+      threads.push_back(thread(Trace, std::ref(pixelJobs), jobsStart, jobsEnd,
+                               std::ref(cam), std::ref(world), max_depth,
+                               image_width, image_height, samples_per_pixel,
+                               std::ref(thread_time[t])));
     }
 
     for (int i = 0; i < NUM_THREADS; i++) {
       threads[i].join();
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+      std::cout << "Thread " << i << "\texecution time:\t" << thread_time[i]
+                << " ms" << std::endl;
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+      std::cout << "\033[A";
     }
 
     threads.clear();
@@ -191,18 +211,9 @@ int main(void) {
     ClearBackground(MAGENTA);
     BeginDrawing();
 
-    // Trace rays
-    // for (int y = image_height - 1; y >= 0; y--) {
-    //   int currProgress = image_height - y + 1;
-    //   std::cout << "\33[2K\r" << ProgBar(currProgress, 0, image_height - 1,
-    //   40)
-    //             << ProgStr(currProgress, image_height - 1) << std::flush;
-
-    // for (int x = 0; x < image_width; x++) {
-    // Vec3 pixel_color(0, 0, 0);
-
     for (auto &&pixel : pixelJobs) {
-      Clr clr = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
+      Clr clr     = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
+      pixel.color = Vec3::Zero();
 
       // This is since raylib starts the vertical axis at the top left
       // While the tutorial assumes it on the bottom right
@@ -210,11 +221,11 @@ int main(void) {
       DrawPixel(pixel.x, raylib_y, clr);
     }
 
-    // }
-
     EndDrawing();
+
+    cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), 45,
+                            aspect_ratio);
   }
-  // }
 
   return 0;
 }
