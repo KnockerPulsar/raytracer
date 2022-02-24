@@ -1,6 +1,8 @@
 #pragma once
 
 #include <raymath.h>
+#include "Util.h"
+
 
 class Vec3 : public Vector3 {
  public:
