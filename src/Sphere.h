@@ -1,6 +1,5 @@
 #pragma once
 
-#include <raylib.h>
 #include "Hittable.h"
 #include "Ray.h"
 #include "Vec3.h"

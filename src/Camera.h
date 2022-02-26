@@ -1,10 +1,11 @@
 #pragma once
-#include "raytracer.h"
+#include "Ray.h"
+#include "Vec3.h"
 
 namespace raytracer {
 class Camera {
 public:
-  Camera(){}
+  Camera()=default;
   Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vUp,
          float vFov, // vertical field-of-view in degrees
          float aspectRatio) {
@@ -27,10 +28,7 @@ public:
     lower_left_corner = origin - horizontal / 2 - vertical / 2 - w;
   }
 
-  Ray GetRay(float u, float v) const {
-    return Ray(origin,
-               lower_left_corner + horizontal * u + vertical * v - origin);
-  }
+  raytracer::Ray GetRay(float u, float v) const;
 
 private:
   Vec3 origin, lower_left_corner, horizontal, vertical;

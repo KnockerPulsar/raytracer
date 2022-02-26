@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Ray.h"
-#include "raytracer.h"
+#include <memory>
+using std::shared_ptr;
 
 namespace raytracer
 {
