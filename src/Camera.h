@@ -3,34 +3,39 @@
 #include "Vec3.h"
 
 namespace raytracer {
-class Camera {
-public:
-  Camera()=default;
-  Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vUp,
-         float vFov, // vertical field-of-view in degrees
-         float aspectRatio) {
+  class Camera {
+  public:
+    Camera() = default;
+    Camera(Vec3 lookFrom, Vec3 lookAt, Vec3 vUp,
+           float vFov, // vertical field-of-view in degrees
+           float aspectRatio, float aperature, float focusDist) {
 
-    float theta = DegressToRadians(vFov);
+      float theta = DegressToRadians(vFov);
 
-    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-    float h               = tan(theta / 2);
-    float viewport_height = 2.0 * h;
-    float viewport_width  = aspectRatio * viewport_height;
+      // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
+      float h               = tan(theta / 2);
+      float viewport_height = 2.0 * h;
+      float viewport_width  = aspectRatio * viewport_height;
 
-    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
-    Vec3 w = (lookFrom - lookAt).Normalize();
-    Vec3 u = Vec3::CrsProd(vUp, w).Normalize();
-    Vec3 v = Vec3::CrsProd(w, u);
+      // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
+      w = (lookFrom - lookAt).Normalize();
+      u = Vec3::CrsProd(vUp, w).Normalize();
+      v = Vec3::CrsProd(w, u);
 
-    origin            = lookFrom;
-    horizontal        = viewport_width * u;
-    vertical          = viewport_height * v;
-    lower_left_corner = origin - horizontal / 2 - vertical / 2 - w;
-  }
+      origin     = lookFrom;
+      horizontal = focusDist * viewport_width * u;
+      vertical   = focusDist * viewport_height * v;
+      lower_left_corner =
+          origin - horizontal / 2 - vertical / 2 - focusDist * w;
 
-  raytracer::Ray GetRay(float u, float v) const;
+      lensRadius = aperature / 2;
+    }
 
-private:
-  Vec3 origin, lower_left_corner, horizontal, vertical;
-};
+    raytracer::Ray GetRay(float s, float t) const;
+
+  private:
+    Vec3  origin, lower_left_corner, horizontal, vertical;
+    Vec3  u, v, w;
+    float lensRadius;
+  };
 } // namespace raytracer

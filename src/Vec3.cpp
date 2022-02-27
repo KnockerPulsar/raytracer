@@ -1,4 +1,5 @@
 #include "Vec3.h"
+#include "Util.h"
 
 Vec3::Vec3() {}
 
@@ -34,11 +35,11 @@ Vec3 Vec3::CrsProd(const Vec3 &left, const Vec3 &right) {
   return Vector3CrossProduct(left, right);
 }
 
-Vec3 Vec3::Random() {
+ Vec3 Vec3::Random() {
   return Vec3(RandomFloat(), RandomFloat(), RandomFloat());
 }
 
-Vec3 Vec3::Random(const float min, const float max) {
+ Vec3 Vec3::Random(const float min, const float max) {
   return Vec3(RandomFloat(min, max), RandomFloat(min, max),
               RandomFloat(min, max));
 }
@@ -61,6 +62,14 @@ Vec3 Vec3::RandomInHemisphere(const Vec3 &normal) {
     return in_unit_sphere;
   else
     return -in_unit_sphere;
+}
+
+Vec3 Vec3::RandomInUnitDisc(){
+  while (true) {
+    Vec3 p (RandomFloat(-1,1), RandomFloat(-1,1),0);
+    if(p.SqrLen()>=1) continue;
+    return p;
+  }
 }
 
 // Binary operators

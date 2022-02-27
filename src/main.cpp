@@ -31,17 +31,25 @@ int main() {
   const int   image_height      = (image_width / aspect_ratio);
   const int   samples_per_pixel = 100;
   const int   max_depth         = 50;
-  const int   fov               = 60;
+  const int   fov               = 50.0;
 
   InitWindow(image_width, image_height, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
 
   // World
-  raytracer::HittableList world = raytracer::CreateScene1();
+  raytracer::HittableList world = raytracer::RandomScene();
 
   // Camera
-  Vec3 lookFrom = Vec3(-2, 0.5, 1);
-  Vec3 moveDir  = Vec3(0.1, 0, 0);
+  Vec3 lookFrom = Vec3(13, 2, 3);
+  Vec3 lookAt   = Vec3(0, 0, 0);
+  Vec3 vUp      = Vec3(0, 1, 0);
+  // float distToFocus = (lookFrom - lookAt).Len();
+  float distToFocus = 10.0f;
+  float aperature   = 0.1F;
+  Vec3  moveDir     = Vec3(0.1F, 0, 0);
+
+  raytracer::Camera cam = raytracer::Camera(
+      lookFrom, lookAt, vUp, fov, aspect_ratio, aperature, distToFocus);
 
   vector<int>                      threadProgress = vector(NUM_THREADS, 0);
   vector<pair<bool, future<void>>> threads;
@@ -49,8 +57,6 @@ int main() {
 
   vector<Pixel> pixelJobs =
       vector(image_width * image_height, Pixel{0, 0, Vec3::Zero()});
-  raytracer::Camera cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1),
-                                            Vec3(0, 1, 0), fov, aspect_ratio);
 
   // Prepare pixel jobs
   for (int y = 0; y < image_height; y++) {
@@ -65,13 +71,7 @@ int main() {
   if (fullscreen)
     ToggleFullscreen();
 
-  while (true) {
-
-    BeginDrawing();
-
-    if (IsKeyPressed(KEY_ESCAPE)) {
-      break;
-    }
+  while (!WindowShouldClose()) {
 
     if (threads.size() == 0) {
 
@@ -113,6 +113,7 @@ int main() {
     if (all_finished) {
       threads.clear();
 
+      BeginDrawing();
       ClearBackground(MAGENTA);
 
       for (auto &&pixel : pixelJobs) {
@@ -124,11 +125,11 @@ int main() {
         int raylib_y = image_height - pixel.y - 1;
         DrawPixel(pixel.x, raylib_y, clr);
       }
+      EndDrawing();
 
-      cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), fov,
-                              aspect_ratio);
+      // cam = raytracer::Camera(lookFrom, Vec3(0, 0, -1), Vec3(0, 1, 0), fov,
+      //                         aspect_ratio, aperature, distToFocus);
     }
-    EndDrawing();
   }
 
   if (fullscreen)
@@ -136,9 +137,9 @@ int main() {
 
   CloseWindow();
 
-  for (auto& thread : threads) {
+  for (auto &thread : threads) {
     thread.second.wait();
   }
-  
+
   return 0;
 }
