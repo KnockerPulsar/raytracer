@@ -19,5 +19,7 @@ namespace raytracer {
     static Scene Scene2(float aspectRatio);
     static Scene Random(float aspectRatio, int ballGridWidth = 11,
                         int ballGridHeight = 11);
+    static Scene RandomMovingSpheres(float aspectRatio, int ballGridWidth = 11,
+                               int ballGridHeight = 11);
   };
 } // namespace raytracer

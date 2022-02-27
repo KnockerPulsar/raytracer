@@ -12,10 +12,14 @@ namespace raytracer {
 
   class Ray {
   public:
-    Vec3 origin, direction;
+    Vec3  origin, direction;
+    float time;
 
     Ray() = default;
     Ray(Vec3 org, Vec3 dir) : origin(org), direction(dir) {}
+    Ray(Vec3 org, Vec3 dir, float time = 0.0)
+        : origin(org), direction(dir), time(time) {}
+
     Vec3 At(float t) const { return Vector3Add(origin, direction * t); }
 
     static Vec3 RayColor(const raytracer::Ray &r, const Hittable &world,

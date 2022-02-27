@@ -105,10 +105,10 @@ void BlitToScreen(vector<Pixel> &pixelJobs, Workers &threads, int imageHeight) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 800;
+  const int   imageWidth      = 400;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 100;
+  const int   samplesPerPixel = 20;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
 
@@ -117,7 +117,7 @@ int main() {
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::Random(aspectRatio, 0, 0)
+      raytracer::Scene::RandomMovingSpheres(aspectRatio, 11, 11)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.
@@ -139,10 +139,10 @@ int main() {
 
     // Update camera and start async again if last frame is done
     if (threads.empty()) {
-      if (currScene.cam.lookFrom.x < -20 || currScene.cam.lookFrom.x > 20)
-        currScene.cam.moveDir *= -1;
+      // if (currScene.cam.lookFrom.x < -20 || currScene.cam.lookFrom.x > 20)
+      //   currScene.cam.moveDir *= -1;
 
-      currScene.cam.Fwd(GetFrameTime());
+      // currScene.cam.Fwd(GetFrameTime());
 
       RenderAsync(pixelJobs, currScene, threads, threadTime, threadProgress);
     }

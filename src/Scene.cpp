@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "Material.h"
+#include "MovingSphere.h"
 #include "Ray.h"
 #include "Sphere.h"
 #include "Util.h"
@@ -123,6 +124,67 @@ namespace raytracer {
             sphereMaterial = make_shared<Dielectric>(1.5);
           }
           world.Add(make_shared<Sphere>(0.2, center, sphereMaterial));
+        }
+      }
+    }
+    auto mat1 = make_shared<Dielectric>(1.5);
+    world.Add(make_shared<Sphere>(1.0, Vec3(0, 1, 0), mat1));
+
+    auto mat2 = make_shared<Lambertian>(Vec3(0.4, 0.2, 0.1));
+    world.Add(make_shared<Sphere>(1.0, Vec3(-4, 1, 0), mat2));
+
+    auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
+    world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
+
+    s.world = world;
+    s.cam   = cam;
+    return s;
+  }
+
+  Scene Scene::RandomMovingSpheres(float aspectRatio, int ballGridWidth,
+                                   int ballGridHeight) {
+    Scene        s;
+    HittableList world;
+
+    Vec3  lookFrom    = Vec3(13, 2, 3);
+    Vec3  lookAt      = Vec3(0, 0, 0);
+    Vec3  vUp         = Vec3(0, 1, 0);
+    float distToFocus = 10.0f;
+    float aperature   = 0.1F;
+    Vec3  moveDir     = Vec3(1.0f, 0, 0);
+    int   fov         = 20.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+               distToFocus, 0.0, 1.0);
+
+    auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
+    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0), groundMaterial));
+
+    for (int a = -ballGridWidth; a < ballGridWidth; a++) {
+      for (int b = -ballGridHeight; b < ballGridHeight; b++) {
+        float chooseMat = RandomFloat();
+        Vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
+        if ((center - Vec3(4, 0.2, 0)).Len() > 0.9) {
+          shared_ptr<Material> sphereMaterial;
+
+          if (chooseMat < 0.8) {
+            // Diffuse
+            auto albedo    = Vec3::Random() * Vec3::Random();
+            sphereMaterial = make_shared<Lambertian>(albedo);
+            Vec3 center2   = center + Vec3(0, RandomFloat(0, .5), 0);
+            world.Add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2,
+                                                sphereMaterial));
+          } else if (chooseMat < 0.95) {
+            // Metal
+            auto  albedo   = Vec3::Random(0.5, 1);
+            float fuzz     = RandomFloat(0, 0.5);
+            sphereMaterial = make_shared<Metal>(albedo, fuzz);
+            world.Add(make_shared<Sphere>(0.2, center, sphereMaterial));
+
+          } else {
+            sphereMaterial = make_shared<Dielectric>(1.5);
+            world.Add(make_shared<Sphere>(0.2, center, sphereMaterial));
+          }
         }
       }
     }
