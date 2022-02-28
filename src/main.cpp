@@ -1,9 +1,12 @@
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <exception>
 #include <future>
 #include <iostream>
+#include <numeric>
 #include <raylib.h>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -23,6 +26,12 @@ using std::string, std::vector, std::chrono::high_resolution_clock,
 
 #define title "Raytracer"
 
+// TODO: Check out raygui for debug panels.
+// TODO: Separate checking on threads and blitting finished thread pixels.
+// TODO: Implement a clearer pipeline (Init, loop{Check inputs, render}, clean up).
+// TODO: Add progress bar to shutdown loop.
+// TODO: Something to switch between incremental and whole frame drawing.
+
 // X is the right axis
 // Y is the vertical (AKA Up) axis
 // Z is the forward axis
@@ -30,16 +39,20 @@ using std::string, std::vector, std::chrono::high_resolution_clock,
 // bool -> done or not
 // future -> data returned from async
 using RunningJob = std::pair<bool, future<void>>;
-using Workers = vector<RunningJob>;
+using Workers    = vector<RunningJob>;
+
+pair<int, int> GetThreadJobSlice(int totalJobs, int t) {
+  int jobsStart = t * totalJobs / NUM_THREADS;
+  int jobsEnd   = (t + 1) * totalJobs / NUM_THREADS;
+  return {jobsStart, jobsEnd};
+}
 
 void RenderAsync(vector<Pixel> &pixelJobs, raytracer::Scene &currScene,
                  Workers &threads, vector<long> &threadTime,
                  vector<int> &threadProgress) {
 
   for (int t = 0; t < NUM_THREADS; t++) {
-    int totalJobs = pixelJobs.size();
-    int jobsStart = t * totalJobs / NUM_THREADS;
-    int jobsEnd   = (t + 1) * totalJobs / NUM_THREADS;
+    auto [jobsStart, jobsEnd] = GetThreadJobSlice(pixelJobs.size(), t);
 
     threads.push_back(make_pair(
         false, async(launch::async, raytracer::Ray::Trace, ref(pixelJobs),
@@ -67,14 +80,34 @@ auto PrepareAsync(int imageWidth, int imageHeight, Workers &threads) {
   return std::make_tuple(pixelJobs, threadTime, threadProgress);
 }
 
-bool CheckAsyncProgress(Workers &threads, const vector<int> &threadProgress) {
+void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
+                  RenderTexture2D &screenBuffer) {
+
+  BeginTextureMode(screenBuffer);
+
+  for (int i = drawStart; i < drawEnd; i++) {
+    Pixel &pixel = pixelJobs[i];
+
+    Clr clr     = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
+    pixel.color = Vec3::Zero();
+
+    DrawPixel(pixel.x, pixel.y, clr);
+  }
+  EndTextureMode();
+}
+
+bool CheckAsyncProgress(vector<Pixel> &pixelJobs, RenderTexture2D &screenBuffer,
+                        Workers &threads, const vector<int> &threadProgress) {
   std::cout << "\r";
   bool allFinished = true;
   for (int i = 0; i < NUM_THREADS; i++) {
-    auto finished = threads[i].second.wait_for(milliseconds());
+    auto finished = threads[i].second.wait_for(milliseconds(0));
 
-    if (finished == std::future_status::ready && threads[i].first == false)
-      threads[i].first = true;
+    if (finished == std::future_status::ready && threads[i].first == false) {
+      threads[i].first          = true;
+      auto [jobsStart, jobsEnd] = GetThreadJobSlice(pixelJobs.size(), i);
+      BlitToBuffer(pixelJobs, jobsStart, jobsEnd, screenBuffer);
+    }
 
     allFinished &= threads[i].first;
 
@@ -84,37 +117,20 @@ bool CheckAsyncProgress(Workers &threads, const vector<int> &threadProgress) {
   return allFinished;
 }
 
-void PrintFrameTimes(vector<long>& threadTime){
+void PrintFrameTimes(vector<long> &threadTime) {
   static bool first = true;
 
-  if(!first){
+  if (!first) {
     for (int i = 0; i < NUM_THREADS; i++) {
       std::cout << "\033[A";
     }
   }
 
-  for (int i = 0 ; i < NUM_THREADS; i++) {
+  std::cout << '\n';
+  for (int i = 0; i < NUM_THREADS; i++) {
     std::cout << "Thread " << i << ":\t " << threadTime[i] << " ms\n";
   }
   first = false;
-}
-
-void BlitToScreen(vector<Pixel> &pixelJobs, Workers &threads, int imageHeight) {
-  threads.clear();
-
-  BeginDrawing();
-  ClearBackground(MAGENTA);
-
-  for (auto &&pixel : pixelJobs) {
-    Clr clr     = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
-    pixel.color = Vec3::Zero();
-
-    // This is siRayColornce raylib starts the vertical axis at the top left
-    // While the tutorial assumes it on the bottom right
-    int raylibY = imageHeight - pixel.y - 1;
-    DrawPixel(pixel.x, raylibY, clr);
-  }
-  EndDrawing();
 }
 
 int main() {
@@ -122,16 +138,18 @@ int main() {
   const int   imageWidth      = 800;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 50;
-  const int   maxDepth        = 50;
+  const int   samplesPerPixel = 100;
+  const int   maxDepth        = 20;
   bool        fullscreen      = false;
+  bool        showProg        = true;
 
   InitWindow(imageWidth, imageHeight, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
+  RenderTexture2D screenBuffer = LoadRenderTexture(imageWidth, imageHeight);
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::RandomMovingSpheres(aspectRatio)
+      raytracer::Scene::RandomMovingSpheres(aspectRatio,30,30)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.
@@ -144,11 +162,15 @@ int main() {
 
   while (!WindowShouldClose()) {
 
-    // Check for input for WindowShouldClose and to toggle fullscreen.
-    PollInputEvents();
-    if (IsKeyPressed(KEY_F)) {
+    int keyPressed = GetKeyPressed();
+    switch (keyPressed) {
+    case KEY_F: {
       fullscreen = !fullscreen;
       ToggleFullscreen();
+    }
+    case KEY_SPACE: {
+      showProg = !showProg;
+    }
     }
 
     // Update camera and start async again if last frame is done
@@ -161,13 +183,41 @@ int main() {
       RenderAsync(pixelJobs, currScene, threads, threadTime, threadProgress);
     }
 
-    // Check on thread progress.
-    bool allFinished = CheckAsyncProgress(threads, threadProgress);
+    // Check on thread progress. Draw finished threads to buffer.
+    bool allFinished =
+        CheckAsyncProgress(pixelJobs, screenBuffer, threads, threadProgress);
+
+    // Display buffer.
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    DrawTextureRec(screenBuffer.texture,
+                   (Rectangle){0, 0, imageWidth, imageWidth}, (Vector2){0, 0},
+                   WHITE);
+
+    if (showProg) {
+      // Get average thread progress in range [0,1].
+      float accumulativePercentage =
+          std::accumulate(threadProgress.begin(), threadProgress.end(), 0) /
+          (threadProgress.size() * 100.0);
+
+      // Calculate how wide the progress bar should be and its middle.
+      int progBarEnd = imageWidth * accumulativePercentage;
+      int progBarMid = progBarEnd / 2;
+
+      string percentText = std::to_string(accumulativePercentage * 100) + " %";
+
+      // Draw progress bar and percentage.
+      DrawRectangle(0, 0, progBarEnd, imageHeight * 0.03, Fade(GREEN, 0.2));
+      DrawText(percentText.c_str(), progBarMid, 10, 20, Fade(BLUE, 0.8));
+    }
+
+    EndDrawing();
 
     // Draw to screen and reset thread jobs.
     if (allFinished) {
       PrintFrameTimes(ref(threadTime));
-      BlitToScreen(pixelJobs, threads, imageHeight);
+      threads.clear();
     }
   }
 
@@ -177,14 +227,29 @@ int main() {
     ToggleFullscreen();
 
   // Clean up.
+
+  string shutdownMessage = "Shutting down, please wait...";
+
+  bool allFinished;
+  int  textSize = 80 * imageWidth / 1080.0;
+  do {
+
+    allFinished = true;
+    for (auto &thread : threads) {
+      auto threadStatus = thread.second.wait_for(milliseconds(0));
+      allFinished &= (threadStatus == std::future_status::ready);
+    }
+
+    BeginDrawing();
+    int textWidth = MeasureText(shutdownMessage.c_str(), textSize);
+    ClearBackground(BLACK);
+    DrawText(shutdownMessage.c_str(), imageWidth / 2.0 - textWidth / 2.0,
+             imageHeight / 2.0, textSize, WHITE);
+    EndDrawing();
+  } while (!allFinished);
+
+  UnloadRenderTexture(screenBuffer);
   CloseWindow();
-  TraceLog(LOG_INFO, "Shutting down, waiting for threads to fall asleep. This "
-                     "can take some time...");
-
-  for (auto &thread : threads) {
-    thread.second.wait();
-  }
-
 
   return 0;
 }

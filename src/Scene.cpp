@@ -26,13 +26,13 @@ namespace raytracer {
   Scene Scene::Scene1(float aspectRatio) {
     Scene        s;
     HittableList world;
-    Vec3         lookFrom    = Vec3(3, 2, 3);
+    Vec3         lookFrom    = Vec3(-1, 1, 1);
     Vec3         lookAt      = Vec3(0, 0, 0);
     Vec3         vUp         = Vec3(0, 1, 0);
     float        distToFocus = 10.0f;
     float        aperature   = 0.001F;
     Vec3         moveDir     = Vec3(10.0f, 0, 0);
-    int          fov         = 20.0;
+    int          fov         = 60.0;
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
                distToFocus);
