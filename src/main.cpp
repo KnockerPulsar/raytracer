@@ -22,7 +22,6 @@ using std::string, std::vector, std::chrono::high_resolution_clock,
     std::future, std::async, std::ref, std::make_pair, std::launch;
 
 #define title "Raytracer"
-#define NUM_THREADS 12
 
 // X is the right axis
 // Y is the vertical (AKA Up) axis
@@ -85,6 +84,21 @@ bool CheckAsyncProgress(Workers &threads, const vector<int> &threadProgress) {
   return allFinished;
 }
 
+void PrintFrameTimes(vector<long>& threadTime){
+  static bool first = true;
+
+  if(!first){
+    for (int i = 0; i < NUM_THREADS; i++) {
+      std::cout << "\033[A";
+    }
+  }
+
+  for (int i = 0 ; i < NUM_THREADS; i++) {
+    std::cout << "Thread " << i << ":\t " << threadTime[i] << " ms\n";
+  }
+  first = false;
+}
+
 void BlitToScreen(vector<Pixel> &pixelJobs, Workers &threads, int imageHeight) {
   threads.clear();
 
@@ -105,11 +119,11 @@ void BlitToScreen(vector<Pixel> &pixelJobs, Workers &threads, int imageHeight) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 400;
+  const int   imageWidth      = 800;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 20;
-  const int   maxDepth        = 10;
+  const int   samplesPerPixel = 50;
+  const int   maxDepth        = 50;
   bool        fullscreen      = false;
 
   InitWindow(imageWidth, imageHeight, title);
@@ -117,7 +131,7 @@ int main() {
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::RandomMovingSpheres(aspectRatio, 11, 11)
+      raytracer::Scene::RandomMovingSpheres(aspectRatio)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.
@@ -139,10 +153,10 @@ int main() {
 
     // Update camera and start async again if last frame is done
     if (threads.empty()) {
-      // if (currScene.cam.lookFrom.x < -20 || currScene.cam.lookFrom.x > 20)
-      //   currScene.cam.moveDir *= -1;
+      if (currScene.cam.lookFrom.x < -20 || currScene.cam.lookFrom.x > 20)
+        currScene.cam.moveDir *= -1;
 
-      // currScene.cam.Fwd(GetFrameTime());
+      currScene.cam.Fwd(GetFrameTime());
 
       RenderAsync(pixelJobs, currScene, threads, threadTime, threadProgress);
     }
@@ -152,6 +166,7 @@ int main() {
 
     // Draw to screen and reset thread jobs.
     if (allFinished) {
+      PrintFrameTimes(ref(threadTime));
       BlitToScreen(pixelJobs, threads, imageHeight);
     }
   }
@@ -169,6 +184,7 @@ int main() {
   for (auto &thread : threads) {
     thread.second.wait();
   }
+
 
   return 0;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "AABB.h"
 #include "Hittable.h"
 #include "Material.h"
 #include "Vec3.h"
@@ -50,9 +51,27 @@ namespace raytracer {
     }
 
     Vec3 CurrCenter(float time) const;
+    bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
   };
 
   Vec3 MovingSphere::CurrCenter(float time) const {
     return center0 + ((time - time0) / (time1 - time0)) * (center1 - center0);
   }
+
+
+    bool MovingSphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
+    AABB box0 = AABB(
+      CurrCenter(t0) - Vec3(radius),
+      CurrCenter(t0) + Vec3(radius)
+    );
+
+    AABB box1 = AABB(
+      CurrCenter(t1) - Vec3(radius),
+      CurrCenter(t1) + Vec3(radius)
+    );
+
+    outputBox = AABB::SurroundingBox(box0, box1);
+    return true;
+  }
+
 } // namespace raytracer

@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "BVHNode.h"
 #include "Material.h"
 #include "MovingSphere.h"
 #include "Ray.h"
@@ -30,7 +31,7 @@ namespace raytracer {
     Vec3         vUp         = Vec3(0, 1, 0);
     float        distToFocus = 10.0f;
     float        aperature   = 0.001F;
-    Vec3         moveDir     = Vec3(0.1f, 0, 0);
+    Vec3         moveDir     = Vec3(10.0f, 0, 0);
     int          fov         = 20.0;
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
@@ -51,7 +52,11 @@ namespace raytracer {
 
         .Add(make_shared<Sphere>(0.5, Vec3(1., 0, -1), material_right));
 
-    s.world = world;
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+
+    s.world = bvh;
     s.cam   = cam;
 
     return s;
@@ -79,7 +84,11 @@ namespace raytracer {
         .Add(make_shared<Sphere>(R, Vec3(-R, 0, -1), material_left))
         .Add(make_shared<Sphere>(R, Vec3(R, 0, -1), material_right));
 
-    s.world = world;
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+
+    s.world = bvh;
     s.cam   = cam;
 
     return s;
@@ -100,9 +109,6 @@ namespace raytracer {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
                distToFocus);
-
-    auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0), groundMaterial));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -136,7 +142,14 @@ namespace raytracer {
     auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
 
-    s.world = world;
+    auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
+    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0), groundMaterial));
+    
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+
+    s.world = bvh;
     s.cam   = cam;
     return s;
   }
@@ -196,8 +209,12 @@ namespace raytracer {
 
     auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
+    
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world = world;
+
+    s.world = bvh;
     s.cam   = cam;
     return s;
   }
