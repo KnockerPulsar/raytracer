@@ -1,6 +1,8 @@
 #pragma once
 #include "Camera.h"
+#include "CheckerTexture.h"
 #include "HittableList.h"
+#include "Material.h"
 
 namespace raytracer {
 
@@ -20,6 +22,8 @@ namespace raytracer {
     static Scene Random(float aspectRatio, int ballGridWidth = 11,
                         int ballGridHeight = 11);
     static Scene RandomMovingSpheres(float aspectRatio, int ballGridWidth = 11,
-                               int ballGridHeight = 11);
+                                     int ballGridHeight = 11);
+
+    static Scene TwoSpheres(float aspectRatio);
   };
 } // namespace raytracer

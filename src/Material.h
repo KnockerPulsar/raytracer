@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Hittable.h"
+#include "SolidColor.h"
+#include "Texture.h"
+#include <memory>
 
 namespace raytracer {
 
@@ -14,10 +17,13 @@ namespace raytracer {
 
   class Lambertian : public Material {
   private:
-    Vec3 albedo;
+    shared_ptr<Texture> albedo;
 
   public:
-    Lambertian(const Vec3 color) : albedo(color) {}
+    Lambertian(const Vec3 &color)
+        : albedo(std::make_shared<SolidColor>(color)) {}
+    Lambertian(shared_ptr<Texture> color) : albedo(color) {}
+    Lambertian(const shared_ptr<Lambertian>& l) { this->albedo = l->albedo; }
 
     virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
                          Ray &scattered) const override {
@@ -28,7 +34,7 @@ namespace raytracer {
         scatter_dir = rec.normal;
 
       scattered   = Ray(rec.p, scatter_dir, r_in.time);
-      attenuation = albedo;
+      attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;
     }
   };

@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
+
 class Vec3 : public Vector3 {
 public:
   Vec3();

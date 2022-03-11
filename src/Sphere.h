@@ -4,6 +4,8 @@
 #include "Hittable.h"
 #include "Ray.h"
 #include "Vec3.h"
+#include <cmath>
+#include <raylib.h>
 
 namespace raytracer {
 
@@ -16,8 +18,18 @@ namespace raytracer {
     Sphere(float r, Vec3 pos, shared_ptr<Material> m)
         : radius(r), center(pos), mat_ptr(m) {}
 
-    bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+    bool Hit(const Ray &r, float t_min, float t_max,
+             HitRecord &rec) const override;
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+
+  private:
+    static void GetSphereUV(const Vec3 &p, float &u, float &v) {
+      float theta = std::acos(-p.y);
+      float phi   = std::atan2(-p.z, p.x) + PI;
+
+      v = theta / PI;
+      u = phi / (2 * PI);
+    }
   };
 
   bool Sphere::Hit(const Ray &r, float t_min, float t_max,
@@ -45,16 +57,14 @@ namespace raytracer {
     rec.p                     = r.At(rec.t);
     const Vec3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(r, outward_normal);
+    GetSphereUV(outward_normal, rec.u, rec.v);
     rec.mat_ptr = mat_ptr;
 
     return true;
   }
 
   bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    outputBox = AABB(
-      center - Vec3(radius),
-      center + Vec3(radius)
-    );
+    outputBox = AABB(center - Vec3(radius), center + Vec3(radius));
 
     return true;
   }

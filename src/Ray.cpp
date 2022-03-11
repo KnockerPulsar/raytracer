@@ -4,8 +4,9 @@
 #include "HittableList.h"
 #include "Material.h"
 #include "Pixel.h"
-#include <chrono>
 #include "Scene.h"
+#include <atomic>
+#include <chrono>
 
 using raytracer::Pixel, raytracer::Camera, raytracer::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
@@ -41,10 +42,17 @@ namespace raytracer {
   }
 
   void Ray::Trace(std::vector<Pixel> &threadJobs, int jobsStart, int jobsEnd,
-                  Scene &currScene, long &thread_time, int &thread_progress) {
+                  Scene &currScene, long &thread_time, int &thread_progress,
+                  int &threadShouldRun) {
 
     auto start = high_resolution_clock::now();
     for (int i = jobsStart; i < jobsEnd; i++) {
+
+#ifdef FAST_EXIT
+      // Exit prematurely if signaled to
+      if (threadShouldRun == 0)
+        return;
+#endif
 
       Pixel &job = threadJobs[i];
 
@@ -53,9 +61,10 @@ namespace raytracer {
 
       for (int s = 0; s < currScene.samplesPerPixel; s++) {
         float          u   = (x + RandomFloat()) / (currScene.imageWidth - 1);
-        float          v   = (y + RandomFloat()) / (currScene.imageHeight- 1);
+        float          v   = (y + RandomFloat()) / (currScene.imageHeight - 1);
         raytracer::Ray ray = currScene.cam.GetRay(u, v);
-        job.color += raytracer::Ray::RayColor(ray, currScene.world, currScene.maxDepth);
+        job.color +=
+            raytracer::Ray::RayColor(ray, currScene.world, currScene.maxDepth);
       }
 
 #ifdef GAMMA_CORRECTION

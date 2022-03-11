@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include "BVHNode.h"
+
+#include "Camera.h"
 #include "Material.h"
 #include "MovingSphere.h"
 #include "Ray.h"
@@ -55,7 +57,6 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-
     s.world = bvh;
     s.cam   = cam;
 
@@ -86,7 +87,6 @@ namespace raytracer {
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
 
     s.world = bvh;
     s.cam   = cam;
@@ -143,11 +143,11 @@ namespace raytracer {
     world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
 
     auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0), groundMaterial));
-    
+    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
+                                  make_shared<Lambertian>(groundMaterial)));
+
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
 
     s.world = bvh;
     s.cam   = cam;
@@ -170,8 +170,12 @@ namespace raytracer {
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
                distToFocus, 0.0, 1.0);
 
+    auto checker = std::make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1),
+                                                    Vec3(0.9, 0.9, 0.9));
+
     auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0), groundMaterial));
+    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
+                                  make_shared<Lambertian>(checker)));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -209,13 +213,33 @@ namespace raytracer {
 
     auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
-    
+
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-
     s.world = bvh;
     s.cam   = cam;
+    return s;
+  }
+
+  Scene Scene::TwoSpheres(float aspectRatio) {
+    Camera cam(Vec3(13, 2, 3), Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3::Zero(), 20.0,
+               aspectRatio, 0.0, 10, 0, 0);
+    HittableList objects;
+
+    Scene s;
+
+    auto checker = make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1),
+                                               Vec3(0.9, 0.9, 0.9));
+
+    // No need to use a BVH since there are only two spheres
+    objects.Add(make_shared<Sphere>(10, Vec3(0, -10, 0),
+                                    make_shared<Lambertian>(checker)));
+    objects.Add(make_shared<Sphere>(10, Vec3(0, 10, 0),
+                                    make_shared<Lambertian>(checker)));
+
+    s.cam   = cam;
+    s.world = objects;
     return s;
   }
 } // namespace raytracer

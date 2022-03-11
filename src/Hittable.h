@@ -12,7 +12,7 @@ namespace raytracer {
     Vec3                 p;
     Vec3                 normal;
     shared_ptr<Material> mat_ptr;
-    float                t;
+    float                t, u, v;
     bool                 front_face;
 
     inline void set_face_normal(const Ray &r, const Vec3 &outward_normal) {

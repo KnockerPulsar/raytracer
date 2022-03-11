@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <exception>
 #include <future>
@@ -28,7 +29,8 @@ using std::string, std::vector, std::chrono::high_resolution_clock,
 
 // TODO: Check out raygui for debug panels.
 // TODO: Separate checking on threads and blitting finished thread pixels.
-// TODO: Implement a clearer pipeline (Init, loop{Check inputs, render}, clean up).
+// TODO: Implement a clearer pipeline (Init, loop{Check inputs, render}, clean
+// up).
 // TODO: Add progress bar to shutdown loop.
 // TODO: Something to switch between incremental and whole frame drawing.
 
@@ -49,7 +51,7 @@ pair<int, int> GetThreadJobSlice(int totalJobs, int t) {
 
 void RenderAsync(vector<Pixel> &pixelJobs, raytracer::Scene &currScene,
                  Workers &threads, vector<long> &threadTime,
-                 vector<int> &threadProgress) {
+                 vector<int> &threadProgress, vector<int> &threadShouldRun) {
 
   for (int t = 0; t < NUM_THREADS; t++) {
     auto [jobsStart, jobsEnd] = GetThreadJobSlice(pixelJobs.size(), t);
@@ -57,7 +59,7 @@ void RenderAsync(vector<Pixel> &pixelJobs, raytracer::Scene &currScene,
     threads.push_back(make_pair(
         false, async(launch::async, raytracer::Ray::Trace, ref(pixelJobs),
                      jobsStart, jobsEnd, ref(currScene), ref(threadTime[t]),
-                     ref(threadProgress[t]))));
+                     ref(threadProgress[t]), ref(threadShouldRun[t]))));
   }
 }
 
@@ -66,6 +68,9 @@ void RenderAsync(vector<Pixel> &pixelJobs, raytracer::Scene &currScene,
 auto PrepareAsync(int imageWidth, int imageHeight, Workers &threads) {
   vector<int>  threadProgress(NUM_THREADS, 0);
   vector<long> threadTime(NUM_THREADS, 0);
+
+  // Used to signal threads to exit prematurely
+  vector<int> threadShouldRun = vector(NUM_THREADS, 1);
 
   vector<Pixel> pixelJobs =
       vector(imageWidth * imageHeight, Pixel{0, 0, Vec3::Zero()});
@@ -77,7 +82,7 @@ auto PrepareAsync(int imageWidth, int imageHeight, Workers &threads) {
     }
   }
 
-  return std::make_tuple(pixelJobs, threadTime, threadProgress);
+  return std::make_tuple(pixelJobs, threadTime, threadProgress, threadShouldRun);
 }
 
 void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
@@ -98,7 +103,7 @@ void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
 
 bool CheckAsyncProgress(vector<Pixel> &pixelJobs, RenderTexture2D &screenBuffer,
                         Workers &threads, const vector<int> &threadProgress) {
-  std::cout << "\r";
+  // std::cout << "\r";
   bool allFinished = true;
   for (int i = 0; i < NUM_THREADS; i++) {
     auto finished = threads[i].second.wait_for(milliseconds(0));
@@ -111,7 +116,7 @@ bool CheckAsyncProgress(vector<Pixel> &pixelJobs, RenderTexture2D &screenBuffer,
 
     allFinished &= threads[i].first;
 
-    std::cout << std::to_string(threadProgress[i]) << "\t";
+    // std::cout << std::to_string(threadProgress[i]) << "\t";
   }
 
   return allFinished;
@@ -135,13 +140,14 @@ void PrintFrameTimes(vector<long> &threadTime) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 800;
+  const int   imageWidth      = 1280;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 100;
-  const int   maxDepth        = 20;
+  const int   samplesPerPixel = 200;
+  const int   maxDepth        = 100;
   bool        fullscreen      = false;
   bool        showProg        = true;
+
 
   InitWindow(imageWidth, imageHeight, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
@@ -149,12 +155,12 @@ int main() {
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::RandomMovingSpheres(aspectRatio,30,30)
+      raytracer::Scene::TwoSpheres(aspectRatio)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.
   Workers threads;
-  auto [pixelJobs, threadTime, threadProgress] =
+  auto [pixelJobs, threadTime, threadProgress, threadShouldRun] =
       PrepareAsync(imageWidth, imageHeight, threads);
 
   if (fullscreen)
@@ -180,7 +186,8 @@ int main() {
 
       currScene.cam.Fwd(GetFrameTime());
 
-      RenderAsync(pixelJobs, currScene, threads, threadTime, threadProgress);
+      RenderAsync(pixelJobs, currScene, threads, threadTime, threadProgress,
+                  threadShouldRun);
     }
 
     // Check on thread progress. Draw finished threads to buffer.
@@ -216,7 +223,7 @@ int main() {
 
     // Draw to screen and reset thread jobs.
     if (allFinished) {
-      PrintFrameTimes(ref(threadTime));
+      // PrintFrameTimes(ref(threadTime));
       threads.clear();
     }
   }
@@ -232,11 +239,16 @@ int main() {
 
   bool allFinished;
   int  textSize = 80 * imageWidth / 1080.0;
+
+  std::for_each(threadShouldRun.begin(), threadShouldRun.end(),
+                [&](int& shouldRun) { shouldRun = 0; });
+
   do {
 
     allFinished = true;
-    for (auto &thread : threads) {
-      auto threadStatus = thread.second.wait_for(milliseconds(0));
+    for (int i = 0; i < threads.size(); i++) {
+      auto threadStatus = threads[i].second.wait_for(milliseconds(0));
+
       allFinished &= (threadStatus == std::future_status::ready);
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vec3.h"
+#include <atomic>
 
 namespace raytracer {
 
@@ -27,7 +28,7 @@ namespace raytracer {
 
     static void Trace(std::vector<Pixel> &threadJobs, int jobsStart,
                       int jobsEnd, Scene &currScene, long &thread_time,
-                      int &thread_progress);
+                      int &thread_progress, int &threadShouldRun);
   };
 
 } // namespace raytracer
