@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Material.h"
 #include "MovingSphere.h"
+#include "NoiseTexture.h"
 #include "Ray.h"
 #include "Sphere.h"
 #include "Util.h"
@@ -12,6 +13,7 @@
 #include <memory>
 #include <raylib.h>
 #include <tuple>
+#include "ImageTexture.h"
 
 namespace raytracer {
 
@@ -229,17 +231,47 @@ namespace raytracer {
 
     Scene s;
 
-    auto checker = make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1),
-                                               Vec3(0.9, 0.9, 0.9));
+    // auto checker =
+    //     make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1), Vec3(0.9, 0.9,
+    //     0.9));
+
+    auto perText = make_shared<NoiseTexture>(4.0f);
 
     // No need to use a BVH since there are only two spheres
     objects.Add(make_shared<Sphere>(10, Vec3(0, -10, 0),
-                                    make_shared<Lambertian>(checker)));
+                                    make_shared<Lambertian>(perText)));
     objects.Add(make_shared<Sphere>(10, Vec3(0, 10, 0),
-                                    make_shared<Lambertian>(checker)));
+                                    make_shared<Lambertian>(perText)));
 
     s.cam   = cam;
     s.world = objects;
+    return s;
+  }
+
+  Scene Scene::Earth(float aspectRatio) {
+    Scene        s;
+    HittableList world;
+
+    Vec3  lookFrom    = Vec3(13, 2, 3);
+    Vec3  lookAt      = Vec3(0, 0, 0);
+    Vec3  vUp         = Vec3(0, 1, 0);
+    float distToFocus = 10.0f;
+    float aperature   = 0.1F;
+    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    int   fov         = 20.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+               distToFocus, 0.0, 1.0);
+
+    auto earthTexture = make_shared<ImageTexture>("earthmap.png");
+    auto earthSurface = make_shared<Lambertian>(earthTexture);
+    // auto earthSurface = make_shared<Metal>(Vec3(0.7,0.2,0.7), 0.7);
+    auto globe = make_shared<Sphere>(2, Vec3(0,0,0), earthSurface);
+    world.Add(globe);
+
+    s.cam = cam;
+    s.world = world;
+
     return s;
   }
 } // namespace raytracer

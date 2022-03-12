@@ -140,11 +140,11 @@ void PrintFrameTimes(vector<long> &threadTime) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 1280;
+  const int   imageWidth      = 540;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 200;
-  const int   maxDepth        = 100;
+  const int   samplesPerPixel = 50;
+  const int   maxDepth        = 50;
   bool        fullscreen      = false;
   bool        showProg        = true;
 
@@ -155,7 +155,7 @@ int main() {
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::TwoSpheres(aspectRatio)
+      raytracer::Scene::Earth(aspectRatio)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.

@@ -25,5 +25,8 @@ namespace raytracer {
                                      int ballGridHeight = 11);
 
     static Scene TwoSpheres(float aspectRatio);
+
+    static Scene Earth(float aspectRatio);
+    
   };
 } // namespace raytracer
