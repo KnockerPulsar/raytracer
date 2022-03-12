@@ -31,6 +31,17 @@ namespace raytracer {
       this->moveDir = moveDir;
     }
 
+    Camera(nlohmann::json cameraJson, float aspectRatio)
+        : Camera(Vec3::FromJson(cameraJson["look_from"]),
+                 Vec3::FromJson(cameraJson["look_at"]),
+                 Vec3::FromJson(cameraJson["v_up"]),
+                 Vec3::FromJson(cameraJson["move_dir"]),
+                 cameraJson["fov"].get<float>(), aspectRatio,
+                 cameraJson["aperature"].get<float>(),
+                 cameraJson["focus_dist"].get<float>(),
+                 cameraJson["time0"].get<float>(),
+                 cameraJson["time1"].get<float>()) {}
+
     void Update() {
       float theta = DegressToRadians(vFov);
 

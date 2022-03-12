@@ -5,3 +5,4 @@ AlignConsecutiveDeclarations: true
 TabWidth: 2
 IndentWidth: 2
 NamespaceIndentation: All
+BinPackArguments: false

@@ -7,7 +7,7 @@ Experimenting with creating a CPU raytracer. Main resources:
 # Showcase
 
 ![Cornell](./cornell.png)
-*Cornell box. This added support for quads, boxes, lights, textures, and more! Rendered with 10k samples and 50 bounces*
+*Cornell box. This version added support for quads, boxes, lights, textures, and more! Rendered with 10k samples and 50 bounces*
 
 ![Weekend final](./weekend_final.png)
 *Showcase of an earlier version of the renderer, implements all of "Raytracing in one weekend"'s core functions + multi-threading*

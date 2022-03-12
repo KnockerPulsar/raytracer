@@ -2,10 +2,12 @@
 
 #include "AABB.h"
 #include "Hittable.h"
+#include "MaterialFactory.h"
 #include "Ray.h"
 #include "Vec3.h"
 #include <cmath>
 #include <raylib.h>
+#include "Material.h"
 
 namespace raytracer {
 
@@ -17,6 +19,12 @@ namespace raytracer {
 
     Sphere(float r, Vec3 pos, shared_ptr<Material> m)
         : radius(r), center(pos), mat_ptr(m) {}
+
+    Sphere(nlohmann::json sphereJson){
+      center = Vec3::FromJson(sphereJson["pos"]);
+      radius = sphereJson["radius"].get<float>();
+      mat_ptr = MaterialFactory::FromJson(sphereJson["material"]);
+    }
 
     bool Hit(const Ray &r, float t_min, float t_max,
              HitRecord &rec) const override;

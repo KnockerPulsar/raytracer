@@ -1,0 +1,85 @@
+{
+  "settings": {
+    "resolution": {
+      "x": 600,
+      "y": 600
+    },
+    "background_color": {
+      "x": 0.1,
+      "y": 0.2,
+      "z": 0.3
+    },
+    "num_samples": 10,
+    "max_depth": 10
+  },
+  "camera": {
+    "look_from": {
+      "x": 13,
+      "y": 0,
+      "z": 0
+    },
+    "look_at": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "v_up": {
+      "x": 0,
+      "y": 1,
+      "z": 0
+    },
+    "focus_dist": 13,
+    "aperature": 0.1,
+    "move_dir": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "fov": 20,
+    "time0": 0,
+    "time1": 1
+  },
+  "objects": [
+    {
+      "type": "sphere",
+      "pos": {
+        "x": 1,
+        "y": 0,
+        "z": 2
+      },
+      "radius": 1,
+      "material": {
+        "type": "lambertian",
+        "texture": {
+          "type": "solid_color",
+          "color": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "sphere",
+      "pos": {
+        "x": -3  ,
+        "y": 0,
+        "z": 0
+      },
+      "radius": 1,
+      "material": {
+        "type": "metal",
+        "fuzz" : 0.0,
+        "texture": {
+          "type": "solid_color",
+          "color": {
+            "x": 0.1,
+            "y": 0.7,
+            "z": 0.5
+          }
+        }
+      }
+    }
+  ]
+}

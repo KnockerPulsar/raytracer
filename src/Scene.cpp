@@ -5,6 +5,7 @@
 #include "Box.h"
 #include "Camera.h"
 #include "Hittable.h"
+#include "HittableList.h"
 #include "ImageTexture.h"
 #include "Material.h"
 #include "MovingSphere.h"
@@ -14,36 +15,36 @@
 #include "Util.h"
 #include "Vec3.h"
 #include <bits/types/FILE.h>
+#include <fstream>
 #include <memory>
 #include <raylib.h>
 #include <tuple>
 
+using nlohmann::json;
+
 namespace raytracer {
 
-  Scene &Scene::UpdateRenderData(int maxDepth, int imageWidth, int imageHeight,
-                                 int samplesPerPixel) {
-    this->maxDepth        = maxDepth;
-    this->imageWidth      = imageWidth;
-    this->imageHeight     = imageHeight;
-    this->samplesPerPixel = samplesPerPixel;
-
-    return *this;
-  }
-
-  Scene Scene::Scene1(float aspectRatio) {
+  Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth,
+                      int samplesPerPixel) {
     Scene        s;
     HittableList world;
     Vec3         lookFrom        = Vec3(-1, 1, 1);
     Vec3         lookAt          = Vec3(0, 0, 0);
     Vec3         vUp             = Vec3(0, 1, 0);
-    Vec3         backgroundColor = Vec3::Zero();
+    Vec3         backgroundColor = Vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.001F;
     Vec3  moveDir     = Vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
                distToFocus);
 
     auto material_ground = make_shared<Lambertian>(Vec3(0.8, 0.8, 0.0));
@@ -64,14 +65,21 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world           = bvh;
-    s.backgroundColor = backgroundColor;
-    s.cam             = cam;
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   } // namespace raytracer
 
-  Scene Scene::Scene2(float aspectRatio) {
+  Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth,
+                      int samplesPerPixel) {
     Scene        s;
     float        R = cos(pi / 4);
     HittableList world;
@@ -85,7 +93,13 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(0.1f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
                distToFocus);
 
     auto material_left  = make_shared<Lambertian>(Vec3(0, 0, 1));
@@ -98,14 +112,21 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world           = bvh;
-    s.cam             = cam;
-    s.backgroundColor = backgroundColor;
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   }
 
-  Scene Scene::Random(float aspectRatio, int ballGridWidth,
+  Scene Scene::Random(int imageWidth, int imageHeight, int maxDepth,
+                      int samplesPerPixel, int ballGridWidth,
                       int ballGridHeight) {
     Scene        s;
     HittableList world;
@@ -120,7 +141,13 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
                distToFocus);
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
@@ -156,20 +183,28 @@ namespace raytracer {
     world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
 
     auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
-                                  make_shared<Lambertian>(groundMaterial)));
+    world.Add(make_shared<Sphere>(
+        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world           = bvh;
-    s.backgroundColor = backgroundColor;
-    s.cam             = cam;
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(float aspectRatio, int ballGridWidth,
-                                   int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight,
+                                   int maxDepth, int samplesPerPixel,
+                                   int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -183,15 +218,23 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
-               distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus,
+               0.0,
+               1.0);
 
     auto checker = std::make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1),
                                                     Vec3(0.9, 0.9, 0.9));
 
     auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
-                                  make_shared<Lambertian>(checker)));
+    world.Add(make_shared<Sphere>(
+        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(checker)));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -205,8 +248,8 @@ namespace raytracer {
             auto albedo    = Vec3::Random() * Vec3::Random();
             sphereMaterial = make_shared<Lambertian>(albedo);
             Vec3 center2   = center + Vec3(0, RandomFloat(0, .5), 0);
-            world.Add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2,
-                                                sphereMaterial));
+            world.Add(make_shared<MovingSphere>(
+                center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           } else if (chooseMat < 0.95) {
             // Metal
             auto  albedo   = Vec3::Random(0.5, 1);
@@ -233,17 +276,33 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world           = bvh;
-    s.backgroundColor = backgroundColor;
-    s.cam             = cam;
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+
     return s;
   }
 
-  Scene Scene::TwoSpheres(float aspectRatio) {
+  Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth,
+                          int samplesPerPixel) {
     Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
 
-    Camera cam(Vec3(13, 2, 3), Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3::Zero(), 20.0,
-               aspectRatio, 0.0, 10, 0, 0);
+    Camera       cam(Vec3(13, 2, 3),
+               Vec3(0, 0, 0),
+               Vec3(0, 1, 0),
+               Vec3::Zero(),
+               20.0,
+               (float)imageWidth / imageHeight,
+               0.0,
+               10,
+               0,
+               0);
     HittableList objects;
 
     Scene s;
@@ -255,18 +314,26 @@ namespace raytracer {
     auto perText = make_shared<NoiseTexture>(4.0f);
 
     // No need to use a BVH since there are only two spheres
-    objects.Add(make_shared<Sphere>(10, Vec3(0, -10, 0),
-                                    make_shared<Lambertian>(perText)));
-    objects.Add(make_shared<Sphere>(10, Vec3(0, 10, 0),
-                                    make_shared<Lambertian>(perText)));
+    objects.Add(make_shared<Sphere>(
+        10, Vec3(0, -10, 0), make_shared<Lambertian>(perText)));
+    objects.Add(make_shared<Sphere>(
+        10, Vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
-    s.cam             = cam;
-    s.backgroundColor = backgroundColor;
-    s.world           = objects;
+    s = {
+        .world           = objects,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+
     return s;
   }
 
-  Scene Scene::Earth(float aspectRatio) {
+  Scene Scene::Earth(int imageWidth, int imageHeight, int maxDepth,
+                     int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
@@ -280,8 +347,16 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
-               distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus,
+               0.0,
+               1.0);
 
     auto earthTexture = make_shared<ImageTexture>("earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
@@ -289,14 +364,21 @@ namespace raytracer {
     auto globe = make_shared<Sphere>(2, Vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
-    s.cam             = cam;
-    s.world           = world;
-    s.backgroundColor = backgroundColor;
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   }
 
-  Scene Scene::Light(float aspectRatio) {
+  Scene Scene::Light(int imageWidth, int imageHeight, int maxDepth,
+                     int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
@@ -310,28 +392,44 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
-               distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus,
+               0.0,
+               1.0);
 
     auto perText   = make_shared<NoiseTexture>(4);
     auto diffLight = make_shared<DiffuseLight>(Vec3(4, 4, 4));
 
-    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
-                                  make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(
+        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(perText)));
 
-    world.Add(make_shared<Sphere>(2, Vec3(0, 2, 0),
-                                  make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(
+        2, Vec3(0, 2, 0), make_shared<Lambertian>(perText)));
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
-    s.cam             = cam;
-    s.world           = world;
-    s.backgroundColor = backgroundColor;
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   }
 
-  Scene Scene::CornellBox(float aspectRatio) {
+  Scene Scene::CornellBox(int imageWidth, int imageHeight, int maxDepth,
+                          int samplesPerPixel) {
+
     Scene        s;
     HittableList world;
 
@@ -345,13 +443,26 @@ namespace raytracer {
     Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
-               distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus,
+               0.0,
+               1.0);
 
-    auto red   = make_shared<Lambertian>(Vec3(0.65, 0.05, 0.05));
-    auto white = make_shared<Lambertian>(Vec3(0.73, 0.73, 0.73));
-    auto green = make_shared<Lambertian>(Vec3(0.12, 0.45, 0.15));
-    auto light = make_shared<DiffuseLight>(Vec3(15, 15, 15));
+    auto red        = make_shared<Lambertian>(Vec3(0.65, 0.05, 0.05));
+    auto white      = make_shared<Lambertian>(Vec3(0.73, 0.73, 0.73));
+    auto green      = make_shared<Lambertian>(Vec3(0.12, 0.45, 0.15));
+    auto light      = make_shared<DiffuseLight>(Vec3(2, 2, 2));
+    auto metal      = make_shared<Metal>(Vec3(0.8, 0.1, 0.8), 0.7);
+    auto dielectric = make_shared<Dielectric>(1.5f);
+    auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1));
+    auto checker    = std::make_shared<CheckerTexture>(
+        Vec3(0.2, 0.3, 0.1), Vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
@@ -360,8 +471,7 @@ namespace raytracer {
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 0, red));
 
     // Top light
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
-
+    // world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
     // floor
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
 
@@ -380,14 +490,61 @@ namespace raytracer {
 
     auto box2 = make_shared<Translate>(
         make_shared<RotateY>(
-            make_shared<Box>(Vec3::Zero(), Vec3(165, 165, 165), white), -18),
-        Vec3(130, 0, 65));
+            make_shared<Box>(Vec3::Zero(),
+                             Vec3(100, 100, 100),
+                             make_shared<DiffuseLight>(checker)),
+            -150),
+        Vec3(200, 0, 65));
     world.Add(box2);
 
-    s.cam             = cam;
-    s.world           = world;
-    s.backgroundColor = backgroundColor;
+    // auto box3 = make_shared<Translate>(
+    //     make_shared<RotateY>(
+    //         make_shared<Box>(Vec3(10), Vec3(165-10, 165-10, 165-10),
+    //         dielectric), -55),
+    //     Vec3(200, 0, 65));
+    // world.Add(box3);
+
+    HittableList bvh(make_shared<BVHNode>(world, 0, 1));
+
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   }
+
+  Scene Scene::Load(std::string path) {
+    std::ifstream jsonFile(path);
+    json          readScene;
+    jsonFile >> readScene;
+
+    json  settings    = readScene["settings"];
+    int   imageWidth  = settings["resolution"]["x"].get<int>();
+    int   imageHeight = settings["resolution"]["y"].get<int>();
+    float aspectRatio = (float)imageWidth / imageHeight;
+    Scene s           = {
+                  .cam             = Camera(readScene["camera"], aspectRatio),
+                  .maxDepth        = settings["max_depth"].get<int>(),
+                  .imageWidth      = imageWidth,
+                  .imageHeight     = imageHeight,
+                  .samplesPerPixel = settings["num_samples"].get<int>(),
+                  .backgroundColor = Vec3::FromJson(settings["background_color"]),
+    };
+    
+
+    s.world = HittableList();
+    for (auto obj : readScene["objects"]) {
+      if (obj["type"].get<string>() == "sphere")
+        s.world.Add(make_shared<Sphere>(obj));
+    }
+
+    return s;
+  }
+
 } // namespace raytracer

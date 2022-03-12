@@ -3,6 +3,7 @@
 #include "Util.h"
 #include <raylib.h>
 #include <raymath.h>
+#include "../vendor/nlohmann-json/json.hpp"
 
 
 class Vec3 : public Vector3 {
@@ -39,6 +40,8 @@ public:
   static Vec3 RandomUnitVec();
   static Vec3 RandomInHemisphere(const Vec3 &normal);
   static Vec3 RandomInUnitDisc();
+  
+  static Vec3 FromJson(nlohmann::json jsonVec);
 
   static Vec3 Zero() { return Vector3Zero(); }
 };

@@ -18,11 +18,11 @@ namespace raytracer {
       boxMin = p0;
       boxMax = p1;
 
-      sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p0.z, mat));
       sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p1.z, mat));
+      sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p0.z, mat));
 
-      sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p0.y, mat));
       sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p1.y, mat));
+      sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p0.y, mat));
 
       sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p0.x, mat));
       sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
