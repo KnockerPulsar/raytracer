@@ -2,7 +2,9 @@
 #include "AARect.h"
 #include "BVHNode.h"
 
+#include "Box.h"
 #include "Camera.h"
+#include "Hittable.h"
 #include "ImageTexture.h"
 #include "Material.h"
 #include "MovingSphere.h"
@@ -338,7 +340,7 @@ namespace raytracer {
     Vec3 vUp             = Vec3(0, 1, 0);
     Vec3 backgroundColor = Vec3::Zero();
 
-    float distToFocus = 10.0f;
+    float distToFocus = 800.0f;
     float aperature   = 0.1F;
     Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
@@ -351,7 +353,6 @@ namespace raytracer {
     auto green = make_shared<Lambertian>(Vec3(0.12, 0.45, 0.15));
     auto light = make_shared<DiffuseLight>(Vec3(15, 15, 15));
 
-
     // Left wall
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
 
@@ -359,7 +360,7 @@ namespace raytracer {
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 0, red));
 
     // Top light
-    world.Add(make_shared<XZRect>(213, 343, 227, 332, 554, light));
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
 
     // floor
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
@@ -369,6 +370,19 @@ namespace raytracer {
 
     // Back wall
     world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
+
+    auto box1 = make_shared<Translate>(
+        make_shared<RotateY>(
+            make_shared<Box>(Vec3(0, 0, 0), Vec3(165, 330, 165), white), 15),
+        Vec3(265, 0, 295));
+
+    world.Add(box1);
+
+    auto box2 = make_shared<Translate>(
+        make_shared<RotateY>(
+            make_shared<Box>(Vec3::Zero(), Vec3(165, 165, 165), white), -18),
+        Vec3(130, 0, 65));
+    world.Add(box2);
 
     s.cam             = cam;
     s.world           = world;

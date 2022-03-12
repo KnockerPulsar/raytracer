@@ -13,6 +13,8 @@
 #include <utility>
 #include <vector>
 
+#include "../vendor/imgui/imgui.h"
+#include "../vendor/rlImGui/rlImGui.h"
 #include "Camera.h"
 #include "Clr.h"
 #include "Constants.h"
@@ -93,8 +95,8 @@ void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
   BeginTextureMode(screenBuffer);
 
   for (int i = drawStart; i < drawEnd; i++) {
-    Pixel &pixel = pixelJobs[i];
-    auto [r,g,b] = pixel.color;
+    Pixel &pixel   = pixelJobs[i];
+    auto [r, g, b] = pixel.color;
 
     // Clamp r, g, and b to prevent underflows and artifacts
     r = Clamp(r, 0, 1);
@@ -148,15 +150,16 @@ void PrintFrameTimes(vector<long> &threadTime) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 600;
-  const float aspectRatio     = 16.0 / 9.0;
+  const int   imageWidth      = 1080;
+  const float aspectRatio     = 1;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 1000;
-  const int   maxDepth        = 50;
+  const int   samplesPerPixel = 100;
+  const int   maxDepth        = 8;
   bool        fullscreen      = false;
   bool        showProg        = true;
 
   InitWindow(imageWidth, imageHeight, title);
+  rlImGuiSetup(true);
   SetTargetFPS(60); // Not like we're gonna hit it...
   RenderTexture2D screenBuffer = LoadRenderTexture(imageWidth, imageHeight);
 
@@ -201,36 +204,42 @@ int main() {
     bool allFinished =
         CheckAsyncProgress(pixelJobs, screenBuffer, threads, threadProgress);
 
-    // Display buffer.
     BeginDrawing();
+    rlImGuiBegin();
+
     ClearBackground(BLACK);
 
+    // Display buffer.
     DrawTextureRec(screenBuffer.texture,
                    (Rectangle){0, 0, imageWidth, imageWidth}, (Vector2){0, 0},
                    WHITE);
 
     if (showProg) {
-      // Get average thread progress in range [0,1].
-      float accumulativePercentage =
-          std::accumulate(threadProgress.begin(), threadProgress.end(), 0) /
-          (threadProgress.size() * 100.0);
+      if (ImGui::Begin("Thread status"), 0, ImGuiWindowFlags_AlwaysAutoResize) {
+        if (ImGui::BeginTable("Thread status", 3)) {
+          ImGui::TableNextRow();
 
-      // Calculate how wide the progress bar should be and its middle.
-      int progBarEnd = imageWidth * accumulativePercentage;
-      int progBarMid = progBarEnd / 2;
-
-      string percentText = std::to_string(accumulativePercentage * 100) + " %";
-
-      // Draw progress bar and percentage.
-      DrawRectangle(0, 0, progBarEnd, imageHeight * 0.03, Fade(GREEN, 0.2));
-      DrawText(percentText.c_str(), progBarMid, 10, 20, Fade(BLUE, 0.8));
+          for (int t = 0; t < NUM_THREADS; t++) {
+            // Thread labels
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("Thread %d progress", t);
+            ImGui::TableNextColumn();
+            ImGui::ProgressBar(threadProgress[t] / 100.0f);
+            ImGui::TableNextColumn();
+            ImGui::Text("Time: %ld ms", threadTime[t]);
+          }
+          ImGui::EndTable();
+        }
+        ImGui::End();
+      }
     }
 
+    rlImGuiEnd();
     EndDrawing();
 
     // Draw to screen and reset thread jobs.
     if (allFinished) {
-      // PrintFrameTimes(ref(threadTime));
       threads.clear();
     }
   }
@@ -268,6 +277,7 @@ int main() {
   } while (!allFinished);
 
   UnloadRenderTexture(screenBuffer);
+  rlImGuiShutdown();
   CloseWindow();
 
   return 0;

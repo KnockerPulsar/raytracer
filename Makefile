@@ -3,7 +3,7 @@
 # ggdb / g             	-> enable debugging
 # DGAMMA_CORRECTION			-> Turn gamma correction on or off. 
 # DFAST_EXIT						-> Compile with fast thread exiting on, seems to lower performance a bit
-defines :=  -DGAMMA_CORRECTION  -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp  
+defines := -DGAMMA_CORRECTION -DFAST_EXIT -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp  
 
 # Define custom functions
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
@@ -14,6 +14,8 @@ buildDir := bin
 executable := Raytracer
 target := $(buildDir)/$(executable)
 sources := $(call rwildcard,src/,*.cpp)
+sources += $(wildcard vendor/rlImGui/*.cpp)
+sources += $(wildcard vendor/imgui/*.cpp)
 objects := $(patsubst src/%, $(buildDir)/%, $(patsubst %.cpp, %.o, $(sources)))
 depends := $(patsubst %.o, %.d, $(objects))
 
