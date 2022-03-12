@@ -23,8 +23,8 @@ namespace raytracer {
 
     Vec3 At(float t) const { return Vector3Add(origin, direction * t); }
 
-    static Vec3 RayColor(const raytracer::Ray &r, const Hittable &world,
-                         int depth);
+    static Vec3 RayColor(const raytracer::Ray &r, const Vec3 &backgroundColor,
+                         const Hittable &world, int depth);
 
     static void Trace(std::vector<Pixel> &threadJobs, int jobsStart,
                       int jobsEnd, Scene &currScene, long &thread_time,

@@ -11,6 +11,9 @@ namespace raytracer {
 
   class Material {
   public:
+    virtual Vec3 emitted(float u, float v, const Vec3 &p) const {
+      return Vec3::Zero();
+    }
     virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
                          Ray &scattered) const = 0;
   };
@@ -23,7 +26,7 @@ namespace raytracer {
     Lambertian(const Vec3 &color)
         : albedo(std::make_shared<SolidColor>(color)) {}
     Lambertian(shared_ptr<Texture> color) : albedo(color) {}
-    Lambertian(const shared_ptr<Lambertian>& l) { this->albedo = l->albedo; }
+    Lambertian(const shared_ptr<Lambertian> &l) { this->albedo = l->albedo; }
 
     virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
                          Ray &scattered) const override {
@@ -94,6 +97,23 @@ namespace raytracer {
       float r0 = (1 - ref_idx) / (1 + ref_idx);
       r0       = r0 * r0;
       return r0 + (1 - r0) * pow(1 - cos, 5);
+    }
+  };
+
+  class DiffuseLight : public Material {
+  public:
+    shared_ptr<Texture> emit;
+
+    DiffuseLight(shared_ptr<Texture> a) : emit(a) {}
+    DiffuseLight(Vec3 c) : emit(std::make_shared<SolidColor>(c)) {}
+
+    virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+                         Ray &scattered) const override {
+      return false;
+    }
+
+    virtual Vec3 emitted(float u, float v, const Vec3 &p) const override {
+      return emit->Value(u, v, p);
     }
   };
 }; // namespace raytracer

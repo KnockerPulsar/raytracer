@@ -1,7 +1,9 @@
 #include "Scene.h"
+#include "AARect.h"
 #include "BVHNode.h"
 
 #include "Camera.h"
+#include "ImageTexture.h"
 #include "Material.h"
 #include "MovingSphere.h"
 #include "NoiseTexture.h"
@@ -13,7 +15,6 @@
 #include <memory>
 #include <raylib.h>
 #include <tuple>
-#include "ImageTexture.h"
 
 namespace raytracer {
 
@@ -30,13 +31,15 @@ namespace raytracer {
   Scene Scene::Scene1(float aspectRatio) {
     Scene        s;
     HittableList world;
-    Vec3         lookFrom    = Vec3(-1, 1, 1);
-    Vec3         lookAt      = Vec3(0, 0, 0);
-    Vec3         vUp         = Vec3(0, 1, 0);
-    float        distToFocus = 10.0f;
-    float        aperature   = 0.001F;
-    Vec3         moveDir     = Vec3(10.0f, 0, 0);
-    int          fov         = 60.0;
+    Vec3         lookFrom        = Vec3(-1, 1, 1);
+    Vec3         lookAt          = Vec3(0, 0, 0);
+    Vec3         vUp             = Vec3(0, 1, 0);
+    Vec3         backgroundColor = Vec3::Zero();
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    Vec3  moveDir     = Vec3(10.0f, 0, 0);
+    int   fov         = 60.0;
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
                distToFocus);
@@ -59,8 +62,9 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world = bvh;
-    s.cam   = cam;
+    s.world           = bvh;
+    s.backgroundColor = backgroundColor;
+    s.cam             = cam;
 
     return s;
   } // namespace raytracer
@@ -69,13 +73,15 @@ namespace raytracer {
     Scene        s;
     float        R = cos(pi / 4);
     HittableList world;
-    Vec3         lookFrom    = Vec3(13, 2, 3);
-    Vec3         lookAt      = Vec3(0, 0, 0);
-    Vec3         vUp         = Vec3(0, 1, 0);
-    float        distToFocus = 10.0f;
-    float        aperature   = 0.1F;
-    Vec3         moveDir     = Vec3(0.1f, 0, 0);
-    int          fov         = 20.0;
+    Vec3         lookFrom        = Vec3(13, 2, 3);
+    Vec3         lookAt          = Vec3(0, 0, 0);
+    Vec3         vUp             = Vec3(0, 1, 0);
+    Vec3         backgroundColor = Vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.1F;
+    Vec3  moveDir     = Vec3(0.1f, 0, 0);
+    int   fov         = 20.0;
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
                distToFocus);
@@ -90,8 +96,9 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world = bvh;
-    s.cam   = cam;
+    s.world           = bvh;
+    s.cam             = cam;
+    s.backgroundColor = backgroundColor;
 
     return s;
   }
@@ -101,9 +108,11 @@ namespace raytracer {
     Scene        s;
     HittableList world;
 
-    Vec3  lookFrom    = Vec3(13, 2, 5);
-    Vec3  lookAt      = Vec3(0, 0, 0);
-    Vec3  vUp         = Vec3(0, 1, 0);
+    Vec3 lookFrom        = Vec3(13, 2, 5);
+    Vec3 lookAt          = Vec3(0, 0, 0);
+    Vec3 vUp             = Vec3(0, 1, 0);
+    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
     Vec3  moveDir     = Vec3(1.0f, 0, 0);
@@ -151,8 +160,9 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world = bvh;
-    s.cam   = cam;
+    s.world           = bvh;
+    s.backgroundColor = backgroundColor;
+    s.cam             = cam;
     return s;
   }
 
@@ -161,9 +171,11 @@ namespace raytracer {
     Scene        s;
     HittableList world;
 
-    Vec3  lookFrom    = Vec3(13, 2, 3);
-    Vec3  lookAt      = Vec3(0, 0, 0);
-    Vec3  vUp         = Vec3(0, 1, 0);
+    Vec3 lookFrom        = Vec3(13, 2, 3);
+    Vec3 lookAt          = Vec3(0, 0, 0);
+    Vec3 vUp             = Vec3(0, 1, 0);
+    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
     Vec3  moveDir     = Vec3(1.0f, 0, 0);
@@ -219,12 +231,15 @@ namespace raytracer {
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
-    s.world = bvh;
-    s.cam   = cam;
+    s.world           = bvh;
+    s.backgroundColor = backgroundColor;
+    s.cam             = cam;
     return s;
   }
 
   Scene Scene::TwoSpheres(float aspectRatio) {
+    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+
     Camera cam(Vec3(13, 2, 3), Vec3(0, 0, 0), Vec3(0, 1, 0), Vec3::Zero(), 20.0,
                aspectRatio, 0.0, 10, 0, 0);
     HittableList objects;
@@ -243,8 +258,9 @@ namespace raytracer {
     objects.Add(make_shared<Sphere>(10, Vec3(0, 10, 0),
                                     make_shared<Lambertian>(perText)));
 
-    s.cam   = cam;
-    s.world = objects;
+    s.cam             = cam;
+    s.backgroundColor = backgroundColor;
+    s.world           = objects;
     return s;
   }
 
@@ -252,9 +268,11 @@ namespace raytracer {
     Scene        s;
     HittableList world;
 
-    Vec3  lookFrom    = Vec3(13, 2, 3);
-    Vec3  lookAt      = Vec3(0, 0, 0);
-    Vec3  vUp         = Vec3(0, 1, 0);
+    Vec3 lookFrom        = Vec3(13, 2, 3);
+    Vec3 lookAt          = Vec3(0, 0, 0);
+    Vec3 vUp             = Vec3(0, 1, 0);
+    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
     Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
@@ -266,11 +284,95 @@ namespace raytracer {
     auto earthTexture = make_shared<ImageTexture>("earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
     // auto earthSurface = make_shared<Metal>(Vec3(0.7,0.2,0.7), 0.7);
-    auto globe = make_shared<Sphere>(2, Vec3(0,0,0), earthSurface);
+    auto globe = make_shared<Sphere>(2, Vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
-    s.cam = cam;
-    s.world = world;
+    s.cam             = cam;
+    s.world           = world;
+    s.backgroundColor = backgroundColor;
+
+    return s;
+  }
+
+  Scene Scene::Light(float aspectRatio) {
+    Scene        s;
+    HittableList world;
+
+    Vec3 lookFrom        = Vec3(26, 3, 6);
+    Vec3 lookAt          = Vec3(0, 2, 0);
+    Vec3 vUp             = Vec3(0, 1, 0);
+    Vec3 backgroundColor = Vec3::Zero();
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.1F;
+    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    int   fov         = 20.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+               distToFocus, 0.0, 1.0);
+
+    auto perText   = make_shared<NoiseTexture>(4);
+    auto diffLight = make_shared<DiffuseLight>(Vec3(4, 4, 4));
+
+    world.Add(make_shared<Sphere>(1000, Vec3(0, -1000, 0),
+                                  make_shared<Lambertian>(perText)));
+
+    world.Add(make_shared<Sphere>(2, Vec3(0, 2, 0),
+                                  make_shared<Lambertian>(perText)));
+
+    world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
+
+    s.cam             = cam;
+    s.world           = world;
+    s.backgroundColor = backgroundColor;
+
+    return s;
+  }
+
+  Scene Scene::CornellBox(float aspectRatio) {
+    Scene        s;
+    HittableList world;
+
+    Vec3 lookFrom        = Vec3(278, 278, -800);
+    Vec3 lookAt          = Vec3(278, 278, 0);
+    Vec3 vUp             = Vec3(0, 1, 0);
+    Vec3 backgroundColor = Vec3::Zero();
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.1F;
+    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    int   fov         = 40.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aspectRatio, aperature,
+               distToFocus, 0.0, 1.0);
+
+    auto red   = make_shared<Lambertian>(Vec3(0.65, 0.05, 0.05));
+    auto white = make_shared<Lambertian>(Vec3(0.73, 0.73, 0.73));
+    auto green = make_shared<Lambertian>(Vec3(0.12, 0.45, 0.15));
+    auto light = make_shared<DiffuseLight>(Vec3(15, 15, 15));
+
+
+    // Left wall
+    world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
+
+    // Right wall
+    world.Add(make_shared<YZRect>(0, 555, 0, 555, 0, red));
+
+    // Top light
+    world.Add(make_shared<XZRect>(213, 343, 227, 332, 554, light));
+
+    // floor
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
+
+    // ceiling
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, white));
+
+    // Back wall
+    world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
+
+    s.cam             = cam;
+    s.world           = world;
+    s.backgroundColor = backgroundColor;
 
     return s;
   }

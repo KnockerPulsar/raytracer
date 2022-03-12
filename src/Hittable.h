@@ -24,7 +24,7 @@ namespace raytracer {
   class Hittable {
   public:
     virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rect) const = 0;
+                     HitRecord &rec) const = 0;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
   };

@@ -12,6 +12,7 @@ namespace raytracer {
     HittableList world;
     Camera       cam;
     int          maxDepth, imageWidth, imageHeight, samplesPerPixel;
+    Vec3         backgroundColor;
 
     Scene &UpdateRenderData(int maxDepth, int imageWidth, int imageHeight,
                             int samplesPerPixel);
@@ -27,6 +28,9 @@ namespace raytracer {
     static Scene TwoSpheres(float aspectRatio);
 
     static Scene Earth(float aspectRatio);
-    
+
+    static Scene Light(float aspectRatio);
+
+    static Scene CornellBox(float aspectRatio);
   };
 } // namespace raytracer

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <numeric>
 #include <raylib.h>
+#include <raymath.h>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -82,7 +83,8 @@ auto PrepareAsync(int imageWidth, int imageHeight, Workers &threads) {
     }
   }
 
-  return std::make_tuple(pixelJobs, threadTime, threadProgress, threadShouldRun);
+  return std::make_tuple(pixelJobs, threadTime, threadProgress,
+                         threadShouldRun);
 }
 
 void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
@@ -92,8 +94,14 @@ void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd,
 
   for (int i = drawStart; i < drawEnd; i++) {
     Pixel &pixel = pixelJobs[i];
+    auto [r,g,b] = pixel.color;
 
-    Clr clr     = Clr::FromFloat(pixel.color.x, pixel.color.y, pixel.color.z);
+    // Clamp r, g, and b to prevent underflows and artifacts
+    r = Clamp(r, 0, 1);
+    g = Clamp(g, 0, 1);
+    b = Clamp(b, 0, 1);
+
+    Clr clr     = Clr::FromFloat(r, g, b);
     pixel.color = Vec3::Zero();
 
     DrawPixel(pixel.x, pixel.y, clr);
@@ -140,14 +148,13 @@ void PrintFrameTimes(vector<long> &threadTime) {
 
 int main() {
   // Rendering constants for easy modifications.
-  const int   imageWidth      = 540;
+  const int   imageWidth      = 600;
   const float aspectRatio     = 16.0 / 9.0;
   const int   imageHeight     = (imageWidth / aspectRatio);
-  const int   samplesPerPixel = 50;
+  const int   samplesPerPixel = 1000;
   const int   maxDepth        = 50;
   bool        fullscreen      = false;
   bool        showProg        = true;
-
 
   InitWindow(imageWidth, imageHeight, title);
   SetTargetFPS(60); // Not like we're gonna hit it...
@@ -155,7 +162,7 @@ int main() {
 
   // Create scene and update required data for rendering.
   raytracer::Scene currScene =
-      raytracer::Scene::Earth(aspectRatio)
+      raytracer::Scene::CornellBox(aspectRatio)
           .UpdateRenderData(maxDepth, imageWidth, imageHeight, samplesPerPixel);
 
   // Prepares the pixel jobs, thread progress and time lists.
@@ -241,7 +248,7 @@ int main() {
   int  textSize = 80 * imageWidth / 1080.0;
 
   std::for_each(threadShouldRun.begin(), threadShouldRun.end(),
-                [&](int& shouldRun) { shouldRun = 0; });
+                [&](int &shouldRun) { shouldRun = 0; });
 
   do {
 

@@ -7,13 +7,14 @@
 #include "Scene.h"
 #include <atomic>
 #include <chrono>
+#include <iostream>
 
 using raytracer::Pixel, raytracer::Camera, raytracer::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
 
 namespace raytracer {
-  Vec3 Ray::RayColor(const raytracer::Ray &r, const Hittable &world,
-                     int depth) {
+  Vec3 Ray::RayColor(const raytracer::Ray &r, const Vec3 &backgroundColor,
+                     const Hittable &world, int depth) {
     HitRecord rec;
 
     // Limit max recursion depth
@@ -21,24 +22,18 @@ namespace raytracer {
       return Vec3::Zero();
     }
 
-    if (world.Hit(r, 0.001f, infinity, rec)) {
-      raytracer::Ray scattered;
-      Vec3           attenuation;
+    if (!world.Hit(r, 0.001f, infinity, rec))
+      return backgroundColor;
 
-      if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-        Vec3 rayClr = RayColor(scattered, world, depth - 1);
-        return attenuation * rayClr;
-      }
+    raytracer::Ray scattered;
+    Vec3           attenuation;
+    Vec3           emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
-      return Vec3::Zero();
-    }
+    if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+      return emitted;
 
-    Vec3 unit_direction = r.direction.Normalize();
-
-    float t = 0.5 * (unit_direction.y + 1.0);
-    Vec3  startColor(1.0, 1.0, 1.0), endColor(0.5, 0.7, 1.0);
-
-    return startColor * (1 - t) + endColor * t;
+    return emitted +
+           attenuation * RayColor(scattered, backgroundColor, world, depth - 1);
   }
 
   void Ray::Trace(std::vector<Pixel> &threadJobs, int jobsStart, int jobsEnd,
@@ -64,7 +59,7 @@ namespace raytracer {
         float          v   = (y + RandomFloat()) / (currScene.imageHeight - 1);
         raytracer::Ray ray = currScene.cam.GetRay(u, v);
         job.color +=
-            raytracer::Ray::RayColor(ray, currScene.world, currScene.maxDepth);
+            raytracer::Ray::RayColor(ray, currScene.backgroundColor, currScene.world, currScene.maxDepth);
       }
 
 #ifdef GAMMA_CORRECTION
@@ -82,6 +77,7 @@ namespace raytracer {
 #endif
       thread_progress = ((float)(i - jobsStart) / (jobsEnd - jobsStart)) * 100;
     }
+
     auto stop = high_resolution_clock::now();
     thread_time =
         duration_cast<std::chrono::milliseconds>(stop - start).count();
