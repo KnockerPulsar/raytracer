@@ -68,16 +68,15 @@ namespace raytracer {
     bool                 hasBox;
     AABB                 bBox;
 
-
     // Since we use this same function with the signs of the sin flipped
     // (for inverse rotation)
     // I added the `opposite` parameter to deal with that.
 
-    // set as true for 
+    // set as true for
     // x = cos*x + sin*z
     // z = -sin*x + cos*z
 
-    // set as false for 
+    // set as false for
     // x = cos*x - sin*z
     // z = sin*x + cos*z
 
@@ -104,25 +103,26 @@ namespace raytracer {
       for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
           for (int k = 0; k < 2; k++) {
-            float x = i * bBox.max.x - (1 - i) * bBox.max.x;
-            float y = j * bBox.max.y - (1 - j) * bBox.max.y;
-            float z = k * bBox.max.z - (1 - k) * bBox.max.z;
+            float x = i * bBox.max.x - (1 - i) * bBox.min.x;
+            float y = j * bBox.max.y - (1 - j) * bBox.min.y;
+            float z = k * bBox.max.z - (1 - k) * bBox.min.z;
 
             auto [newX, _, newZ] = Rotate(Vec3(x, y, z), true);
 
             Vec3 tester(newX, y, newZ);
 
             min.x = fmin(min.x, tester.x);
-            max.x = fmax(min.x, tester.x);
+            max.x = fmax(max.x, tester.x);
 
             min.y = fmin(min.y, tester.y);
-            max.y = fmax(min.y, tester.y);
+            max.y = fmax(max.y, tester.y);
 
             min.z = fmin(min.z, tester.z);
-            max.z = fmax(min.z, tester.z);
+            max.z = fmax(max.z, tester.z);
           }
         }
       }
+      bBox = AABB(min, max);
     }
 
     virtual bool BoundingBox(float t0, float t1,

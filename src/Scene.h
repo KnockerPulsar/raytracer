@@ -14,23 +14,31 @@ namespace raytracer {
     int          maxDepth, imageWidth, imageHeight, samplesPerPixel;
     Vec3         backgroundColor;
 
-    Scene &UpdateRenderData(int maxDepth, int imageWidth, int imageHeight,
-                            int samplesPerPixel);
+    static Scene Scene1(int imageWidth, int imageHeight, int maxDepth,
+                        int samplesPerPixel);
 
-    static Scene Scene1(float aspectRatio);
+    static Scene Scene2(int imageWidth, int imageHeight, int maxDepth,
+                        int samplesPerPixel);
 
-    static Scene Scene2(float aspectRatio);
-    static Scene Random(float aspectRatio, int ballGridWidth = 11,
+    static Scene Random(int imageWidth, int imageHeight, int maxDepth,
+                        int samplesPerPixel, int ballGridWidth = 11,
                         int ballGridHeight = 11);
-    static Scene RandomMovingSpheres(float aspectRatio, int ballGridWidth = 11,
+
+    static Scene RandomMovingSpheres(int imageWidth, int imageHeight,
+                                     int maxDepth, int samplesPerPixel,
+                                     int ballGridWidth  = 11,
                                      int ballGridHeight = 11);
 
-    static Scene TwoSpheres(float aspectRatio);
+    static Scene TwoSpheres(int imageWidth, int imageHeight, int maxDepth,
+                            int samplesPerPixel);
 
-    static Scene Earth(float aspectRatio);
+    static Scene Earth(int imageWidth, int imageHeight, int maxDepth,
+                       int samplesPerPixel);
 
-    static Scene Light(float aspectRatio);
+    static Scene Light(int imageWidth, int imageHeight, int maxDepth,
+                       int samplesPerPixel);
 
-    static Scene CornellBox(float aspectRatio);
+    static Scene CornellBox(int imageWidth, int imageHeight, int maxDepth,
+                            int samplesPerPixel);
   };
 } // namespace raytracer
