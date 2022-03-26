@@ -4,11 +4,11 @@
 
 #include "Box.h"
 #include "Camera.h"
+#include "Dielectric.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "ImageTexture.h"
 #include "Material.h"
-#include "Dielectric.h"
 #include "MovingSphere.h"
 #include "NoiseTexture.h"
 #include "Ray.h"
@@ -537,13 +537,15 @@ namespace raytracer {
                   .samplesPerPixel = settings["num_samples"].get<int>(),
                   .backgroundColor = Vec3::FromJson(settings["background_color"]),
     };
-    
 
-    s.world = HittableList();
+    auto world = HittableList();
     for (auto obj : readScene["objects"]) {
       if (obj["type"].get<string>() == "sphere")
-        s.world.Add(make_shared<Sphere>(obj));
+        world.Add(make_shared<Sphere>(obj));
     }
+
+    auto bvh = HittableList();
+    s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
 
     return s;
   }
