@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AARect.h"
 #include "Box.h"
 #include "Defs.h"
 #include "Ray.h"
@@ -16,6 +17,9 @@ namespace raytracer {
         return std::make_shared<Sphere>(objectJson);
       if(objType == "box")
         return std::make_shared<Box>(objectJson);
+      // XY, XZ, YZ rects
+      if(objType == "xz_rect")
+        return std::make_shared<XZRect>(objectJson);
 
       return nullptr;
     }

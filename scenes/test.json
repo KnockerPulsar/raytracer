@@ -5,9 +5,9 @@
       "y": 600
     },
     "background_color": {
-      "x": 0.01,
-      "y": 0.01,
-      "z": 0.01
+      "x": 0.001,
+      "y": 0.001,
+      "z": 0.001
     },
     "num_samples": 100,
     "max_depth": 100
@@ -40,32 +40,6 @@
     "time1": 1
   },
   "objects": [
-    {
-      "type": "sphere",
-      "pos": {
-        "x": 0,
-        "y": -1005,
-        "z": 0
-      },
-      "radius": 1000,
-      "material": {
-        "type": "diffuse_light",
-        "texture": {
-          "type": "checker",
-          "even": {
-            "x": 0.1,
-            "y": 0.1,
-            "z": 0.1
-          },
-          "odd": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "scale": 0.5
-        }
-      }
-    },
     {
       "type": "sphere",
       "pos": {
@@ -127,8 +101,8 @@
       "type": "box",
       "pos": {
         "x": 0,
-        "y": 3,
-        "z": 0
+        "y": 0,
+        "z": -3
       },
       "extents": {
         "x": 2,
@@ -139,13 +113,44 @@
         "type": "diffuse_light",
         "texture": {
           "type": "noise",
-          "scale": 2,
+          "scale": 4,
           "turb_scale": 10,
-          "base_color" : {
+          "base_color": {
             "x": 0.8,
-            "y": 0.8,
-            "z": 0.3
+            "y": 0.2,
+            "z": 0.8
           }
+        }
+      }
+    },
+    {
+      "type": "xz_rect",
+      "pos": {
+        "x": 0,
+        "y": -5,
+        "z": 0
+      },
+      "extents": {
+        "x": 200,
+        "y": 0,
+        "z": 200
+      },
+      "material": {
+        "type": "metal",
+        "fuzz": 0.1,
+        "texture": {
+          "type": "checker",
+          "even": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.1
+          },
+          "odd": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 2
         }
       }
     }

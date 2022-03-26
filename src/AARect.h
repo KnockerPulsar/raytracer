@@ -1,9 +1,12 @@
 #pragma once
 
 #include "AABB.h"
+#include "Defs.h"
 #include "Hittable.h"
+#include "MaterialFactory.h"
 #include "Vec3.h"
 #include <memory>
+
 namespace raytracer {
   class XYRect : public Hittable {
   public:
@@ -45,6 +48,7 @@ namespace raytracer {
       return true;
     }
   };
+
   class XZRect : public Hittable {
   public:
     std::shared_ptr<Material> mp;
@@ -55,6 +59,21 @@ namespace raytracer {
            shared_ptr<Material> mat)
         : x0(_x0), x1(_x1), z0(_y0), z1(_y1), y(_y), mp(mat) {}
 
+    XZRect(json objectJson) {
+      Vec3 center  = Vec3::FromJson(objectJson["pos"]);
+      Vec3 extents = Vec3::FromJson(objectJson["extents"]);
+      mp           = MaterialFactory::FromJson(objectJson["material"]);
+
+      Vec3 min = center - extents / 2;
+      Vec3 max = center + extents / 2;
+
+      x0 = min.x;
+      x1 = max.x;
+      z0 = min.z;
+      z1 = max.z;
+      y  = center.y;
+    }
+    
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       float t = (y - r.origin.y) / r.direction.y;
