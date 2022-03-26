@@ -5,17 +5,17 @@
       "y": 600
     },
     "background_color": {
-      "x": 0.1,
-      "y": 0.2,
-      "z": 0.3
+      "x": 0.529411765,
+      "y": 0.807843137,
+      "z": 0.921568627
     },
     "num_samples": 10,
     "max_depth": 10
   },
   "camera": {
     "look_from": {
-      "x": 13,
-      "y": 0,
+      "x": 6,
+      "y": 3,
       "z": 0
     },
     "look_at": {
@@ -35,11 +35,38 @@
       "y": 0,
       "z": 0
     },
-    "fov": 20,
+    "fov": 60,
     "time0": 0,
     "time1": 1
   },
   "objects": [
+    {
+      "type": "sphere",
+      "pos": {
+        "x": 0,
+        "y": -1005,
+        "z": 0
+      },
+      "radius": 1000,
+      "material": {
+        "type": "metal",
+        "fuzz" : 0.05,
+        "texture": {
+          "type": "checker",
+          "even": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "odd": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 0.5
+        }
+      }
+    },
     {
       "type": "sphere",
       "pos": {
@@ -63,14 +90,14 @@
     {
       "type": "sphere",
       "pos": {
-        "x": -3  ,
+        "x": -3,
         "y": 0,
         "z": 0
       },
       "radius": 1,
       "material": {
         "type": "metal",
-        "fuzz" : 0.0,
+        "fuzz": 0.0,
         "texture": {
           "type": "solid_color",
           "color": {

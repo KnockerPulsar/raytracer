@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "SolidColor.h"
 #include "Texture.h"
+#include "TextureFactory.h"
 #include <memory>
 
 namespace raytracer {
@@ -18,10 +19,7 @@ namespace raytracer {
 
     Metal(json materialJson) {
       fuzz = materialJson["fuzz"].get<float>();
-      if (materialJson["texture"]["type"].get<std::string>() == "solid_color") {
-        Vec3 color = Vec3::FromJson(materialJson["texture"]["color"]);
-        albedo     = std::make_shared<SolidColor>(color);
-      }
+      albedo = TextureFactory::FromJson(materialJson["texture"]);
     }
 
     bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,

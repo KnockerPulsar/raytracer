@@ -34,7 +34,7 @@ int main() {
   const int   samplesPerPixel = 500;
   const int   maxDepth        = 100;
   bool        fullscreen      = false;
-  bool        showProg        = true;
+  bool        showProg        = false;
   int         incRender       = 1;
 
 

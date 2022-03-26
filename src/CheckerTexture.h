@@ -1,8 +1,10 @@
+#pragma once
 #include "SolidColor.h"
 #include "Vec3.h"
 #include <future>
 #include <memory>
 #include <raylib.h>
+
 namespace raytracer {
   class CheckerTexture : public Texture {
   private:

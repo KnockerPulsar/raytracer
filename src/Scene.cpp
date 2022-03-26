@@ -8,6 +8,7 @@
 #include "HittableList.h"
 #include "ImageTexture.h"
 #include "Material.h"
+#include "Dielectric.h"
 #include "MovingSphere.h"
 #include "NoiseTexture.h"
 #include "Ray.h"

@@ -2,6 +2,7 @@
 #include "Defs.h"
 #include "Hittable.h"
 #include "Material.h"
+#include "TextureFactory.h"
 
 using nlohmann::json;
 
@@ -20,10 +21,7 @@ namespace raytracer {
     Lambertian(const sPtr<Lambertian> &l) : albedo(l->albedo) {}
 
     Lambertian(json materialJson) {
-      if (materialJson["texture"]["type"].get<std::string>() == "solid_color") {
-        Vec3 color = Vec3::FromJson(materialJson["texture"]["color"]);
-        albedo     = std::make_shared<SolidColor>(color);
-      }
+      albedo = TextureFactory::FromJson(materialJson["texture"]);
     }
 
     virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
