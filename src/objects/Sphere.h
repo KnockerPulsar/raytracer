@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AABB.h"
-#include "Hittable.h"
-#include "MaterialFactory.h"
-#include "Ray.h"
-#include "Vec3.h"
+#include "../AABB.h"
+#include "../Hittable.h"
+#include "../Ray.h"
+#include "../data_structures/Vec3.h"
+#include "../materials/Material.h"
+#include "../materials/MaterialFactory.h"
 #include <cmath>
 #include <raylib.h>
-#include "Material.h"
 
 namespace raytracer {
 
@@ -20,9 +20,9 @@ namespace raytracer {
     Sphere(float r, Vec3 pos, shared_ptr<Material> m)
         : radius(r), center(pos), mat_ptr(m) {}
 
-    Sphere(nlohmann::json sphereJson){
-      center = Vec3::FromJson(sphereJson["pos"]);
-      radius = sphereJson["radius"].get<float>();
+    Sphere(nlohmann::json sphereJson) {
+      center  = Vec3::FromJson(sphereJson["pos"]);
+      radius  = sphereJson["radius"].get<float>();
       mat_ptr = MaterialFactory::FromJson(sphereJson["material"]);
     }
 

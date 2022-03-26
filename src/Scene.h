@@ -1,9 +1,9 @@
 #pragma once
-#include "Camera.h"
-#include "CheckerTexture.h"
-#include "HittableList.h"
-#include "Material.h"
 #include "../vendor/nlohmann-json/json.hpp"
+#include "Camera.h"
+#include "HittableList.h"
+#include "materials/Material.h"
+#include "textures/CheckerTexture.h"
 
 namespace raytracer {
 

@@ -1,22 +1,22 @@
 #include "Scene.h"
 #include "AABB.h"
-#include "AARect.h"
 #include "BVHNode.h"
+#include "objects/AARect.h"
 
-#include "Box.h"
 #include "Camera.h"
-#include "Dielectric.h"
 #include "Hittable.h"
 #include "HittableList.h"
-#include "ImageTexture.h"
-#include "Material.h"
-#include "MovingSphere.h"
-#include "NoiseTexture.h"
-#include "ObjectFactory.h"
 #include "Ray.h"
-#include "Sphere.h"
 #include "Util.h"
-#include "Vec3.h"
+#include "data_structures/Vec3.h"
+#include "materials/Dielectric.h"
+#include "materials/Material.h"
+#include "objects/Box.h"
+#include "objects/MovingSphere.h"
+#include "objects/ObjectFactory.h"
+#include "objects/Sphere.h"
+#include "textures/ImageTexture.h"
+#include "textures/NoiseTexture.h"
 #include <bits/types/FILE.h>
 #include <fstream>
 #include <memory>
@@ -541,15 +541,14 @@ namespace raytracer {
     };
 
     auto world = HittableList();
-    for (const auto& obj : readScene["objects"]) {
+    for (const auto &obj : readScene["objects"]) {
       world.Add(ObjectFactory::FromJson(obj));
     }
 
     auto bvh = HittableList();
     s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
 
-    for(HittableList o : bvh.objects)
-    {
+    for (HittableList o : bvh.objects) {
       for (auto oo : o.objects) {
         std::cout << "AA";
       }
@@ -558,4 +557,4 @@ namespace raytracer {
     return s;
   }
 
-} // namespace raytracer 
+} // namespace raytracer

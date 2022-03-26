@@ -1,6 +1,6 @@
 #pragma once
 #include "Ray.h"
-#include "Vec3.h"
+#include "data_structures/Vec3.h"
 
 namespace raytracer {
   class Camera {

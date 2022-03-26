@@ -1,7 +1,7 @@
 #pragma once
-#include "Perlin.h"
+#include "../Perlin.h"
 #include "Texture.h"
-#include "Vec3.h"
+#include "../data_structures/Vec3.h"
 #include <raylib.h>
 
 namespace raytracer {

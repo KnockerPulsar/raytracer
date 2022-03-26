@@ -1,10 +1,10 @@
 #pragma once
-#include "Defs.h"
-#include "Hittable.h"
-#include "SolidColor.h"
-#include "Texture.h"
+#include "../Defs.h"
+#include "../Hittable.h"
+#include "../textures/SolidColor.h"
+#include "../textures/Texture.h"
+#include "../textures/TextureFactory.h"
 #include "Material.h"
-#include "TextureFactory.h"
 
 
 namespace raytracer {

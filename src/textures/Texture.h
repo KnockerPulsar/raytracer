@@ -1,7 +1,6 @@
 #pragma once
 #include <raylib.h>
-#include "Vec3.h"
-#include "Clr.h"
+#include "../data_structures/Vec3.h"
 
 namespace raytracer {
   class Texture {

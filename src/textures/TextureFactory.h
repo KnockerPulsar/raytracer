@@ -1,11 +1,11 @@
 #pragma once
+#include "../Defs.h"
 #include "CheckerTexture.h"
-#include "Defs.h"
 #include "ImageTexture.h"
 #include "NoiseTexture.h"
 #include "SolidColor.h"
 #include "Texture.h"
-#include "Vec3.h"
+#include "../data_structures/Vec3.h"
 #include <memory>
 #include <raylib.h>
 
@@ -34,8 +34,8 @@ namespace raytracer {
       }
 
       if (texType == "noise") {
-        float scale     = textureJson["scale"].get<float>();
-        float turbScale = textureJson["turb_scale"].get<float>();
+        float   scale     = textureJson["scale"].get<float>();
+        float   turbScale = textureJson["turb_scale"].get<float>();
         Vector3 baseColor = Vec3::FromJson(textureJson["base_color"]);
         return std::make_shared<NoiseTexture>(scale, turbScale, baseColor);
       }

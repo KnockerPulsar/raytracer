@@ -1,10 +1,10 @@
 #pragma once
 
-#include "AARect.h"
-#include "Box.h"
-#include "Defs.h"
-#include "Ray.h"
-#include "Sphere.h"
+#include "../Defs.h"
+#include "../Ray.h"
+#include "../objects/AARect.h"
+#include "../objects/Box.h"
+#include "../objects/Sphere.h"
 #include <memory>
 
 namespace raytracer {
@@ -12,13 +12,13 @@ namespace raytracer {
   public:
     static sPtr<Hittable> FromJson(nlohmann::json objectJson) {
       string objType = objectJson["type"].get<string>();
-      
+
       if (objType == "sphere")
         return std::make_shared<Sphere>(objectJson);
-      if(objType == "box")
+      if (objType == "box")
         return std::make_shared<Box>(objectJson);
       // XY, XZ, YZ rects
-      if(objType == "xz_rect")
+      if (objType == "xz_rect")
         return std::make_shared<XZRect>(objectJson);
 
       return nullptr;

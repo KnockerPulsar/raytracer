@@ -2,9 +2,9 @@
 #include "Camera.h"
 #include "Hittable.h"
 #include "HittableList.h"
-#include "Material.h"
-#include "Pixel.h"
 #include "Scene.h"
+#include "data_structures/Pixel.h"
+#include "materials/Material.h"
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -58,8 +58,10 @@ namespace raytracer {
         float          u   = (x + RandomFloat()) / (currScene.imageWidth - 1);
         float          v   = (y + RandomFloat()) / (currScene.imageHeight - 1);
         raytracer::Ray ray = currScene.cam.GetRay(u, v);
-        job.color +=
-            raytracer::Ray::RayColor(ray, currScene.backgroundColor, currScene.world, currScene.maxDepth);
+        job.color += raytracer::Ray::RayColor(ray,
+                                              currScene.backgroundColor,
+                                              currScene.world,
+                                              currScene.maxDepth);
       }
 
 #ifdef GAMMA_CORRECTION

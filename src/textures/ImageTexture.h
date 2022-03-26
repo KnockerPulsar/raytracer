@@ -1,5 +1,5 @@
 #pragma once
-#include "Perlin.h"
+#include "../Perlin.h"
 #include "Texture.h"
 #include <iostream>
 #include <raylib.h>

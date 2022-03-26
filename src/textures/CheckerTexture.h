@@ -1,6 +1,6 @@
 #pragma once
 #include "SolidColor.h"
-#include "Vec3.h"
+#include "../data_structures/Vec3.h"
 #include <future>
 #include <memory>
 #include <raylib.h>

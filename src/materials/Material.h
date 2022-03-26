@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Hittable.h"
-#include "SolidColor.h"
-#include "Texture.h"
+#include "../Hittable.h"
+#include "../textures/SolidColor.h"
+#include "../textures/Texture.h"
 #include <memory>
 
 namespace raytracer {

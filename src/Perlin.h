@@ -1,6 +1,6 @@
 #pragma once
 #include "Util.h"
-#include "Vec3.h"
+#include "data_structures/Vec3.h"
 #include <cmath>
 #include <type_traits>
 namespace raytracer {

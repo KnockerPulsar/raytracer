@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "Pixel.h"
+#include "data_structures/Pixel.h"
 #include "Scene.h"
 #include <future>
 #include <raylib.h>

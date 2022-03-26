@@ -1,8 +1,8 @@
 #pragma once
-#include "Defs.h"
-#include "Hittable.h"
+#include "../Defs.h"
+#include "../Hittable.h"
+#include "../textures/TextureFactory.h"
 #include "Material.h"
-#include "TextureFactory.h"
 
 using nlohmann::json;
 

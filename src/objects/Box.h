@@ -1,10 +1,10 @@
 #pragma once
 
 #include "AARect.h"
-#include "HittableList.h"
-#include "MaterialFactory.h"
-#include "Ray.h"
-#include "Vec3.h"
+#include "../HittableList.h"
+#include "../materials/MaterialFactory.h"
+#include "../Ray.h"
+#include "../data_structures/Vec3.h"
 #include <memory>
 
 using std::make_shared;

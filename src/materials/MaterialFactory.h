@@ -1,4 +1,5 @@
 #pragma once
+#include "../../vendor/nlohmann-json/json.hpp"
 #include "Dielectric.h"
 #include "DiffuseLight.h"
 #include "Lambertian.h"

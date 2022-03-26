@@ -1,10 +1,11 @@
 #pragma once
 
-#include "AABB.h"
-#include "Defs.h"
-#include "Hittable.h"
-#include "MaterialFactory.h"
-#include "Vec3.h"
+#include "../../vendor/nlohmann-json/json.hpp"
+#include "../AABB.h"
+#include "../Defs.h"
+#include "../Hittable.h"
+#include "../data_structures/Vec3.h"
+#include "../materials/MaterialFactory.h"
 #include <memory>
 
 namespace raytracer {
@@ -73,7 +74,7 @@ namespace raytracer {
       z1 = max.z;
       y  = center.y;
     }
-    
+
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       float t = (y - r.origin.y) / r.direction.y;

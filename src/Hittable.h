@@ -4,7 +4,7 @@
 #include "Constants.h"
 #include "Ray.h"
 #include "Util.h"
-#include "Vec3.h"
+#include "data_structures/Vec3.h"
 #include <cmath>
 #include <memory>
 using std::shared_ptr;

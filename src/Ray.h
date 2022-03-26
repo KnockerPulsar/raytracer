@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Vec3.h"
-#include <atomic>
+#include "data_structures/Vec3.h"
 
 namespace raytracer {
 

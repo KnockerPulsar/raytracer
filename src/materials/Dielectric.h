@@ -1,10 +1,10 @@
 #pragma once
-#include "Defs.h"
+#include "../Defs.h"
 #include "Material.h"
-#include "SolidColor.h"
-#include "Texture.h"
-#include "TextureFactory.h"
-#include "Vec3.h"
+#include "../textures/SolidColor.h"
+#include "../textures/Texture.h"
+#include "../textures/TextureFactory.h"
+#include "../data_structures/Vec3.h"
 #include <memory>
 
 namespace raytracer {
@@ -19,10 +19,10 @@ namespace raytracer {
 
     Dielectric(float refIdx, sPtr<Texture> tex)
         : refractionIndex(refIdx), albedo(tex) {}
-      
-    Dielectric(json materialJson){
+
+    Dielectric(json materialJson) {
       refractionIndex = materialJson["refraction_index"].get<float>();
-      albedo = TextureFactory::FromJson(materialJson["texture"]);
+      albedo          = TextureFactory::FromJson(materialJson["texture"]);
     }
 
     virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,

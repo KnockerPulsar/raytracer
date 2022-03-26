@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Util.h"
+#include "../Util.h"
 #include <raylib.h>
 #include <raymath.h>
-#include "../vendor/nlohmann-json/json.hpp"
+#include "../../vendor/nlohmann-json/json.hpp"
 
 
 class Vec3 : public Vector3 {

@@ -19,15 +19,14 @@
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
-#include "Clr.h"
 #include "Constants.h"
-#include "Pixel.h"
 #include "Ray.h"
 #include "Scene.h"
+#include "data_structures/Pixel.h"
 
 using std::pair, std::future, std::vector, std::async;
 
-using raytracer::Hittable, raytracer::Clr, raytracer::Pixel;
+using raytracer::Hittable, raytracer::Pixel;
 
 using std::string, std::vector, std::chrono::high_resolution_clock,
     std::chrono::duration_cast, std::chrono::milliseconds, std::pair,
@@ -75,7 +74,8 @@ namespace raytracer {
     //                                          gridHeight);
     // else if (sceneID == SceneID::two_spheres)
     //   currScene =
-    //       Scene::TwoSpheres(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    //       Scene::TwoSpheres(imageWidth, imageHeight, maxDepth,
+    //       samplesPerPixel);
     // else if (sceneID == SceneID::earth)
     //   currScene =
     //       Scene::Earth(imageWidth, imageHeight, maxDepth, samplesPerPixel);
@@ -84,7 +84,8 @@ namespace raytracer {
     //       Scene::Light(imageWidth, imageHeight, maxDepth, samplesPerPixel);
     // else if (sceneID == SceneID::cornell) {
     //   currScene =
-    //       Scene::CornellBox(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    //       Scene::CornellBox(imageWidth, imageHeight, maxDepth,
+    //       samplesPerPixel);
     // }
 
     vector<future<void>> threads;
@@ -143,10 +144,10 @@ namespace raytracer {
       Pixel &pixel = pixelJobs[i];
 
       // Clamp r, g, and b to prevent underflows and artifacts
-      
-      Clr clr = Clr::FromFloat(Clamp(pixel.color.x, 0, 1),
-                               Clamp(pixel.color.y, 0, 1),
-                               Clamp(pixel.color.z, 0, 1));
+
+      Color clr = ColorFromFloats(Clamp(pixel.color.x, 0, 1),
+                                  Clamp(pixel.color.y, 0, 1),
+                                  Clamp(pixel.color.z, 0, 1));
 
       pixel.color = Vec3::Zero();
 

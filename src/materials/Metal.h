@@ -1,9 +1,9 @@
 #pragma once
-#include "Defs.h"
-#include "Material.h"
-#include "SolidColor.h"
-#include "Texture.h"
-#include "TextureFactory.h"
+#include "../Defs.h"
+#include "../materials/Material.h"
+#include "../textures/SolidColor.h"
+#include "../textures/Texture.h"
+#include "../textures/TextureFactory.h"
 #include <memory>
 
 namespace raytracer {
@@ -18,7 +18,7 @@ namespace raytracer {
     Metal(sPtr<Texture> tex) : albedo(tex) {}
 
     Metal(json materialJson) {
-      fuzz = materialJson["fuzz"].get<float>();
+      fuzz   = materialJson["fuzz"].get<float>();
       albedo = TextureFactory::FromJson(materialJson["texture"]);
     }
 
