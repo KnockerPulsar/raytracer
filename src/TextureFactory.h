@@ -1,11 +1,13 @@
 #pragma once
+#include "CheckerTexture.h"
 #include "Defs.h"
 #include "ImageTexture.h"
+#include "NoiseTexture.h"
 #include "SolidColor.h"
 #include "Texture.h"
-#include "CheckerTexture.h"
 #include "Vec3.h"
 #include <memory>
+#include <raylib.h>
 
 namespace raytracer {
   class TextureFactory {
@@ -19,18 +21,23 @@ namespace raytracer {
         return std::make_shared<SolidColor>(color);
       }
 
-      if(texType == "checker")
-      {
+      if (texType == "checker") {
         float scale = textureJson["scale"].get<float>();
-        Vec3 even = Vec3::FromJson(textureJson["even"]);
-        Vec3 odd = Vec3::FromJson(textureJson["odd"]);
-        return std::make_shared<CheckerTexture>(even,odd, scale);
+        Vec3  even  = Vec3::FromJson(textureJson["even"]);
+        Vec3  odd   = Vec3::FromJson(textureJson["odd"]);
+        return std::make_shared<CheckerTexture>(even, odd, scale);
       }
 
-      if(texType == "image")
-      {
+      if (texType == "image") {
         string path = textureJson["path"];
         return std::make_shared<ImageTexture>(path.c_str());
+      }
+
+      if (texType == "noise") {
+        float scale     = textureJson["scale"].get<float>();
+        float turbScale = textureJson["turb_scale"].get<float>();
+        Vector3 baseColor = Vec3::FromJson(textureJson["base_color"]);
+        return std::make_shared<NoiseTexture>(scale, turbScale, baseColor);
       }
 
       return nullptr;

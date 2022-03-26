@@ -406,7 +406,7 @@ namespace raytracer {
                0.0,
                1.0);
 
-    auto perText   = make_shared<NoiseTexture>(4);
+    auto perText   = make_shared<NoiseTexture>(4.0f);
     auto diffLight = make_shared<DiffuseLight>(Vec3(4, 4, 4));
 
     world.Add(make_shared<Sphere>(
@@ -463,7 +463,7 @@ namespace raytracer {
     auto light      = make_shared<DiffuseLight>(Vec3(2, 2, 2));
     auto metal      = make_shared<Metal>(Vec3(0.8, 0.1, 0.8), 0.7);
     auto dielectric = make_shared<Dielectric>(1.5f);
-    auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1));
+    auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
     auto checker    = std::make_shared<CheckerTexture>(
         Vec3(0.2, 0.3, 0.1), Vec3(10, 3.0, 10), 0.2f);
 

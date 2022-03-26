@@ -138,11 +138,13 @@
       "material": {
         "type": "diffuse_light",
         "texture": {
-          "type": "solid_color",
-          "color": {
-            "x": 5,
-            "y": 5,
-            "z": 5
+          "type": "noise",
+          "scale": 2,
+          "turb_scale": 10,
+          "base_color" : {
+            "x": 0.8,
+            "y": 0.8,
+            "z": 0.3
           }
         }
       }
