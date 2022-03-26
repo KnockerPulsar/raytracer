@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "AABB.h"
 #include "AARect.h"
 #include "BVHNode.h"
 
@@ -11,6 +12,7 @@
 #include "Material.h"
 #include "MovingSphere.h"
 #include "NoiseTexture.h"
+#include "ObjectFactory.h"
 #include "Ray.h"
 #include "Sphere.h"
 #include "Util.h"
@@ -539,15 +541,21 @@ namespace raytracer {
     };
 
     auto world = HittableList();
-    for (auto obj : readScene["objects"]) {
-      if (obj["type"].get<string>() == "sphere")
-        world.Add(make_shared<Sphere>(obj));
+    for (const auto& obj : readScene["objects"]) {
+      world.Add(ObjectFactory::FromJson(obj));
     }
 
     auto bvh = HittableList();
     s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
 
+    for(HittableList o : bvh.objects)
+    {
+      for (auto oo : o.objects) {
+        std::cout << "AA";
+      }
+    }
+
     return s;
   }
 
-} // namespace raytracer
+} // namespace raytracer 

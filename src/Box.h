@@ -2,7 +2,9 @@
 
 #include "AARect.h"
 #include "HittableList.h"
+#include "MaterialFactory.h"
 #include "Ray.h"
+#include "Vec3.h"
 #include <memory>
 
 using std::make_shared;
@@ -28,8 +30,20 @@ namespace raytracer {
       sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
     }
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override{
-      outputBox = AABB(boxMin,boxMax);
+    Box(nlohmann::json objectJson) {
+      auto mat     = MaterialFactory::FromJson(objectJson["material"]);
+      auto center  = Vec3::FromJson(objectJson["pos"]);
+      auto extents = Vec3::FromJson(objectJson["extents"]);
+
+      auto min = center - extents / 2;
+      auto max = center + extents / 2;
+      
+      *this    = Box(min, max, mat);
+    }
+
+    virtual bool BoundingBox(float t0, float t1,
+                             AABB &outputBox) const override {
+      outputBox = AABB(boxMin, boxMax);
       return true;
     }
 

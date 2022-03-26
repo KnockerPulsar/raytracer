@@ -55,37 +55,37 @@ namespace raytracer {
     RenderTexture2D screenBuffer = LoadRenderTexture(imageWidth, imageHeight);
     RenderTexture2D incBuffer    = LoadRenderTexture(imageWidth, imageHeight);
 
-    Scene currScene;
+    // Scene currScene;
 
-    if (sceneID == SceneID::scene1)
-      currScene =
-          Scene::Scene1(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::scene2)
-      currScene =
-          Scene::Scene2(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::random)
-      currScene =
-          Scene::Random(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::random_moving)
-      currScene = Scene::RandomMovingSpheres(imageWidth,
-                                             imageHeight,
-                                             maxDepth,
-                                             samplesPerPixel,
-                                             gridWidth,
-                                             gridHeight);
-    else if (sceneID == SceneID::two_spheres)
-      currScene =
-          Scene::TwoSpheres(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::earth)
-      currScene =
-          Scene::Earth(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::light)
-      currScene =
-          Scene::Light(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::cornell) {
-      currScene =
-          Scene::CornellBox(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    }
+    // if (sceneID == SceneID::scene1)
+    //   currScene =
+    //       Scene::Scene1(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::scene2)
+    //   currScene =
+    //       Scene::Scene2(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::random)
+    //   currScene =
+    //       Scene::Random(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::random_moving)
+    //   currScene = Scene::RandomMovingSpheres(imageWidth,
+    //                                          imageHeight,
+    //                                          maxDepth,
+    //                                          samplesPerPixel,
+    //                                          gridWidth,
+    //                                          gridHeight);
+    // else if (sceneID == SceneID::two_spheres)
+    //   currScene =
+    //       Scene::TwoSpheres(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::earth)
+    //   currScene =
+    //       Scene::Earth(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::light)
+    //   currScene =
+    //       Scene::Light(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::cornell) {
+    //   currScene =
+    //       Scene::CornellBox(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // }
 
     vector<future<void>> threads;
     vector<int>          threadProgress(NUM_THREADS, 0);
@@ -105,7 +105,7 @@ namespace raytracer {
     return (AsyncRenderData){pixelJobs,
                              // Must move since futures can only have one owner
                              std::move(threads),
-                             currScene,
+                             Scene(),
                              threadTimes,
                              threadProgress,
                              threadShouldRun,
