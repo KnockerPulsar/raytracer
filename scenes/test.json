@@ -50,7 +50,7 @@
       "radius": 1000,
       "material": {
         "type": "metal",
-        "fuzz" : 0.05,
+        "fuzz": 0.05,
         "texture": {
           "type": "checker",
           "even": {
@@ -105,6 +105,22 @@
             "y": 0.7,
             "z": 0.5
           }
+        }
+      }
+    },
+    {
+      "type": "sphere",
+      "pos": {
+        "x": 3,
+        "y": 0,
+        "z": 0
+      },
+      "radius": 1,
+      "material": {
+        "type": "lambertian",
+        "texture": {
+          "type": "image",
+          "path": "earthmap.png"
         }
       }
     }

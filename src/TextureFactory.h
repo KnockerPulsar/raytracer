@@ -1,5 +1,6 @@
 #pragma once
 #include "Defs.h"
+#include "ImageTexture.h"
 #include "SolidColor.h"
 #include "Texture.h"
 #include "CheckerTexture.h"
@@ -24,6 +25,12 @@ namespace raytracer {
         Vec3 even = Vec3::FromJson(textureJson["even"]);
         Vec3 odd = Vec3::FromJson(textureJson["odd"]);
         return std::make_shared<CheckerTexture>(even,odd, scale);
+      }
+
+      if(texType == "image")
+      {
+        string path = textureJson["path"];
+        return std::make_shared<ImageTexture>(path.c_str());
       }
 
       return nullptr;
