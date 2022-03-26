@@ -1,19 +1,29 @@
 #pragma once
+#include "../data_structures/vec3.h"
 #include "Texture.h"
-#include "../data_structures/Vec3.h"
 #include <raylib.h>
 
-namespace raytracer {
+namespace rt {
   class SolidColor : public Texture {
   public:
+    vec3 color;
+
     SolidColor() = default;
-    SolidColor(Vec3 c) : colVal(c) {}
+    SolidColor(vec3 c) : color(c) {}
 
-    SolidColor(float r, float g, float b) : colVal(r,g,b) {}
+    SolidColor(float r, float g, float b) : color(r, g, b) {}
 
-    virtual Vec3 Value(float u, float v, const Vec3 &p) const override { return colVal; }
+    virtual json GetJson() const override {
+      return json{{"type", "solid_color"}, {"color", color}};
+    }
+    virtual void GetTexture(const json &j) override {
+      color = j["color"].get<vec3>();
+    }
 
-  private:
-    Vec3 colVal;
+    virtual vec3 Value(float u, float v, const vec3 &p) const override {
+      return color;
+    }
   };
-} // namespace raytracer
+
+  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SolidColor, color);
+} // namespace rt

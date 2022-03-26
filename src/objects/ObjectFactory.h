@@ -7,7 +7,7 @@
 #include "../objects/Sphere.h"
 #include <memory>
 
-namespace raytracer {
+namespace rt {
   class ObjectFactory {
   public:
     static sPtr<Hittable> FromJson(nlohmann::json objectJson) {
@@ -15,8 +15,10 @@ namespace raytracer {
 
       if (objType == "sphere")
         return std::make_shared<Sphere>(objectJson);
-      if (objType == "box")
-        return std::make_shared<Box>(objectJson);
+      if (objType == "box") {
+        Box b = objectJson.get<Box>();
+        return std::make_shared<Box>(b);
+      }
       // XY, XZ, YZ rects
       if (objType == "xz_rect")
         return std::make_shared<XZRect>(objectJson);
@@ -24,4 +26,4 @@ namespace raytracer {
       return nullptr;
     }
   };
-} // namespace raytracer
+} // namespace rt

@@ -1,22 +1,29 @@
 #pragma once
 
-#include "AARect.h"
 #include "../HittableList.h"
-#include "../materials/MaterialFactory.h"
 #include "../Ray.h"
-#include "../data_structures/Vec3.h"
+#include "../data_structures/vec3.h"
+#include "../materials/MaterialFactory.h"
+#include "AARect.h"
 #include <memory>
 
 using std::make_shared;
 
-namespace raytracer {
+namespace rt {
   class Box : public Hittable {
+
   public:
-    Vec3         boxMin, boxMax;
-    HittableList sides;
+    vec3           boxMin, boxMax;
+    sPtr<Material> material;
+    HittableList   sides;
 
     Box() = default;
-    Box(const Vec3 &p0, const Vec3 &p1, std::shared_ptr<Material> mat) {
+    Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
+      Create(p0, p1, mat);
+    }
+
+    // To work around not being able to use constructors with references
+    void Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
       boxMin = p0;
       boxMax = p1;
 
@@ -30,17 +37,6 @@ namespace raytracer {
       sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
     }
 
-    Box(nlohmann::json objectJson) {
-      auto mat     = MaterialFactory::FromJson(objectJson["material"]);
-      auto center  = Vec3::FromJson(objectJson["pos"]);
-      auto extents = Vec3::FromJson(objectJson["extents"]);
-
-      auto min = center - extents / 2;
-      auto max = center + extents / 2;
-      
-      *this    = Box(min, max, mat);
-    }
-
     virtual bool BoundingBox(float t0, float t1,
                              AABB &outputBox) const override {
       outputBox = AABB(boxMin, boxMax);
@@ -52,4 +48,22 @@ namespace raytracer {
       return sides.Hit(r, t_min, t_max, rec);
     }
   };
-} // namespace raytracer
+
+  // This is how you use `json.get<Box>()`
+  inline void from_json(const json &objectJson, Box &b) {
+    auto center  = objectJson["pos"].get<vec3>();
+    auto extents = objectJson["extents"].get<vec3>();
+
+    auto min = center - extents / 2;
+    auto max = center + extents / 2;
+    auto mat = MaterialFactory::FromJson(objectJson["material"]);
+
+    b.Create(min, max, mat);
+  }
+
+  inline void to_json(json &j, const Box &b) {
+    j = json{{"pos", (b.boxMin + b.boxMax) / 2},
+             {"extents", b.boxMax - b.boxMin},
+             {"material", b.material->GetJson()}};
+  }
+} // namespace rt

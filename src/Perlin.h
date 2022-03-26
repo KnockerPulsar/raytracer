@@ -1,17 +1,17 @@
 #pragma once
 #include "Util.h"
-#include "data_structures/Vec3.h"
+#include "data_structures/vec3.h"
 #include <cmath>
 #include <type_traits>
-namespace raytracer {
+namespace rt {
   class Perlin {
   public:
     Perlin() {
 
-      ranVec = new Vec3[pointCount];
+      ranVec = new vec3[pointCount];
 
       for (int i = 0; i < pointCount; ++i) {
-        ranVec[i] = Vec3::Random(-1, 1).Normalize();
+        ranVec[i] = vec3::Random(-1, 1).Normalize();
       }
 
       permX = PerlinGeneratePerm();
@@ -26,7 +26,7 @@ namespace raytracer {
       delete[] permZ;
     }
 
-    float Noise(const Vec3 &p) const {
+    float Noise(const vec3 &p) const {
 
       // Gets the fractional value of each coordinate
       float u = p.x - floor(p.x);
@@ -38,25 +38,26 @@ namespace raytracer {
       int j = floor(p.y);
       int k = floor(p.z);
 
-      Vec3 c[2][2][2];
+      vec3 c[2][2][2];
 
       for (int di = 0; di < 2; di++) {
         for (int dj = 0; dj < 2; dj++) {
           for (int dk = 0; dk < 2; dk++) {
             // Hashing???
 
-            c[di][dj][dk] =
+            vec3 hashedVal =
                 ranVec[permX[(i + di) & 255] ^ permY[(j + dj) & 255] ^
                        permZ[(k + dk) & 255]];
+            c[di][dj][dk] = hashedVal;
           }
         }
       }
       return PerlinInterp(c, u, v, w);
     }
 
-    float Turb(const Vec3 &p, int depth = 7) const {
+    float Turb(const vec3 &p, int depth = 7) const {
       float accum  = 0.0f;
-      Vec3  tempP  = p;
+      vec3  tempP  = p;
       float weight = 1.0f;
 
       for (int i = 0; i < depth; i++) {
@@ -70,7 +71,7 @@ namespace raytracer {
 
   private:
     static const int pointCount = 256;
-    Vec3            *ranVec;
+    vec3            *ranVec;
     int             *permX;
     int             *permY;
     int             *permZ;
@@ -91,9 +92,9 @@ namespace raytracer {
       }
     }
 
-    // u,v,w are the fractional part of a Vec3's x,y,z coordinates
+    // u,v,w are the fractional part of a vec3's x,y,z coordinates
     // c is a 3D matrix of (random?) values
-    static float PerlinInterp(Vec3 c[2][2][2], float u, float v, float w) {
+    static float PerlinInterp(vec3 c[2][2][2], float u, float v, float w) {
 
       float uu    = u * u * (3 - 2 * u);
       float vv    = v * v * (3 - 2 * v);
@@ -103,18 +104,18 @@ namespace raytracer {
       for (int i = 0; i < 2; i++)
         for (int j = 0; j < 2; j++)
           for (int k = 0; k < 2; k++) {
-            Vec3 weightV(u - i, v - j, w - k);
+            vec3 weightV(u - i, v - j, w - k);
 
             // clang-format off
             // This looks like interpolation...
             accum +=  (i * u + (1 - i) * (1 - u)) 
                     * (j * v + (1 - j) * (1 - v)) 
                     * (k * w + (1 - k) * (1 - w)) 
-                    * Vec3::DotProd(c[i][j][k], weightV);
+                    * vec3::DotProd(c[i][j][k], weightV);
 
             // clang-format on
           }
       return accum;
     }
   };
-} // namespace raytracer
+} // namespace rt

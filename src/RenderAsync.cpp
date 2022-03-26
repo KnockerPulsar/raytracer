@@ -26,14 +26,14 @@
 
 using std::pair, std::future, std::vector, std::async;
 
-using raytracer::Hittable, raytracer::Pixel;
+using rt::Hittable, rt::Pixel;
 
 using std::string, std::vector, std::chrono::high_resolution_clock,
     std::chrono::duration_cast, std::chrono::milliseconds, std::pair,
     std::future, std::future, std::async, std::ref, std::make_pair, std::launch,
     std::future, std::async, std::ref, std::make_pair, std::launch;
 
-namespace raytracer {
+namespace rt {
   pair<int, int> RenderAsync::GetThreadJobSlice(int totalJobs, int t) {
     int jobsStart = t * totalJobs / NUM_THREADS;
     int jobsEnd   = (t + 1) * totalJobs / NUM_THREADS;
@@ -94,12 +94,12 @@ namespace raytracer {
     vector<int>          threadShouldRun(NUM_THREADS, 1); // Used to exit early
     vector<bool>         finishedThreads(NUM_THREADS, false);
     vector<Pixel>        pixelJobs =
-        vector(imageWidth * imageHeight, Pixel{0, 0, Vec3::Zero()});
+        vector(imageWidth * imageHeight, Pixel{0, 0, vec3::Zero()});
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {
       for (int x = 0; x < imageWidth; x++) {
-        pixelJobs[x + imageWidth * y] = Pixel{x, y, Vec3::Zero()};
+        pixelJobs[x + imageWidth * y] = Pixel{x, y, vec3::Zero()};
       }
     }
 
@@ -124,7 +124,7 @@ namespace raytracer {
       auto [jobsStart, jobsEnd] = GetThreadJobSlice(ard.pixelJobs.size(), t);
 
       ard.threads.push_back(async(launch::async,
-                                  raytracer::Ray::Trace,
+                                  rt::Ray::Trace,
                                   ref(ard.pixelJobs),
                                   jobsStart,
                                   jobsEnd,
@@ -149,7 +149,7 @@ namespace raytracer {
                                   Clamp(pixel.color.y, 0, 1),
                                   Clamp(pixel.color.z, 0, 1));
 
-      pixel.color = Vec3::Zero();
+      pixel.color = vec3::Zero();
 
       DrawPixel(pixel.x, pixel.y, clr);
     }
@@ -296,4 +296,4 @@ namespace raytracer {
     }
     }
   }
-} // namespace raytracer
+} // namespace rt

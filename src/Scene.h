@@ -5,7 +5,7 @@
 #include "materials/Material.h"
 #include "textures/CheckerTexture.h"
 
-namespace raytracer {
+namespace rt {
 
   class Scene {
 
@@ -13,7 +13,7 @@ namespace raytracer {
     HittableList world;
     Camera       cam;
     int          maxDepth, imageWidth, imageHeight, samplesPerPixel;
-    Vec3         backgroundColor;
+    vec3         backgroundColor;
 
     static Scene Scene1(int imageWidth, int imageHeight, int maxDepth,
                         int samplesPerPixel);
@@ -43,5 +43,7 @@ namespace raytracer {
                             int samplesPerPixel);
 
     static Scene Load(std::string path);
+
+    // static json Save(std::string path);
   };
-} // namespace raytracer
+} // namespace rt

@@ -4,11 +4,11 @@
 #include "../AABB.h"
 #include "../Defs.h"
 #include "../Hittable.h"
-#include "../data_structures/Vec3.h"
+#include "../data_structures/vec3.h"
 #include "../materials/MaterialFactory.h"
 #include <memory>
 
-namespace raytracer {
+namespace rt {
   class XYRect : public Hittable {
   public:
     std::shared_ptr<Material> mp;
@@ -35,17 +35,17 @@ namespace raytracer {
       rec.v = (y - y0) / (y - y1);
       rec.t = t;
 
-      Vec3 outwardNormal = Vec3(0, 0, 1);
+      vec3 outwardNormal = vec3(0, 0, 1);
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
-      rec.p       = Vec3(x, y, z);
+      rec.p       = vec3(x, y, z);
       return true;
     }
 
     virtual bool BoundingBox(float t0, float t1,
                              AABB &outputBox) const override {
       // Add some padding to the thin dimension to prevent issues
-      outputBox = AABB(Vec3(x0, y0, z - 1e-4), Vec3(x1, y1, z + 1e-4));
+      outputBox = AABB(vec3(x0, y0, z - 1e-4), vec3(x1, y1, z + 1e-4));
       return true;
     }
   };
@@ -61,12 +61,12 @@ namespace raytracer {
         : x0(_x0), x1(_x1), z0(_y0), z1(_y1), y(_y), mp(mat) {}
 
     XZRect(json objectJson) {
-      Vec3 center  = Vec3::FromJson(objectJson["pos"]);
-      Vec3 extents = Vec3::FromJson(objectJson["extents"]);
+      vec3 center  = objectJson["pos"].get<vec3>();
+      vec3 extents = objectJson["extents"].get<vec3>();
       mp           = MaterialFactory::FromJson(objectJson["material"]);
 
-      Vec3 min = center - extents / 2;
-      Vec3 max = center + extents / 2;
+      vec3 min = center - extents / 2;
+      vec3 max = center + extents / 2;
 
       x0 = min.x;
       x1 = max.x;
@@ -91,17 +91,17 @@ namespace raytracer {
       rec.v = (z - z0) / (z - z1);
       rec.t = t;
 
-      Vec3 outwardNormal = Vec3(0, 1, 0);
+      vec3 outwardNormal = vec3(0, 1, 0);
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
-      rec.p       = Vec3(x, y, z);
+      rec.p       = vec3(x, y, z);
       return true;
     }
 
     virtual bool BoundingBox(float t0, float t1,
                              AABB &outputBox) const override {
       // Add some padding to the thin dimension to prevent issues
-      outputBox = AABB(Vec3(x0, y - 1e-4, z0), Vec3(x1, y + 1e-4, z1));
+      outputBox = AABB(vec3(x0, y - 1e-4, z0), vec3(x1, y + 1e-4, z1));
       return true;
     }
   };
@@ -132,18 +132,18 @@ namespace raytracer {
       rec.v = (z - z0) / (z - z1);
       rec.t = t;
 
-      Vec3 outwardNormal = Vec3(1, 0, 0);
+      vec3 outwardNormal = vec3(1, 0, 0);
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
-      rec.p       = Vec3(x, y, z);
+      rec.p       = vec3(x, y, z);
       return true;
     }
 
     virtual bool BoundingBox(float t0, float t1,
                              AABB &outputBox) const override {
       // Add some padding to the thin dimension to prevent issues
-      outputBox = AABB(Vec3(x - 1e-4, y0, z0), Vec3(x + 1e-4, y1, z1));
+      outputBox = AABB(vec3(x - 1e-4, y0, z0), vec3(x + 1e-4, y1, z1));
       return true;
     }
   };
-} // namespace raytracer
+} // namespace rt

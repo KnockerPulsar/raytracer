@@ -4,22 +4,22 @@
 #include "Constants.h"
 #include "Ray.h"
 #include "Util.h"
-#include "data_structures/Vec3.h"
+#include "data_structures/vec3.h"
 #include <cmath>
 #include <memory>
 using std::shared_ptr;
 
-namespace raytracer {
+namespace rt {
   class Material;
 
   struct HitRecord {
-    Vec3                 p;
-    Vec3                 normal;
+    vec3                 p;
+    vec3                 normal;
     shared_ptr<Material> mat_ptr;
     float                t, u, v;
     bool                 front_face;
 
-    inline void set_face_normal(const Ray &r, const Vec3 &outward_normal) {
+    inline void set_face_normal(const Ray &r, const vec3 &outward_normal) {
       front_face = Vector3DotProduct(outward_normal, r.direction) < 0;
       normal     = front_face ? outward_normal : outward_normal * -1;
     }
@@ -36,9 +36,9 @@ namespace raytracer {
   class Translate : public Hittable {
   public:
     shared_ptr<Hittable> ptr;
-    Vec3                 offset;
+    vec3                 offset;
 
-    Translate(shared_ptr<Hittable> p, const Vec3 &dis) : ptr(p), offset(dis) {}
+    Translate(shared_ptr<Hittable> p, const vec3 &dis) : ptr(p), offset(dis) {}
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       Ray moved = Ray(r.origin - offset, r.direction, r.time);
@@ -80,8 +80,8 @@ namespace raytracer {
     // x = cos*x - sin*z
     // z = sin*x + cos*z
 
-    inline Vec3 Rotate(Vec3 in, bool opposite = false) const {
-      Vec3 out = in;
+    inline vec3 Rotate(vec3 in, bool opposite = false) const {
+      vec3 out = in;
 
       // Perhaps lerping instead of branching would be faster???
       int sinSign = opposite * -1 + (1 - opposite) * 1;
@@ -97,8 +97,8 @@ namespace raytracer {
       cosTheta  = cos(rad);
       hasBox    = ptr->BoundingBox(0, 1, bBox);
 
-      Vec3 min(infinity, infinity, infinity);
-      Vec3 max(-infinity, -infinity, -infinity);
+      vec3 min(infinity, infinity, infinity);
+      vec3 max(-infinity, -infinity, -infinity);
 
       for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
@@ -107,9 +107,9 @@ namespace raytracer {
             float y = j * bBox.max.y - (1 - j) * bBox.min.y;
             float z = k * bBox.max.z - (1 - k) * bBox.min.z;
 
-            auto [newX, _, newZ] = Rotate(Vec3(x, y, z), true);
+            auto [newX, _, newZ] = Rotate(vec3(x, y, z), true);
 
-            Vec3 tester(newX, y, newZ);
+            vec3 tester(newX, y, newZ);
 
             min.x = fmin(min.x, tester.x);
             max.x = fmax(max.x, tester.x);
@@ -133,8 +133,8 @@ namespace raytracer {
 
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
-      Vec3 origin = Rotate(r.origin);
-      Vec3 dir    = Rotate(r.direction);
+      vec3 origin = Rotate(r.origin);
+      vec3 dir    = Rotate(r.direction);
 
       Ray rotatedR(origin, dir, r.time);
 
@@ -148,4 +148,4 @@ namespace raytracer {
       ;
     }
   };
-} // namespace raytracer
+} // namespace rt

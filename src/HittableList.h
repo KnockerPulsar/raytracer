@@ -8,7 +8,7 @@
 using ::std::make_shared;
 using ::std::shared_ptr;
 
-namespace raytracer
+namespace rt
 {
     class HittableList : public Hittable
     {
@@ -33,4 +33,4 @@ namespace raytracer
 
         virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
     };
-} // namespace raytracer
+} // namespace rt

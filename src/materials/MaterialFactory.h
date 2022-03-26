@@ -8,28 +8,29 @@
 #include <memory>
 #include <string>
 
-namespace raytracer {
+using nlohmann::json;
+
+namespace rt {
 
   class MaterialFactory {
   public:
-    static std::shared_ptr<raytracer::Material>
-    FromJson(nlohmann::json materialJson) {
+    static sPtr<Material> FromJson(json materialJson) {
 
       string matType = materialJson["type"].get<string>();
 
       if (matType == "lambertian")
-        return std::make_shared<Lambertian>(materialJson);
+        return std::make_shared<Lambertian>(materialJson.get<Lambertian>());
 
       if (matType == "metal")
-        return std::make_shared<Metal>(materialJson);
+        return std::make_shared<Metal>(materialJson.get<Metal>());
 
       if (matType == "dielectric")
-        return std::make_shared<Dielectric>(materialJson);
+        return std::make_shared<Dielectric>(materialJson.get<Dielectric>());
 
       if (matType == "diffuse_light")
-        return std::make_shared<DiffuseLight>(materialJson);
+        return std::make_shared<DiffuseLight>(materialJson. get<DiffuseLight>());
 
       return nullptr;
     }
   };
-} // namespace raytracer
+} // namespace rt

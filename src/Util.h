@@ -1,6 +1,6 @@
 #pragma once
 #include "Constants.h"
-#include "data_structures/Vec3.h"
+#include "data_structures/vec3.h"
 #include <random>
 #include <raylib.h>
 

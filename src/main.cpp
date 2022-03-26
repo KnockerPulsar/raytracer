@@ -6,10 +6,7 @@
 #include <algorithm>
 #include <iostream>
 
-// TODO: Separate checking on threads and blitting finished thread pixels.
-// TODO: Implement a clearer pipeline (Init, loop{Check inputs, render}, clean
-// up).
-// TODO: Add progress bar to shutdown loop.
+// TODO: finish json reading/writing (scene still remains);
 
 // X is the right axis
 // Y is the vertical (AKA Up) axis
@@ -25,7 +22,7 @@
 // light,
 // cornell
 
-using raytracer::RenderAsync, raytracer::AsyncRenderData, raytracer::SceneID;
+using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
 int main() {
   // Rendering constants for easy modifications.
@@ -43,7 +40,7 @@ int main() {
   AsyncRenderData asyncRenderData = RenderAsync::Perpare(
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
-  asyncRenderData.currScene = raytracer::Scene::Load("scenes/test.json");
+  asyncRenderData.currScene = rt::Scene::Load("scenes/test.json");
 
   if (fullscreen)
     ToggleFullscreen();

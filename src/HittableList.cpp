@@ -1,7 +1,7 @@
 #include "HittableList.h"
 #include "AABB.h"
 
-namespace raytracer {
+namespace rt {
   bool HittableList::Hit(const Ray &r, float t_min, float t_max,
                          HitRecord &rec) const
 
@@ -37,4 +37,4 @@ namespace raytracer {
 
     return true;
   }
-} // namespace raytracer
+} // namespace rt

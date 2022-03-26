@@ -1,43 +1,40 @@
 #pragma once
 #include "../Defs.h"
-#include "Material.h"
+#include "../data_structures/vec3.h"
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
 #include "../textures/TextureFactory.h"
-#include "../data_structures/Vec3.h"
+#include "Material.h"
 #include <memory>
 
-namespace raytracer {
+namespace rt {
   class Dielectric : public Material {
   public:
     sPtr<Texture> albedo;
     float         refractionIndex;
 
-    Dielectric(float refIdx, Vec3 color = Vec3(1.0))
+    Dielectric() = default;
+
+    Dielectric(float refIdx, vec3 color = vec3(1.0))
         : refractionIndex(refIdx), albedo(std::make_shared<SolidColor>(color)) {
     }
 
     Dielectric(float refIdx, sPtr<Texture> tex)
         : refractionIndex(refIdx), albedo(tex) {}
 
-    Dielectric(json materialJson) {
-      refractionIndex = materialJson["refraction_index"].get<float>();
-      albedo          = TextureFactory::FromJson(materialJson["texture"]);
-    }
-
-    virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
                          Ray &scattered) const override {
 
       attenuation   = albedo->Value(rec.u, rec.v, rec.p);
       float ref_idx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
-      Vec3  unit_dir  = r_in.direction.Normalize();
-      float cos_theta = fmin(Vec3::DotProd(-unit_dir, rec.normal), 1.0);
+      vec3  unit_dir  = r_in.direction.Normalize();
+      float cos_theta = fmin(vec3::DotProd(-unit_dir, rec.normal), 1.0);
       float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
       bool  cannot_refract = ref_idx * sin_theta > 1.0;
       float reflectance    = Reflectance(cos_theta, ref_idx);
-      Vec3  dir;
+      vec3  dir;
 
       // Either reflect when the refraction index and sin_theta are large
       // enought Or just reflect randomly. Otherwise, refract.
@@ -50,6 +47,12 @@ namespace raytracer {
       return true;
     }
 
+    virtual json GetJson() const override {
+      return json{{"type", "dielectri"},
+                  {"refraction_index", refractionIndex},
+                  {"texture", albedo->GetJson()}};
+    }
+
   private:
     static float Reflectance(float cos, float ref_idx) {
       // Schlick's approx.
@@ -59,4 +62,11 @@ namespace raytracer {
     }
   };
 
-} // namespace raytracer
+  inline void from_json(const json &j, Dielectric &d) {
+    d.refractionIndex = j["refraction_index"].get<float>();
+    d.albedo          = TextureFactory::FromJson(j["texture"]);
+  }
+
+  inline void to_json(json &j, const Dielectric &d) { j = d.GetJson(); }
+
+} // namespace rt

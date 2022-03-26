@@ -5,17 +5,19 @@
 #include "../textures/Texture.h"
 #include <memory>
 
-namespace raytracer {
+namespace rt {
 
   struct HitRecord;
 
   class Material {
   public:
-    virtual Vec3 emitted(float u, float v, const Vec3 &p) const {
-      return Vec3::Zero();
+    virtual vec3 emitted(float u, float v, const vec3 &p) const {
+      return vec3::Zero();
     }
 
-    virtual bool scatter(const Ray &r_in, HitRecord &rec, Vec3 &attenuation,
+    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
                          Ray &scattered) const = 0;
+
+    virtual json GetJson() const = 0;
   };
-}; // namespace raytracer
+}; // namespace rt

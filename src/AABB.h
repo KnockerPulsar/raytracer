@@ -1,19 +1,19 @@
 #pragma once
 
 #include "Ray.h"
-#include "data_structures/Vec3.h"
+#include "data_structures/vec3.h"
 #include <cmath>
 #include <tuple>
 
-namespace raytracer {
-  using raytracer::Ray;
+namespace rt {
+  using rt::Ray;
 
   class AABB {
   public:
-    Vec3 min, max;
+    vec3 min, max;
 
     AABB() = default;
-    AABB(const Vec3 &a, const Vec3 &b) {
+    AABB(const vec3 &a, const vec3 &b) {
       min = a;
       max = b;
     }
@@ -59,13 +59,13 @@ namespace raytracer {
     }
 
     static AABB SurroundingBox(AABB b0, AABB b1) {
-      Vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y),
+      vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y),
                 fmin(b0.min.z, b1.min.z));
 
-      Vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y),
+      vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y),
                fmax(b0.max.z, b1.max.z));
 
       return AABB(smol, big);
     }
   };
-} // namespace raytracer
+} // namespace rt

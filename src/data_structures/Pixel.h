@@ -1,9 +1,9 @@
 #pragma once
-#include "Vec3.h"
+#include "vec3.h"
 
-namespace raytracer {
+namespace rt {
   struct Pixel {
     int  x, y;
-    Vec3 color;
+    vec3 color;
   };
-} // namespace raytracer
+} // namespace rt

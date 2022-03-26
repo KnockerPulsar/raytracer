@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace raytracer {
+namespace rt {
   class BVHNode : public Hittable {
   public:
     std::shared_ptr<Hittable> left, right;
@@ -117,4 +117,4 @@ namespace raytracer {
       return BoxCompare(a, b, 2);
     }
   };
-} // namespace raytracer
+} // namespace rt

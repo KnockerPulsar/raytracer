@@ -3,25 +3,25 @@
 #include "../AABB.h"
 #include "../Hittable.h"
 #include "../Ray.h"
-#include "../data_structures/Vec3.h"
+#include "../data_structures/vec3.h"
 #include "../materials/Material.h"
 #include "../materials/MaterialFactory.h"
 #include <cmath>
 #include <raylib.h>
 
-namespace raytracer {
+namespace rt {
 
   class Sphere : public Hittable {
   public:
     float                radius;
-    Vec3                 center;
+    vec3                 center;
     shared_ptr<Material> mat_ptr;
 
-    Sphere(float r, Vec3 pos, shared_ptr<Material> m)
+    Sphere(float r, vec3 pos, shared_ptr<Material> m)
         : radius(r), center(pos), mat_ptr(m) {}
 
     Sphere(nlohmann::json sphereJson) {
-      center  = Vec3::FromJson(sphereJson["pos"]);
+      center  = sphereJson["pos"].get<vec3>();
       radius  = sphereJson["radius"].get<float>();
       mat_ptr = MaterialFactory::FromJson(sphereJson["material"]);
     }
@@ -31,7 +31,7 @@ namespace raytracer {
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
   private:
-    static void GetSphereUV(const Vec3 &p, float &u, float &v) {
+    static void GetSphereUV(const vec3 &p, float &u, float &v) {
       float theta = std::acos(-p.y);
       float phi   = std::atan2(-p.z, p.x) + PI;
 
@@ -43,9 +43,9 @@ namespace raytracer {
   bool Sphere::Hit(const Ray &r, float t_min, float t_max,
                    HitRecord &rec) const {
     // Vector between ray origin and sphere center
-    Vec3  oc     = r.origin - this->center;
+    vec3  oc     = r.origin - this->center;
     float a      = r.direction.SqrLen();
-    float half_b = Vec3::DotProd(oc, r.direction);
+    float half_b = vec3::DotProd(oc, r.direction);
     float c      = oc.Len() * oc.Len() - radius * radius;
 
     float discriminant = half_b * half_b - a * c;
@@ -63,7 +63,7 @@ namespace raytracer {
 
     rec.t                     = root;
     rec.p                     = r.At(rec.t);
-    const Vec3 outward_normal = (rec.p - center) / radius;
+    const vec3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(r, outward_normal);
     GetSphereUV(outward_normal, rec.u, rec.v);
     rec.mat_ptr = mat_ptr;
@@ -72,9 +72,9 @@ namespace raytracer {
   }
 
   bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    outputBox = AABB(center - Vec3(radius), center + Vec3(radius));
+    outputBox = AABB(center - vec3(radius), center + vec3(radius));
 
     return true;
   }
 
-} // namespace raytracer
+} // namespace rt

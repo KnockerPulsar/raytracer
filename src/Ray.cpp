@@ -9,25 +9,25 @@
 #include <chrono>
 #include <iostream>
 
-using raytracer::Pixel, raytracer::Camera, raytracer::HittableList;
+using rt::Pixel, rt::Camera, rt::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
 
-namespace raytracer {
-  Vec3 Ray::RayColor(const raytracer::Ray &r, const Vec3 &backgroundColor,
+namespace rt {
+  vec3 Ray::RayColor(const rt::Ray &r, const vec3 &backgroundColor,
                      const Hittable &world, int depth) {
     HitRecord rec;
 
     // Limit max recursion depth
     if (depth <= 0) {
-      return Vec3::Zero();
+      return vec3::Zero();
     }
 
     if (!world.Hit(r, 0.001f, infinity, rec))
       return backgroundColor;
 
-    raytracer::Ray scattered;
-    Vec3           attenuation;
-    Vec3           emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+    rt::Ray scattered;
+    vec3           attenuation;
+    vec3           emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
     if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
       return emitted;
@@ -57,8 +57,8 @@ namespace raytracer {
       for (int s = 0; s < currScene.samplesPerPixel; s++) {
         float          u   = (x + RandomFloat()) / (currScene.imageWidth - 1);
         float          v   = (y + RandomFloat()) / (currScene.imageHeight - 1);
-        raytracer::Ray ray = currScene.cam.GetRay(u, v);
-        job.color += raytracer::Ray::RayColor(ray,
+        rt::Ray ray = currScene.cam.GetRay(u, v);
+        job.color += rt::Ray::RayColor(ray,
                                               currScene.backgroundColor,
                                               currScene.world,
                                               currScene.maxDepth);
@@ -73,7 +73,7 @@ namespace raytracer {
       g           = sqrt(scale * g);
       b           = sqrt(scale * b);
 
-      job.color = Vec3(r, g, b);
+      job.color = vec3(r, g, b);
 #else
       job.color /= currScene.samplesPerPixel;
 #endif
@@ -85,4 +85,4 @@ namespace raytracer {
         duration_cast<std::chrono::milliseconds>(stop - start).count();
   }
 
-} // namespace raytracer
+} // namespace rt
