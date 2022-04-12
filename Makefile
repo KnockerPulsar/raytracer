@@ -3,7 +3,7 @@
 # ggdb / g             	-> enable debugging
 # DGAMMA_CORRECTION			-> Turn gamma correction on or off. 
 # DFAST_EXIT						-> Compile with fast thread exiting on, seems to lower performance a bit
-defines := -ggdb -DGAMMA_CORRECTION -DFAST_EXIT 
+defines := -DGAMMA_CORRECTION -DFAST_EXIT -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp  
 
 
 # Define custom functions

@@ -5,6 +5,7 @@
 #include "objects/AARect.h"
 
 #include "Camera.h"
+#include "ConstantMedium.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Ray.h"
@@ -477,7 +478,7 @@ namespace rt {
 
     // Top light
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
-    
+
     // floor
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
 
@@ -487,20 +488,30 @@ namespace rt {
     // Back wall
     world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
 
-    auto box1 = make_shared<Translate>(
-        make_shared<RotateY>(
-            make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), white), 15),
-        vec3(265, 0, 295));
+    // world.Add(make_shared<Sphere>(100, vec3(330, 330, 165), light));
+
+    auto box1 = make_shared<ConstantMedium>(
+        make_shared<Translate>(
+            make_shared<RotateY>(
+                make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), white),
+                15),
+            vec3(265, 0, 295)),
+        0.01,
+        vec3(0, 0, 0));
 
     world.Add(box1);
 
-    auto box2 = make_shared<Translate>(
-        make_shared<RotateY>(
-            make_shared<Box>(vec3::Zero(),
-                             vec3(100, 100, 100),
-                             make_shared<DiffuseLight>(checker)),
-            -150),
-        vec3(200, 0, 65));
+    auto box2 = make_shared<ConstantMedium>(
+        make_shared<Translate>(                       // Object
+            make_shared<RotateY>(                     //
+                make_shared<Box>(vec3::Zero(),        //
+                                 vec3(100, 100, 100), //
+                                 white),              //
+                -150),                                //
+            vec3(200, 0, 65)),                        //
+        0.1,                                         // Density
+        vec3(1, 1, 1));                               // Color
+
     world.Add(box2);
 
     // auto box3 = make_shared<Translate>(
