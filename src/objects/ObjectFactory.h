@@ -20,8 +20,12 @@ namespace rt {
         return std::make_shared<Box>(b);
       }
       // XY, XZ, YZ rects
+      if (objType == "xy_rect")
+        return std::make_shared<XYRect>(objectJson);
       if (objType == "xz_rect")
         return std::make_shared<XZRect>(objectJson);
+      if (objType == "yz_rect")
+        return std::make_shared<YZRect>(objectJson);
 
       return nullptr;
     }

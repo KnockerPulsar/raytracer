@@ -30,6 +30,7 @@ namespace rt {
 
     void ImageFromPath(const char *filename) {
       int compsPerPixel = bytesPerPixel;
+      path = filename;
 
       img = LoadImage(filename);
 

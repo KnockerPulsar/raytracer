@@ -1,3 +1,4 @@
+#pragma once
 #include "AABB.h"
 #include "Hittable.h"
 #include "HittableList.h"

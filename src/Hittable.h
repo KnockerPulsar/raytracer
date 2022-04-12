@@ -31,6 +31,8 @@ namespace rt {
                      HitRecord &rec) const = 0;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
+
+    virtual json GetJson() const { return json{{"type", "unimplemented"}}; }
   };
 
   class Translate : public Hittable {

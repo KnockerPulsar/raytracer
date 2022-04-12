@@ -21,6 +21,7 @@
 #include <bits/types/FILE.h>
 #include <fstream>
 #include <memory>
+#include <ostream>
 #include <raylib.h>
 #include <tuple>
 
@@ -475,7 +476,8 @@ namespace rt {
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 0, red));
 
     // Top light
-    // world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
+    
     // floor
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
 
@@ -512,6 +514,7 @@ namespace rt {
 
     s = {
         .world           = bvh,
+        .objects         = world,
         .cam             = cam,
         .maxDepth        = maxDepth,
         .imageWidth      = imageWidth,
@@ -525,7 +528,9 @@ namespace rt {
 
   Scene Scene::Load(std::string path) {
     std::ifstream jsonFile(path);
-    json          readScene;
+    std::cout << "Loading scene from file " << path << std::endl;
+
+    json readScene;
     jsonFile >> readScene;
 
     json  settings    = readScene["settings"];
@@ -543,8 +548,16 @@ namespace rt {
 
     auto world = HittableList();
     for (const auto &obj : readScene["objects"]) {
-      world.Add(ObjectFactory::FromJson(obj));
+      auto objPtr = ObjectFactory::FromJson(obj);
+      if (objPtr)
+        world.Add(objPtr);
     }
+
+    std::cout << "Loaded scene with\n"
+              << "\tsettings " << settings << std::endl
+              << "\t#objects " << world.objects.size() << std::endl;
+
+    s.objects = world;
 
     auto bvh = HittableList();
     s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
@@ -557,6 +570,4 @@ namespace rt {
 
     return s;
   }
-
-  // static json Save(std::string path) { json sceneJson; }
 } // namespace rt

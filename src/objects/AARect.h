@@ -19,6 +19,32 @@ namespace rt {
            shared_ptr<Material> mat)
         : x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
 
+    XYRect(json objectJson) {
+      vec3 center  = objectJson["pos"].get<vec3>();
+      vec3 extents = objectJson["extents"].get<vec3>();
+      mp           = MaterialFactory::FromJson(objectJson["material"]);
+
+      vec3 min = center - extents / 2;
+      vec3 max = center + extents / 2;
+
+      x0 = min.x;
+      x1 = max.x;
+      y0 = min.y;
+      y1 = max.y;
+      z  = center.z;
+    }
+
+    json GetJson() const override {
+      vec3 center  = vec3((x0 + x1) / 2, (y0 + y1) / 2, z);
+      vec3 extents = vec3((x1 - x0), (y1 - y0), 0);
+      return json{
+          {"type", "xy_rect"},
+          {"pos", center},
+          {"extents", extents},
+          {"material", mp->GetJson()},
+      };
+    }
+
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       float t = (z - r.origin.z) / r.direction.z;
@@ -75,6 +101,17 @@ namespace rt {
       y  = center.y;
     }
 
+    json GetJson() const override {
+      vec3 center  = vec3((x0 + x1) / 2, y, (z0 + z1) / 2);
+      vec3 extents = vec3((x1 - x0), 0, (z1 - z0));
+      return json{
+          {"type", "xz_rect"},
+          {"pos", center},
+          {"extents", extents},
+          {"material", mp->GetJson()},
+      };
+    }
+
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       float t = (y - r.origin.y) / r.direction.y;
@@ -116,6 +153,31 @@ namespace rt {
            shared_ptr<Material> mat)
         : y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
 
+    YZRect(json objectJson) {
+      vec3 center  = objectJson["pos"].get<vec3>();
+      vec3 extents = objectJson["extents"].get<vec3>();
+      mp           = MaterialFactory::FromJson(objectJson["material"]);
+
+      vec3 min = center - extents / 2;
+      vec3 max = center + extents / 2;
+
+      x  = center.x;
+      z0 = min.z;
+      z1 = max.z;
+      y0 = min.y;
+      y1 = max.y;
+    }
+
+    json GetJson() const override {
+      vec3 center  = vec3(x, (y0 + y1) / 2, (z0 + z1) / 2);
+      vec3 extents = vec3(0, (y1 - y0), (z1 - z0));
+      return json{
+          {"type", "yz_rect"},
+          {"pos", center},
+          {"extents", extents},
+          {"material", mp->GetJson()},
+      };
+    }
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override {
       float t = (x - r.origin.x) / r.direction.x;
@@ -146,4 +208,8 @@ namespace rt {
       return true;
     }
   };
+
+  void to_json(json &j, const XYRect &xy) { j = xy.GetJson(); }
+  void to_json(json &j, const XZRect &xz) { j = xz.GetJson(); }
+  void to_json(json &j, const YZRect &yz) { j = yz.GetJson(); }
 } // namespace rt

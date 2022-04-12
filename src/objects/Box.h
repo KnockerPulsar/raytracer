@@ -24,8 +24,9 @@ namespace rt {
 
     // To work around not being able to use constructors with references
     void Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
-      boxMin = p0;
-      boxMax = p1;
+      boxMin   = p0;
+      boxMax   = p1;
+      material = mat;
 
       sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p1.z, mat));
       sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p0.z, mat));
@@ -41,6 +42,13 @@ namespace rt {
                              AABB &outputBox) const override {
       outputBox = AABB(boxMin, boxMax);
       return true;
+    }
+
+    virtual json GetJson() const override {
+      return json{{"type", "box"},
+                  {"pos", (boxMin + boxMax) / 2},
+                  {"extents", boxMax - boxMin},
+                  {"material", material->GetJson()}};
     }
 
     bool Hit(const Ray &r, float t_min, float t_max,
@@ -61,9 +69,5 @@ namespace rt {
     b.Create(min, max, mat);
   }
 
-  inline void to_json(json &j, const Box &b) {
-    j = json{{"pos", (b.boxMin + b.boxMax) / 2},
-             {"extents", b.boxMax - b.boxMin},
-             {"material", b.material->GetJson()}};
-  }
+  inline void to_json(json &j, const Box &b) { j = b.GetJson(); }
 } // namespace rt

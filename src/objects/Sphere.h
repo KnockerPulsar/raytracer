@@ -28,7 +28,15 @@ namespace rt {
 
     bool Hit(const Ray &r, float t_min, float t_max,
              HitRecord &rec) const override;
+
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+
+    json GetJson() const override {
+      return json{{"type", "sphere"},
+                  {"pos", center},
+                  {"radius", radius},
+                  {"material", mat_ptr->GetJson()}};
+    }
 
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v) {
@@ -76,5 +84,7 @@ namespace rt {
 
     return true;
   }
+
+  void to_json(json &j, const Sphere &s) { j = s.GetJson(); }
 
 } // namespace rt

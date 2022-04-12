@@ -31,7 +31,11 @@ namespace rt {
     }
 
     json GetJson() const override {
-      return json{{"type", "metal"}, {"texture", albedo->GetJson()}};
+      return json{
+          {"type", "metal"},
+          {"fuzz", fuzz},
+          {"texture", albedo->GetJson()},
+      };
     }
   };
 

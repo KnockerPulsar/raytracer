@@ -5,17 +5,17 @@
       "y": 600
     },
     "background_color": {
-      "x": 0.001,
-      "y": 0.001,
-      "z": 0.001
+      "x": 0.1,
+      "y": 0.1,
+      "z": 0.1
     },
     "num_samples": 100,
     "max_depth": 100
   },
   "camera": {
     "look_from": {
-      "x": 10,
-      "y": 3,
+      "x": 5,
+      "y": 7,
       "z": 0
     },
     "look_at": {
@@ -105,20 +105,20 @@
         "z": -3
       },
       "extents": {
-        "x": 2,
-        "y": 2,
-        "z": 2
+        "x": 3,
+        "y": 3,
+        "z": 3
       },
       "material": {
         "type": "diffuse_light",
         "texture": {
           "type": "noise",
-          "scale": 4,
+          "scale": 12,
           "turb_scale": 10,
           "base_color": {
-            "x": 0.8,
-            "y": 0.2,
-            "z": 0.8
+            "x": 8,
+            "y": 2,
+            "z": 8
           }
         }
       }

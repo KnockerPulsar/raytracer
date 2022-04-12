@@ -1,16 +1,21 @@
 #pragma once
 #include "../vendor/nlohmann-json/json.hpp"
+#include "BVHNode.h"
 #include "Camera.h"
+#include "Defs.h"
 #include "HittableList.h"
+#include "materials/Dielectric.h"
 #include "materials/Material.h"
 #include "textures/CheckerTexture.h"
+#include <vector>
 
 namespace rt {
 
   class Scene {
 
   public:
-    HittableList world;
+    HittableList world;    // Might contain a BVH, harder to serialize
+    HittableList objects;  // Should always contain a linear list of object that's easy to iterate over
     Camera       cam;
     int          maxDepth, imageWidth, imageHeight, samplesPerPixel;
     vec3         backgroundColor;
@@ -44,6 +49,28 @@ namespace rt {
 
     static Scene Load(std::string path);
 
-    // static json Save(std::string path);
+    json GetObjArray() const {
+      std::vector<json> objJsons;
+
+      for (auto obj : objects.objects) {
+        json temp = obj->GetJson();
+        std::cout << temp << std::endl;
+        objJsons.push_back(temp);
+      }
+      return objJsons;
+    }
   };
+
+  inline void to_json(json &j, const Scene &s) {
+    json objArr = s.GetObjArray();
+    j           = json{{"settings",
+              {
+                  {"resolution", {{"x", s.imageWidth}, {"y", s.imageHeight}}},
+                  {"background_color", s.backgroundColor},
+                  {"num_samples", s.samplesPerPixel},
+                  {"max_depth", s.maxDepth},
+              }},
+             s.cam,
+             {"objects", objArr}};
+  }
 } // namespace rt

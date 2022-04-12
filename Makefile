@@ -3,7 +3,8 @@
 # ggdb / g             	-> enable debugging
 # DGAMMA_CORRECTION			-> Turn gamma correction on or off. 
 # DFAST_EXIT						-> Compile with fast thread exiting on, seems to lower performance a bit
-defines := -ggdb -DGAMMA_CORRECTION -DFAST_EXIT
+defines := -ggdb -DGAMMA_CORRECTION -DFAST_EXIT 
+
 
 # Define custom functions
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

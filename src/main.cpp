@@ -4,9 +4,19 @@
 #include "RenderAsync.h"
 #include "Scene.h"
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 
-// TODO: finish json reading/writing (scene still remains);
+/*
+ TODO: finish json reading/writing 
+    Need some way to encode transforms 
+    Currently, transforms (translation and rotation) are hittables that apply some transformation on the ray itself when they interact
+    
+    translation(object) -> AKA composition
+
+    we somehow have to invert this structure on serialization...
+    OR keep it how it is and work recursively   
+*/
 
 // X is the right axis
 // Y is the vertical (AKA Up) axis
@@ -24,6 +34,14 @@
 
 using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
+int main1(){
+  rt::Scene scene = rt::Scene::CornellBox(600, 600, 50, 100);
+  json json = scene;
+  std::ofstream output("cornell.json");
+  output << std::setw(4) << json << std::endl;
+  output.close();
+}
+
 int main() {
   // Rendering constants for easy modifications.
   const int   imageWidth      = 600;
@@ -34,18 +52,17 @@ int main() {
   bool        showProg        = false;
   int         incRender       = 1;
 
-
   SceneID sceneID = SceneID::cornell;
 
   AsyncRenderData asyncRenderData = RenderAsync::Perpare(
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
-  asyncRenderData.currScene = rt::Scene::Load("scenes/test.json");
+  asyncRenderData.currScene = rt::Scene::Load("cornell.json");
 
   if (fullscreen)
     ToggleFullscreen();
 
-  bool allFinished = true;
+   bool allFinished = true;
   while (!WindowShouldClose()) {
 
     // Update camera and start async again if last frame is done

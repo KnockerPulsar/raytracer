@@ -1,0 +1,194 @@
+{
+    "camera": {
+        "aperature": 0.10000000149011612,
+        "focus_dist": 800.0,
+        "fov": 40.0,
+        "look_at": {
+            "x": 278.0,
+            "y": 278.0,
+            "z": 0.0
+        },
+        "look_from": {
+            "x": 278.0,
+            "y": 278.0,
+            "z": -800.0
+        },
+        "move_dir": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "time0": 0.0,
+        "time1": 1.0,
+        "v_up": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0
+        }
+    },
+    "objects": [
+        {
+            "extents": {
+                "x": 0.0,
+                "y": 555.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.11999999731779099,
+                        "y": 0.44999998807907104,
+                        "z": 0.15000000596046448
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 555.0,
+                "y": 277.5,
+                "z": 277.5
+            },
+            "type": "yz_rect"
+        },
+        {
+            "extents": {
+                "x": 0.0,
+                "y": 555.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.6499999761581421,
+                        "y": 0.05000000074505806,
+                        "z": 0.05000000074505806
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 0.0,
+                "y": 277.5,
+                "z": 277.5
+            },
+            "type": "yz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 0.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    },
+                    "type": "solid_color"
+                },
+                "type": "diffuse_light"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 554.0,
+                "z": 277.5
+            },
+            "type": "xz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 0.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 0.0,
+                "z": 277.5
+            },
+            "type": "xz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 0.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 555.0,
+                "z": 277.5
+            },
+            "type": "xz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 555.0,
+                "z": 0.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 277.5,
+                "z": 555.0
+            },
+            "type": "xy_rect"
+        },
+        {
+            "type": "unimplemented"
+        },
+        {
+            "type": "unimplemented"
+        }
+    ],
+    "settings": {
+        "background_color": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "max_depth": 50,
+        "num_samples": 100,
+        "resolution": {
+            "x": 600,
+            "y": 600
+        }
+    }
+}

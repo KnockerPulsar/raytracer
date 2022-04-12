@@ -1,12 +1,18 @@
 #pragma once
 #include "Ray.h"
 #include "data_structures/vec3.h"
+#include <raylib.h>
 
 namespace rt {
   class Camera {
   public:
-    vec3  lookFrom, lookAt, moveDir;
+    vec3 lookFrom, lookAt, moveDir;
+    vec3 lower_left_corner, horizontal, vertical;
+    vec3 u, v, w, vUp;
+
     float time0, time1;
+    float vFov, // vertical field-of-view in degrees
+        aspectRatio, aperature, focusDist, lensRadius;
 
     Camera() = default;
     Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, vec3 moveDir, float vFov,
@@ -71,12 +77,22 @@ namespace rt {
     }
 
     rt::Ray GetRay(float s, float t) const;
-
-  private:
-    vec3 lower_left_corner, horizontal, vertical;
-    vec3 u, v, w, vUp;
-
-    float vFov, // vertical field-of-view in degrees
-        aspectRatio, aperature, focusDist, lensRadius;
   };
+
+  inline void to_json(json &j, const Camera &c) {
+    j = json{
+        "camera",
+        {
+            {"look_from", c.lookFrom},
+            {"look_at", c.lookAt},
+            {"v_up", c.vUp},
+            {"focus_dist", c.focusDist},
+            {"aperature", c.aperature},
+            {"move_dir", c.moveDir},
+            {"fov", c.vFov},
+            {"time0", c.time0},
+            {"time1", c.time1},
+        },
+    };
+  }
 } // namespace rt
