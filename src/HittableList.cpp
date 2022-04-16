@@ -11,7 +11,7 @@ namespace rt {
     float     closest_so_far = t_max;
 
     for (const auto &obj : objects) {
-      if (obj->Hit(r, t_min, closest_so_far, temp_rec)) {
+      if (obj->HitTransformed(r, t_min, closest_so_far, temp_rec)) {
         hit_anything   = true;
         closest_so_far = temp_rec.t;
         rec            = temp_rec;

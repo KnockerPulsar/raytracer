@@ -55,10 +55,10 @@ int main1() {
 int main() {
   // Rendering constants for easy modifications.
   // Only used when creating hardcoded scenes
-  const int   imageWidth      = 600;
+  const int   imageWidth      = 300;
   const float aspectRatio     = 1;
-  const int   samplesPerPixel = 50;
-  const int   maxDepth        = 100;
+  const int   samplesPerPixel = 1;
+  const int   maxDepth        = 5;
   bool        fullscreen      = false;
   bool        showProg        = false;
   int         incRender       = 1;
@@ -69,7 +69,7 @@ int main() {
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
-  asyncRenderData.currScene = rt::Scene::CornellBox(
+  asyncRenderData.currScene = rt::Scene::TransformationTest(
       imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   if (fullscreen)

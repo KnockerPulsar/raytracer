@@ -2,11 +2,14 @@
 
 #include "AABB.h"
 #include "Constants.h"
+#include "Defs.h"
 #include "Ray.h"
+#include "Transformation.h"
 #include "Util.h"
 #include "data_structures/vec3.h"
 #include <cmath>
 #include <memory>
+#include <vector>
 using std::shared_ptr;
 
 namespace rt {
@@ -27,12 +30,31 @@ namespace rt {
 
   class Hittable {
   public:
+    Transformation transformation;
+
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const = 0;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
 
     virtual json GetJson() const { return json{{"type", "unimplemented"}}; }
+
+    virtual bool HitTransformed(const Ray &r, float t_min, float t_max,
+                                HitRecord &rec) {
+      Ray transformedRay = r;
+
+      // Apply inverse transformations in reverse
+      transformedRay.origin    = transformation.Inverse(r.origin);
+      transformedRay.direction = transformation.Inverse(r.direction);
+
+      if (!this->Hit(transformedRay, t_min, t_max, rec))
+        return false;
+
+      rec.p = transformation.Apply(rec.p);
+      rec.set_face_normal(transformedRay, transformation.Apply(rec.normal));
+
+      return true;
+    }
   };
 
   class Translate : public Hittable {
@@ -147,7 +169,6 @@ namespace rt {
       rec.set_face_normal(rotatedR, Rotate(rec.normal, true));
 
       return true;
-      ;
     }
   };
 } // namespace rt

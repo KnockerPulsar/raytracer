@@ -49,6 +49,9 @@ namespace rt {
 
     static Scene Load(std::string path);
 
+    static Scene TransformationTest(int imageWidth, int imageHeight, int maxDepth,
+                        int samplesPerPixel);
+
     json GetObjArray() const {
       std::vector<json> objJsons;
 

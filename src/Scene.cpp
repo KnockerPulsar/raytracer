@@ -2,6 +2,7 @@
 #include "AABB.h"
 #include "BVHNode.h"
 #include "Defs.h"
+#include "Transformation.h"
 #include "objects/AARect.h"
 
 #include "Camera.h"
@@ -509,7 +510,7 @@ namespace rt {
                                  white),              //
                 -150),                                //
             vec3(200, 0, 65)),                        //
-        0.1,                                         // Density
+        0.1,                                          // Density
         vec3(1, 1, 1));                               // Color
 
     world.Add(box2);
@@ -578,6 +579,55 @@ namespace rt {
         std::cout << "AA";
       }
     }
+
+    return s;
+  }
+
+  Scene Scene::TransformationTest(int imageWidth, int imageHeight, int maxDepth,
+                                  int samplesPerPixel) {
+
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(2, 2, 0);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(0.0f, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus);
+
+    auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
+
+
+    auto sphere = make_shared<Box>(vec3(-0.5,-0.5,-0.5), vec3(0.5, 0.5,0.5), material_center);
+    sphere->transformation = Transformation(vec3(0,0,0), vec3(0,45,0));
+    // auto rotSphere= make_shared<RotateY>(sphere, 45);
+
+    world //
+        .Add(sphere);
+
+
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
 
     return s;
   }
