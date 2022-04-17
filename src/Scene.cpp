@@ -3,6 +3,7 @@
 #include "BVHNode.h"
 #include "Defs.h"
 #include "Transformation.h"
+#include "materials/DiffuseLight.h"
 #include "objects/AARect.h"
 
 #include "Camera.h"
@@ -465,7 +466,8 @@ namespace rt {
     auto white      = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
     auto green      = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
     auto light      = make_shared<DiffuseLight>(vec3(2, 2, 2));
-    auto metal      = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
+    auto purplishMetal      = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
+    auto chrome      = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
     auto dielectric = make_shared<Dielectric>(1.5f);
     auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
     auto checker    = std::make_shared<CheckerTexture>(
@@ -481,38 +483,26 @@ namespace rt {
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
 
     // floor
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, chrome));
 
     // ceiling
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, white));
+    // world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, metal));
 
     // Back wall
     world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
 
     // world.Add(make_shared<Sphere>(100, vec3(330, 330, 165), light));
 
-    auto box1 = make_shared<ConstantMedium>(
-        make_shared<Translate>(
-            make_shared<RotateY>(
-                make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), white),
-                15),
-            vec3(265, 0, 295)),
-        0.01,
-        vec3(0, 0, 0));
+    auto b1 = Box(vec3(0, 0, 0), vec3(165, 330, 165), white);
+    b1.setTransformation(vec3(265, 0, 295), vec3(0, 15, 0));
 
-    world.Add(box1);
+    world.Add(make_shared<Box>(b1));
 
-    auto box2 = make_shared<ConstantMedium>(
-        make_shared<Translate>(                       // Object
-            make_shared<RotateY>(                     //
-                make_shared<Box>(vec3::Zero(),        //
-                                 vec3(100, 100, 100), //
-                                 white),              //
-                -150),                                //
-            vec3(200, 0, 65)),                        //
-        0.1,                                          // Density
-        vec3(1, 1, 1));                               // Color
+    auto b2 = Box(vec3::Zero(), vec3(100, 100, 100), purplishMetal);
+    b2.setTransformation(vec3(50, 0, 0), vec3(0, 12, 0));
+    auto box2 = make_shared<Box>(b2);
 
+    // auto box2 = make_shared<Translate>(make_shared<Box>(b2), vec3(50, 0, 0));
     world.Add(box2);
 
     // auto box3 = make_shared<Translate>(
@@ -610,14 +600,13 @@ namespace rt {
     auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
 
-
-    auto sphere = make_shared<Box>(vec3(-0.5,-0.5,-0.5), vec3(0.5, 0.5,0.5), material_center);
-    sphere->transformation = Transformation(vec3(0,0,0), vec3(0,45,0));
+    auto sphere = make_shared<Box>(
+        vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
+    sphere->transformation = Transformation(vec3(0, 0, 0), vec3(0, 45, 0));
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
     world //
         .Add(sphere);
-
 
     s = {
         .world           = world,

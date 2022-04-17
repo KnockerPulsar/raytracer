@@ -31,7 +31,7 @@ namespace rt {
 
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    json GetJson() const override {
+    json GetJsonDerived() const override {
       return json{{"type", "sphere"},
                   {"pos", center},
                   {"radius", radius},

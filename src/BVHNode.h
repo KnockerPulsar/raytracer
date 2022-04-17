@@ -64,8 +64,8 @@ namespace rt {
       if (!box.Hit(r, t_min, t_max))
         return false;
 
-      bool leftHit  = left->Hit(r, t_min, t_max, rec);
-      bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);
+      bool leftHit  = left->HitTransformed(r, t_min, t_max, rec);
+      bool rightHit = right->HitTransformed(r, t_min, leftHit ? rec.t : t_max, rec);
 
       // if(leftHit || rightHit)
       //   std::cout << "AAAA";

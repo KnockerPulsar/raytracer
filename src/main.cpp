@@ -3,20 +3,17 @@
 #include "AsyncRenderData.h"
 #include "RenderAsync.h"
 #include "Scene.h"
+#include "Transformation.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 
 /*
  TODO: finish json reading/writing
-    Need some way to encode transforms
-    Currently, transforms (translation and rotation) are hittables that apply
- some transformation on the ray itself when they interact
-
-    translation(object) -> AKA composition
-
-    we somehow have to invert this structure on serialization...
-    OR keep it how it is and work recursively
+    Finish transform serialization/deserialization
+    Add a way to compose/update a transformation
+    Configure clangd to format in a better way
+    Clean up code a naming
 */
 
 /*
@@ -42,7 +39,7 @@
 using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
 // Quick way of exporting hardcoded scenes into JSON
-int main1() {
+int main() {
   rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
   json          json  = scene;
   std::ofstream output("cornell.json");
@@ -52,13 +49,13 @@ int main1() {
   return 0;
 }
 
-int main() {
+int main1() {
   // Rendering constants for easy modifications.
   // Only used when creating hardcoded scenes
-  const int   imageWidth      = 300;
-  const float aspectRatio     = 1;
-  const int   samplesPerPixel = 1;
-  const int   maxDepth        = 5;
+  const int   imageWidth      = 600;
+  const float aspectRatio     = 16 / 9.0;
+  const int   samplesPerPixel = 20;
+  const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
   int         incRender       = 1;
@@ -69,7 +66,7 @@ int main() {
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
-  asyncRenderData.currScene = rt::Scene::TransformationTest(
+  asyncRenderData.currScene = rt::Scene::CornellBox(
       imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   if (fullscreen)
@@ -79,8 +76,16 @@ int main() {
   while (!WindowShouldClose()) {
 
     // Update camera and start async again if last frame is done
-    if (allFinished)
+    if (allFinished) {
       RenderAsync::ResetThreads(asyncRenderData);
+
+      // for (auto &&obj : asyncRenderData.currScene.objects.objects) {
+      //   auto t = obj->transformation.translate;
+      //   auto r = obj->transformation.rotate;
+      //   r.z += 1.0f;
+      //   obj->transformation = rt::Transformation(t,r);
+      // }
+    }
 
     RenderAsync::CheckInput(fullscreen, showProg);
 

@@ -46,11 +46,11 @@ namespace rt {
 
     HitRecord rec1, rec2;
 
-    if (!boundry->Hit(r, -infinity, infinity, rec1)) {
+    if (!boundry->HitTransformed(r, -infinity, infinity, rec1)) {
       return false;
     }
 
-    if (!boundry->Hit(r, rec1.t + 0.0001, infinity, rec2)) {
+    if (!boundry->HitTransformed(r, rec1.t + 0.0001, infinity, rec2)) {
       return false;
     }
 

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
+#include "AABB.h"
+#include "Constants.h"
 #include "Defs.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
+#include <cmath>
 
 namespace rt {
   class Transformation {
@@ -11,21 +14,26 @@ namespace rt {
     glm::mat4 modelMatrix;
     glm::mat4 invModelMatrix;
 
+    glm::mat4 rotationMatrix;
+    glm::mat4 invRotationMatrix;
+
+    vec3 translate;
+    vec3 rotate;
+
     Transformation(vec3 translation = vec3::Zero(),
-                   vec3 rotation    = vec3::Zero()) {
+                   vec3 rotation    = vec3::Zero())
+        : translate(translation), rotate(rotation) {
 
-      glm::mat4 model = glm::mat4(1.0f);
-      auto translationMat = glm::translate(model, toGlmVec3(translation));
+      glm::mat4 model          = glm::mat4(1.0f);
+      auto      translationMat = glm::translate(model, toGlmVec3(translation));
       // modelMatrix      = glm::scale(modelMatrix, Scale);
-      auto rotMat    = glm::eulerAngleXYZ(glm::radians(rotation.x),
-                                       glm::radians(rotation.y),
-                                       glm::radians(rotation.z));
-      modelMatrix    = translationMat * rotMat;
-      invModelMatrix = glm::inverse(modelMatrix);
+      rotationMatrix    = glm::eulerAngleXYZ(glm::radians(rotation.x),
+                                          glm::radians(rotation.y),
+                                          glm::radians(rotation.z));
+      modelMatrix       = translationMat * rotationMatrix;
+      invModelMatrix    = glm::inverse(modelMatrix);
+      invRotationMatrix = glm::inverse(rotationMatrix);
     }
-
-    // virtual vec3 Apply(const vec3 &inVec) const   = 0;
-    // virtual vec3 Inverse(const vec3 &inVec) const = 0;
 
     static vec3 applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat) {
       auto glmVec     = glm::vec4(vec.x, vec.y, vec.z, 1);
@@ -45,59 +53,50 @@ namespace rt {
     vec3 Inverse(const vec3 &inVec) const {
       return applyGlmMat(inVec, invModelMatrix);
     }
-    /*
-      Translate example
 
-      virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec)
-    const override {
+    AABB regenAABB(const AABB &aabb) const {
+      // Generate all 8 vertices of the input AABB
+      // Apply the transform to all 8
+      // Get the bounding box of the rotated bounding box
+      std::vector<vec3> vertices = {
+          vec3(aabb.min.x, aabb.min.y, aabb.min.z),
+          vec3(aabb.min.x, aabb.min.y, aabb.max.z),
+          vec3(aabb.min.x, aabb.max.y, aabb.min.z),
+          vec3(aabb.min.x, aabb.max.y, aabb.max.z),
+          vec3(aabb.max.x, aabb.min.y, aabb.min.z),
+          vec3(aabb.max.x, aabb.min.y, aabb.max.z),
+          vec3(aabb.max.x, aabb.max.y, aabb.min.z),
+          vec3(aabb.max.x, aabb.max.y, aabb.max.z),
+      };
 
-      // Apply inverse translate on ray
-      Ray moved = Ray(r.origin - offset, r.direction, r.time);
+      for (auto &&vert : vertices) {
+        vert = applyGlmMat(vert, modelMatrix);
+      }
 
-      // Check for hit
-      if (!ptr->Hit(moved, t_min, t_max, rec))
-        return false;
+      AABB newAABB = {vec3(infinity), vec3(-infinity)};
 
-      // Apply translate on hit point
-      rec.p += offset;
-      rec.set_face_normal(moved, rec.normal);
-      return true;
+      for (auto &&vert : vertices) {
+        newAABB.min.x = fmin(newAABB.min.x, vert.x);
+        newAABB.min.y = fmin(newAABB.min.y, vert.y);
+        newAABB.min.z = fmin(newAABB.min.z, vert.z);
+
+        newAABB.max.x = fmax(newAABB.max.x, vert.x);
+        newAABB.max.y = fmax(newAABB.max.y, vert.y);
+        newAABB.max.z = fmax(newAABB.max.z, vert.z);
+      }
+
+      return newAABB;
     }
-     */
   };
-  // TODO: Figure out a way to apply transformations without wrapping the object
-  // class Translation : public Transformation {
-  // public:
-  //   vec3 translation;
 
-  //   Translation(vec3 translate) : translation(translate) {}
+  // This is how you use `json.get<Box>()`
+  inline void from_json(const json     &objectJson,
+                        Transformation &transformation) {
+    auto t = objectJson["translation"].get<vec3>();
+    auto r = objectJson["rotation"].get<vec3>();
+  }
 
-  //   virtual vec3 Apply(const vec3 &inVec) const override {
-  //     return inVec + translation;
-  //   }
-  //   virtual vec3 Inverse(const vec3 &inVec) const override {
-  //     return inVec - translation;
-  //   }
-  // };
-
-  // class Rotation : public Transformation {
-  // public:
-  //   vec3                  eulerAngles;
-  //   glm::mat<4, 4, float> rotMat;
-  //   glm::mat<4, 4, float> invRotMat;
-
-  //   Rotation(vec3 eulers) : eulerAngles(eulers) {
-  //     rotMat    = glm::eulerAngleXYZ(glm::radians(eulerAngles.x),
-  //                                 glm::radians(eulerAngles.y),
-  //                                 glm::radians(eulerAngles.z));
-  //     invRotMat = glm::transpose(rotMat);
-  //   }
-
-  //   virtual vec3 Apply(const vec3 &inVec) const override {
-  //     return applyGlmMat(inVec, rotMat);
-  //   }
-  //   virtual vec3 Inverse(const vec3 &inVec) const override {
-  //     return applyGlmMat(inVec, invRotMat);
-  //   }
-  // };
+  inline void to_json(json &j, const Transformation &t) {
+    j = {{"transform", {{"translation", t.translate}, {"rotation", t.rotate}}}};
+  }
 } // namespace rt

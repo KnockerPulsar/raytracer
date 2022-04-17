@@ -44,7 +44,7 @@ namespace rt {
       return true;
     }
 
-    virtual json GetJson() const override {
+    virtual json GetJsonDerived() const override {
       return json{{"type", "box"},
                   {"pos", (boxMin + boxMax) / 2},
                   {"extents", boxMax - boxMin},

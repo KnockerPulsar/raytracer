@@ -34,7 +34,7 @@ namespace rt {
       z  = center.z;
     }
 
-    json GetJson() const override {
+    json GetJsonDerived() const override {
       vec3 center  = vec3((x0 + x1) / 2, (y0 + y1) / 2, z);
       vec3 extents = vec3((x1 - x0), (y1 - y0), 0);
       return json{
@@ -101,7 +101,7 @@ namespace rt {
       y  = center.y;
     }
 
-    json GetJson() const override {
+    json GetJsonDerived() const override {
       vec3 center  = vec3((x0 + x1) / 2, y, (z0 + z1) / 2);
       vec3 extents = vec3((x1 - x0), 0, (z1 - z0));
       return json{
@@ -168,7 +168,7 @@ namespace rt {
       y1 = max.y;
     }
 
-    json GetJson() const override {
+    json GetJsonDerived() const override {
       vec3 center  = vec3(x, (y0 + y1) / 2, (z0 + z1) / 2);
       vec3 extents = vec3(0, (y1 - y0), (z1 - z0));
       return json{
