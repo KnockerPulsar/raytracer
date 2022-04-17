@@ -1,6 +1,7 @@
 #include "../vendor/imgui/imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
+#include "Ray.h"
 #include "RenderAsync.h"
 #include "Scene.h"
 #include "Transformation.h"
@@ -40,7 +41,8 @@ using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
 // Quick way of exporting hardcoded scenes into JSON
 int main() {
-  rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
+  rt::Scene     scene = rt::Scene::Load("cornell.json");
+  // rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
   json          json  = scene;
   std::ofstream output("cornell.json");
   output << std::setw(4) << json << std::endl;

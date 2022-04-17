@@ -27,288 +27,260 @@
         }
     },
     "objects": [
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
+        {
+            "extents": {
+                "x": 0.0,
+                "y": 555.0,
+                "z": 555.0
             },
-            {
-                "extents": {
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.11999999731779099,
+                        "y": 0.44999998807907104,
+                        "z": 0.15000000596046448
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 555.0,
+                "y": 277.5,
+                "z": 277.5
+            },
+            "transform": {
+                "rotation": {
                     "x": 0.0,
-                    "y": 555.0,
-                    "z": 555.0
-                },
-                "material": {
-                    "texture": {
-                        "color": {
-                            "x": 0.11999999731779099,
-                            "y": 0.44999998807907104,
-                            "z": 0.15000000596046448
-                        },
-                        "type": "solid_color"
-                    },
-                    "type": "lambertian"
-                },
-                "pos": {
-                    "x": 555.0,
-                    "y": 277.5,
-                    "z": 277.5
-                },
-                "type": "yz_rect"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "extents": {
-                    "x": 0.0,
-                    "y": 555.0,
-                    "z": 555.0
-                },
-                "material": {
-                    "texture": {
-                        "color": {
-                            "x": 0.6499999761581421,
-                            "y": 0.05000000074505806,
-                            "z": 0.05000000074505806
-                        },
-                        "type": "solid_color"
-                    },
-                    "type": "lambertian"
-                },
-                "pos": {
-                    "x": 0.0,
-                    "y": 277.5,
-                    "z": 277.5
-                },
-                "type": "yz_rect"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "extents": {
-                    "x": 555.0,
                     "y": 0.0,
-                    "z": 555.0
-                },
-                "material": {
-                    "texture": {
-                        "color": {
-                            "x": 2.0,
-                            "y": 2.0,
-                            "z": 2.0
-                        },
-                        "type": "solid_color"
-                    },
-                    "type": "diffuse_light"
-                },
-                "pos": {
-                    "x": 277.5,
-                    "y": 554.0,
-                    "z": 277.5
-                },
-                "type": "xz_rect"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "extents": {
-                    "x": 555.0,
-                    "y": 0.0,
-                    "z": 555.0
-                },
-                "material": {
-                    "fuzz": 0.05000000074505806,
-                    "texture": {
-                        "color": {
-                            "x": 0.800000011920929,
-                            "y": 0.800000011920929,
-                            "z": 0.800000011920929
-                        },
-                        "type": "solid_color"
-                    },
-                    "type": "metal"
-                },
-                "pos": {
-                    "x": 277.5,
-                    "y": 0.0,
-                    "z": 277.5
-                },
-                "type": "xz_rect"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "extents": {
-                    "x": 555.0,
-                    "y": 555.0,
                     "z": 0.0
                 },
-                "material": {
-                    "texture": {
-                        "color": {
-                            "x": 0.7300000190734863,
-                            "y": 0.7300000190734863,
-                            "z": 0.7300000190734863
-                        },
-                        "type": "solid_color"
-                    },
-                    "type": "lambertian"
-                },
-                "pos": {
-                    "x": 277.5,
-                    "y": 277.5,
-                    "z": 555.0
-                },
-                "type": "xy_rect"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 15.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 265.0,
-                        "y": 0.0,
-                        "z": 295.0
-                    }
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 }
             },
-            {
-                "extents": {
-                    "x": 165.0,
-                    "y": 330.0,
-                    "z": 165.0
-                },
-                "material": {
-                    "texture": {
-                        "color": {
-                            "x": 0.7300000190734863,
-                            "y": 0.7300000190734863,
-                            "z": 0.7300000190734863
-                        },
-                        "type": "solid_color"
+            "type": "yz_rect"
+        },
+        {
+            "extents": {
+                "x": 0.0,
+                "y": 555.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.6499999761581421,
+                        "y": 0.05000000074505806,
+                        "z": 0.05000000074505806
                     },
-                    "type": "lambertian"
+                    "type": "solid_color"
                 },
-                "pos": {
-                    "x": 82.5,
-                    "y": 165.0,
-                    "z": 82.5
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 0.0,
+                "y": 277.5,
+                "z": 277.5
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 },
-                "type": "box"
-            }
-        ],
-        [
-            {
-                "transform": {
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 12.0,
-                        "z": 0.0
-                    },
-                    "translation": {
-                        "x": 50.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 }
             },
-            {
-                "extents": {
-                    "x": 100.0,
-                    "y": 100.0,
-                    "z": 100.0
-                },
-                "material": {
-                    "fuzz": 0.699999988079071,
-                    "texture": {
-                        "color": {
-                            "x": 0.800000011920929,
-                            "y": 0.10000000149011612,
-                            "z": 0.800000011920929
-                        },
-                        "type": "solid_color"
+            "type": "yz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 0.0,
+                "z": 555.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
                     },
-                    "type": "metal"
+                    "type": "solid_color"
                 },
-                "pos": {
-                    "x": 50.0,
-                    "y": 50.0,
-                    "z": 50.0
+                "type": "diffuse_light"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 554.0,
+                "z": 277.5
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 },
-                "type": "box"
-            }
-        ]
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "xz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 0.0,
+                "z": 555.0
+            },
+            "material": {
+                "fuzz": 0.05000000074505806,
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    },
+                    "type": "solid_color"
+                },
+                "type": "metal"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 0.0,
+                "z": 277.5
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "xz_rect"
+        },
+        {
+            "extents": {
+                "x": 555.0,
+                "y": 555.0,
+                "z": 0.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 277.5,
+                "y": 277.5,
+                "z": 555.0
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "xy_rect"
+        },
+        {
+            "extents": {
+                "x": 165.0,
+                "y": 330.0,
+                "z": 165.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "pos": {
+                "x": 82.5,
+                "y": 165.0,
+                "z": 82.5
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "box"
+        },
+        {
+            "extents": {
+                "x": 100.0,
+                "y": 100.0,
+                "z": 100.0
+            },
+            "material": {
+                "fuzz": 0.699999988079071,
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.10000000149011612,
+                        "z": 0.800000011920929
+                    },
+                    "type": "solid_color"
+                },
+                "type": "metal"
+            },
+            "pos": {
+                "x": 50.0,
+                "y": 50.0,
+                "z": 50.0
+            },
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "box"
+        }
     ],
     "settings": {
         "background_color": {

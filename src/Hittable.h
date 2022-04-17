@@ -41,7 +41,10 @@ namespace rt {
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
 
     virtual json GetJson() const {
-      return json{this->GetJsonDerived(), transformation};
+      json derived = this->GetJsonDerived();
+      json tJson   = transformation;
+      derived.update(tJson);
+      return derived;
     }
 
     virtual json GetJsonDerived() const { return {"type", "unimplemented"}; }

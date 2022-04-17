@@ -17,14 +17,10 @@ namespace rt {
     vec3                 center;
     shared_ptr<Material> mat_ptr;
 
+
+    Sphere() = default;
     Sphere(float r, vec3 pos, shared_ptr<Material> m)
         : radius(r), center(pos), mat_ptr(m) {}
-
-    Sphere(nlohmann::json sphereJson) {
-      center  = sphereJson["pos"].get<vec3>();
-      radius  = sphereJson["radius"].get<float>();
-      mat_ptr = MaterialFactory::FromJson(sphereJson["material"]);
-    }
 
     bool Hit(const Ray &r, float t_min, float t_max,
              HitRecord &rec) const override;
@@ -85,6 +81,13 @@ namespace rt {
     return true;
   }
 
-  void to_json(json &j, const Sphere &s) { j = s.GetJson(); }
+  inline void from_json(const json &j, Sphere &s) {
+    s.center  = j["pos"].get<vec3>();
+    s.radius  = j["radius"].get<float>();
+    s.mat_ptr = MaterialFactory::FromJson(j["material"]);
+    s.transformation = j["transform"].get<Transformation>();
+  }
+
+  inline void to_json(json &j, const Sphere &s) { j = s.GetJson(); }
 
 } // namespace rt

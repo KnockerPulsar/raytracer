@@ -19,21 +19,6 @@ namespace rt {
            shared_ptr<Material> mat)
         : x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
 
-    XYRect(json objectJson) {
-      vec3 center  = objectJson["pos"].get<vec3>();
-      vec3 extents = objectJson["extents"].get<vec3>();
-      mp           = MaterialFactory::FromJson(objectJson["material"]);
-
-      vec3 min = center - extents / 2;
-      vec3 max = center + extents / 2;
-
-      x0 = min.x;
-      x1 = max.x;
-      y0 = min.y;
-      y1 = max.y;
-      z  = center.z;
-    }
-
     json GetJsonDerived() const override {
       vec3 center  = vec3((x0 + x1) / 2, (y0 + y1) / 2, z);
       vec3 extents = vec3((x1 - x0), (y1 - y0), 0);
@@ -85,21 +70,6 @@ namespace rt {
     XZRect(float _x0, float _x1, float _y0, float _y1, float _y,
            shared_ptr<Material> mat)
         : x0(_x0), x1(_x1), z0(_y0), z1(_y1), y(_y), mp(mat) {}
-
-    XZRect(json objectJson) {
-      vec3 center  = objectJson["pos"].get<vec3>();
-      vec3 extents = objectJson["extents"].get<vec3>();
-      mp           = MaterialFactory::FromJson(objectJson["material"]);
-
-      vec3 min = center - extents / 2;
-      vec3 max = center + extents / 2;
-
-      x0 = min.x;
-      x1 = max.x;
-      z0 = min.z;
-      z1 = max.z;
-      y  = center.y;
-    }
 
     json GetJsonDerived() const override {
       vec3 center  = vec3((x0 + x1) / 2, y, (z0 + z1) / 2);
@@ -153,21 +123,6 @@ namespace rt {
            shared_ptr<Material> mat)
         : y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
 
-    YZRect(json objectJson) {
-      vec3 center  = objectJson["pos"].get<vec3>();
-      vec3 extents = objectJson["extents"].get<vec3>();
-      mp           = MaterialFactory::FromJson(objectJson["material"]);
-
-      vec3 min = center - extents / 2;
-      vec3 max = center + extents / 2;
-
-      x  = center.x;
-      z0 = min.z;
-      z1 = max.z;
-      y0 = min.y;
-      y1 = max.y;
-    }
-
     json GetJsonDerived() const override {
       vec3 center  = vec3(x, (y0 + y1) / 2, (z0 + z1) / 2);
       vec3 extents = vec3(0, (y1 - y0), (z1 - z0));
@@ -210,6 +165,52 @@ namespace rt {
   };
 
   void to_json(json &j, const XYRect &xy) { j = xy.GetJson(); }
+  void from_json(const json &j, XYRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x0 = min.x;
+    plane.x1 = max.x;
+    plane.y0 = min.y;
+    plane.y1 = max.y;
+    plane.z  = center.z;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
+
   void to_json(json &j, const XZRect &xz) { j = xz.GetJson(); }
+  void from_json(const json &j, XZRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x0 = min.x;
+    plane.x1 = max.x;
+    plane.z0 = min.z;
+    plane.z1 = max.z;
+    plane.y  = center.y;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
   void to_json(json &j, const YZRect &yz) { j = yz.GetJson(); }
+  void from_json(const json &j, YZRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x  = center.x;
+    plane.z0 = min.z;
+    plane.z1 = max.z;
+    plane.y0 = min.y;
+    plane.y1 = max.y;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
 } // namespace rt

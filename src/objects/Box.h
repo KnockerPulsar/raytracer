@@ -67,6 +67,7 @@ namespace rt {
     auto mat = MaterialFactory::FromJson(objectJson["material"]);
 
     b.Create(min, max, mat);
+    b.transformation = objectJson["transform"].get<Transformation>();
   }
 
   inline void to_json(json &j, const Box &b) { j = b.GetJson(); }
