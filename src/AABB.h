@@ -1,9 +1,12 @@
 #pragma once
 
+#include "Constants.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
 #include <cmath>
+#include <raylib.h>
 #include <tuple>
+#include <vector>
 
 namespace rt {
   using rt::Ray;
@@ -16,6 +19,38 @@ namespace rt {
     AABB(const vec3 &a, const vec3 &b) {
       min = a;
       max = b;
+    }
+
+    // Build an AABB from points
+    AABB(std::vector<vec3> points) {
+      vec3 _min = vec3(infinity, infinity, infinity);
+      vec3 _max = -min;
+      for (auto &&point : points) {
+        min.x = fmin(point.x, min.x);
+        min.y = fmin(point.y, min.y);
+        min.z = fmin(point.z, min.z);
+
+        max.x = fmax(point.x, max.x);
+        max.y = fmax(point.y, max.y);
+        max.z = fmax(point.z, max.z);
+      }
+      min = _min;
+      max = _max;
+
+      // In case the points are coplanar
+      float eps = 1e-6;
+      if (min.x == max.x) {
+        min.x -= eps;
+        max.x += eps;
+      }
+      if (min.y == max.y) {
+        min.y -= eps;
+        max.y += eps;
+      }
+      if (min.z == max.z) {
+        min.z -= eps;
+        max.z += eps;
+      }
     }
 
     bool Hit(const Ray &r, float tMin, float tMax) const {
@@ -59,10 +94,12 @@ namespace rt {
     }
 
     static AABB SurroundingBox(AABB b0, AABB b1) {
-      vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y),
+      vec3 smol(fmin(b0.min.x, b1.min.x),
+                fmin(b0.min.y, b1.min.y),
                 fmin(b0.min.z, b1.min.z));
 
-      vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y),
+      vec3 big(fmax(b0.max.x, b1.max.x),
+               fmax(b0.max.y, b1.max.y),
                fmax(b0.max.z, b1.max.z));
 
       return AABB(smol, big);

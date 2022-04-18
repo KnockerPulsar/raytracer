@@ -56,7 +56,7 @@ int main() {
   // Only used when creating hardcoded scenes
   const int   imageWidth      = 600;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 100;
+  const int   samplesPerPixel = 10;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;

@@ -674,29 +674,30 @@ namespace rt {
     auto red     = make_shared<DiffuseLight>(vec3(3, 0, 0));
     auto magenta = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
         CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
-    auto blue = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
+    auto blue    = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
         CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
 
-    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+    auto earth =
+        make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
 
-    auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, earth);
-    plane->setTransformation(vec3(0,1,0), (0, 0, 0));
+    auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
+    plane->setTransformation(vec3(-3, 10, 0), (0, 0, 0));
 
-    auto xzplane = make_shared<XZRect>(-2, 2, -0.5, 0.5, 1, magenta);
+    auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
 
     std::vector<sPtr<Hittable>> obj = {plane, xzplane};
 
     world //
-        // .Add(make_shared<Triangle>(
-            // vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
-        .Add(plane);
-        // .Add(xzplane);
+        .Add(make_shared<Triangle>(
+            vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
+        .Add(plane)
+        .Add(xzplane);
 
-    // HittableList bvh;
-    // bvh.Add(make_shared<BVHNode>(world, 0, 1));
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
 
     s = {
-        .world           = world,
+        .world           = bvh,
         .cam             = cam,
         .maxDepth        = maxDepth,
         .imageWidth      = imageWidth,

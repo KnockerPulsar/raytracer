@@ -56,6 +56,14 @@ namespace rt {
     }
 
     virtual bool
-    BoundingBox(float t0, float t1, AABB &outputBox) const override {}
+    BoundingBox(float t0, float t1, AABB &outputBox) const override {
+      outputBox = transformation.regenAABB(AABB({this->t0.v0.p,
+                                                 this->t0.v1.p,
+                                                 this->t0.v2.p,
+                                                 this->t1.v0.p,
+                                                 this->t1.v1.p,
+                                                 this->t1.v2.p}));
+      return true;
+    }
   };
 } // namespace rt

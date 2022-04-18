@@ -28,7 +28,7 @@ namespace rt {
     }
     Triangle(vec3 p0, vec3 p1, vec3 p2, sPtr<Material> mat)
         : v0(p0), v1(p1), v2(p2), mp(mat) {
-    vec3 v01 = (v1.p - v0.p).Normalize();
+      vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
       normal = vec3::DotProd(v01, v02);
@@ -71,10 +71,9 @@ namespace rt {
       rec.p      = p;
       rec.normal = normal;
 
-
-      
       // UV interpolation
-      // source: https://www.gamedev.net/forums/topic/513814-raytracing-and-texture-mapping-triangles/
+      // source:
+      // https://www.gamedev.net/forums/topic/513814-raytracing-and-texture-mapping-triangles/
       vec3 properUVs = v0.uvw + (v1.uvw - v0.uvw) * u + (v2.uvw - v0.uvw) * v;
 
       rec.u       = properUVs.x;
@@ -86,6 +85,9 @@ namespace rt {
     }
 
     virtual bool
-    BoundingBox(float t0, float t1, AABB &outputBox) const override {}
+    BoundingBox(float t0, float t1, AABB &outputBox) const override {
+      outputBox = transformation.regenAABB(AABB({v0.p, v1.p, v2.p}));
+      return true;
+    }
   };
 } // namespace rt
