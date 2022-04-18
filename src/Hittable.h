@@ -88,37 +88,9 @@ namespace rt {
 
     void setTransformation(vec3 translate = vec3::Zero(),
                            vec3 rotate    = vec3::Zero()) {
-      std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
+      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
       transformation = Transformation(translate, rotate);
-      std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
-    }
-  };
-
-  class Translate : public Hittable {
-  public:
-    shared_ptr<Hittable> ptr;
-    vec3                 offset;
-
-    Translate(shared_ptr<Hittable> p, const vec3 &dis) : ptr(p), offset(dis) {}
-    virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rec) const override {
-      Ray moved = Ray(r.origin - offset, r.direction, r.time);
-
-      if (!ptr->Hit(moved, t_min, t_max, rec))
-        return false;
-
-      rec.p += offset;
-      rec.set_face_normal(moved, rec.normal);
-      return true;
-    }
-
-    virtual bool BoundingBox(float t0, float t1,
-                             AABB &outputBox) const override {
-      if (!ptr->BoundingBox(t0, t1, outputBox))
-        return false;
-
-      outputBox = AABB(outputBox.min + offset, outputBox.max + offset);
-      return true;
+      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
     }
   };
 } // namespace rt

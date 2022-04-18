@@ -17,11 +17,7 @@ namespace rt {
     DiffuseLight(sPtr<Texture> a) : emit(a) {}
 
     DiffuseLight(vec3 c) : emit(std::make_shared<SolidColor>(c)) {}
-
-    DiffuseLight(json materialJson) {
-      emit = TextureFactory::FromJson(materialJson["texture"]);
-    }
-
+    
     virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
                          Ray &scattered) const override {
       return false;

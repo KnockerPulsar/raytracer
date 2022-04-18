@@ -18,21 +18,28 @@
 #include "objects/Box.h"
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
+#include "objects/Plane.h"
 #include "objects/Sphere.h"
+#include "objects/Triangle.h"
+#include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
 #include "textures/NoiseTexture.h"
+#include "textures/Texture.h"
 #include <bits/types/FILE.h>
 #include <fstream>
 #include <memory>
 #include <ostream>
 #include <raylib.h>
 #include <tuple>
+#include <vector>
 
 using nlohmann::json;
 
 namespace rt {
 
-  Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Scene1(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
                       int samplesPerPixel) {
     Scene        s;
     HittableList world;
@@ -86,7 +93,9 @@ namespace rt {
     return s;
   } // namespace rt
 
-  Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Scene2(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
                       int samplesPerPixel) {
     Scene        s;
     float        R = cos(pi / 4);
@@ -133,8 +142,11 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Random(int imageWidth, int imageHeight, int maxDepth,
-                      int samplesPerPixel, int ballGridWidth,
+  Scene Scene::Random(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
+                      int samplesPerPixel,
+                      int ballGridWidth,
                       int ballGridHeight) {
     Scene        s;
     HittableList world;
@@ -210,9 +222,12 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight,
-                                   int maxDepth, int samplesPerPixel,
-                                   int ballGridWidth, int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(int imageWidth,
+                                   int imageHeight,
+                                   int maxDepth,
+                                   int samplesPerPixel,
+                                   int ballGridWidth,
+                                   int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -297,7 +312,9 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::TwoSpheres(int imageWidth,
+                          int imageHeight,
+                          int maxDepth,
                           int samplesPerPixel) {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
@@ -340,7 +357,9 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Earth(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Earth(int imageWidth,
+                     int imageHeight,
+                     int maxDepth,
                      int samplesPerPixel) {
     Scene        s;
     HittableList world;
@@ -385,7 +404,9 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Light(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Light(int imageWidth,
+                     int imageHeight,
+                     int maxDepth,
                      int samplesPerPixel) {
     Scene        s;
     HittableList world;
@@ -435,7 +456,9 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::CornellBox(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::CornellBox(int imageWidth,
+                          int imageHeight,
+                          int maxDepth,
                           int samplesPerPixel) {
 
     Scene        s;
@@ -462,15 +485,15 @@ namespace rt {
                0.0,
                1.0);
 
-    auto red        = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
-    auto white      = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
-    auto green      = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
-    auto light      = make_shared<DiffuseLight>(vec3(2, 2, 2));
-    auto purplishMetal      = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
-    auto chrome      = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
-    auto dielectric = make_shared<Dielectric>(1.5f);
-    auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
-    auto checker    = std::make_shared<CheckerTexture>(
+    auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
+    auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
+    auto green         = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
+    auto light         = make_shared<DiffuseLight>(vec3(2, 2, 2));
+    auto purplishMetal = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
+    auto chrome        = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
+    auto dielectric    = make_shared<Dielectric>(1.5f);
+    auto noise   = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
+    auto checker = std::make_shared<CheckerTexture>(
         vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
@@ -573,7 +596,9 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TransformationTest(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::TransformationTest(int imageWidth,
+                                  int imageHeight,
+                                  int maxDepth,
                                   int samplesPerPixel) {
 
     Scene        s;
@@ -620,4 +645,67 @@ namespace rt {
 
     return s;
   }
+
+  Scene Scene::PlaneTest(int imageWidth,
+                         int imageHeight,
+                         int maxDepth,
+                         int samplesPerPixel) {
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(0, 3, 0);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0.1);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(0, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus);
+
+    auto red     = make_shared<DiffuseLight>(vec3(3, 0, 0));
+    auto magenta = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
+        CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
+    auto blue = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
+        CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
+
+    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+
+    auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, earth);
+    plane->setTransformation(vec3(0,1,0), (0, 0, 0));
+
+    auto xzplane = make_shared<XZRect>(-2, 2, -0.5, 0.5, 1, magenta);
+
+    std::vector<sPtr<Hittable>> obj = {plane, xzplane};
+
+    world //
+        // .Add(make_shared<Triangle>(
+            // vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
+        .Add(plane);
+        // .Add(xzplane);
+
+    // HittableList bvh;
+    // bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+    s.objects.objects = obj;
+
+    return s;
+  } // namespace rt
 } // namespace rt

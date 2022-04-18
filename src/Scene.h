@@ -14,11 +14,12 @@ namespace rt {
   class Scene {
 
   public:
-    HittableList world;    // Might contain a BVH, harder to serialize
-    HittableList objects;  // Should always contain a linear list of object that's easy to iterate over
-    Camera       cam;
-    int          maxDepth, imageWidth, imageHeight, samplesPerPixel;
-    vec3         backgroundColor;
+    HittableList world;   // Might contain a BVH, harder to serialize
+    HittableList objects; // Should always contain a linear list of object
+                          // that's easy to iterate over
+    Camera cam;
+    int    maxDepth, imageWidth, imageHeight, samplesPerPixel;
+    vec3   backgroundColor;
 
     static Scene Scene1(int imageWidth, int imageHeight, int maxDepth,
                         int samplesPerPixel);
@@ -49,8 +50,10 @@ namespace rt {
 
     static Scene Load(std::string path);
 
-    static Scene TransformationTest(int imageWidth, int imageHeight, int maxDepth,
-                        int samplesPerPixel);
+    static Scene TransformationTest(int imageWidth, int imageHeight,
+                                    int maxDepth, int samplesPerPixel);
+    static Scene PlaneTest(int imageWidth, int imageHeight, int maxDepth,
+                           int samplesPerPixel);
 
     json GetObjArray() const {
       std::vector<json> objJsons;
@@ -67,11 +70,11 @@ namespace rt {
   inline void to_json(json &j, const Scene &s) {
     json objArr = s.GetObjArray();
     j           = json{{"settings",
-              {
-                  {"resolution", {{"x", s.imageWidth}, {"y", s.imageHeight}}},
-                  {"background_color", s.backgroundColor},
-                  {"num_samples", s.samplesPerPixel},
-                  {"max_depth", s.maxDepth},
+                        {
+                            {"resolution", {{"x", s.imageWidth}, {"y", s.imageHeight}}},
+                            {"background_color", s.backgroundColor},
+                            {"num_samples", s.samplesPerPixel},
+                            {"max_depth", s.maxDepth},
               }},
              s.cam,
              {"objects", objArr}};

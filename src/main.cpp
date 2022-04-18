@@ -40,7 +40,7 @@
 using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
 // Quick way of exporting hardcoded scenes into JSON
-int main() {
+int main1() {
   rt::Scene     scene = rt::Scene::Load("cornell.json");
   // rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
   json          json  = scene;
@@ -51,12 +51,12 @@ int main() {
   return 0;
 }
 
-int main1() {
+int main() {
   // Rendering constants for easy modifications.
   // Only used when creating hardcoded scenes
   const int   imageWidth      = 600;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 20;
+  const int   samplesPerPixel = 100;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
@@ -68,7 +68,7 @@ int main1() {
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
-  asyncRenderData.currScene = rt::Scene::CornellBox(
+  asyncRenderData.currScene = rt::Scene::PlaneTest(
       imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   if (fullscreen)
@@ -81,12 +81,12 @@ int main1() {
     if (allFinished) {
       RenderAsync::ResetThreads(asyncRenderData);
 
-      // for (auto &&obj : asyncRenderData.currScene.objects.objects) {
-      //   auto t = obj->transformation.translate;
-      //   auto r = obj->transformation.rotate;
-      //   r.z += 1.0f;
-      //   obj->transformation = rt::Transformation(t,r);
-      // }
+      for (auto &&obj : asyncRenderData.currScene.objects.objects) {
+        auto t = obj->transformation.translate;
+        auto r = obj->transformation.rotate;
+        r.z += 1.0f;
+        obj->setTransformation(t,r);
+      }
     }
 
     RenderAsync::CheckInput(fullscreen, showProg);

@@ -67,9 +67,9 @@ namespace rt {
     float                     x0, x1, z0, z1, y;
 
     XZRect() = default;
-    XZRect(float _x0, float _x1, float _y0, float _y1, float _y,
+    XZRect(float _x0, float _x1, float _z0, float _z1, float _y,
            shared_ptr<Material> mat)
-        : x0(_x0), x1(_x1), z0(_y0), z1(_y1), y(_y), mp(mat) {}
+        : x0(_x0), x1(_x1), z0(_z0), z1(_z1), y(_y), mp(mat) {}
 
     json GetJsonDerived() const override {
       vec3 center  = vec3((x0 + x1) / 2, y, (z0 + z1) / 2);

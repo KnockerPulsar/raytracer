@@ -276,8 +276,8 @@ namespace rt {
     ard.threads.clear();
     std::fill(ard.finishedThreads.begin(), ard.finishedThreads.end(), false);
 
-    if (ard.currScene.cam.lookFrom.x < -20 || ard.currScene.cam.lookFrom.x > 20)
-      ard.currScene.cam.moveDir *= -1;
+    // if (ard.currScene.cam.lookFrom.x < -20 || ard.currScene.cam.lookFrom.x > 20)
+    //   ard.currScene.cam.moveDir *= -1;
 
     ard.currScene.cam.Fwd(GetFrameTime());
 
