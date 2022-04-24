@@ -1,4 +1,4 @@
-#include "../vendor/imgui/imgui.h"
+#include "../vendor/rlImGui/imgui/imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Ray.h"

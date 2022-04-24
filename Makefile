@@ -16,7 +16,7 @@ executable := Raytracer
 target := $(buildDir)/$(executable)
 sources := $(call rwildcard,src/,*.cpp)
 sources += $(wildcard vendor/rlImGui/*.cpp)
-sources += $(wildcard vendor/imgui/*.cpp)
+sources += $(wildcard vendor/rlImGui/imgui/*.cpp)
 objects := $(patsubst src/%, $(buildDir)/%, $(patsubst %.cpp, %.o, $(sources)))
 depends := $(patsubst %.o, %.d, $(objects))
 
