@@ -10,17 +10,9 @@
 #include <iostream>
 
 /*
- TODO: finish json reading/writing
-    Finish transform serialization/deserialization
-    Add a way to compose/update a transformation
+ TODO: 
     Configure clangd to format in a better way
-    Clean up code a naming
-*/
-
-/*
-  TODO: Figure out to streamline planes into only one class
-    Perhaps we can use the base XZ plane and rotate it to create YZ and XZ
-  (perhaps also arbitrary planes?)
+    Clean up code and naming
 */
 
 // X is the right axis

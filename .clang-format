@@ -7,3 +7,4 @@ IndentWidth: 2
 NamespaceIndentation: All
 BinPackArguments: false
 BinPackParameters: false
+ColumnLimit: 120
