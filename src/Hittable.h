@@ -3,6 +3,7 @@
 #include "AABB.h"
 #include "Constants.h"
 #include "Defs.h"
+#include "IRasterizable.h"
 #include "Ray.h"
 #include "Transformation.h"
 #include "Util.h"
@@ -31,12 +32,11 @@ namespace rt {
     }
   };
 
-  class Hittable {
+  class Hittable : public IRasterizable {
   public:
     Transformation transformation;
 
-    virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rec) const = 0;
+    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
 
@@ -49,8 +49,7 @@ namespace rt {
 
     virtual json GetJsonDerived() const { return {"type", "unimplemented"}; }
 
-    virtual bool HitTransformed(const Ray &r, float t_min, float t_max,
-                                HitRecord &rec) {
+    virtual bool HitTransformed(const Ray &r, float t_min, float t_max, HitRecord &rec) {
 
       // Need to apply inverse translation on ray origin
       // And translation on ray hit point
@@ -62,22 +61,18 @@ namespace rt {
 
       // Apply inverse transformations in reverse
       transformedRay.origin    = transformation.Inverse(r.origin);
-      transformedRay.direction = Transformation::applyGlmMat(
-          r.direction, transformation.invRotationMatrix);
+      transformedRay.direction = Transformation::applyGlmMat(r.direction, transformation.invRotationMatrix);
 
       if (!this->Hit(transformedRay, t_min, t_max, rec))
         return false;
 
       rec.p = transformation.Apply(rec.p);
-      rec.set_face_normal(transformedRay,
-                          Transformation::applyGlmMat(
-                              rec.normal, transformation.rotationMatrix));
+      rec.set_face_normal(transformedRay, Transformation::applyGlmMat(rec.normal, transformation.rotationMatrix));
 
       return true;
     }
 
-    virtual bool BoundingBoxTransformed(float t0, float t1,
-                                        AABB &outputBox) const {
+    virtual bool BoundingBoxTransformed(float t0, float t1, AABB &outputBox) const {
       if (!this->BoundingBox(t0, t1, outputBox))
         return false;
 
@@ -86,8 +81,7 @@ namespace rt {
       ;
     }
 
-    void setTransformation(vec3 translate = vec3::Zero(),
-                           vec3 rotate    = vec3::Zero()) {
+    void setTransformation(vec3 translate = vec3::Zero(), vec3 rotate = vec3::Zero()) {
       // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
       transformation = Transformation(translate, rotate);
       // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;

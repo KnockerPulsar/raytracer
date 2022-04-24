@@ -15,8 +15,8 @@
 #include <utility>
 #include <vector>
 
-#include "../vendor/imgui/imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
+#include "../vendor/rlImGui/imgui/imgui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
 #include "Constants.h"
@@ -282,18 +282,5 @@ namespace rt {
     ard.currScene.cam.Fwd(GetFrameTime());
 
     RenderAsync::Start(ard);
-  }
-
-  void RenderAsync::CheckInput(bool &fullscreen, bool &showProg) {
-    int keyPressed = GetKeyPressed();
-    switch (keyPressed) {
-    case KEY_F: {
-      fullscreen = !fullscreen;
-      ToggleFullscreen();
-    }
-    case KEY_SPACE: {
-      showProg = !showProg;
-    }
-    }
   }
 } // namespace rt

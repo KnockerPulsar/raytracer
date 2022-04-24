@@ -52,7 +52,10 @@ namespace rt {
 
     static Scene TransformationTest(int imageWidth, int imageHeight,
                                     int maxDepth, int samplesPerPixel);
+
     static Scene PlaneTest(int imageWidth, int imageHeight, int maxDepth,
+                           int samplesPerPixel);
+    static Scene RasterTest(int imageWidth, int imageHeight, int maxDepth,
                            int samplesPerPixel);
 
     json GetObjArray() const {

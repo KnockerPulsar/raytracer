@@ -3,7 +3,7 @@
 # ggdb / g             	-> enable debugging
 # DGAMMA_CORRECTION			-> Turn gamma correction on or off. 
 # DFAST_EXIT						-> Compile with fast thread exiting on, seems to lower performance a bit
-defines := -DGAMMA_CORRECTION -DFAST_EXIT -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp  
+defines := -ggdb -DGAMMA_CORRECTION -DFAST_EXIT -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp  
 
 
 # Define custom functions
@@ -16,12 +16,12 @@ executable := Raytracer
 target := $(buildDir)/$(executable)
 sources := $(call rwildcard,src/,*.cpp)
 sources += $(wildcard vendor/rlImGui/*.cpp)
-sources += $(wildcard vendor/imgui/*.cpp)
+sources += $(wildcard vendor/rlImGui/imgui/*.cpp)
 objects := $(patsubst src/%, $(buildDir)/%, $(patsubst %.cpp, %.o, $(sources)))
 depends := $(patsubst %.o, %.d, $(objects))
 
 # Added -ggdb for enabling debugging, note that it causes less performance
-compileFlags := -std=c++17 -I C:\raylib\raylib\src 
+compileFlags := -std=c++17 -I vendor/rlImGui/imgui
 compileFlags += $(defines)
 
 linkFlags = -L lib/$(platform) -l raylib

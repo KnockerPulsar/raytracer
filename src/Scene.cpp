@@ -37,10 +37,7 @@ using nlohmann::json;
 
 namespace rt {
 
-  Scene Scene::Scene1(int imageWidth,
-                      int imageHeight,
-                      int maxDepth,
-                      int samplesPerPixel) {
+  Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(-1, 1, 1);
@@ -53,14 +50,7 @@ namespace rt {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
@@ -93,10 +83,7 @@ namespace rt {
     return s;
   } // namespace rt
 
-  Scene Scene::Scene2(int imageWidth,
-                      int imageHeight,
-                      int maxDepth,
-                      int samplesPerPixel) {
+  Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     float        R = cos(pi / 4);
     HittableList world;
@@ -110,14 +97,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.1f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto material_left  = make_shared<Lambertian>(vec3(0, 0, 1));
     auto material_right = make_shared<Lambertian>(vec3(1, 0, 0));
@@ -142,12 +122,8 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Random(int imageWidth,
-                      int imageHeight,
-                      int maxDepth,
-                      int samplesPerPixel,
-                      int ballGridWidth,
-                      int ballGridHeight) {
+  Scene Scene::Random(
+      int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -161,14 +137,7 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -203,8 +172,7 @@ namespace rt {
     world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
     auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
-    world.Add(make_shared<Sphere>(
-        1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
+    world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
@@ -222,12 +190,8 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(int imageWidth,
-                                   int imageHeight,
-                                   int maxDepth,
-                                   int samplesPerPixel,
-                                   int ballGridWidth,
-                                   int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(
+      int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -241,23 +205,12 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus,
-               0.0,
-               1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
-    auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1),
-                                                    vec3(0.9, 0.9, 0.9));
+    auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
     auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
-    world.Add(make_shared<Sphere>(
-        1000, vec3(0, -1000, 0), make_shared<Lambertian>(checker)));
+    world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(checker)));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -271,8 +224,7 @@ namespace rt {
             auto albedo    = vec3::Random() * vec3::Random();
             sphereMaterial = make_shared<Lambertian>(albedo);
             vec3 center2   = center + vec3(0, RandomFloat(0, .5), 0);
-            world.Add(make_shared<MovingSphere>(
-                center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+            world.Add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           } else if (chooseMat < 0.95) {
             // Metal
             auto  albedo   = vec3::Random(0.5, 1);
@@ -312,10 +264,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TwoSpheres(int imageWidth,
-                          int imageHeight,
-                          int maxDepth,
-                          int samplesPerPixel) {
+  Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     Camera       cam(vec3(13, 2, 3),
@@ -339,10 +288,8 @@ namespace rt {
     auto perText = make_shared<NoiseTexture>(4.0f);
 
     // No need to use a BVH since there are only two spheres
-    objects.Add(make_shared<Sphere>(
-        10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
-    objects.Add(make_shared<Sphere>(
-        10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
+    objects.Add(make_shared<Sphere>(10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
+    objects.Add(make_shared<Sphere>(10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
     s = {
         .world           = objects,
@@ -357,10 +304,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Earth(int imageWidth,
-                     int imageHeight,
-                     int maxDepth,
-                     int samplesPerPixel) {
+  Scene Scene::Earth(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
@@ -374,16 +318,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus,
-               0.0,
-               1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto earthTexture = make_shared<ImageTexture>("earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
@@ -404,10 +339,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Light(int imageWidth,
-                     int imageHeight,
-                     int maxDepth,
-                     int samplesPerPixel) {
+  Scene Scene::Light(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
@@ -421,25 +353,14 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus,
-               0.0,
-               1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto perText   = make_shared<NoiseTexture>(4.0f);
     auto diffLight = make_shared<DiffuseLight>(vec3(4, 4, 4));
 
-    world.Add(make_shared<Sphere>(
-        1000, vec3(0, -1000, 0), make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(perText)));
 
-    world.Add(make_shared<Sphere>(
-        2, vec3(0, 2, 0), make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(2, vec3(0, 2, 0), make_shared<Lambertian>(perText)));
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
@@ -456,10 +377,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::CornellBox(int imageWidth,
-                          int imageHeight,
-                          int maxDepth,
-                          int samplesPerPixel) {
+  Scene Scene::CornellBox(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
 
     Scene        s;
     HittableList world;
@@ -474,16 +392,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus,
-               0.0,
-               1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
     auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
@@ -492,9 +401,8 @@ namespace rt {
     auto purplishMetal = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
     auto chrome        = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
     auto dielectric    = make_shared<Dielectric>(1.5f);
-    auto noise   = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
-    auto checker = std::make_shared<CheckerTexture>(
-        vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
+    auto noise         = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
+    auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
@@ -596,10 +504,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TransformationTest(int imageWidth,
-                                  int imageHeight,
-                                  int maxDepth,
-                                  int samplesPerPixel) {
+  Scene Scene::TransformationTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
 
     Scene        s;
     HittableList world;
@@ -613,24 +518,20 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
+    auto earth           = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
 
-    auto sphere = make_shared<Box>(
-        vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
-    sphere->transformation = Transformation(vec3(0, 0, 0), vec3(0, 45, 0));
+    auto box               = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
+    auto sphere            = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
+    sphere->transformation = Transformation(vec3(-1, -1, 0));
+    box->transformation    = Transformation(vec3(1, -1, 0), vec3(0, 45, 0));
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
     world //
+        .Add(box)
         .Add(sphere);
 
     s = {
@@ -646,10 +547,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::PlaneTest(int imageWidth,
-                         int imageHeight,
-                         int maxDepth,
-                         int samplesPerPixel) {
+  Scene Scene::PlaneTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(0, 3, 0);
@@ -662,23 +560,14 @@ namespace rt {
     vec3  moveDir     = vec3(0, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom,
-               lookAt,
-               vUp,
-               moveDir,
-               fov,
-               (float)imageWidth / imageHeight,
-               aperature,
-               distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto red     = make_shared<DiffuseLight>(vec3(3, 0, 0));
-    auto magenta = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
-        CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
-    auto blue    = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
-        CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
+    auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
+    auto magenta =
+        make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
+    auto blue = make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
 
-    auto earth =
-        make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
 
     auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
     plane->setTransformation(vec3(-3, 10, 0), (0, 0, 0));
@@ -688,8 +577,7 @@ namespace rt {
     std::vector<sPtr<Hittable>> obj = {plane, xzplane};
 
     world //
-        .Add(make_shared<Triangle>(
-            vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
+        .Add(make_shared<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
         .Add(plane)
         .Add(xzplane);
 
@@ -709,4 +597,42 @@ namespace rt {
 
     return s;
   } // namespace rt
+
+  Scene Scene::RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(4, 4, 4);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0.1);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(0, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+
+    auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
+
+    auto box = ms<Box>(Box(vec3(1, 1, 1), vec3(2, 2, 2), red));
+
+    std::vector<sPtr<Hittable>> obj = {box};
+
+    world //
+        .Add(box);
+
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+    s.objects.objects = obj;
+
+    return s;
+  }
 } // namespace rt

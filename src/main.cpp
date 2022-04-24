@@ -1,4 +1,3 @@
-#include "../vendor/imgui/imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Ray.h"
@@ -8,9 +7,11 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <raylib.h>
+#include <vector>
 
 /*
- TODO: 
+ TODO:
     Configure clangd to format in a better way
     Clean up code and naming
 */
@@ -33,9 +34,9 @@ using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
 
 // Quick way of exporting hardcoded scenes into JSON
 int main1() {
-  rt::Scene     scene = rt::Scene::Load("cornell.json");
+  rt::Scene scene = rt::Scene::Load("cornell.json");
   // rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
-  json          json  = scene;
+  json          json = scene;
   std::ofstream output("cornell.json");
   output << std::setw(4) << json << std::endl;
   output.close();
@@ -53,47 +54,75 @@ int main() {
   bool        fullscreen      = false;
   bool        showProg        = false;
   int         incRender       = 1;
+  bool        raster          = true;
 
   SceneID sceneID = SceneID::cornell;
 
-  AsyncRenderData asyncRenderData = RenderAsync::Perpare(
-      imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
+  AsyncRenderData asyncRenderData =
+      RenderAsync::Perpare(imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
 
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
-  asyncRenderData.currScene = rt::Scene::PlaneTest(
-      imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
+  asyncRenderData.currScene =
+      rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   if (fullscreen)
     ToggleFullscreen();
 
+  auto onFrameRender = [&] {
+    for (auto &&obj : asyncRenderData.currScene.world.objects) {
+      auto t = obj->transformation.translate;
+      auto r = obj->transformation.rotate;
+      r.y += 1.0f;
+      obj->setTransformation(t, r);
+    }
+  };
+
+  auto checkInput = [&] {
+    int keyPressed = GetKeyPressed();
+    switch (keyPressed) {
+    case KEY_F: {
+      fullscreen = !fullscreen;
+      ToggleFullscreen();
+      break;
+    }
+    case KEY_SPACE: {
+      showProg = !showProg;
+      break;
+    }
+    case KEY_E : {
+      raster = !raster;
+      break;
+    }
+    }
+  };
+
   bool allFinished = true;
   while (!WindowShouldClose()) {
+    checkInput();
+    if (!raster) {
+      // Update camera and start async again if last frame is done
+      if (allFinished) {
+        RenderAsync::ResetThreads(asyncRenderData);
 
-    // Update camera and start async again if last frame is done
-    if (allFinished) {
-      RenderAsync::ResetThreads(asyncRenderData);
-
-      for (auto &&obj : asyncRenderData.currScene.objects.objects) {
-        auto t = obj->transformation.translate;
-        auto r = obj->transformation.rotate;
-        r.z += 1.0f;
-        obj->setTransformation(t,r);
+        onFrameRender();
       }
+
+      BeginDrawing();
+
+      // Check on thread progress. Draw finished threads to buffer.
+      allFinished = RenderAsync::RenderFinished(asyncRenderData);
+
+      RenderAsync::RenderImGui(showProg, asyncRenderData);
+
+      EndDrawing();
+    } else {
+      asyncRenderData.currScene.cam.Rasterize(asyncRenderData.currScene.world.objects);
+      onFrameRender();
     }
-
-    RenderAsync::CheckInput(fullscreen, showProg);
-
-    BeginDrawing();
-
-    // Check on thread progress. Draw finished threads to buffer.
-    allFinished = RenderAsync::RenderFinished(asyncRenderData);
-
-    RenderAsync::RenderImGui(showProg, asyncRenderData);
-
-    EndDrawing();
   }
 
-  RenderAsync::Shutdown(fullscreen, asyncRenderData);
+  if (!raster)
+    RenderAsync::Shutdown(fullscreen, asyncRenderData);
 
   return 0;
 }

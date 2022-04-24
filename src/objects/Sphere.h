@@ -8,6 +8,7 @@
 #include "../materials/MaterialFactory.h"
 #include <cmath>
 #include <raylib.h>
+#include <raymath.h>
 
 namespace rt {
 
@@ -32,6 +33,11 @@ namespace rt {
                   {"pos", center},
                   {"radius", radius},
                   {"material", mat_ptr->GetJson()}};
+    }
+    
+    void Rasterize() override {
+      // RasterizeTransformed takes care of the transformation and rotation
+      DrawSphere(Vector3Zero(), radius, RED);
     }
 
   private:

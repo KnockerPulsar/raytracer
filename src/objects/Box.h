@@ -1,11 +1,15 @@
 #pragma once
 
 #include "../HittableList.h"
+#include "../IRasterizable.h"
 #include "../Ray.h"
 #include "../data_structures/vec3.h"
 #include "../materials/MaterialFactory.h"
 #include "AARect.h"
 #include <memory>
+#include <raylib.h>
+#include <raymath.h>
+#include <rlgl.h>
 
 using std::make_shared;
 
@@ -18,9 +22,7 @@ namespace rt {
     HittableList   sides;
 
     Box() = default;
-    Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
-      Create(p0, p1, mat);
-    }
+    Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) { Create(p0, p1, mat); }
 
     // To work around not being able to use constructors with references
     void Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
@@ -38,8 +40,7 @@ namespace rt {
       sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
     }
 
-    virtual bool BoundingBox(float t0, float t1,
-                             AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = AABB(boxMin, boxMax);
       return true;
     }
@@ -51,9 +52,13 @@ namespace rt {
                   {"material", material->GetJson()}};
     }
 
-    bool Hit(const Ray &r, float t_min, float t_max,
-             HitRecord &rec) const override {
+    bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
       return sides.Hit(r, t_min, t_max, rec);
+    }
+
+    void Rasterize() override {
+      auto extents = (boxMax - boxMin);
+      DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, GREEN);
     }
   };
 

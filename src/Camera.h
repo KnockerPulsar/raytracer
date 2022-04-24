@@ -1,7 +1,10 @@
 #pragma once
+#include "Defs.h"
+#include "IRasterizable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
 #include <raylib.h>
+#include <vector>
 
 namespace rt {
   class Camera {
@@ -15,12 +18,18 @@ namespace rt {
         aspectRatio, aperature, focusDist, lensRadius;
 
     Camera() = default;
-    Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, vec3 moveDir, float vFov,
-           float aspectRatio, float aperature, float focusDist,
-           float time0 = 0.0, float time1 = 1.0)
-        : lookFrom(lookFrom), lookAt(lookAt), vUp(vUp), moveDir(moveDir),
-          vFov(vFov), aspectRatio(aspectRatio), aperature(aperature),
-          focusDist(focusDist), time0(time0), time1(time1) {
+    Camera(vec3  lookFrom,
+           vec3  lookAt,
+           vec3  vUp,
+           vec3  moveDir,
+           float vFov,
+           float aspectRatio,
+           float aperature,
+           float focusDist,
+           float time0 = 0.0,
+           float time1 = 1.0)
+        : lookFrom(lookFrom), lookAt(lookAt), vUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
+          aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
 
       float theta = DegressToRadians(vFov);
 
@@ -42,7 +51,8 @@ namespace rt {
                  cameraJson["look_at"].get<vec3>(),
                  cameraJson["v_up"].get<vec3>(),
                  cameraJson["move_dir"].get<vec3>(),
-                 cameraJson["fov"].get<float>(), aspectRatio,
+                 cameraJson["fov"].get<float>(),
+                 aspectRatio,
                  cameraJson["aperature"].get<float>(),
                  cameraJson["focus_dist"].get<float>(),
                  cameraJson["time0"].get<float>(),
@@ -61,10 +71,9 @@ namespace rt {
       u = vec3::CrsProd(vUp, w).Normalize();
       v = vec3::CrsProd(w, u);
 
-      horizontal = focusDist * viewport_width * u;
-      vertical   = focusDist * viewport_height * v;
-      lower_left_corner =
-          this->lookFrom - horizontal / 2 - vertical / 2 - focusDist * w;
+      horizontal        = focusDist * viewport_width * u;
+      vertical          = focusDist * viewport_height * v;
+      lower_left_corner = this->lookFrom - horizontal / 2 - vertical / 2 - focusDist * w;
     }
 
     void Fwd(float deltaTime) {
@@ -77,6 +86,8 @@ namespace rt {
     }
 
     rt::Ray GetRay(float s, float t) const;
+
+    void Rasterize(std::vector<sPtr<Hittable>> rasterizables);
   };
 
   inline void to_json(json &j, const Camera &c) {

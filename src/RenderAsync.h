@@ -50,8 +50,6 @@ namespace rt {
     static void RenderImGui(bool showProg, AsyncRenderData &ard);
 
     static void ResetThreads(AsyncRenderData &ard);
-
-    static void CheckInput(bool &fullscreen, bool &showProg);
   };
 
 } // namespace rt
