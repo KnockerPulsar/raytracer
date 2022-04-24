@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "Pixel.h"
+#include "data_structures/Pixel.h"
 #include "Scene.h"
 #include <future>
 #include <raylib.h>
@@ -9,7 +9,7 @@
 
 using std::vector, std::future;
 
-namespace raytracer {
+namespace rt {
   struct AsyncRenderData {
     vector<Pixel>        pixelJobs;
     vector<future<void>> threads;
@@ -22,4 +22,4 @@ namespace raytracer {
     RenderTexture2D      screenBuffer;
     bool                 incRender;
   };
-} // namespace raytracer
+} // namespace rt

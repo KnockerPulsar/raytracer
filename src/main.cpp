@@ -1,15 +1,19 @@
 #include "../vendor/imgui/imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
+#include "Ray.h"
 #include "RenderAsync.h"
 #include "Scene.h"
+#include "Transformation.h"
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 
-// TODO: Separate checking on threads and blitting finished thread pixels.
-// TODO: Implement a clearer pipeline (Init, loop{Check inputs, render}, clean
-// up).
-// TODO: Add progress bar to shutdown loop.
+/*
+ TODO: 
+    Configure clangd to format in a better way
+    Clean up code and naming
+*/
 
 // X is the right axis
 // Y is the vertical (AKA Up) axis
@@ -25,22 +29,39 @@
 // light,
 // cornell
 
-using raytracer::RenderAsync, raytracer::AsyncRenderData, raytracer::SceneID;
+using rt::RenderAsync, rt::AsyncRenderData, rt::SceneID;
+
+// Quick way of exporting hardcoded scenes into JSON
+int main1() {
+  rt::Scene     scene = rt::Scene::Load("cornell.json");
+  // rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
+  json          json  = scene;
+  std::ofstream output("cornell.json");
+  output << std::setw(4) << json << std::endl;
+  output.close();
+
+  return 0;
+}
 
 int main() {
   // Rendering constants for easy modifications.
+  // Only used when creating hardcoded scenes
   const int   imageWidth      = 600;
-  const float aspectRatio     = 1;
-  const int   samplesPerPixel = 100;
-  const int   maxDepth        = 20;
+  const float aspectRatio     = 16 / 9.0;
+  const int   samplesPerPixel = 10;
+  const int   maxDepth        = 10;
   bool        fullscreen      = false;
-  bool        showProg        = true;
+  bool        showProg        = false;
   int         incRender       = 1;
 
-  SceneID sceneID = SceneID::scene1;
+  SceneID sceneID = SceneID::cornell;
 
   AsyncRenderData asyncRenderData = RenderAsync::Perpare(
       imageWidth, aspectRatio, maxDepth, samplesPerPixel, sceneID, incRender);
+
+  // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
+  asyncRenderData.currScene = rt::Scene::PlaneTest(
+      imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   if (fullscreen)
     ToggleFullscreen();
@@ -49,8 +70,16 @@ int main() {
   while (!WindowShouldClose()) {
 
     // Update camera and start async again if last frame is done
-    if (allFinished)
+    if (allFinished) {
       RenderAsync::ResetThreads(asyncRenderData);
+
+      for (auto &&obj : asyncRenderData.currScene.objects.objects) {
+        auto t = obj->transformation.translate;
+        auto r = obj->transformation.rotate;
+        r.z += 1.0f;
+        obj->setTransformation(t,r);
+      }
+    }
 
     RenderAsync::CheckInput(fullscreen, showProg);
 

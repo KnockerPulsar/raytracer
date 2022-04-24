@@ -6,3 +6,7 @@ TabWidth: 2
 IndentWidth: 2
 NamespaceIndentation: All
 BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 120
+BraceWrapping:
+  AfterStruct: true

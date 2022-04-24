@@ -12,7 +12,7 @@ using std::pair, std::vector, std::future;
 using RunningJob = std::pair<bool, future<void>>;
 using Workers    = vector<RunningJob>;
 
-namespace raytracer {
+namespace rt {
   class Pixel;
   class Scene;
 
@@ -54,4 +54,4 @@ namespace raytracer {
     static void CheckInput(bool &fullscreen, bool &showProg);
   };
 
-} // namespace raytracer
+} // namespace rt

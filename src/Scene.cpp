@@ -1,38 +1,56 @@
 #include "Scene.h"
-#include "AARect.h"
+#include "AABB.h"
 #include "BVHNode.h"
+#include "Defs.h"
+#include "Transformation.h"
+#include "materials/DiffuseLight.h"
+#include "objects/AARect.h"
 
-#include "Box.h"
 #include "Camera.h"
+#include "ConstantMedium.h"
 #include "Hittable.h"
 #include "HittableList.h"
-#include "ImageTexture.h"
-#include "Material.h"
-#include "MovingSphere.h"
-#include "NoiseTexture.h"
 #include "Ray.h"
-#include "Sphere.h"
 #include "Util.h"
-#include "Vec3.h"
+#include "data_structures/vec3.h"
+#include "materials/Dielectric.h"
+#include "materials/Material.h"
+#include "objects/Box.h"
+#include "objects/MovingSphere.h"
+#include "objects/ObjectFactory.h"
+#include "objects/Plane.h"
+#include "objects/Sphere.h"
+#include "objects/Triangle.h"
+#include "textures/CheckerTexture.h"
+#include "textures/ImageTexture.h"
+#include "textures/NoiseTexture.h"
+#include "textures/Texture.h"
 #include <bits/types/FILE.h>
+#include <fstream>
 #include <memory>
+#include <ostream>
 #include <raylib.h>
 #include <tuple>
+#include <vector>
 
-namespace raytracer {
+using nlohmann::json;
 
-  Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth,
+namespace rt {
+
+  Scene Scene::Scene1(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
                       int samplesPerPixel) {
     Scene        s;
     HittableList world;
-    Vec3         lookFrom        = Vec3(-1, 1, 1);
-    Vec3         lookAt          = Vec3(0, 0, 0);
-    Vec3         vUp             = Vec3(0, 1, 0);
-    Vec3         backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3         lookFrom        = vec3(-1, 1, 1);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.001F;
-    Vec3  moveDir     = Vec3(10.0f, 0, 0);
+    vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
     Camera cam(lookFrom,
@@ -44,20 +62,20 @@ namespace raytracer {
                aperature,
                distToFocus);
 
-    auto material_ground = make_shared<Lambertian>(Vec3(0.8, 0.8, 0.0));
-    auto material_center = make_shared<Lambertian>(Vec3(0.1, 0.2, 0.5));
+    auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
     auto material_left   = make_shared<Dielectric>(1.5);
-    auto material_right  = make_shared<Metal>(Vec3(0.8, 0.6, 0.2), 0.1);
+    auto material_right  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 0.1);
 
     world //
-        .Add(make_shared<Sphere>(100.0, Vec3(0, -100.5, -1), material_ground))
-        .Add(make_shared<Sphere>(0.5, Vec3(0, 0, -1.0), material_center))
+        .Add(make_shared<Sphere>(100.0, vec3(0, -100.5, -1), material_ground))
+        .Add(make_shared<Sphere>(0.5, vec3(0, 0, -1.0), material_center))
 
         // These 2 spheres make a "hollow sphere"
-        .Add(make_shared<Sphere>(0.5, Vec3(-1., 0, -1), material_left))
-        .Add(make_shared<Sphere>(-0.45, Vec3(-1., 0, -1), material_left))
+        .Add(make_shared<Sphere>(0.5, vec3(-1., 0, -1), material_left))
+        .Add(make_shared<Sphere>(-0.45, vec3(-1., 0, -1), material_left))
 
-        .Add(make_shared<Sphere>(0.5, Vec3(1., 0, -1), material_right));
+        .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), material_right));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
@@ -73,21 +91,23 @@ namespace raytracer {
     };
 
     return s;
-  } // namespace raytracer
+  } // namespace rt
 
-  Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Scene2(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
                       int samplesPerPixel) {
     Scene        s;
     float        R = cos(pi / 4);
     HittableList world;
-    Vec3         lookFrom        = Vec3(13, 2, 3);
-    Vec3         lookAt          = Vec3(0, 0, 0);
-    Vec3         vUp             = Vec3(0, 1, 0);
-    Vec3         backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3         lookFrom        = vec3(13, 2, 3);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(0.1f, 0, 0);
+    vec3  moveDir     = vec3(0.1f, 0, 0);
     int   fov         = 20.0;
 
     Camera cam(lookFrom,
@@ -99,12 +119,12 @@ namespace raytracer {
                aperature,
                distToFocus);
 
-    auto material_left  = make_shared<Lambertian>(Vec3(0, 0, 1));
-    auto material_right = make_shared<Lambertian>(Vec3(1, 0, 0));
+    auto material_left  = make_shared<Lambertian>(vec3(0, 0, 1));
+    auto material_right = make_shared<Lambertian>(vec3(1, 0, 0));
 
     world //
-        .Add(make_shared<Sphere>(R, Vec3(-R, 0, -1), material_left))
-        .Add(make_shared<Sphere>(R, Vec3(R, 0, -1), material_right));
+        .Add(make_shared<Sphere>(R, vec3(-R, 0, -1), material_left))
+        .Add(make_shared<Sphere>(R, vec3(R, 0, -1), material_right));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
@@ -122,20 +142,23 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::Random(int imageWidth, int imageHeight, int maxDepth,
-                      int samplesPerPixel, int ballGridWidth,
+  Scene Scene::Random(int imageWidth,
+                      int imageHeight,
+                      int maxDepth,
+                      int samplesPerPixel,
+                      int ballGridWidth,
                       int ballGridHeight) {
     Scene        s;
     HittableList world;
 
-    Vec3 lookFrom        = Vec3(13, 2, 5);
-    Vec3 lookAt          = Vec3(0, 0, 0);
-    Vec3 vUp             = Vec3(0, 1, 0);
-    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3 lookFrom        = vec3(13, 2, 5);
+    vec3 lookAt          = vec3(0, 0, 0);
+    vec3 vUp             = vec3(0, 1, 0);
+    vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(1.0f, 0, 0);
+    vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
     Camera cam(lookFrom,
@@ -150,17 +173,17 @@ namespace raytracer {
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
         float chooseMat = RandomFloat();
-        Vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
-        if ((center - Vec3(4, 0.2, 0)).Len() > 0.9) {
+        vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
+        if ((center - vec3(4, 0.2, 0)).Len() > 0.9) {
           shared_ptr<Material> sphereMaterial;
 
           if (chooseMat < 0.8) {
             // Diffuse
-            auto albedo    = Vec3::Random() * Vec3::Random();
+            auto albedo    = vec3::Random() * vec3::Random();
             sphereMaterial = make_shared<Lambertian>(albedo);
           } else if (chooseMat < 0.95) {
             // Metal
-            auto  albedo   = Vec3::Random(0.5, 1);
+            auto  albedo   = vec3::Random(0.5, 1);
             float fuzz     = RandomFloat(0, 0.5);
             sphereMaterial = make_shared<Metal>(albedo, fuzz);
           } else {
@@ -171,17 +194,17 @@ namespace raytracer {
       }
     }
     auto mat1 = make_shared<Dielectric>(1.5);
-    world.Add(make_shared<Sphere>(1.0, Vec3(0, 1, 0), mat1));
+    world.Add(make_shared<Sphere>(1.0, vec3(0, 1, 0), mat1));
 
-    auto mat2 = make_shared<Lambertian>(Vec3(0.4, 0.2, 0.1));
-    world.Add(make_shared<Sphere>(1.0, Vec3(-4, 1, 0), mat2));
+    auto mat2 = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
+    world.Add(make_shared<Sphere>(1.0, vec3(-4, 1, 0), mat2));
 
-    auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
-    world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
+    auto mat3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
+    world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
-    auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
+    auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
     world.Add(make_shared<Sphere>(
-        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
+        1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
@@ -199,20 +222,23 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight,
-                                   int maxDepth, int samplesPerPixel,
-                                   int ballGridWidth, int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(int imageWidth,
+                                   int imageHeight,
+                                   int maxDepth,
+                                   int samplesPerPixel,
+                                   int ballGridWidth,
+                                   int ballGridHeight) {
     Scene        s;
     HittableList world;
 
-    Vec3 lookFrom        = Vec3(13, 2, 3);
-    Vec3 lookAt          = Vec3(0, 0, 0);
-    Vec3 vUp             = Vec3(0, 1, 0);
-    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3 lookFrom        = vec3(13, 2, 3);
+    vec3 lookAt          = vec3(0, 0, 0);
+    vec3 vUp             = vec3(0, 1, 0);
+    vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(1.0f, 0, 0);
+    vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
     Camera cam(lookFrom,
@@ -226,30 +252,30 @@ namespace raytracer {
                0.0,
                1.0);
 
-    auto checker = std::make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1),
-                                                    Vec3(0.9, 0.9, 0.9));
+    auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1),
+                                                    vec3(0.9, 0.9, 0.9));
 
-    auto groundMaterial = make_shared<Lambertian>(Vec3(0.5f));
+    auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
     world.Add(make_shared<Sphere>(
-        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(checker)));
+        1000, vec3(0, -1000, 0), make_shared<Lambertian>(checker)));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
         float chooseMat = RandomFloat();
-        Vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
-        if ((center - Vec3(4, 0.2, 0)).Len() > 0.9) {
+        vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
+        if ((center - vec3(4, 0.2, 0)).Len() > 0.9) {
           shared_ptr<Material> sphereMaterial;
 
           if (chooseMat < 0.8) {
             // Diffuse
-            auto albedo    = Vec3::Random() * Vec3::Random();
+            auto albedo    = vec3::Random() * vec3::Random();
             sphereMaterial = make_shared<Lambertian>(albedo);
-            Vec3 center2   = center + Vec3(0, RandomFloat(0, .5), 0);
+            vec3 center2   = center + vec3(0, RandomFloat(0, .5), 0);
             world.Add(make_shared<MovingSphere>(
                 center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           } else if (chooseMat < 0.95) {
             // Metal
-            auto  albedo   = Vec3::Random(0.5, 1);
+            auto  albedo   = vec3::Random(0.5, 1);
             float fuzz     = RandomFloat(0, 0.5);
             sphereMaterial = make_shared<Metal>(albedo, fuzz);
             world.Add(make_shared<Sphere>(0.2, center, sphereMaterial));
@@ -262,13 +288,13 @@ namespace raytracer {
       }
     }
     auto mat1 = make_shared<Dielectric>(1.5);
-    world.Add(make_shared<Sphere>(1.0, Vec3(0, 1, 0), mat1));
+    world.Add(make_shared<Sphere>(1.0, vec3(0, 1, 0), mat1));
 
-    auto mat2 = make_shared<Lambertian>(Vec3(0.4, 0.2, 0.1));
-    world.Add(make_shared<Sphere>(1.0, Vec3(-4, 1, 0), mat2));
+    auto mat2 = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
+    world.Add(make_shared<Sphere>(1.0, vec3(-4, 1, 0), mat2));
 
-    auto mat3 = make_shared<Metal>(Vec3(0.7, 0.6, 0.5), 0.0);
-    world.Add(make_shared<Sphere>(1.0, Vec3(4, 1, 0), mat3));
+    auto mat3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
+    world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
@@ -286,14 +312,16 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::TwoSpheres(int imageWidth,
+                          int imageHeight,
+                          int maxDepth,
                           int samplesPerPixel) {
-    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
-    Camera       cam(Vec3(13, 2, 3),
-               Vec3(0, 0, 0),
-               Vec3(0, 1, 0),
-               Vec3::Zero(),
+    Camera       cam(vec3(13, 2, 3),
+               vec3(0, 0, 0),
+               vec3(0, 1, 0),
+               vec3::Zero(),
                20.0,
                (float)imageWidth / imageHeight,
                0.0,
@@ -305,16 +333,16 @@ namespace raytracer {
     Scene s;
 
     // auto checker =
-    //     make_shared<CheckerTexture>(Vec3(0.2, 0.3, 0.1), Vec3(0.9, 0.9,
+    //     make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9,
     //     0.9));
 
     auto perText = make_shared<NoiseTexture>(4.0f);
 
     // No need to use a BVH since there are only two spheres
     objects.Add(make_shared<Sphere>(
-        10, Vec3(0, -10, 0), make_shared<Lambertian>(perText)));
+        10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
     objects.Add(make_shared<Sphere>(
-        10, Vec3(0, 10, 0), make_shared<Lambertian>(perText)));
+        10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
     s = {
         .world           = objects,
@@ -329,19 +357,21 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::Earth(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Earth(int imageWidth,
+                     int imageHeight,
+                     int maxDepth,
                      int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
-    Vec3 lookFrom        = Vec3(13, 2, 3);
-    Vec3 lookAt          = Vec3(0, 0, 0);
-    Vec3 vUp             = Vec3(0, 1, 0);
-    Vec3 backgroundColor = Vec3(0.70, 0.80, 1.00);
+    vec3 lookFrom        = vec3(13, 2, 3);
+    vec3 lookAt          = vec3(0, 0, 0);
+    vec3 vUp             = vec3(0, 1, 0);
+    vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
     Camera cam(lookFrom,
@@ -357,8 +387,8 @@ namespace raytracer {
 
     auto earthTexture = make_shared<ImageTexture>("earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
-    // auto earthSurface = make_shared<Metal>(Vec3(0.7,0.2,0.7), 0.7);
-    auto globe = make_shared<Sphere>(2, Vec3(0, 0, 0), earthSurface);
+    // auto earthSurface = make_shared<Metal>(vec3(0.7,0.2,0.7), 0.7);
+    auto globe = make_shared<Sphere>(2, vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
     s = {
@@ -374,19 +404,21 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::Light(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::Light(int imageWidth,
+                     int imageHeight,
+                     int maxDepth,
                      int samplesPerPixel) {
     Scene        s;
     HittableList world;
 
-    Vec3 lookFrom        = Vec3(26, 3, 6);
-    Vec3 lookAt          = Vec3(0, 2, 0);
-    Vec3 vUp             = Vec3(0, 1, 0);
-    Vec3 backgroundColor = Vec3::Zero();
+    vec3 lookFrom        = vec3(26, 3, 6);
+    vec3 lookAt          = vec3(0, 2, 0);
+    vec3 vUp             = vec3(0, 1, 0);
+    vec3 backgroundColor = vec3::Zero();
 
     float distToFocus = 10.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
     Camera cam(lookFrom,
@@ -400,14 +432,14 @@ namespace raytracer {
                0.0,
                1.0);
 
-    auto perText   = make_shared<NoiseTexture>(4);
-    auto diffLight = make_shared<DiffuseLight>(Vec3(4, 4, 4));
+    auto perText   = make_shared<NoiseTexture>(4.0f);
+    auto diffLight = make_shared<DiffuseLight>(vec3(4, 4, 4));
 
     world.Add(make_shared<Sphere>(
-        1000, Vec3(0, -1000, 0), make_shared<Lambertian>(perText)));
+        1000, vec3(0, -1000, 0), make_shared<Lambertian>(perText)));
 
     world.Add(make_shared<Sphere>(
-        2, Vec3(0, 2, 0), make_shared<Lambertian>(perText)));
+        2, vec3(0, 2, 0), make_shared<Lambertian>(perText)));
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
@@ -424,20 +456,22 @@ namespace raytracer {
     return s;
   }
 
-  Scene Scene::CornellBox(int imageWidth, int imageHeight, int maxDepth,
+  Scene Scene::CornellBox(int imageWidth,
+                          int imageHeight,
+                          int maxDepth,
                           int samplesPerPixel) {
 
     Scene        s;
     HittableList world;
 
-    Vec3 lookFrom        = Vec3(278, 278, -800);
-    Vec3 lookAt          = Vec3(278, 278, 0);
-    Vec3 vUp             = Vec3(0, 1, 0);
-    Vec3 backgroundColor = Vec3::Zero();
+    vec3 lookFrom        = vec3(278, 278, -800);
+    vec3 lookAt          = vec3(278, 278, 0);
+    vec3 vUp             = vec3(0, 1, 0);
+    vec3 backgroundColor = vec3::Zero();
 
     float distToFocus = 800.0f;
     float aperature   = 0.1F;
-    Vec3  moveDir     = Vec3(0.0f, 0, 0.0);
+    vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
     Camera cam(lookFrom,
@@ -451,13 +485,16 @@ namespace raytracer {
                0.0,
                1.0);
 
-    auto red        = make_shared<Lambertian>(Vec3(0.65, 0.05, 0.05));
-    auto white      = make_shared<Lambertian>(Vec3(0.73, 0.73, 0.73));
-    auto green      = make_shared<Lambertian>(Vec3(0.12, 0.45, 0.15));
-    auto light      = make_shared<DiffuseLight>(Vec3(2, 2, 2));
-    auto metal      = make_shared<Metal>(Vec3(0.8, 0.1, 0.8), 0.7);
-    auto dielectric = make_shared<Dielectric>(1.5f);
-    auto noise      = make_shared<Lambertian>(make_shared<NoiseTexture>(0.2));
+    auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
+    auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
+    auto green         = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
+    auto light         = make_shared<DiffuseLight>(vec3(2, 2, 2));
+    auto purplishMetal = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
+    auto chrome        = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
+    auto dielectric    = make_shared<Dielectric>(1.5f);
+    auto noise   = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
+    auto checker = std::make_shared<CheckerTexture>(
+        vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
     world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
@@ -469,38 +506,40 @@ namespace raytracer {
     world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
 
     // floor
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, white));
+    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, chrome));
 
     // ceiling
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, white));
+    // world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, metal));
 
     // Back wall
     world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
 
-    auto box1 = make_shared<Translate>(
-        make_shared<RotateY>(
-            make_shared<Box>(Vec3(0, 0, 0), Vec3(165, 330, 165), white), 15),
-        Vec3(265, 0, 295));
+    // world.Add(make_shared<Sphere>(100, vec3(330, 330, 165), light));
 
-    world.Add(box1);
+    auto b1 = Box(vec3(0, 0, 0), vec3(165, 330, 165), white);
+    b1.setTransformation(vec3(265, 0, 295), vec3(0, 15, 0));
 
-    auto box2 = make_shared<Translate>(
-        make_shared<RotateY>(
-            make_shared<Box>(Vec3::Zero(), Vec3(165, 165, 165), metal), -55),
-        Vec3(200, 0, 65));
+    world.Add(make_shared<Box>(b1));
+
+    auto b2 = Box(vec3::Zero(), vec3(100, 100, 100), purplishMetal);
+    b2.setTransformation(vec3(50, 0, 0), vec3(0, 12, 0));
+    auto box2 = make_shared<Box>(b2);
+
+    // auto box2 = make_shared<Translate>(make_shared<Box>(b2), vec3(50, 0, 0));
     world.Add(box2);
 
     // auto box3 = make_shared<Translate>(
     //     make_shared<RotateY>(
-    //         make_shared<Box>(Vec3(10), Vec3(165-10, 165-10, 165-10),
+    //         make_shared<Box>(vec3(10), vec3(165-10, 165-10, 165-10),
     //         dielectric), -55),
-    //     Vec3(200, 0, 65));
+    //     vec3(200, 0, 65));
     // world.Add(box3);
 
     HittableList bvh(make_shared<BVHNode>(world, 0, 1));
 
     s = {
         .world           = bvh,
+        .objects         = world,
         .cam             = cam,
         .maxDepth        = maxDepth,
         .imageWidth      = imageWidth,
@@ -511,4 +550,163 @@ namespace raytracer {
 
     return s;
   }
-} // namespace raytracer
+
+  Scene Scene::Load(std::string path) {
+    std::ifstream jsonFile(path);
+    std::cout << "Loading scene from file " << path << std::endl;
+
+    json readScene;
+    jsonFile >> readScene;
+
+    json  settings    = readScene["settings"];
+    int   imageWidth  = settings["resolution"]["x"].get<int>();
+    int   imageHeight = settings["resolution"]["y"].get<int>();
+    float aspectRatio = (float)imageWidth / imageHeight;
+    Scene s           = {
+                  .cam             = Camera(readScene["camera"], aspectRatio),
+                  .maxDepth        = settings["max_depth"].get<int>(),
+                  .imageWidth      = imageWidth,
+                  .imageHeight     = imageHeight,
+                  .samplesPerPixel = settings["num_samples"].get<int>(),
+                  .backgroundColor = settings["background_color"].get<vec3>(),
+    };
+
+    auto world = HittableList();
+    for (const auto &obj : readScene["objects"]) {
+      auto objPtr = ObjectFactory::FromJson(obj);
+      if (objPtr)
+        world.Add(objPtr);
+    }
+
+    std::cout << "Loaded scene with\n"
+              << "\tsettings " << settings << std::endl
+              << "\t#objects " << world.objects.size() << std::endl;
+
+    s.objects = world;
+
+    auto bvh = HittableList();
+    s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
+
+    for (HittableList o : bvh.objects) {
+      for (auto oo : o.objects) {
+        std::cout << "AA";
+      }
+    }
+
+    return s;
+  }
+
+  Scene Scene::TransformationTest(int imageWidth,
+                                  int imageHeight,
+                                  int maxDepth,
+                                  int samplesPerPixel) {
+
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(2, 2, 0);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(0.0f, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus);
+
+    auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
+
+    auto sphere = make_shared<Box>(
+        vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
+    sphere->transformation = Transformation(vec3(0, 0, 0), vec3(0, 45, 0));
+    // auto rotSphere= make_shared<RotateY>(sphere, 45);
+
+    world //
+        .Add(sphere);
+
+    s = {
+        .world           = world,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+
+    return s;
+  }
+
+  Scene Scene::PlaneTest(int imageWidth,
+                         int imageHeight,
+                         int maxDepth,
+                         int samplesPerPixel) {
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(0, 3, 0);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0.1);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(0, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom,
+               lookAt,
+               vUp,
+               moveDir,
+               fov,
+               (float)imageWidth / imageHeight,
+               aperature,
+               distToFocus);
+
+    auto red     = make_shared<DiffuseLight>(vec3(3, 0, 0));
+    auto magenta = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
+        CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
+    auto blue    = make_shared<DiffuseLight>(make_shared<CheckerTexture>(
+        CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
+
+    auto earth =
+        make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+
+    auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
+    plane->setTransformation(vec3(-3, 10, 0), (0, 0, 0));
+
+    auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
+
+    std::vector<sPtr<Hittable>> obj = {plane, xzplane};
+
+    world //
+        .Add(make_shared<Triangle>(
+            vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
+        .Add(plane)
+        .Add(xzplane);
+
+    HittableList bvh;
+    bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+    s = {
+        .world           = bvh,
+        .cam             = cam,
+        .maxDepth        = maxDepth,
+        .imageWidth      = imageWidth,
+        .imageHeight     = imageHeight,
+        .samplesPerPixel = samplesPerPixel,
+        .backgroundColor = backgroundColor,
+    };
+    s.objects.objects = obj;
+
+    return s;
+  } // namespace rt
+} // namespace rt

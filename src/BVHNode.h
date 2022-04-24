@@ -1,3 +1,4 @@
+#pragma once
 #include "AABB.h"
 #include "Hittable.h"
 #include "HittableList.h"
@@ -8,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace raytracer {
+namespace rt {
   class BVHNode : public Hittable {
   public:
     std::shared_ptr<Hittable> left, right;
@@ -63,8 +64,8 @@ namespace raytracer {
       if (!box.Hit(r, t_min, t_max))
         return false;
 
-      bool leftHit  = left->Hit(r, t_min, t_max, rec);
-      bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);
+      bool leftHit  = left->HitTransformed(r, t_min, t_max, rec);
+      bool rightHit = right->HitTransformed(r, t_min, leftHit ? rec.t : t_max, rec);
 
       // if(leftHit || rightHit)
       //   std::cout << "AAAA";
@@ -117,4 +118,4 @@ namespace raytracer {
       return BoxCompare(a, b, 2);
     }
   };
-} // namespace raytracer
+} // namespace rt

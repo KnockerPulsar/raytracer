@@ -19,22 +19,21 @@
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
-#include "Clr.h"
 #include "Constants.h"
-#include "Pixel.h"
 #include "Ray.h"
 #include "Scene.h"
+#include "data_structures/Pixel.h"
 
 using std::pair, std::future, std::vector, std::async;
 
-using raytracer::Hittable, raytracer::Clr, raytracer::Pixel;
+using rt::Hittable, rt::Pixel;
 
 using std::string, std::vector, std::chrono::high_resolution_clock,
     std::chrono::duration_cast, std::chrono::milliseconds, std::pair,
     std::future, std::future, std::async, std::ref, std::make_pair, std::launch,
     std::future, std::async, std::ref, std::make_pair, std::launch;
 
-namespace raytracer {
+namespace rt {
   pair<int, int> RenderAsync::GetThreadJobSlice(int totalJobs, int t) {
     int jobsStart = t * totalJobs / NUM_THREADS;
     int jobsEnd   = (t + 1) * totalJobs / NUM_THREADS;
@@ -55,37 +54,39 @@ namespace raytracer {
     RenderTexture2D screenBuffer = LoadRenderTexture(imageWidth, imageHeight);
     RenderTexture2D incBuffer    = LoadRenderTexture(imageWidth, imageHeight);
 
-    Scene currScene;
+    // Scene currScene;
 
-    if (sceneID == SceneID::scene1)
-      currScene =
-          Scene::Scene1(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::scene2)
-      currScene =
-          Scene::Scene2(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::random)
-      currScene =
-          Scene::Random(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::random_moving)
-      currScene = Scene::RandomMovingSpheres(imageWidth,
-                                             imageHeight,
-                                             maxDepth,
-                                             samplesPerPixel,
-                                             gridWidth,
-                                             gridHeight);
-    else if (sceneID == SceneID::two_spheres)
-      currScene =
-          Scene::TwoSpheres(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::earth)
-      currScene =
-          Scene::Earth(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::light)
-      currScene =
-          Scene::Light(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    else if (sceneID == SceneID::cornell) {
-      currScene =
-          Scene::CornellBox(imageWidth, imageHeight, maxDepth, samplesPerPixel);
-    }
+    // if (sceneID == SceneID::scene1)
+    //   currScene =
+    //       Scene::Scene1(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::scene2)
+    //   currScene =
+    //       Scene::Scene2(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::random)
+    //   currScene =
+    //       Scene::Random(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::random_moving)
+    //   currScene = Scene::RandomMovingSpheres(imageWidth,
+    //                                          imageHeight,
+    //                                          maxDepth,
+    //                                          samplesPerPixel,
+    //                                          gridWidth,
+    //                                          gridHeight);
+    // else if (sceneID == SceneID::two_spheres)
+    //   currScene =
+    //       Scene::TwoSpheres(imageWidth, imageHeight, maxDepth,
+    //       samplesPerPixel);
+    // else if (sceneID == SceneID::earth)
+    //   currScene =
+    //       Scene::Earth(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::light)
+    //   currScene =
+    //       Scene::Light(imageWidth, imageHeight, maxDepth, samplesPerPixel);
+    // else if (sceneID == SceneID::cornell) {
+    //   currScene =
+    //       Scene::CornellBox(imageWidth, imageHeight, maxDepth,
+    //       samplesPerPixel);
+    // }
 
     vector<future<void>> threads;
     vector<int>          threadProgress(NUM_THREADS, 0);
@@ -93,19 +94,19 @@ namespace raytracer {
     vector<int>          threadShouldRun(NUM_THREADS, 1); // Used to exit early
     vector<bool>         finishedThreads(NUM_THREADS, false);
     vector<Pixel>        pixelJobs =
-        vector(imageWidth * imageHeight, Pixel{0, 0, Vec3::Zero()});
+        vector(imageWidth * imageHeight, Pixel{0, 0, vec3::Zero()});
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {
       for (int x = 0; x < imageWidth; x++) {
-        pixelJobs[x + imageWidth * y] = Pixel{x, y, Vec3::Zero()};
+        pixelJobs[x + imageWidth * y] = Pixel{x, y, vec3::Zero()};
       }
     }
 
     return (AsyncRenderData){pixelJobs,
                              // Must move since futures can only have one owner
                              std::move(threads),
-                             currScene,
+                             Scene(),
                              threadTimes,
                              threadProgress,
                              threadShouldRun,
@@ -123,7 +124,7 @@ namespace raytracer {
       auto [jobsStart, jobsEnd] = GetThreadJobSlice(ard.pixelJobs.size(), t);
 
       ard.threads.push_back(async(launch::async,
-                                  raytracer::Ray::Trace,
+                                  rt::Ray::Trace,
                                   ref(ard.pixelJobs),
                                   jobsStart,
                                   jobsEnd,
@@ -143,11 +144,12 @@ namespace raytracer {
       Pixel &pixel = pixelJobs[i];
 
       // Clamp r, g, and b to prevent underflows and artifacts
-      Clr clr = Clr::FromFloat(Clamp(pixel.color.x, 0, 1),
-                               Clamp(pixel.color.y, 0, 1),
-                               Clamp(pixel.color.z, 0, 1));
 
-      pixel.color = Vec3::Zero();
+      Color clr = ColorFromFloats(Clamp(pixel.color.x, 0, 1),
+                                  Clamp(pixel.color.y, 0, 1),
+                                  Clamp(pixel.color.z, 0, 1));
+
+      pixel.color = vec3::Zero();
 
       DrawPixel(pixel.x, pixel.y, clr);
     }
@@ -274,8 +276,8 @@ namespace raytracer {
     ard.threads.clear();
     std::fill(ard.finishedThreads.begin(), ard.finishedThreads.end(), false);
 
-    if (ard.currScene.cam.lookFrom.x < -20 || ard.currScene.cam.lookFrom.x > 20)
-      ard.currScene.cam.moveDir *= -1;
+    // if (ard.currScene.cam.lookFrom.x < -20 || ard.currScene.cam.lookFrom.x > 20)
+    //   ard.currScene.cam.moveDir *= -1;
 
     ard.currScene.cam.Fwd(GetFrameTime());
 
@@ -294,4 +296,4 @@ namespace raytracer {
     }
     }
   }
-} // namespace raytracer
+} // namespace rt

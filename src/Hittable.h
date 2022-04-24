@@ -2,24 +2,30 @@
 
 #include "AABB.h"
 #include "Constants.h"
+#include "Defs.h"
 #include "Ray.h"
+#include "Transformation.h"
 #include "Util.h"
-#include "Vec3.h"
+#include "data_structures/vec3.h"
 #include <cmath>
+#include <iostream>
 #include <memory>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "../vendor/glm/glm/gtx/string_cast.hpp"
+#include <vector>
 using std::shared_ptr;
 
-namespace raytracer {
+namespace rt {
   class Material;
 
   struct HitRecord {
-    Vec3                 p;
-    Vec3                 normal;
+    vec3                 p;
+    vec3                 normal;
     shared_ptr<Material> mat_ptr;
     float                t, u, v;
     bool                 front_face;
 
-    inline void set_face_normal(const Ray &r, const Vec3 &outward_normal) {
+    inline void set_face_normal(const Ray &r, const vec3 &outward_normal) {
       front_face = Vector3DotProduct(outward_normal, r.direction) < 0;
       normal     = front_face ? outward_normal : outward_normal * -1;
     }
@@ -27,125 +33,64 @@ namespace raytracer {
 
   class Hittable {
   public:
+    Transformation transformation;
+
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const = 0;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
-  };
 
-  class Translate : public Hittable {
-  public:
-    shared_ptr<Hittable> ptr;
-    Vec3                 offset;
+    virtual json GetJson() const {
+      json derived = this->GetJsonDerived();
+      json tJson   = transformation;
+      derived.update(tJson);
+      return derived;
+    }
 
-    Translate(shared_ptr<Hittable> p, const Vec3 &dis) : ptr(p), offset(dis) {}
-    virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rec) const override {
-      Ray moved = Ray(r.origin - offset, r.direction, r.time);
+    virtual json GetJsonDerived() const { return {"type", "unimplemented"}; }
 
-      if (!ptr->Hit(moved, t_min, t_max, rec))
+    virtual bool HitTransformed(const Ray &r, float t_min, float t_max,
+                                HitRecord &rec) {
+
+      // Need to apply inverse translation on ray origin
+      // And translation on ray hit point
+      // Need to apply inverse rotation on both ray origin and direction
+      // Need to apply rotation on both hit point and normals
+      // Compare against RotateY and Translate implementations for accuracy
+
+      Ray transformedRay = r;
+
+      // Apply inverse transformations in reverse
+      transformedRay.origin    = transformation.Inverse(r.origin);
+      transformedRay.direction = Transformation::applyGlmMat(
+          r.direction, transformation.invRotationMatrix);
+
+      if (!this->Hit(transformedRay, t_min, t_max, rec))
         return false;
 
-      rec.p += offset;
-      rec.set_face_normal(moved, rec.normal);
+      rec.p = transformation.Apply(rec.p);
+      rec.set_face_normal(transformedRay,
+                          Transformation::applyGlmMat(
+                              rec.normal, transformation.rotationMatrix));
+
       return true;
     }
 
-    virtual bool BoundingBox(float t0, float t1,
-                             AABB &outputBox) const override {
-      if (!ptr->BoundingBox(t0, t1, outputBox))
+    virtual bool BoundingBoxTransformed(float t0, float t1,
+                                        AABB &outputBox) const {
+      if (!this->BoundingBox(t0, t1, outputBox))
         return false;
 
-      outputBox = AABB(outputBox.min + offset, outputBox.max + offset);
-      return true;
-    }
-  };
-
-  class RotateY : public Hittable {
-  public:
-    shared_ptr<Hittable> ptr;
-    float                sinTheta, cosTheta;
-    bool                 hasBox;
-    AABB                 bBox;
-
-    // Since we use this same function with the signs of the sin flipped
-    // (for inverse rotation)
-    // I added the `opposite` parameter to deal with that.
-
-    // set as true for
-    // x = cos*x + sin*z
-    // z = -sin*x + cos*z
-
-    // set as false for
-    // x = cos*x - sin*z
-    // z = sin*x + cos*z
-
-    inline Vec3 Rotate(Vec3 in, bool opposite = false) const {
-      Vec3 out = in;
-
-      // Perhaps lerping instead of branching would be faster???
-      int sinSign = opposite * -1 + (1 - opposite) * 1;
-
-      out.x = cosTheta * in.x - sinSign * sinTheta * in.z;
-      out.z = sinSign * sinTheta * in.x + cosTheta * in.z;
-      return out;
-    }
-
-    RotateY(shared_ptr<Hittable> p, float angle) : ptr(p) {
-      float rad = DegressToRadians(angle);
-      sinTheta  = sin(rad);
-      cosTheta  = cos(rad);
-      hasBox    = ptr->BoundingBox(0, 1, bBox);
-
-      Vec3 min(infinity, infinity, infinity);
-      Vec3 max(-infinity, -infinity, -infinity);
-
-      for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-          for (int k = 0; k < 2; k++) {
-            float x = i * bBox.max.x - (1 - i) * bBox.min.x;
-            float y = j * bBox.max.y - (1 - j) * bBox.min.y;
-            float z = k * bBox.max.z - (1 - k) * bBox.min.z;
-
-            auto [newX, _, newZ] = Rotate(Vec3(x, y, z), true);
-
-            Vec3 tester(newX, y, newZ);
-
-            min.x = fmin(min.x, tester.x);
-            max.x = fmax(max.x, tester.x);
-
-            min.y = fmin(min.y, tester.y);
-            max.y = fmax(max.y, tester.y);
-
-            min.z = fmin(min.z, tester.z);
-            max.z = fmax(max.z, tester.z);
-          }
-        }
-      }
-      bBox = AABB(min, max);
-    }
-
-    virtual bool BoundingBox(float t0, float t1,
-                             AABB &outputBox) const override {
-      outputBox = bBox;
-      return hasBox;
-    }
-
-    virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rec) const override {
-      Vec3 origin = Rotate(r.origin);
-      Vec3 dir    = Rotate(r.direction);
-
-      Ray rotatedR(origin, dir, r.time);
-
-      if (!ptr->Hit(rotatedR, t_min, t_max, rec))
-        return false;
-
-      rec.p = Rotate(rec.p, true);
-      rec.set_face_normal(rotatedR, Rotate(rec.normal, true));
-
+      outputBox = transformation.regenAABB(outputBox);
       return true;
       ;
     }
+
+    void setTransformation(vec3 translate = vec3::Zero(),
+                           vec3 rotate    = vec3::Zero()) {
+      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
+      transformation = Transformation(translate, rotate);
+      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
+    }
   };
-} // namespace raytracer
+} // namespace rt

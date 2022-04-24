@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Vec3.h"
-#include <atomic>
+#include "data_structures/vec3.h"
 
-namespace raytracer {
+namespace rt {
 
   class Hittable;
   class Camera;
@@ -13,17 +12,17 @@ namespace raytracer {
 
   class Ray {
   public:
-    Vec3  origin, direction;
+    vec3  origin, direction;
     float time;
 
     Ray() = default;
-    Ray(Vec3 org, Vec3 dir) : origin(org), direction(dir) {}
-    Ray(Vec3 org, Vec3 dir, float time = 0.0)
+    Ray(vec3 org, vec3 dir) : origin(org), direction(dir) {}
+    Ray(vec3 org, vec3 dir, float time = 0.0)
         : origin(org), direction(dir), time(time) {}
 
-    Vec3 At(float t) const { return Vector3Add(origin, direction * t); }
+    vec3 At(float t) const { return Vector3Add(origin, direction * t); }
 
-    static Vec3 RayColor(const raytracer::Ray &r, const Vec3 &backgroundColor,
+    static vec3 RayColor(const rt::Ray &r, const vec3 &backgroundColor,
                          const Hittable &world, int depth);
 
     static void Trace(std::vector<Pixel> &threadJobs, int jobsStart,
@@ -31,4 +30,4 @@ namespace raytracer {
                       int &thread_progress, int &threadShouldRun);
   };
 
-} // namespace raytracer
+} // namespace rt
