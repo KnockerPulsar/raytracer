@@ -8,15 +8,16 @@ Diagnostics:
   # Tweak Clang-Tidy checks.
   ClangTidy:
     Add: [performance*, readability*]
-    Remove: [modernize-use-trailing-return-type, readability-braces-around-statements, readability-magic-numbers, readability-uppercase-literal-suffix, readability-simplify-boolean-expr, readability-identifier-length]
+    Remove:
+      [
+        modernize-use-trailing-return-type,
+        readability-braces-around-statements,
+        readability-magic-numbers,
+        readability-uppercase-literal-suffix,
+        readability-simplify-boolean-expr,
+        readability-identifier-length,
+        performance-unnecessary-value-param,
+      ]
     CheckOptions:
       readability-identifier-naming.VariableCase: camelBack
----
-# Use Remote Index Service for LLVM.
-If:
-  # Note: This is a regexp, notice '.*' at the end of PathMatch string.
-  PathMatch: /path/to/llvm/.*
-Index:
-  External:
-    Server: clangd-index.llvm.org:5900
-    MountPoint: /path/to/llvm/
+

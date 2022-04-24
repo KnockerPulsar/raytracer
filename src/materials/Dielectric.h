@@ -8,56 +8,75 @@
 #include <memory>
 
 namespace rt {
+  /**
+   * @brief Contains logic to model dielectric (glass) materials.
+   */
   class Dielectric : public Material {
   public:
-    sPtr<Texture> albedo;
-    float         refractionIndex;
+    sPtr<Texture> albedo;          // Shared pointer to the texture this material has
+    float         refractionIndex; // Controls how likely a ray is to reflect or refract
 
     Dielectric() = default;
 
-    Dielectric(float refIdx, vec3 color = vec3(1.0))
-        : refractionIndex(refIdx), albedo(std::make_shared<SolidColor>(color)) {
-    }
+    Dielectric(float refIdx, vec3 color = vec3(1.0)) : refractionIndex(refIdx), albedo(ms<SolidColor>(color)) {}
 
-    Dielectric(float refIdx, sPtr<Texture> tex)
-        : refractionIndex(refIdx), albedo(tex) {}
+    Dielectric(float refIdx, sPtr<Texture> tex) : refractionIndex(refIdx), albedo(tex) {}
 
-    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
-                         Ray &scattered) const override {
+    /**
+     * @brief Hit logic, simulates dielectric/glass materials
+     *
+     * @param rIn Input ray
+     * @param rec Input hit record
+     * @param attenuation Accumulated texture effects during ray tracing
+     * @param scattered Scattered/output ray
+     * @return true Always, independent of whether the ray reflects or refracts
+     */
+    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
-      attenuation   = albedo->Value(rec.u, rec.v, rec.p);
-      float ref_idx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
+      attenuation  = albedo->Value(rec.u, rec.v, rec.p);
+      float refIdx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
-      vec3  unit_dir  = r_in.direction.Normalize();
-      float cos_theta = fmin(vec3::DotProd(-unit_dir, rec.normal), 1.0);
-      float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+      vec3  unitDir  = rIn.direction.Normalize();
+      float cosTheta = fmin(vec3::DotProd(-unitDir, rec.normal), 1.0);
+      float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-      bool  cannot_refract = ref_idx * sin_theta > 1.0;
-      float reflectance    = Reflectance(cos_theta, ref_idx);
+      bool  cannotRefract = refIdx * sinTheta > 1.0;
+      float reflectance   = Reflectance(cosTheta, refIdx);
       vec3  dir;
 
-      // Either reflect when the refraction index and sin_theta are large
+      // Either reflect when the refraction index and sinTheta are large
       // enought Or just reflect randomly. Otherwise, refract.
-      if (cannot_refract || reflectance > RandomFloat())
-        dir = unit_dir.Reflect(rec.normal);
+      if (cannotRefract || reflectance > RandomFloat())
+        dir = unitDir.Reflect(rec.normal);
       else
-        dir = unit_dir.Refract(rec.normal, ref_idx);
+        dir = unitDir.Refract(rec.normal, refIdx);
 
-      scattered = Ray(rec.p, dir, r_in.time);
+      scattered = Ray(rec.p, dir, rIn.time);
       return true;
     }
 
     virtual json GetJson() const override {
-      return json{{"type", "dielectri"},
-                  {"refraction_index", refractionIndex},
-                  {"texture", albedo->GetJson()}};
+      // clang-format off
+      return json{
+        {"type", "dielectric"},
+        {"refraction_index", refractionIndex},
+        {"texture", albedo->GetJson()}
+      };
+      // clang-format on
     }
 
   private:
-    static float Reflectance(float cos, float ref_idx) {
-      // Schlick's approx.
-      float r0 = (1 - ref_idx) / (1 + ref_idx);
+    /**
+     * @brief Uses Schlick's approximation to calculate reflectance.
+     *
+     * @param cos Cos the angle between the incident and normal vectors (dot product)
+     * @param refIdx Refraction index of the material
+     * @return float The reflectence of the material (how likely it is to reflect a ray)
+     */
+    static float Reflectance(float cos, float refIdx) {
+      float r0 = (1 - refIdx) / (1 + refIdx);
       r0       = r0 * r0;
+
       return r0 + (1 - r0) * pow(1 - cos, 5);
     }
   };
@@ -68,5 +87,4 @@ namespace rt {
   }
 
   inline void to_json(json &j, const Dielectric &d) { j = d.GetJson(); }
-
 } // namespace rt

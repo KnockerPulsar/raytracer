@@ -8,3 +8,5 @@ NamespaceIndentation: All
 BinPackArguments: false
 BinPackParameters: false
 ColumnLimit: 120
+BraceWrapping:
+  AfterStruct: true
