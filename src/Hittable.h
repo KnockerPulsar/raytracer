@@ -8,12 +8,15 @@
 #include "Transformation.h"
 #include "Util.h"
 #include "data_structures/vec3.h"
+#include "editor/Utils.h"
 #include <cmath>
 #include <iostream>
 #include <memory>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "../vendor/glm/glm/gtx/string_cast.hpp"
+#include "../vendor/rlImGui/imgui/imgui.h"
 #include <vector>
+
 using std::shared_ptr;
 
 namespace rt {
@@ -34,6 +37,7 @@ namespace rt {
 
   class Hittable : public IRasterizable {
   public:
+    std::string name;
     Transformation transformation;
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
@@ -85,6 +89,11 @@ namespace rt {
       // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
       transformation = Transformation(translate, rotate);
       // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
+    }
+
+    void onImmediateGui() {
+      ImGui::DragFloat3(("Translation##"+Editor::GetIDFromPointer(this)).c_str(), &transformation.translate.x);
+      ImGui::DragFloat3(("Rotation##"+Editor::GetIDFromPointer(this)).c_str(), &transformation.rotate.x);
     }
   };
 } // namespace rt

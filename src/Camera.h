@@ -1,9 +1,11 @@
 #pragma once
 #include "Defs.h"
+#include "HittableList.h"
 #include "IRasterizable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
 #include <raylib.h>
+#include <raymath.h>
 #include <vector>
 
 namespace rt {
@@ -13,9 +15,19 @@ namespace rt {
     vec3 lower_left_corner, horizontal, vertical;
     vec3 u, v, w, vUp;
 
+    vec3 rgt;
+
     float time0, time1;
     float vFov, // vertical field-of-view in degrees
         aspectRatio, aperature, focusDist, lensRadius;
+
+    constexpr static const float xAngleClampMin = -89.0f;
+    constexpr static const float xAngleClampMax = 89.0f;
+    float                        panningDivider = 51.0f;
+
+    float   movScale     = 10.0f;
+    vec3    angle        = {0, 0, 0}; // Used to rotate the camera using the mouse
+    Vector2 rotSensitity = {0.003f, 0.003f};
 
     Camera() = default;
     Camera(vec3  lookFrom,
@@ -62,24 +74,26 @@ namespace rt {
       float theta = DegressToRadians(vFov);
 
       // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-      float h               = tan(theta / 2);
-      float viewport_height = 2.0 * h;
-      float viewport_width  = aspectRatio * viewport_height;
+      float h              = tan(theta / 2);
+      float viewportHeight = 2.0 * h;
+      float viewportWidth  = aspectRatio * viewportHeight;
 
       // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
       w = (lookFrom - lookAt).Normalize();
       u = vec3::CrsProd(vUp, w).Normalize();
       v = vec3::CrsProd(w, u);
 
-      horizontal        = focusDist * viewport_width * u;
-      vertical          = focusDist * viewport_height * v;
+      horizontal        = focusDist * viewportWidth * u;
+      vertical          = focusDist * viewportHeight * v;
       lower_left_corner = this->lookFrom - horizontal / 2 - vertical / 2 - focusDist * w;
+      rgt               = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(lookAt, lookFrom), vUp));
     }
 
     void Fwd(float deltaTime) {
       lookFrom += moveDir * deltaTime;
       Update();
     }
+
     void Bck(float deltaTime) {
       lookFrom += -moveDir * deltaTime;
       Update();
@@ -88,6 +102,10 @@ namespace rt {
     rt::Ray GetRay(float s, float t) const;
 
     void Rasterize(std::vector<sPtr<Hittable>> rasterizables);
+
+    void UpdateEditorCamera();
+    void RaylibRotateCamera(Vector2 mousePositionDelta);
+    void RenderImgui(HittableList* objectList);
   };
 
   inline void to_json(json &j, const Camera &c) {

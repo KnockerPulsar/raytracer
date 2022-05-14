@@ -508,8 +508,8 @@ namespace rt {
 
     Scene        s;
     HittableList world;
-    vec3         lookFrom        = vec3(2, 2, 0);
-    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         lookFrom        = vec3(0, 0, 0);
+    vec3         lookAt          = vec3(0, 0, -1);
     vec3         vUp             = vec3(0, 1, 0);
     vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
 
@@ -527,8 +527,10 @@ namespace rt {
     auto box               = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
     auto sphere            = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
     sphere->transformation = Transformation(vec3(-1, -1, 0));
-    box->transformation    = Transformation(vec3(1, -1, 0), vec3(0, 45, 0));
+    box->transformation    = Transformation(vec3(0,0, -1), vec3(0, 45, 0));
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
+
+    std::vector<sPtr<Hittable>> objs = {box,sphere};
 
     world //
         .Add(box)
@@ -543,6 +545,8 @@ namespace rt {
         .samplesPerPixel = samplesPerPixel,
         .backgroundColor = backgroundColor,
     };
+
+    s.objects.objects = objs;
 
     return s;
   }
@@ -573,16 +577,19 @@ namespace rt {
     plane->setTransformation(vec3(-3, 10, 0), (0, 0, 0));
 
     auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
+    auto tri = make_shared<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red);
 
-    std::vector<sPtr<Hittable>> obj = {plane, xzplane};
+    std::vector<sPtr<Hittable>> obj = {plane, xzplane, tri};
 
     world //
-        .Add(make_shared<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red))
+        .Add(tri)
         .Add(plane)
         .Add(xzplane);
 
     HittableList bvh;
     bvh.Add(make_shared<BVHNode>(world, 0, 1));
+
+    
 
     s = {
         .world           = bvh,

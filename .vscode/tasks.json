@@ -27,7 +27,7 @@
             "label": "build release",
             "type": "process",
             "command": "make",
-            "args": ["build"],
+            "args": ["build", "-j12"],
             "windows": {
                 "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [],

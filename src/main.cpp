@@ -89,13 +89,12 @@ int main() {
       showProg = !showProg;
       break;
     }
-    case KEY_E : {
+    case KEY_E: {
       raster = !raster;
       break;
     }
     }
   };
-
   bool allFinished = true;
   while (!WindowShouldClose()) {
     checkInput();
@@ -116,11 +115,19 @@ int main() {
 
       EndDrawing();
     } else {
+      BeginDrawing();
+      ClearBackground(BLACK);
+
+      asyncRenderData.currScene.cam.UpdateEditorCamera();
       asyncRenderData.currScene.cam.Rasterize(asyncRenderData.currScene.world.objects);
+      
+      asyncRenderData.currScene.cam.RenderImgui(&asyncRenderData.currScene.objects);
       onFrameRender();
+      EndDrawing();
     }
   }
 
+  rlImGuiShutdown();
   if (!raster)
     RenderAsync::Shutdown(fullscreen, asyncRenderData);
 

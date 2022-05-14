@@ -1,8 +1,3 @@
 
-bin/
-valgrind
-valgrind-out.txt
-callgrind.out.2032439
-callgrind.out.1977778
-callgrind.out.1917785
-callgrind.out.1835490
+**/bin/
+**/obj/

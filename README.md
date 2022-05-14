@@ -26,3 +26,6 @@ Experimenting with creating a CPU raytracer. Main resources:
 
 # Dependencies
 - [raylib](https://github.com/raysan5/raylib) for drawing and Vector3 class library
+- [glm](https://github.com/g-truc/glm) for transforms
+- [rlImGui](https://github.com/raylib-extras/rlImGui) for imgui support
+- [nlohmann-json](https://github.com/nlohmann/json) for json support
