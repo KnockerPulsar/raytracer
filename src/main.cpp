@@ -1,5 +1,6 @@
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
+#include "Camera.h"
 #include "Ray.h"
 #include "RenderAsync.h"
 #include "Scene.h"
@@ -47,9 +48,9 @@ int main1() {
 int main() {
   // Rendering constants for easy modifications.
   // Only used when creating hardcoded scenes
-  const int   imageWidth      = 600;
+  const int   imageWidth      = 1200;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 10;
+  const int   samplesPerPixel = 1;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
@@ -64,6 +65,8 @@ int main() {
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
   asyncRenderData.currScene =
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
+  
+  rt::Camera& cam = asyncRenderData.currScene.cam;
 
   if (fullscreen)
     ToggleFullscreen();
@@ -95,6 +98,7 @@ int main() {
     }
     }
   };
+
   bool allFinished = true;
   while (!WindowShouldClose()) {
     checkInput();
@@ -110,7 +114,6 @@ int main() {
 
       // Check on thread progress. Draw finished threads to buffer.
       allFinished = RenderAsync::RenderFinished(asyncRenderData);
-
       RenderAsync::RenderImGui(showProg, asyncRenderData);
 
       EndDrawing();
@@ -118,10 +121,11 @@ int main() {
       BeginDrawing();
       ClearBackground(BLACK);
 
-      asyncRenderData.currScene.cam.UpdateEditorCamera();
-      asyncRenderData.currScene.cam.Rasterize(asyncRenderData.currScene.world.objects);
-      
-      asyncRenderData.currScene.cam.RenderImgui(&asyncRenderData.currScene.objects);
+      if(cam.controlType == rt::CameraControlType::flyCam)
+        cam.UpdateEditorCamera(GetFrameTime());
+      cam.Rasterize(asyncRenderData.currScene.world.objects);
+      cam.RenderImgui(&asyncRenderData.currScene.objects);
+
       onFrameRender();
       EndDrawing();
     }

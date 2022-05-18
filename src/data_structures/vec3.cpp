@@ -10,7 +10,11 @@ vec3::vec3(const float f) : vec3(f, f, f) {}
 
 vec3::vec3(const Vector3 &conv) : Vector3{conv} {}
 
+vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
+
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
+
+glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 
 vec3 vec3::Reflect(const vec3 &norm) const {
   float bScale = vec3::DotProd(norm, *this);

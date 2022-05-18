@@ -6,8 +6,12 @@
 #include "HittableList.h"
 #include "Ray.h"
 #include "Util.h"
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
+#include <tuple>
+
+#include "../vendor/glm/glm/gtx/fast_trigonometry.hpp"
 
 namespace rt {
   Ray Camera::GetRay(float s, float t) const {
@@ -21,6 +25,8 @@ namespace rt {
   void Camera::Rasterize(std::vector<sPtr<Hittable>> rasterizables) {
     BeginMode3D(
         Camera3D{.position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE});
+
+    DrawGrid(10, 10);
     for (auto &&raster : rasterizables) {
       raster->RasterizeTransformed(raster->transformation);
     }
@@ -31,37 +37,45 @@ namespace rt {
     angle.x += (mousePositionDelta.y * -rotSensitity.y);
     angle.y += (mousePositionDelta.x * -rotSensitity.x);
 
-    // Angle clamp
-    if (angle.x < xAngleClampMin * DEG2RAD)
-      angle.x = xAngleClampMin * DEG2RAD;
-    else if (angle.x > xAngleClampMax * DEG2RAD)
-      angle.x = xAngleClampMax * DEG2RAD;
+    angle.x = glm::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
+    angle.y = glm::wrapAngle(angle.y);
 
-    glm::mat4 rotMat = glm::eulerAngleXYZ(angle.x, angle.y, angle.z);
-    glm::vec4 defaultFwd = glm::vec4(0,0,-1, 1) ;
+    glm::mat4 rotMat     = glm::eulerAngleYX(angle.y, angle.x);
+    glm::vec4 defaultFwd = glm::vec4(0, 0, -1, 0);
+    glm::vec4 defaultRgt = glm::vec4(1, 0, 0, 0);
 
-    glm::vec3 rotated = rotMat * defaultFwd;
-    vec3 rot = {rotated.x, rotated.y, rotated.z};
+    glm::vec3 rotatedFwd = rotMat * defaultFwd;
+    glm::vec3 rotatedRgt = rotMat * defaultRgt;
 
-    lookAt = rot;
-    rgt    = Vector3Normalize(Vector3CrossProduct(lookAt, vUp));
+    lookAt = lookFrom + rotatedFwd;
+    rgt    = rotatedRgt;
     // vUp    = Vector3Normalize(Vector3CrossProduct(rgt, lookAt));
   }
 
-  void Camera::RenderImgui(HittableList* objectList) {
+  void Camera::RenderImgui(HittableList *objectList) {
     rlImGuiBegin();
 
     ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::DragFloat3("translation", &lookFrom.x, 0.05);
-    ImGui::DragFloat3("look at", &lookAt.x, 0.05);
-    if(ImGui::DragFloat3("rotation", &angle.x, 0.05f))
-      RaylibRotateCamera({0,0});    
+
+    vec3 deltaPos = lookFrom;
+    ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
+
+    ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, CameraControlType::controlTypesCount, 0);
+
+    if (controlType == CameraControlType::lookAt)
+      ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
+
+    else {
+      deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
+      lookAt += (deltaPos);
+      ImGui::DragFloat2("rotation", &angle.x, 0.05f);
+      RaylibRotateCamera({0, 0});
+    }
 
     ImGui::End();
 
-
     ImGui::Begin("Objects");
-    for(auto&& o : objectList->objects){
+    for (auto &&o : objectList->objects) {
       o->onImmediateGui();
       ImGui::Separator();
     }
@@ -70,48 +84,53 @@ namespace rt {
     rlImGuiEnd();
   }
 
-  void Camera::UpdateEditorCamera() {
+  void Camera::UpdateEditorCamera(float dt) {
+    auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt);
+    bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
+                      IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-      float dt = GetFrameTime();
-
-      Vector3 elevationChange = Vector3Scale(vUp, dt * movScale);
-      Vector3 fwdChange       = Vector3Scale(lookAt - lookFrom, dt * movScale);
-      Vector3 rgtChange       = Vector3Scale(rgt, dt * movScale);
-
-      bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
-                        IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
+    if (IsMouseButtonDown(1)) {
+      DisableCursor();
+      RaylibRotateCamera(GetMouseDelta());
 
       if (keyPressed) {
         if (IsKeyDown(KEY_SPACE)) {
-          lookFrom = Vector3Add(lookFrom, elevationChange);
-          lookAt   = Vector3Add(lookAt, elevationChange);
+          lookFrom += upChange;
+          lookAt += upChange;
         }
         if (IsKeyDown(KEY_LEFT_CONTROL)) {
-          lookFrom = Vector3Subtract(lookFrom, elevationChange);
-          lookAt   = Vector3Subtract(lookAt, elevationChange);
+          lookFrom -= upChange;
+          lookAt -= upChange;
         }
         if (IsKeyDown(KEY_W)) {
-          lookFrom = Vector3Add(lookFrom, fwdChange);
-          lookAt   = Vector3Add(lookAt, fwdChange);
+          lookFrom += fwdChange;
+          lookAt += fwdChange;
         }
         if (IsKeyDown(KEY_S)) {
-          lookFrom = Vector3Subtract(lookFrom, fwdChange);
-          lookAt   = Vector3Subtract(lookAt, fwdChange);
+          lookFrom -= fwdChange;
+          lookAt -= fwdChange;
         }
         if (IsKeyDown(KEY_A)) {
-          lookFrom = Vector3Subtract(lookFrom, rgtChange);
-          lookAt   = Vector3Subtract(lookAt, rgtChange);
+          lookFrom -= rgtChange;
+          lookAt -= rgtChange;
         }
         if (IsKeyDown(KEY_D)) {
-          lookFrom = Vector3Add(lookFrom, rgtChange);
-          lookAt   = Vector3Add(lookAt, rgtChange);
+          lookFrom += rgtChange;
+          lookAt += rgtChange;
         }
-      }
 
-      DisableCursor();
-      RaylibRotateCamera(GetMouseDelta());
-    } else
+        RaylibRotateCamera(GetMouseDelta());
+      }
+    } else {
       EnableCursor();
+    }
+  }
+
+  std::tuple<vec3, vec3, vec3> Camera::getScaledDirectionVectors(float dt) const {
+    vec3 upChange  = vUp * dt * movScale;
+    vec3 fwdChange = (lookAt - lookFrom).Normalize() * dt * movScale;
+    vec3 rgtChange = rgt * dt * movScale;
+
+    return std::make_tuple(upChange, fwdChange, rgtChange);
   }
 } // namespace rt

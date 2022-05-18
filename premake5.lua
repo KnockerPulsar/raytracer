@@ -1,5 +1,6 @@
 workspace "rt"
 configurations {"Debug", "Release"}
+require("modules/premake-ecc/ecc")
 
 project "Raytracer"
   kind "WindowedApp"
@@ -36,6 +37,7 @@ project "Raytracer"
 
   includedirs {
     "vendor/glm", 
+    "vendor/glm/glm", 
     "vendor/nlohmann-json", 
     "vendor/rlImGui/imgui/",
     "vendor/rlImGui/"
@@ -43,8 +45,8 @@ project "Raytracer"
 
   filter {"configurations:Debug"}
     defines {"DEBUG"}
-    symbols "Off"
+    symbols "ON"
 
   filter {"configurations:Release"}
     defines {"NDEBUG"}
-    optimize "Off"
+    optimize "ON"

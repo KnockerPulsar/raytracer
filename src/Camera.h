@@ -9,12 +9,13 @@
 #include <vector>
 
 namespace rt {
+  enum CameraControlType { flyCam, lookAt, controlTypesCount };
+
   class Camera {
   public:
     vec3 lookFrom, lookAt, moveDir;
     vec3 lower_left_corner, horizontal, vertical;
     vec3 u, v, w, vUp;
-
     vec3 rgt;
 
     float time0, time1;
@@ -24,10 +25,12 @@ namespace rt {
     constexpr static const float xAngleClampMin = -89.0f;
     constexpr static const float xAngleClampMax = 89.0f;
     float                        panningDivider = 51.0f;
+    float                        movScale       = 10.0f;
+    vec3                         angle          = {0, 0, 0}; // Used to rotate the camera using the mouse
+    Vector2                      rotSensitity   = {0.003f, 0.003f};
 
-    float   movScale     = 10.0f;
-    vec3    angle        = {0, 0, 0}; // Used to rotate the camera using the mouse
-    Vector2 rotSensitity = {0.003f, 0.003f};
+    CameraControlType   controlType         = CameraControlType::flyCam;
+    inline static char *controlTypeLabels[] = {"flyCam", "lookAt"};
 
     Camera() = default;
     Camera(vec3  lookFrom,
@@ -103,9 +106,10 @@ namespace rt {
 
     void Rasterize(std::vector<sPtr<Hittable>> rasterizables);
 
-    void UpdateEditorCamera();
-    void RaylibRotateCamera(Vector2 mousePositionDelta);
-    void RenderImgui(HittableList* objectList);
+    void                         UpdateEditorCamera(float dt);
+    void                         RaylibRotateCamera(Vector2 mousePositionDelta);
+    void                         RenderImgui(HittableList *objectList);
+    std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
   };
 
   inline void to_json(json &j, const Camera &c) {

@@ -527,7 +527,7 @@ namespace rt {
     auto box               = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
     auto sphere            = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
     sphere->transformation = Transformation(vec3(-1, -1, 0));
-    box->transformation    = Transformation(vec3(0,0, -1), vec3(0, 45, 0));
+    box->transformation    = Transformation(vec3(0,0, -5), vec3(0, 45, 0));
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
     std::vector<sPtr<Hittable>> objs = {box,sphere};

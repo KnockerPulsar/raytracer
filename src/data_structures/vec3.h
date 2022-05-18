@@ -5,6 +5,7 @@
 #include "../Util.h"
 #include <raylib.h>
 #include <raymath.h>
+#include "../../vendor/glm/glm/glm.hpp" 
 
 /**
  * @brief Represents any 3 component object (X,Y,Z) or (R,G,B)
@@ -15,7 +16,10 @@ public:
   vec3(float);                                 // Creates a 3 componenet vector with all elements set to the given float
   vec3(float, float, float);                   // Sets the each component to the corresponding parameter
   vec3(const Vector3 &);                       // Copy constructor for raylib's Vector3
+  vec3(const glm::vec3&);
+
   static vec3 Zero() { return Vector3Zero(); } // Returns a vector with all components set to zero
+  glm::vec3 toGlm() const ;
 
   bool NearZero() const;                // Checks if all components of the vector are less than epsilon (Constants.h)
   vec3 Reflect(const vec3 &norm) const; // Reflects the vector about a given axisI
@@ -34,6 +38,7 @@ public:
   inline vec3 operator/(float f) const;       // Divides all components by the given float, returns a new vector
 
   inline vec3 &operator+=(const vec3 &v); // Element-wise increment
+  inline vec3 &operator-=(const vec3 &v); // Element-wise decrement
   inline vec3 &operator/=(float f);       // Divides all components by the given float, mutates the calling vector
   inline vec3 &operator*=(float f);       // Multiplies all components by the given float, mutates the calling vector
 
@@ -86,6 +91,11 @@ inline vec3 &vec3::operator+=(const vec3 &v) {
   x += rX;
   y += rY;
   z += rZ;
+  return *this;
+}
+
+inline vec3 &vec3::operator-=(const vec3 &v) {
+  *this += -v;
   return *this;
 }
 

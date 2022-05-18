@@ -4,10 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "premake",
+            "type": "shell",
+            "command": "premake5 gmake",
+        },
+        {
             "label": "build debug",
             "type": "process",
             "command": "make",
-            "args": ["build", "-j12"],
+            "args": [
+                "config=debug",
+                "-j12"
+            ],
             "windows": {
                 "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [],
@@ -24,25 +32,12 @@
             ]
         },
         {
-            "label": "build release",
-            "type": "process",
-            "command": "make",
-            "args": ["build", "-j12"],
-            "windows": {
-                "command": "C:/raylib/mingw/bin/mingw32-make.exe",
-                "args": [],
-            },
-            "osx": {
-                "args": [
-                    "RAYLIB_PATH=<path_to_raylib>/raylib",
-                    "PROJECT_NAME=${fileBasenameNoExtension}",
-                    "OBJS=${fileBasenameNoExtension}.c"
-                ],
-            },
-            "group": "build",
-            "problemMatcher": [
-                "$gcc"
-            ]
-        },
+            "label": "premake+build",
+            "dependsOn": [
+                "premake",
+                "build debug"
+            ],
+            "dependsOrder": "sequence"
+        }
     ]
 }
