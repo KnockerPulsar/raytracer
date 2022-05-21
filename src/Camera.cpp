@@ -11,25 +11,29 @@
 #include <raymath.h>
 #include <tuple>
 
+#include "../vendor/glm/glm/gtc/matrix_transform.hpp"
 #include "../vendor/glm/glm/gtx/fast_trigonometry.hpp"
+#include "editor/Utils.h"
 
 namespace rt {
   Ray Camera::GetRay(float s, float t) const {
     vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
     vec3 offset = u * rd.x + v * rd.y;
     return Ray(lookFrom + offset,
-               lower_left_corner + horizontal * s + vertical * t - lookFrom - offset,
+               (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
                RandomFloat(time0, time1));
   }
 
   void Camera::Rasterize(std::vector<sPtr<Hittable>> rasterizables) {
-    BeginMode3D(
-        Camera3D{.position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE});
+    BeginMode3D(toCamera3D());
 
     DrawGrid(10, 10);
     for (auto &&raster : rasterizables) {
       raster->RasterizeTransformed(raster->transformation);
     }
+
+    DrawLine3D(rt::Camera::lineStart, rt::Camera::lineEnd, BLUE);
+
     EndMode3D();
   }
 
@@ -47,8 +51,8 @@ namespace rt {
     glm::vec3 rotatedFwd = rotMat * defaultFwd;
     glm::vec3 rotatedRgt = rotMat * defaultRgt;
 
-    lookAt = lookFrom + rotatedFwd;
-    rgt    = rotatedRgt;
+    lookAt     = lookFrom + rotatedFwd;
+    rgt        = rotatedRgt;
     // vUp    = Vector3Normalize(Vector3CrossProduct(rgt, lookAt));
   }
 
@@ -76,10 +80,21 @@ namespace rt {
 
     ImGui::Begin("Objects");
     for (auto &&o : objectList->objects) {
-      o->onImmediateGui();
+      std::string idPlusName = o->name + "##" + Editor::GetIDFromPointer(&o);
+      if (ImGui::Button(idPlusName.c_str())) {
+        Camera::selectedObject = o.get();
+      }
       ImGui::Separator();
     }
     ImGui::End();
+
+    if (Camera::selectedObject != nullptr) {
+      ImGui::Begin((Camera::selectedObject->name + "##" + Editor::GetIDFromPointer(&Camera::selectedObject)).c_str(),
+                   0,
+                   ImGuiWindowFlags_AlwaysAutoResize);
+      Camera::selectedObject->onImmediateGui();
+      ImGui::End();
+    }
 
     rlImGuiEnd();
   }
@@ -133,4 +148,6 @@ namespace rt {
 
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
+
+  glm::mat4 Camera::getCameraTransform() const { return glm::lookAt(lookAt.toGlm(), lookFrom.toGlm(), vUp.toGlm()); }
 } // namespace rt

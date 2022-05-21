@@ -1,9 +1,12 @@
 #pragma once
+#include "Constants.h"
 #include "Defs.h"
+#include "Hittable.h"
 #include "HittableList.h"
 #include "IRasterizable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
@@ -13,6 +16,8 @@ namespace rt {
 
   class Camera {
   public:
+    static inline Hittable *selectedObject; // TODO: Move this out
+
     vec3 lookFrom, lookAt, moveDir;
     vec3 lower_left_corner, horizontal, vertical;
     vec3 u, v, w, vUp;
@@ -30,7 +35,9 @@ namespace rt {
     Vector2                      rotSensitity   = {0.003f, 0.003f};
 
     CameraControlType   controlType         = CameraControlType::flyCam;
-    inline static char *controlTypeLabels[] = {"flyCam", "lookAt"};
+    inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};
+
+    inline static vec3 lineStart, lineEnd;
 
     Camera() = default;
     Camera(vec3  lookFrom,
@@ -102,6 +109,31 @@ namespace rt {
       Update();
     }
 
+    Camera3D toCamera3D() const {
+      return Camera3D{
+          .position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
+    }
+
+    Hittable *CastRay(Vector2 mousePos, Vector2 screenDims, HittableList *world) const {
+      // auto [s, t] = mouseST;
+
+      // Ray r = GetRay(s, t);
+
+      float s =  mousePos.x /  (screenDims.x-1);
+      float t =  (screenDims.y - mousePos.y) /  (screenDims.y-1);
+
+      ::Ray raylibRay = GetMouseRay(mousePos, toCamera3D());
+      Ray   r = {raylibRay.position, raylibRay.direction, 0};
+      rt::Camera::lineStart = r.origin.toGlm();
+      rt::Camera::lineEnd   = r.At(1000).toGlm();
+
+
+      rt::HitRecord rec;
+      world->Hit(r, -INFINITY, INFINITY, rec);
+
+      return rec.closestHit;
+    }
+
     rt::Ray GetRay(float s, float t) const;
 
     void Rasterize(std::vector<sPtr<Hittable>> rasterizables);
@@ -110,6 +142,7 @@ namespace rt {
     void                         RaylibRotateCamera(Vector2 mousePositionDelta);
     void                         RenderImgui(HittableList *objectList);
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
+    glm::mat4                    getCameraTransform() const;
   };
 
   inline void to_json(json &j, const Camera &c) {

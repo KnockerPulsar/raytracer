@@ -46,7 +46,7 @@ namespace rt {
       const vec3 outward_normal = (rec.p - CurrCenter(r.time)) / radius;
       rec.set_face_normal(r, outward_normal);
       rec.mat_ptr = mat_ptr;
-
+      rec.closestHit = (Hittable*)this;
       return true;
     }
 

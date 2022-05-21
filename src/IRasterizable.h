@@ -1,6 +1,7 @@
 #pragma once
 #include "Transformation.h"
 #include <rlgl.h>
+#include "../vendor/rlImGui/imgui/imgui.h"
 
 /**
  * @brief Interface that rasterizable objects should inherit from.
@@ -8,6 +9,8 @@
 namespace rt {
   class IRasterizable {
   public:
+    std::string name;
+    
     virtual void Rasterize(){};
     virtual void RasterizeTransformed(Transformation t){
       rlPushMatrix();
@@ -23,5 +26,7 @@ namespace rt {
        rlRotatef(rotY, 0, 1, 0);
        rlRotatef(rotZ, 0, 0, 1);
     }
+
+    virtual void onImGui(){ImGui::LabelText("IRasterizable unimplemented", "%s: %d, unimplemented", __FILE__, __LINE__);}
   };
 } // namespace rt

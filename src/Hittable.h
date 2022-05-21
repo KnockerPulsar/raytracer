@@ -28,6 +28,7 @@ namespace rt {
     shared_ptr<Material> mat_ptr;
     float                t, u, v;
     bool                 front_face;
+    Hittable            *closestHit = nullptr;
 
     inline void set_face_normal(const Ray &r, const vec3 &outward_normal) {
       front_face = Vector3DotProduct(outward_normal, r.direction) < 0;
@@ -37,7 +38,7 @@ namespace rt {
 
   class Hittable : public IRasterizable {
   public:
-    std::string name;
+    std::string    name;
     Transformation transformation;
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
@@ -92,8 +93,8 @@ namespace rt {
     }
 
     void onImmediateGui() {
-      ImGui::DragFloat3(("Translation##"+Editor::GetIDFromPointer(this)).c_str(), &transformation.translate.x);
-      ImGui::DragFloat3(("Rotation##"+Editor::GetIDFromPointer(this)).c_str(), &transformation.rotate.x);
+      ImGui::DragFloat3(("Translation##" + Editor::GetIDFromPointer(this)).c_str(), &transformation.translate.x, 0.05f);
+      ImGui::DragFloat3(("Rotation##" + Editor::GetIDFromPointer(this)).c_str(), &transformation.rotate.x, 0.05f);
     }
   };
 } // namespace rt

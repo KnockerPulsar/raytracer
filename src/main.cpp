@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <ostream>
 #include <raylib.h>
 #include <vector>
 
@@ -65,8 +66,8 @@ int main() {
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
   asyncRenderData.currScene =
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
-  
-  rt::Camera& cam = asyncRenderData.currScene.cam;
+
+  rt::Camera &cam = asyncRenderData.currScene.cam;
 
   if (fullscreen)
     ToggleFullscreen();
@@ -121,8 +122,27 @@ int main() {
       BeginDrawing();
       ClearBackground(BLACK);
 
-      if(cam.controlType == rt::CameraControlType::flyCam)
+      if (cam.controlType == rt::CameraControlType::flyCam)
         cam.UpdateEditorCamera(GetFrameTime());
+
+      // Trial-and-error'd my way through figuring out these
+      bool dragging = ImGui::IsMouseDragging(0);
+      bool hovering = ImGui::IsAnyItemHovered();
+
+      // Using ImGui's function since it might work better with the GUI
+      if (ImGui::IsMouseClicked(0) && !hovering && !dragging) {
+        float screenW = GetScreenWidth();
+        float screenH = GetScreenHeight();
+
+        float mouseX = GetMouseX();
+        float mouseY = GetMouseY();
+
+
+        
+        rt::Camera::selectedObject =
+            cam.CastRay({mouseX, mouseY}, {screenW, screenH}, &asyncRenderData.currScene.world);
+      }
+
       cam.Rasterize(asyncRenderData.currScene.world.objects);
       cam.RenderImgui(&asyncRenderData.currScene.objects);
 

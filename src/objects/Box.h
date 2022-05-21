@@ -53,7 +53,12 @@ namespace rt {
     }
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
-      return sides.Hit(r, t_min, t_max, rec);
+      if(sides.Hit(r, t_min, t_max, rec)){
+        rec.closestHit = (Hittable*)this;
+        return true;
+      }
+
+      return false;
     }
 
     void Rasterize() override {

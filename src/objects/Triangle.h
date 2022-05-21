@@ -81,6 +81,8 @@ namespace rt {
       rec.mat_ptr = mp;
       rec.t       = t;
       rec.set_face_normal(r, normal);
+      rec.closestHit = (Hittable*)this;
+      
       return true;
     }
 

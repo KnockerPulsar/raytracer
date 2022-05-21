@@ -12,6 +12,12 @@
       "args": [],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "premake+build",
+      "setupCommands": [
+        {
+          "description": "Skip library files",
+          "text": "-interpreter-exec console \"skip -gfi **/bits/*.h\""
+        }
+      ],
     }
   ]
 }

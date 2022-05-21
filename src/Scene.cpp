@@ -514,7 +514,7 @@ namespace rt {
     vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
 
     float distToFocus = 10.0f;
-    float aperature   = 0.001F;
+    float aperature   = 0.0;
     vec3  moveDir     = vec3(0.0f, 0, 0);
     int   fov         = 60.0;
 
@@ -526,8 +526,11 @@ namespace rt {
 
     auto box               = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
     auto sphere            = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
+    
     sphere->transformation = Transformation(vec3(-1, -1, 0));
-    box->transformation    = Transformation(vec3(0,0, -5), vec3(0, 45, 0));
+    sphere->name = "Earth";
+    box->transformation    = Transformation(vec3(0,0, -5), vec3(0, 0, 0));
+    box->name = "Cube";
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
     std::vector<sPtr<Hittable>> objs = {box,sphere};

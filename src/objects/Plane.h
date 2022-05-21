@@ -50,19 +50,17 @@ namespace rt {
       t1 = Triangle(botL, topL, topR, mat);
     }
 
-    virtual bool
-    Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
-      return t0.Hit(r, t_min, t_max, rec) || t1.Hit(r, t_min, t_max, rec);
+    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
+      if (t0.Hit(r, t_min, t_max, rec) || t1.Hit(r, t_min, t_max, rec)) {
+        rec.closestHit = (Hittable *)this;
+        return true;
+      }
+      return false;
     }
 
-    virtual bool
-    BoundingBox(float t0, float t1, AABB &outputBox) const override {
-      outputBox = transformation.regenAABB(AABB({this->t0.v0.p,
-                                                 this->t0.v1.p,
-                                                 this->t0.v2.p,
-                                                 this->t1.v0.p,
-                                                 this->t1.v1.p,
-                                                 this->t1.v2.p}));
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
+      outputBox = transformation.regenAABB(
+          AABB({this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
       return true;
     }
   };

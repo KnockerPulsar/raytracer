@@ -50,6 +50,7 @@ namespace rt {
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
       rec.p       = vec3(x, y, z);
+      rec.closestHit = (Hittable*)this;
       return true;
     }
 
@@ -102,6 +103,7 @@ namespace rt {
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
       rec.p       = vec3(x, y, z);
+      rec.closestHit = (Hittable*)this;
       return true;
     }
 
@@ -153,6 +155,7 @@ namespace rt {
       rec.set_face_normal(r, outwardNormal);
       rec.mat_ptr = mp;
       rec.p       = vec3(x, y, z);
+      rec.closestHit = (Hittable*)this;
       return true;
     }
 

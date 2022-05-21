@@ -77,6 +77,7 @@ namespace rt {
     rec.set_face_normal(r, outward_normal);
     GetSphereUV(outward_normal, rec.u, rec.v);
     rec.mat_ptr = mat_ptr;
+    rec.closestHit = (Hittable*)this;
 
     return true;
   }
