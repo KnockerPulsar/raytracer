@@ -66,13 +66,13 @@ namespace rt {
 
       // Apply inverse transformations in reverse
       transformedRay.origin    = transformation.Inverse(r.origin);
-      transformedRay.direction = Transformation::applyGlmMat(r.direction, transformation.invRotationMatrix);
+      transformedRay.direction = Transformation::applyGlmMat(r.direction, transformation.getInverseRotationMatrix());
 
       if (!this->Hit(transformedRay, t_min, t_max, rec))
         return false;
 
       rec.p = transformation.Apply(rec.p);
-      rec.set_face_normal(transformedRay, Transformation::applyGlmMat(rec.normal, transformation.rotationMatrix));
+      rec.set_face_normal(transformedRay, Transformation::applyGlmMat(rec.normal, transformation.getRotationMatrix()));
 
       return true;
     }

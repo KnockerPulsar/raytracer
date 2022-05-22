@@ -74,6 +74,7 @@ OBJECTS := \
 	$(OBJDIR)/Utils.o \
 	$(OBJDIR)/editor.o \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/ImGuizmo.o \
 	$(OBJDIR)/imgui_impl_opengl3.o \
 	$(OBJDIR)/imgui.o \
 	$(OBJDIR)/imgui_demo.o \
@@ -164,6 +165,9 @@ $(OBJDIR)/editor.o: src/editor/editor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ImGuizmo.o: vendor/imguizmo/ImGuizmo.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/imgui_impl_opengl3.o: vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp

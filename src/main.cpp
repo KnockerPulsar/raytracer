@@ -5,6 +5,7 @@
 #include "RenderAsync.h"
 #include "Scene.h"
 #include "Transformation.h"
+#include "editor/editor.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -57,6 +58,7 @@ int main() {
   bool        showProg        = false;
   int         incRender       = 1;
   bool        raster          = true;
+  bool        allFinished     = true;
 
   SceneID sceneID = SceneID::cornell;
 
@@ -100,7 +102,6 @@ int main() {
     }
   };
 
-  bool allFinished = true;
   while (!WindowShouldClose()) {
     checkInput();
     if (!raster) {
@@ -119,35 +120,24 @@ int main() {
 
       EndDrawing();
     } else {
+
       BeginDrawing();
+      rlImGuiBegin();
       ClearBackground(BLACK);
+      {
+        if (cam.controlType == rt::CameraControlType::flyCam)
+          cam.UpdateEditorCamera(GetFrameTime(), asyncRenderData.currScene.world);
 
-      if (cam.controlType == rt::CameraControlType::flyCam)
-        cam.UpdateEditorCamera(GetFrameTime());
+        Editor::Rasterize(asyncRenderData.currScene.world.objects, cam);
+        Editor::RenderImgui(asyncRenderData.currScene.world.objects, cam);
 
-      // Trial-and-error'd my way through figuring out these
-      bool dragging = ImGui::IsMouseDragging(0);
-      bool hovering = ImGui::IsAnyItemHovered();
-
-      // Using ImGui's function since it might work better with the GUI
-      if (ImGui::IsMouseClicked(0) && !hovering && !dragging) {
-        float screenW = GetScreenWidth();
-        float screenH = GetScreenHeight();
-
-        float mouseX = GetMouseX();
-        float mouseY = GetMouseY();
-
-
-        
-        rt::Camera::selectedObject =
-            cam.CastRay({mouseX, mouseY}, {screenW, screenH}, &asyncRenderData.currScene.world);
+        cam.RenderImgui(asyncRenderData.currScene.objects);
       }
-
-      cam.Rasterize(asyncRenderData.currScene.world.objects);
-      cam.RenderImgui(&asyncRenderData.currScene.objects);
-
+      
       onFrameRender();
+      rlImGuiEnd();
       EndDrawing();
+
     }
   }
 

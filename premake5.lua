@@ -33,6 +33,7 @@ project "Raytracer"
     "vendor/rlImGui/*.cpp",
     "vendor/rlImGui/*.h",
 
+    "vendor/imguizmo/*"
   }
 
   includedirs {

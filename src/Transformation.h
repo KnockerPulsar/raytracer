@@ -11,29 +11,11 @@
 namespace rt {
   class Transformation {
   public:
-    glm::mat4 modelMatrix;
-    glm::mat4 invModelMatrix;
-
-    glm::mat4 rotationMatrix;
-    glm::mat4 invRotationMatrix;
-
     vec3 translate;
     vec3 rotate;
 
-    Transformation(vec3 translation = vec3::Zero(),
-                   vec3 rotation    = vec3::Zero())
-        : translate(translation), rotate(rotation) {
-
-      glm::mat4 model          = glm::mat4(1.0f);
-      auto      translationMat = glm::translate(model, toGlmVec3(translation));
-      // modelMatrix      = glm::scale(modelMatrix, Scale);
-      rotationMatrix    = glm::eulerAngleXYZ(glm::radians(rotation.x),
-                                          glm::radians(rotation.y),
-                                          glm::radians(rotation.z));
-      modelMatrix       = translationMat * rotationMatrix;
-      invModelMatrix    = glm::inverse(modelMatrix);
-      invRotationMatrix = glm::inverse(rotationMatrix);
-    }
+    Transformation(vec3 translation = vec3::Zero(), vec3 rotation = vec3::Zero())
+        : translate(translation), rotate(rotation) {}
 
     static vec3 applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat) {
       auto glmVec     = glm::vec4(vec.x, vec.y, vec.z, 1);
@@ -42,17 +24,9 @@ namespace rt {
       return vec3(rotatedVec.x, rotatedVec.y, rotatedVec.z);
     }
 
-    static glm::vec3 toGlmVec3(const vec3 &vec) {
-      return glm::vec3(vec.x, vec.y, vec.z);
-    }
+    vec3 Apply(const vec3 &inVec) const { return applyGlmMat(inVec, getModelMatrix()); }
 
-    vec3 Apply(const vec3 &inVec) const {
-      return applyGlmMat(inVec, modelMatrix);
-    }
-
-    vec3 Inverse(const vec3 &inVec) const {
-      return applyGlmMat(inVec, invModelMatrix);
-    }
+    vec3 Inverse(const vec3 &inVec) const { return applyGlmMat(inVec, getInverseModelMatrix()); }
 
     AABB regenAABB(const AABB &aabb) const {
       // Generate all 8 vertices of the input AABB
@@ -70,7 +44,7 @@ namespace rt {
       };
 
       for (auto &&vert : vertices) {
-        vert = applyGlmMat(vert, modelMatrix);
+        vert = applyGlmMat(vert, getModelMatrix());
       }
 
       AABB newAABB = {vec3(infinity), vec3(-infinity)};
@@ -87,11 +61,26 @@ namespace rt {
 
       return newAABB;
     }
+
+    glm::mat4 getModelMatrix() const {
+      glm::mat4 model          = glm::mat4(1.0f);
+      glm::mat4 translationMat = glm::translate(model, translate.toGlm());
+      glm::mat4 rotationMatrix = getRotationMatrix();
+
+      return translationMat * rotationMatrix;
+    }
+
+    glm::mat4 getRotationMatrix() const {
+      return glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z));
+    }
+
+    glm::mat4 getInverseModelMatrix() const { return glm::inverse(getModelMatrix()); }
+
+    glm::mat4 getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
   };
 
   // This is how you use `json.get<Box>()`
-  inline void from_json(const json     &objectJson,
-                        Transformation &transformation) {
+  inline void from_json(const json &objectJson, Transformation &transformation) {
     auto t = objectJson["translation"].get<vec3>();
     auto r = objectJson["rotation"].get<vec3>();
   }

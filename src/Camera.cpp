@@ -11,30 +11,97 @@
 #include <raymath.h>
 #include <tuple>
 
+#include "../vendor/glm/glm/ext/matrix_clip_space.hpp"
 #include "../vendor/glm/glm/gtc/matrix_transform.hpp"
 #include "../vendor/glm/glm/gtx/fast_trigonometry.hpp"
+
 #include "editor/Utils.h"
+#include "editor/editor.h"
 
 namespace rt {
+
+  Camera::Camera(vec3  lookFrom,
+                 vec3  lookAt,
+                 vec3  vUp,
+                 vec3  moveDir,
+                 float vFov,
+                 float aspectRatio,
+                 float aperature,
+                 float focusDist,
+                 float time0,
+                 float time1)
+      : lookFrom(lookFrom), lookAt(lookAt), vUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
+        aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
+
+    float theta = DegressToRadians(vFov);
+
+    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
+    float h              = tan(theta / 2);
+    float viewportHeight = 2.0 * h;
+    float viewportWidth  = aspectRatio * viewportHeight;
+
+    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
+    Update();
+
+    lensRadius    = aperature / 2;
+    this->lookAt  = lookAt;
+    this->moveDir = moveDir;
+  }
+
+  // Should probably be moved to from_json()?
+  Camera::Camera(nlohmann::json cameraJson, float aspectRatio)
+      : Camera(cameraJson["look_from"].get<vec3>(),
+               cameraJson["look_at"].get<vec3>(),
+               cameraJson["v_up"].get<vec3>(),
+               cameraJson["move_dir"].get<vec3>(),
+               cameraJson["fov"].get<float>(),
+               aspectRatio,
+               cameraJson["aperature"].get<float>(),
+               cameraJson["focus_dist"].get<float>(),
+               cameraJson["time0"].get<float>(),
+               cameraJson["time1"].get<float>()) {}
+
+  void Camera::Update() {
+    float theta = DegressToRadians(vFov);
+
+    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
+    float h              = tan(theta / 2);
+    float viewportHeight = 2.0 * h;
+    float viewportWidth  = aspectRatio * viewportHeight;
+
+    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
+    w = (lookFrom - lookAt).Normalize();
+    u = vec3::CrsProd(vUp, w).Normalize();
+    v = vec3::CrsProd(w, u);
+
+    horizontal        = focusDist * viewportWidth * u;
+    vertical          = focusDist * viewportHeight * v;
+    lower_left_corner = this->lookFrom - horizontal / 2 - vertical / 2 - focusDist * w;
+    rgt               = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(lookAt, lookFrom), vUp));
+  }
+
+  // Used for mouse picking
+  Hittable *Camera::CastRay(Vector2 mousePos, HittableList &world) const {
+
+    ::Ray raylibRay = GetMouseRay(mousePos, toCamera3D());
+    Ray   r         = {raylibRay.position, raylibRay.direction, 0};
+
+    rt::Camera::lineStart = r.origin.toGlm();
+    rt::Camera::lineEnd   = r.At(1000).toGlm();
+
+    rt::HitRecord rec;
+    world.Hit(r, -INFINITY, INFINITY, rec);
+
+    return rec.closestHit;
+  }
+
+  // Used for raytracing
   Ray Camera::GetRay(float s, float t) const {
     vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
     vec3 offset = u * rd.x + v * rd.y;
     return Ray(lookFrom + offset,
                (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
                RandomFloat(time0, time1));
-  }
-
-  void Camera::Rasterize(std::vector<sPtr<Hittable>> rasterizables) {
-    BeginMode3D(toCamera3D());
-
-    DrawGrid(10, 10);
-    for (auto &&raster : rasterizables) {
-      raster->RasterizeTransformed(raster->transformation);
-    }
-
-    DrawLine3D(rt::Camera::lineStart, rt::Camera::lineEnd, BLUE);
-
-    EndMode3D();
   }
 
   void Camera::RaylibRotateCamera(Vector2 mousePositionDelta) {
@@ -51,93 +118,86 @@ namespace rt {
     glm::vec3 rotatedFwd = rotMat * defaultFwd;
     glm::vec3 rotatedRgt = rotMat * defaultRgt;
 
-    lookAt     = lookFrom + rotatedFwd;
-    rgt        = rotatedRgt;
+    lookAt = lookFrom + rotatedFwd;
+    rgt    = rotatedRgt;
     // vUp    = Vector3Normalize(Vector3CrossProduct(rgt, lookAt));
   }
 
-  void Camera::RenderImgui(HittableList *objectList) {
-    rlImGuiBegin();
+  void Camera::RenderImgui(HittableList &objectList) {
+    {
+      ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
+      {
+        vec3 deltaPos = lookFrom;
+        ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
 
-    ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, CameraControlType::controlTypesCount, 0);
 
-    vec3 deltaPos = lookFrom;
-    ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
-
-    ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, CameraControlType::controlTypesCount, 0);
-
-    if (controlType == CameraControlType::lookAt)
-      ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
-
-    else {
-      deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
-      lookAt += (deltaPos);
-      ImGui::DragFloat2("rotation", &angle.x, 0.05f);
-      RaylibRotateCamera({0, 0});
-    }
-
-    ImGui::End();
-
-    ImGui::Begin("Objects");
-    for (auto &&o : objectList->objects) {
-      std::string idPlusName = o->name + "##" + Editor::GetIDFromPointer(&o);
-      if (ImGui::Button(idPlusName.c_str())) {
-        Camera::selectedObject = o.get();
+        if (controlType == CameraControlType::lookAt)
+          ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
+        else {
+          deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
+          lookAt += (deltaPos);
+          ImGui::DragFloat2("rotation", &angle.x, 0.05f);
+          RaylibRotateCamera({0, 0});
+        }
       }
-      ImGui::Separator();
-    }
-    ImGui::End();
-
-    if (Camera::selectedObject != nullptr) {
-      ImGui::Begin((Camera::selectedObject->name + "##" + Editor::GetIDFromPointer(&Camera::selectedObject)).c_str(),
-                   0,
-                   ImGuiWindowFlags_AlwaysAutoResize);
-      Camera::selectedObject->onImmediateGui();
       ImGui::End();
     }
-
-    rlImGuiEnd();
   }
 
-  void Camera::UpdateEditorCamera(float dt) {
+  void Camera::UpdateEditorCamera(float dt, HittableList &world) {
     auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt);
     bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
                       IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
 
     if (IsMouseButtonDown(1)) {
       DisableCursor();
-      RaylibRotateCamera(GetMouseDelta());
 
-      if (keyPressed) {
-        if (IsKeyDown(KEY_SPACE)) {
-          lookFrom += upChange;
-          lookAt += upChange;
-        }
-        if (IsKeyDown(KEY_LEFT_CONTROL)) {
-          lookFrom -= upChange;
-          lookAt -= upChange;
-        }
-        if (IsKeyDown(KEY_W)) {
-          lookFrom += fwdChange;
-          lookAt += fwdChange;
-        }
-        if (IsKeyDown(KEY_S)) {
-          lookFrom -= fwdChange;
-          lookAt -= fwdChange;
-        }
-        if (IsKeyDown(KEY_A)) {
-          lookFrom -= rgtChange;
-          lookAt -= rgtChange;
-        }
-        if (IsKeyDown(KEY_D)) {
-          lookFrom += rgtChange;
-          lookAt += rgtChange;
-        }
-
-        RaylibRotateCamera(GetMouseDelta());
+      if (IsKeyDown(KEY_SPACE)) {
+        lookFrom += upChange;
+        lookAt += upChange;
       }
+      if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        lookFrom -= upChange;
+        lookAt -= upChange;
+      }
+      if (IsKeyDown(KEY_W)) {
+        lookFrom += fwdChange;
+        lookAt += fwdChange;
+      }
+      if (IsKeyDown(KEY_S)) {
+        lookFrom -= fwdChange;
+        lookAt -= fwdChange;
+      }
+      if (IsKeyDown(KEY_A)) {
+        lookFrom -= rgtChange;
+        lookAt -= rgtChange;
+      }
+      if (IsKeyDown(KEY_D)) {
+        lookFrom += rgtChange;
+        lookAt += rgtChange;
+      }
+      RaylibRotateCamera(GetMouseDelta());
     } else {
       EnableCursor();
+    }
+
+    if (IsMouseButtonDown(0)) {
+      // Trial-and-error'd my way through figuring out these
+      bool     dragging = ImGui::IsMouseDragging(0);
+      bool     hovering = ImGui::IsAnyItemHovered() || ImGui::IsWindowHovered();
+      ImGuiIO &io       = ImGui::GetIO();
+
+      // Using ImGui's function since it might work better with the GUI
+      if (ImGui::IsMouseClicked(0) && !io.WantCaptureMouse) {
+        float screenW = GetScreenWidth();
+        float screenH = GetScreenHeight();
+
+        float mouseX = GetMouseX();
+        float mouseY = GetMouseY();
+
+        rt::Camera::selectedObject = CastRay({mouseX, mouseY}, world);
+      }
     }
   }
 
@@ -149,5 +209,17 @@ namespace rt {
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
 
-  glm::mat4 Camera::getCameraTransform() const { return glm::lookAt(lookAt.toGlm(), lookFrom.toGlm(), vUp.toGlm()); }
+  glm::mat4 Camera::getViewMatrix() const {
+    glm::mat4 M = glm::mat4(1);
+    M           = glm::translate(M, lookFrom.toGlm());
+    M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
+
+    glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
+    glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
+    glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
+
+    return glm::lookAt(eye, center, up);
+  }
+
+  glm::mat4 Camera::getProjectionMatrix() const { return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f); }
 } // namespace rt
