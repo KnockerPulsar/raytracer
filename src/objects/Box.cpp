@@ -1,0 +1,19 @@
+#include "Box.h"
+namespace rt {
+
+  void Box::Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
+    boxMin   = p0;
+    boxMax   = p1;
+    material = mat;
+
+    sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p1.z, mat));
+    sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p0.z, mat));
+
+    sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p1.y, mat));
+    sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p0.y, mat));
+
+    sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p0.x, mat));
+    sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
+  }
+  
+} // namespace rt
