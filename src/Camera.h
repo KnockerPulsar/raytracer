@@ -6,6 +6,7 @@
 #include "IRasterizable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
+#include "editor/editor.h"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
@@ -16,8 +17,6 @@ namespace rt {
 
   class Camera {
   public:
-    static inline Hittable *selectedObject; // TODO: Move this out
-
     vec3 lookFrom, lookAt, moveDir;
     vec3 lower_left_corner, horizontal, vertical;
     vec3 u, v, w, vUp;
@@ -39,6 +38,8 @@ namespace rt {
 
     inline static vec3 lineStart, lineEnd;
 
+    rt::Editor* editor;
+
     Camera() = default;
 
     Camera(vec3  lookFrom,
@@ -54,34 +55,35 @@ namespace rt {
 
     Camera(nlohmann::json cameraJson, float aspectRatio);
 
-    void Update();
+
+    // Calculates horizontal, vertical, lower_left_corner, rgt from input data.
+    void GenerateData();
 
     void Fwd(float deltaTime) {
       lookFrom += moveDir * deltaTime;
-      Update();
+      GenerateData();
     }
 
     void Bck(float deltaTime) {
       lookFrom += -moveDir * deltaTime;
-      Update();
+      GenerateData();
     }
 
-    Camera3D toCamera3D() const {
+    Camera3D toRaylibCamera3D() const {
       return Camera3D{
           .position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
     }
 
     Hittable *CastRay(Vector2 mousePos, HittableList &world) const;
+    Ray GetRay(float s, float t) const;
 
-    rt::Ray GetRay(float s, float t) const;
-
-    void                         UpdateEditorCamera(float dt, HittableList &world);
-    void                         RaylibRotateCamera(Vector2 mousePositionDelta);
+    void                         Update(float dt, HittableList &world);
+    void                         MouseLook(Vector2 mousePositionDelta);
     void                         RenderImgui(HittableList &objectList);
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
-    
-    glm::mat4                    getViewMatrix() const;
-    glm::mat4                    getProjectionMatrix() const;
+
+    glm::mat4 getViewMatrix() const;
+    glm::mat4 getProjectionMatrix() const;
   };
 
   inline void to_json(json &j, const Camera &c) {

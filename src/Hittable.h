@@ -7,8 +7,8 @@
 #include "Ray.h"
 #include "Transformation.h"
 #include "Util.h"
-#include "data_structures/vec3.h"
 #include "editor/Utils.h"
+#include "data_structures/vec3.h"
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -93,8 +93,9 @@ namespace rt {
     }
 
     void onImmediateGui() {
-      ImGui::DragFloat3(("Translation##" + Editor::GetIDFromPointer(this)).c_str(), &transformation.translate.x, 0.05f);
-      ImGui::DragFloat3(("Rotation##" + Editor::GetIDFromPointer(this)).c_str(), &transformation.rotate.x, 0.05f);
+      ImGui::DragFloat3(
+          ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.translate.x, 0.05f);
+      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.rotate.x, 0.05f);
     }
   };
 } // namespace rt

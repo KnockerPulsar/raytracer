@@ -43,8 +43,9 @@ namespace rt {
           vec3(aabb.max.x, aabb.max.y, aabb.max.z),
       };
 
+      glm::mat4 model = getModelMatrix();
       for (auto &&vert : vertices) {
-        vert = applyGlmMat(vert, getModelMatrix());
+        vert = applyGlmMat(vert, model);
       }
 
       AABB newAABB = {vec3(infinity), vec3(-infinity)};

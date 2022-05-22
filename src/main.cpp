@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Transformation.h"
 #include "editor/editor.h"
+#include "rt.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -70,6 +71,7 @@ int main() {
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   rt::Camera &cam = asyncRenderData.currScene.cam;
+  cam.editor      = new rt::Editor();
 
   if (fullscreen)
     ToggleFullscreen();
@@ -126,18 +128,17 @@ int main() {
       ClearBackground(BLACK);
       {
         if (cam.controlType == rt::CameraControlType::flyCam)
-          cam.UpdateEditorCamera(GetFrameTime(), asyncRenderData.currScene.world);
+          cam.Update(GetFrameTime(), asyncRenderData.currScene.world);
 
-        Editor::Rasterize(asyncRenderData.currScene.world.objects, cam);
-        Editor::RenderImgui(asyncRenderData.currScene.world.objects, cam);
+        rt::Editor::Rasterize(asyncRenderData.currScene.world.objects, cam);
+        cam.editor->RenderImgui(asyncRenderData.currScene.world.objects, cam);
 
         cam.RenderImgui(asyncRenderData.currScene.objects);
       }
-      
-      onFrameRender();
+
+      // onFrameRender();
       rlImGuiEnd();
       EndDrawing();
-
     }
   }
 

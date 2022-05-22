@@ -16,7 +16,7 @@
 #include "../vendor/glm/glm/gtx/fast_trigonometry.hpp"
 
 #include "editor/Utils.h"
-#include "editor/editor.h"
+#include "rt.h"
 
 namespace rt {
 
@@ -41,7 +41,7 @@ namespace rt {
     float viewportWidth  = aspectRatio * viewportHeight;
 
     // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
-    Update();
+    GenerateData();
 
     lensRadius    = aperature / 2;
     this->lookAt  = lookAt;
@@ -61,7 +61,7 @@ namespace rt {
                cameraJson["time0"].get<float>(),
                cameraJson["time1"].get<float>()) {}
 
-  void Camera::Update() {
+  void Camera::GenerateData() {
     float theta = DegressToRadians(vFov);
 
     // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
@@ -83,7 +83,7 @@ namespace rt {
   // Used for mouse picking
   Hittable *Camera::CastRay(Vector2 mousePos, HittableList &world) const {
 
-    ::Ray raylibRay = GetMouseRay(mousePos, toCamera3D());
+    ::Ray raylibRay = GetMouseRay(mousePos, toRaylibCamera3D());
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
 
     rt::Camera::lineStart = r.origin.toGlm();
@@ -104,7 +104,7 @@ namespace rt {
                RandomFloat(time0, time1));
   }
 
-  void Camera::RaylibRotateCamera(Vector2 mousePositionDelta) {
+  void Camera::MouseLook(Vector2 mousePositionDelta) {
     angle.x += (mousePositionDelta.y * -rotSensitity.y);
     angle.y += (mousePositionDelta.x * -rotSensitity.x);
 
@@ -138,14 +138,14 @@ namespace rt {
           deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
           lookAt += (deltaPos);
           ImGui::DragFloat2("rotation", &angle.x, 0.05f);
-          RaylibRotateCamera({0, 0});
+          MouseLook({0, 0});
         }
       }
       ImGui::End();
     }
   }
 
-  void Camera::UpdateEditorCamera(float dt, HittableList &world) {
+  void Camera::Update(float dt, HittableList &world) {
     auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt);
     bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
                       IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
@@ -177,7 +177,7 @@ namespace rt {
         lookFrom += rgtChange;
         lookAt += rgtChange;
       }
-      RaylibRotateCamera(GetMouseDelta());
+      MouseLook(GetMouseDelta());
     } else {
       EnableCursor();
     }
@@ -190,13 +190,10 @@ namespace rt {
 
       // Using ImGui's function since it might work better with the GUI
       if (ImGui::IsMouseClicked(0) && !io.WantCaptureMouse) {
-        float screenW = GetScreenWidth();
-        float screenH = GetScreenHeight();
-
         float mouseX = GetMouseX();
         float mouseY = GetMouseY();
 
-        rt::Camera::selectedObject = CastRay({mouseX, mouseY}, world);
+        editor->selectedObject = CastRay({mouseX, mouseY}, world);
       }
     }
   }
@@ -210,15 +207,15 @@ namespace rt {
   }
 
   glm::mat4 Camera::getViewMatrix() const {
-    glm::mat4 M = glm::mat4(1);
-    M           = glm::translate(M, lookFrom.toGlm());
-    M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
+    // glm::mat4 M = glm::mat4(1);
+    // M           = glm::translate(M, lookFrom.toGlm());
+    // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
 
-    glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
-    glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
-    glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
+    // glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
+    // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
+    // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
 
-    return glm::lookAt(eye, center, up);
+    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), vUp.toGlm());
   }
 
   glm::mat4 Camera::getProjectionMatrix() const { return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f); }
