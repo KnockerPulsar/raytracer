@@ -10,6 +10,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <tuple>
+#include <vector>
 
 #include "../vendor/glm/glm/ext/matrix_clip_space.hpp"
 #include "../vendor/glm/glm/gtc/matrix_transform.hpp"
@@ -80,20 +81,6 @@ namespace rt {
     rgt               = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(lookAt, lookFrom), vUp));
   }
 
-  // Used for mouse picking
-  Hittable *Camera::CastRay(Vector2 mousePos, HittableList &world) const {
-
-    ::Ray raylibRay = GetMouseRay(mousePos, toRaylibCamera3D());
-    Ray   r         = {raylibRay.position, raylibRay.direction, 0};
-
-    rt::Camera::lineStart = r.origin.toGlm();
-    rt::Camera::lineEnd   = r.At(1000).toGlm();
-
-    rt::HitRecord rec;
-    world.Hit(r, -INFINITY, INFINITY, rec);
-
-    return rec.closestHit;
-  }
 
   // Used for raytracing
   Ray Camera::GetRay(float s, float t) const {
@@ -123,7 +110,7 @@ namespace rt {
     // vUp    = Vector3Normalize(Vector3CrossProduct(rgt, lookAt));
   }
 
-  void Camera::RenderImgui(HittableList &objectList) {
+  void Camera::RenderImgui() {
     {
       ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
       {
@@ -180,21 +167,6 @@ namespace rt {
       MouseLook(GetMouseDelta());
     } else {
       EnableCursor();
-    }
-
-    if (IsMouseButtonDown(0)) {
-      // Trial-and-error'd my way through figuring out these
-      bool     dragging = ImGui::IsMouseDragging(0);
-      bool     hovering = ImGui::IsAnyItemHovered() || ImGui::IsWindowHovered();
-      ImGuiIO &io       = ImGui::GetIO();
-
-      // Using ImGui's function since it might work better with the GUI
-      if (ImGui::IsMouseClicked(0) && !io.WantCaptureMouse) {
-        float mouseX = GetMouseX();
-        float mouseY = GetMouseY();
-
-        editor->selectedObject = CastRay({mouseX, mouseY}, world);
-      }
     }
   }
 

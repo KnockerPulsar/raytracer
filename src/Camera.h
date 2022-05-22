@@ -6,7 +6,6 @@
 #include "IRasterizable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
-#include "editor/editor.h"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
@@ -37,8 +36,6 @@ namespace rt {
     inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};
 
     inline static vec3 lineStart, lineEnd;
-
-    rt::Editor* editor;
 
     Camera() = default;
 
@@ -74,12 +71,11 @@ namespace rt {
           .position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
     }
 
-    Hittable *CastRay(Vector2 mousePos, HittableList &world) const;
     Ray GetRay(float s, float t) const;
 
     void                         Update(float dt, HittableList &world);
     void                         MouseLook(Vector2 mousePositionDelta);
-    void                         RenderImgui(HittableList &objectList);
+    void                         RenderImgui();
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
 
     glm::mat4 getViewMatrix() const;

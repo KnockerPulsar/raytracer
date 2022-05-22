@@ -1,4 +1,3 @@
-#include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
 #include "Ray.h"
@@ -71,7 +70,7 @@ int main() {
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   rt::Camera &cam = asyncRenderData.currScene.cam;
-  cam.editor      = new rt::Editor();
+  rt::Editor* editor = new rt::Editor(&asyncRenderData.currScene.world, &cam);
 
   if (fullscreen)
     ToggleFullscreen();
@@ -122,23 +121,7 @@ int main() {
 
       EndDrawing();
     } else {
-
-      BeginDrawing();
-      rlImGuiBegin();
-      ClearBackground(BLACK);
-      {
-        if (cam.controlType == rt::CameraControlType::flyCam)
-          cam.Update(GetFrameTime(), asyncRenderData.currScene.world);
-
-        rt::Editor::Rasterize(asyncRenderData.currScene.world.objects, cam);
-        cam.editor->RenderImgui(asyncRenderData.currScene.world.objects, cam);
-
-        cam.RenderImgui(asyncRenderData.currScene.objects);
-      }
-
-      // onFrameRender();
-      rlImGuiEnd();
-      EndDrawing();
+      editor->Update(); 
     }
   }
 
