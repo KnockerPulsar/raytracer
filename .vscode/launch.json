@@ -11,7 +11,22 @@
       "program": "${workspaceFolder}/bin/Debug/Raytracer",
       "args": [],
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "premake+build",
+      "preLaunchTask": "premake+build debug",
+      "setupCommands": [
+        {
+          "description": "Skip library files",
+          "text": "-interpreter-exec console \"skip -gfi **/bits/*.h\""
+        }
+      ],
+    },
+    {
+      "name": "Run",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/Release/Raytracer",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "premake+build release",
       "setupCommands": [
         {
           "description": "Skip library files",

@@ -20,7 +20,24 @@
                 "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [],
             },
-            "osx": {
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build release",
+            "type": "process",
+            "command": "make",
+            "args": [
+                "config=release",
+                "-j12"
+            ],
+            "windows": {
+                "command": "C:/raylib/mingw/bin/mingw32-make.exe",
                 "args": [],
             },
             "group": {
@@ -32,10 +49,18 @@
             ]
         },
         {
-            "label": "premake+build",
+            "label": "premake+build debug",
             "dependsOn": [
                 "premake",
                 "build debug"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "premake+build release",
+            "dependsOn": [
+                "premake",
+                "build release"
             ],
             "dependsOrder": "sequence"
         }

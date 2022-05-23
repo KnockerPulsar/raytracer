@@ -16,14 +16,13 @@ namespace rt {
   class Scene {
 
   public:
-    sPtr<Hittable> worldRoot; // Might contain a BVH, harder to serialize
-
+    Hittable* worldRoot; // Might contain a BVH, harder to serialize
     Camera cam;
     int    maxDepth, imageWidth, imageHeight, samplesPerPixel;
     vec3   backgroundColor;
 
     Scene() = default;
-    Scene(sPtr<Hittable> wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
+    Scene(Hittable* wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
         : worldRoot(wr), cam(c), maxDepth(md), imageWidth(iw), imageHeight(ih), samplesPerPixel(spp),
           backgroundColor(bc) {}
 

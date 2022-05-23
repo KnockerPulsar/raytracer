@@ -137,7 +137,7 @@ namespace rt {
       return childrenAABBs;
     }
 
-    std::optional<sPtr<Hittable>> addChild(Hittable* newChild) override {
+    std::optional<Hittable*> addChild(Hittable* newChild) override {
       std::vector<Hittable *>     children = getChildrenAsList();
       std::vector<sPtr<Hittable>> *sPtrs = new std::vector<sPtr<Hittable>>();
       sPtrs->reserve(children.size());
@@ -148,7 +148,7 @@ namespace rt {
 
       sPtrs->push_back(sPtr<Hittable>(newChild));
     
-      return std::optional<sPtr<Hittable>>(make_shared<BVHNode>(*sPtrs, 0, sPtrs->size(), 0.0f, 1.0f));
+      return std::optional<Hittable*>(new BVHNode(*sPtrs, 0, sPtrs->size(), 0.0f, 1.0f));
     }
   };
 } // namespace rt

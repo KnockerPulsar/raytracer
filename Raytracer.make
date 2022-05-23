@@ -15,7 +15,7 @@ ifeq ($(config),debug)
   TARGETDIR = bin/Debug
   TARGET = $(TARGETDIR)/Raytracer
   OBJDIR = obj/Debug
-  DEFINES += -DDEBUG
+  DEFINES += -DDEBUG -DFAST_EXIT
   INCLUDES += -Ivendor/glm -Ivendor/glm/glm -Ivendor/nlohmann-json -Ivendor/rlImGui/imgui -Ivendor/rlImGui
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -42,16 +42,16 @@ ifeq ($(config),release)
   TARGETDIR = bin/Release
   TARGET = $(TARGETDIR)/Raytracer
   OBJDIR = obj/Release
-  DEFINES += -DNDEBUG
+  DEFINES += -DNDEBUG -DFAST_EXIT
   INCLUDES += -Ivendor/glm -Ivendor/glm/glm -Ivendor/nlohmann-json -Ivendor/rlImGui/imgui -Ivendor/rlImGui
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -flto -ffast-math -O3
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -flto -ffast-math -O3 -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -Wl,-Bstatic -lraylib -Wl,-Bdynamic -lpthread -lGL -lm -lrt -lX11 -ldl
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s
+  ALL_LDFLAGS += $(LDFLAGS) -flto -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef

@@ -111,7 +111,7 @@ namespace rt {
     }
 
     // Only HittableLists and BVHNodes should override this.
-    virtual std::optional<sPtr<Hittable>> addChild(Hittable* newChild) { return std::optional<sPtr<Hittable>>(); }
+    virtual std::optional<Hittable*> addChild(Hittable* newChild) { return std::optional<Hittable*>(); }
 
   };
 } // namespace rt

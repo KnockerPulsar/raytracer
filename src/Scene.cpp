@@ -66,13 +66,7 @@ namespace rt {
 
         .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), material_right));
 
-    s = Scene(make_shared<BVHNode>(BVHNode(world, 0, 1)),
-              cam,
-              maxDepth,
-              imageWidth,
-              imageHeight,
-              samplesPerPixel,
-              backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   } // namespace rt
@@ -100,8 +94,7 @@ namespace rt {
         .Add(make_shared<Sphere>(R, vec3(-R, 0, -1), material_left))
         .Add(make_shared<Sphere>(R, vec3(R, 0, -1), material_right));
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -158,8 +151,7 @@ namespace rt {
     auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
     world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -222,8 +214,7 @@ namespace rt {
     auto mat3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -231,7 +222,7 @@ namespace rt {
   Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
-    Camera       cam(vec3(13, 2, 3),
+    Camera cam(vec3(13, 2, 3),
                vec3(0, 0, 0),
                vec3(0, 1, 0),
                vec3::Zero(),
@@ -241,7 +232,6 @@ namespace rt {
                10,
                0,
                0);
-    HittableList objects;
 
     Scene s;
 
@@ -251,11 +241,12 @@ namespace rt {
 
     auto perText = make_shared<NoiseTexture>(4.0f);
 
+    HittableList world;
     // No need to use a BVH since there are only two spheres
-    objects.Add(make_shared<Sphere>(10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
-    objects.Add(make_shared<Sphere>(10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
+    world.Add(make_shared<Sphere>(10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
-    s = Scene(make_shared<HittableList>(objects), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -282,7 +273,7 @@ namespace rt {
     auto globe = make_shared<Sphere>(2, vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
-    s = Scene(make_shared<HittableList>(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -312,7 +303,7 @@ namespace rt {
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
-    s = Scene(make_shared<HittableList>(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -383,8 +374,7 @@ namespace rt {
     //     vec3(200, 0, 65));
     // world.Add(box3);
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -400,7 +390,7 @@ namespace rt {
     int   imageWidth  = settings["resolution"]["x"].get<int>();
     int   imageHeight = settings["resolution"]["y"].get<int>();
     float aspectRatio = (float)imageWidth / imageHeight;
-    Scene s           = Scene(make_shared<HittableList>(nullptr),
+    Scene s           = Scene(new HittableList(),
                     Camera(readScene["camera"], aspectRatio),
                     settings["max_depth"].get<int>(),
                     imageWidth,
@@ -422,7 +412,7 @@ namespace rt {
     // s.objects = world;
 
     auto bvh    = HittableList();
-    s.worldRoot = make_shared<BVHNode>(world, s.cam.time0, s.cam.time1);
+    s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
 
     for (HittableList o : bvh.objects) {
       for (auto oo : o.objects) {
@@ -466,10 +456,7 @@ namespace rt {
         .Add(box)
         .Add(sphere);
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
-
-    // s.objects.objects = objs;
+    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -509,19 +496,18 @@ namespace rt {
         .Add(plane)
         .Add(xzplane);
 
-    s = Scene(
-        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
     // s.objects.objects = obj;
 
     return s;
   } // namespace rt
 
   Scene Scene::RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
-    Scene        s;
-    HittableList world;
-    vec3         lookFrom = vec3(4, 4, 4);
-    vec3         lookAt   = vec3(0, 0, 0);
-    vec3         vUp      = vec3(0, 1, 0.1);
+    Scene         s;
+    HittableList *world    = new HittableList();
+    vec3          lookFrom = vec3(4, 4, 4);
+    vec3          lookAt   = vec3(0, 0, 0);
+    vec3          vUp      = vec3(0, 1, 0.1);
     // vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
     vec3 backgroundColor = vec3(0.0, 0.0, 0.00);
 
@@ -539,17 +525,9 @@ namespace rt {
     std::vector<sPtr<Hittable>> obj = {box};
 
     world //
-        .Add(box);
+        ->Add(box);
 
-    s = Scene(
-         make_shared<HittableList>(world),
-         cam,
-         maxDepth,
-         imageWidth,
-         imageHeight,
-         samplesPerPixel,
-         backgroundColor
-    );
+    s = Scene(world, cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
     // s.objects.objects = obj;
 
     return s;

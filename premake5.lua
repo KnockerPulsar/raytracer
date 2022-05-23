@@ -44,9 +44,12 @@ project "Raytracer"
   }
 
   filter {"configurations:Debug"}
-    defines {"DEBUG"}
-    symbols "ON"
+    defines {"DEBUG", "FAST_EXIT"}
+    symbols "On"
 
   filter {"configurations:Release"}
-    defines {"NDEBUG"}
-    optimize "ON"
+    defines {"NDEBUG", "FAST_EXIT"}
+    floatingpoint "Fast"
+    flags {"LinkTimeOptimization"}
+    symbols "Off"
+    optimize "Speed"

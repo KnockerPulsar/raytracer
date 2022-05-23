@@ -25,9 +25,9 @@ namespace rt {
       return *this;
     }
 
-    virtual std::optional<sPtr<Hittable>> addChild(Hittable* newChild) override {
+    virtual std::optional<Hittable*> addChild(Hittable* newChild) override {
       objects.push_back(sPtr<Hittable>(newChild));
-      return std::make_optional(sPtr<Hittable>(this));
+      return std::make_optional(this);
     }
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;

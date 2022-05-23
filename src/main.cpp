@@ -15,6 +15,7 @@
 #include "../vendor/rlImGui/rlImGui.h"
 /*
  TODO:
+    Figure out a way to update a BVH tree AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     Configure clangd to format in a better way
     Clean up code and naming
 */
@@ -52,7 +53,7 @@ int main() {
   // Only used when creating hardcoded scenes
   const int   imageWidth      = 1200;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 1;
+  const int   samplesPerPixel = 100;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
