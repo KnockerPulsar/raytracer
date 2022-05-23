@@ -74,6 +74,8 @@ OBJECTS := \
 	$(OBJDIR)/Utils.o \
 	$(OBJDIR)/editor.o \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/AARect.o \
+	$(OBJDIR)/Box.o \
 	$(OBJDIR)/ImGuizmo.o \
 	$(OBJDIR)/imgui_impl_opengl3.o \
 	$(OBJDIR)/imgui.o \
@@ -165,6 +167,12 @@ $(OBJDIR)/editor.o: src/editor/editor.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/AARect.o: src/objects/AARect.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Box.o: src/objects/Box.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ImGuizmo.o: vendor/imguizmo/ImGuizmo.cpp

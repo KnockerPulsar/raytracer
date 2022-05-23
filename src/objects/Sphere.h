@@ -7,6 +7,7 @@
 #include "../materials/Material.h"
 #include "../materials/MaterialFactory.h"
 #include <cmath>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -39,6 +40,7 @@ namespace rt {
       // RasterizeTransformed takes care of the transformation and rotation
       DrawSphere(Vector3Zero(), radius, RED);
     }
+
 
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v) {

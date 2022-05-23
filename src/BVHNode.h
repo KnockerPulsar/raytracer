@@ -1,33 +1,33 @@
 #pragma once
 #include "AABB.h"
+#include "Defs.h"
 #include "Hittable.h"
 #include "HittableList.h"
+#include "Ray.h"
 #include "Util.h"
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace rt {
   class BVHNode : public Hittable {
   public:
-    std::shared_ptr<Hittable> left, right;
+    std::shared_ptr<Hittable> left = nullptr, right = nullptr;
     AABB                      box;
 
     BVHNode() = default;
 
-    BVHNode(const HittableList &list, float t0, float t1)
-        : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
+    BVHNode(const HittableList &list, float t0, float t1) : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
 
-    BVHNode(const std::vector<shared_ptr<Hittable>> &srcObjects, size_t start,
-            size_t end, float t0, float t1) {
+    BVHNode(const std::vector<shared_ptr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
       auto objs = srcObjects;
 
       int  axis       = RandomInt(0, 2);
-      auto comparator = (axis == 0)   ? boxXCompare
-                        : (axis == 1) ? boxYCompare
-                                      : boxZCompare;
+      auto comparator = (axis == 0) ? boxXCompare : (axis == 1) ? boxYCompare : boxZCompare;
 
       size_t objSpan = end - start;
 
@@ -52,15 +52,13 @@ namespace rt {
       AABB boxLeft;
       AABB boxRight;
 
-      if (!left->BoundingBox(t0, t1, boxLeft) ||
-          !right->BoundingBox(t0, t1, boxRight))
+      if (!left->BoundingBoxTransformed(t0, t1, boxLeft) || !right->BoundingBoxTransformed(t0, t1, boxRight))
         std::cerr << "No bounding box in BVHNode constructor.\n";
 
       box = AABB::SurroundingBox(boxLeft, boxRight);
     }
 
-    virtual bool Hit(const Ray &r, float t_min, float t_max,
-                     HitRecord &rec) const override {
+    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
       if (!box.Hit(r, t_min, t_max))
         return false;
 
@@ -72,14 +70,12 @@ namespace rt {
       return leftHit || rightHit;
     }
 
-    virtual bool BoundingBox(float t0, float t1,
-                             AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = box;
       return true;
     }
 
-    static inline bool BoxCompare(const shared_ptr<Hittable> a,
-                                  const shared_ptr<Hittable> b, int axis) {
+    static inline bool BoxCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b, int axis) {
       AABB boxA;
       AABB boxB;
 
@@ -103,19 +99,56 @@ namespace rt {
       return false;
     }
 
-    static bool boxXCompare(const shared_ptr<Hittable> a,
-                            const shared_ptr<Hittable> b) {
-      return BoxCompare(a, b, 0);
+    static bool boxXCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 0); }
+
+    static bool boxYCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 1); }
+
+    static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 2); }
+
+    std::vector<Hittable *> getChildrenAsList() override {
+      std::vector<Hittable *> leftChildren;
+      std::vector<Hittable *> rightChildren;
+
+      if (left == nullptr && right == nullptr)
+        return std::vector<Hittable *>{};
+
+      if (left)
+        leftChildren = left->getChildrenAsList();
+
+      if (right)
+        rightChildren = right->getChildrenAsList();
+
+      if (!(leftChildren.size() == 1 && rightChildren.size() == 1 && leftChildren[0] == rightChildren[0]))
+        leftChildren.insert(leftChildren.end(), rightChildren.begin(), rightChildren.end());
+      // leftChildren.push_back(this);
+
+      return leftChildren;
     }
 
-    static bool boxYCompare(const shared_ptr<Hittable> a,
-                            const shared_ptr<Hittable> b) {
-      return BoxCompare(a, b, 1);
+    std::vector<AABB> getChildrenAABBs() override {
+      std::vector<Hittable *> children = getChildrenAsList();
+      std::vector<AABB>       childrenAABBs;
+      for (auto *e : children) {
+        AABB output;
+        if (e->BoundingBoxTransformed(0, 1, output))
+          childrenAABBs.push_back(output);
+      }
+
+      return childrenAABBs;
     }
 
-    static bool boxZCompare(const shared_ptr<Hittable> a,
-                            const shared_ptr<Hittable> b) {
-      return BoxCompare(a, b, 2);
+    std::optional<sPtr<Hittable>> addChild(Hittable* newChild) override {
+      std::vector<Hittable *>     children = getChildrenAsList();
+      std::vector<sPtr<Hittable>> *sPtrs = new std::vector<sPtr<Hittable>>();
+      sPtrs->reserve(children.size());
+
+      for (auto *e : children) {
+        sPtrs->push_back(sPtr<Hittable>(e));
+      }
+
+      sPtrs->push_back(sPtr<Hittable>(newChild));
+    
+      return std::optional<sPtr<Hittable>>(make_shared<BVHNode>(*sPtrs, 0, sPtrs->size(), 0.0f, 1.0f));
     }
   };
 } // namespace rt

@@ -1,5 +1,8 @@
 #include "Box.h"
+#include "AARect.h"
+
 namespace rt {
+  Box::Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) { Create(p0, p1, mat); }
 
   void Box::Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
     boxMin   = p0;
@@ -15,5 +18,30 @@ namespace rt {
     sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p0.x, mat));
     sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
   }
-  
+
+  bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
+    outputBox = AABB(boxMin, boxMax);
+    return true;
+  }
+
+  json Box::GetJsonDerived() const {
+    return json{{"type", "box"},
+                {"pos", (boxMin + boxMax) / 2},
+                {"extents", boxMax - boxMin},
+                {"material", material->GetJson()}};
+  }
+
+  bool Box::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+    if (sides.Hit(r, t_min, t_max, rec)) {
+      rec.closestHit = (Hittable *)this;
+      return true;
+    }
+
+    return false;
+  }
+
+  void Box::Rasterize() {
+    auto extents = (boxMax - boxMin);
+    DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, GREEN);
+  }
 } // namespace rt

@@ -7,11 +7,13 @@
 #include "Ray.h"
 #include "Transformation.h"
 #include "Util.h"
-#include "editor/Utils.h"
 #include "data_structures/vec3.h"
+#include "editor/Utils.h"
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include <memory>
+#include <optional>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "../vendor/glm/glm/gtx/string_cast.hpp"
 #include "../vendor/rlImGui/imgui/imgui.h"
@@ -97,5 +99,19 @@ namespace rt {
           ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.translate.x, 0.05f);
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.rotate.x, 0.05f);
     }
+
+    virtual std::vector<Hittable *> getChildrenAsList() { return std::vector<Hittable *>{this}; }
+
+    virtual std::vector<AABB> getChildrenAABBs() {
+      AABB outputBox;
+      if (this->BoundingBoxTransformed(0, 1, outputBox))
+        return std::vector<AABB>{outputBox};
+
+      return std::vector<AABB>{};
+    }
+
+    // Only HittableLists and BVHNodes should override this.
+    virtual std::optional<sPtr<Hittable>> addChild(Hittable* newChild) { return std::optional<sPtr<Hittable>>(); }
+
   };
 } // namespace rt

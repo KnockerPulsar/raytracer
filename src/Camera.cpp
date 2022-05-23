@@ -117,9 +117,9 @@ namespace rt {
         vec3 deltaPos = lookFrom;
         ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
 
-        ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, CameraControlType::controlTypesCount, 0);
+        ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, rt::Camera::ControlType::controlTypesCount, 0);
 
-        if (controlType == CameraControlType::lookAt)
+        if (controlType == rt::Camera::ControlType::lookAtPoint)
           ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
         else {
           deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
@@ -132,7 +132,7 @@ namespace rt {
     }
   }
 
-  void Camera::Update(float dt, HittableList &world) {
+  void Camera::Update(float dt) {
     auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt);
     bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
                       IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
@@ -168,7 +168,7 @@ namespace rt {
     } else {
       EnableCursor();
     }
-  }
+   }
 
   std::tuple<vec3, vec3, vec3> Camera::getScaledDirectionVectors(float dt) const {
     vec3 upChange  = vUp * dt * movScale;

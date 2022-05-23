@@ -7,7 +7,6 @@ project "Raytracer"
   language "C++"
   cppdialect "c++17"
 
-
   -- All these are system libraries
   -- Raylib is also installed as a system library but statically to provide portability.
   if os.host() == "linux" then

@@ -60,7 +60,7 @@ namespace rt {
         rt::Ray ray = currScene.cam.GetRay(u, v);
         job.color += rt::Ray::RayColor(ray,
                                               currScene.backgroundColor,
-                                              currScene.world,
+                                              *currScene.worldRoot,
                                               currScene.maxDepth);
       }
 

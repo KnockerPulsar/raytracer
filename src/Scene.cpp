@@ -4,7 +4,6 @@
 #include "Defs.h"
 #include "Transformation.h"
 #include "materials/DiffuseLight.h"
-#include "objects/AARect.h"
 
 #include "Camera.h"
 #include "ConstantMedium.h"
@@ -15,7 +14,7 @@
 #include "data_structures/vec3.h"
 #include "materials/Dielectric.h"
 #include "materials/Material.h"
-#include "objects/Box.h"
+
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
@@ -67,18 +66,13 @@ namespace rt {
 
         .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), material_right));
 
-    HittableList bvh;
-    bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
-    s = {
-        .world           = bvh,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(make_shared<BVHNode>(BVHNode(world, 0, 1)),
+              cam,
+              maxDepth,
+              imageWidth,
+              imageHeight,
+              samplesPerPixel,
+              backgroundColor);
 
     return s;
   } // namespace rt
@@ -106,18 +100,8 @@ namespace rt {
         .Add(make_shared<Sphere>(R, vec3(-R, 0, -1), material_left))
         .Add(make_shared<Sphere>(R, vec3(R, 0, -1), material_right));
 
-    HittableList bvh;
-    bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
-    s = {
-        .world           = bvh,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -174,18 +158,8 @@ namespace rt {
     auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
     world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
-    HittableList bvh;
-    bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
-    s = {
-        .world           = bvh,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -248,18 +222,8 @@ namespace rt {
     auto mat3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
-    HittableList bvh;
-    bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
-    s = {
-        .world           = bvh,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -291,15 +255,7 @@ namespace rt {
     objects.Add(make_shared<Sphere>(10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
     objects.Add(make_shared<Sphere>(10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
-    s = {
-        .world           = objects,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(make_shared<HittableList>(objects), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -326,15 +282,7 @@ namespace rt {
     auto globe = make_shared<Sphere>(2, vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
-    s = {
-        .world           = world,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(make_shared<HittableList>(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -364,15 +312,7 @@ namespace rt {
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
-    s = {
-        .world           = world,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(make_shared<HittableList>(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -443,18 +383,8 @@ namespace rt {
     //     vec3(200, 0, 65));
     // world.Add(box3);
 
-    HittableList bvh(make_shared<BVHNode>(world, 0, 1));
-
-    s = {
-        .world           = bvh,
-        .objects         = world,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -470,14 +400,13 @@ namespace rt {
     int   imageWidth  = settings["resolution"]["x"].get<int>();
     int   imageHeight = settings["resolution"]["y"].get<int>();
     float aspectRatio = (float)imageWidth / imageHeight;
-    Scene s           = {
-                  .cam             = Camera(readScene["camera"], aspectRatio),
-                  .maxDepth        = settings["max_depth"].get<int>(),
-                  .imageWidth      = imageWidth,
-                  .imageHeight     = imageHeight,
-                  .samplesPerPixel = settings["num_samples"].get<int>(),
-                  .backgroundColor = settings["background_color"].get<vec3>(),
-    };
+    Scene s           = Scene(make_shared<HittableList>(nullptr),
+                    Camera(readScene["camera"], aspectRatio),
+                    settings["max_depth"].get<int>(),
+                    imageWidth,
+                    imageHeight,
+                    settings["num_samples"].get<int>(),
+                    settings["background_color"].get<vec3>());
 
     auto world = HittableList();
     for (const auto &obj : readScene["objects"]) {
@@ -490,10 +419,10 @@ namespace rt {
               << "\tsettings " << settings << std::endl
               << "\t#objects " << world.objects.size() << std::endl;
 
-    s.objects = world;
+    // s.objects = world;
 
-    auto bvh = HittableList();
-    s.world  = bvh.Add(make_shared<BVHNode>(world, s.cam.time0, s.cam.time1));
+    auto bvh    = HittableList();
+    s.worldRoot = make_shared<BVHNode>(world, s.cam.time0, s.cam.time1);
 
     for (HittableList o : bvh.objects) {
       for (auto oo : o.objects) {
@@ -511,7 +440,7 @@ namespace rt {
     vec3         lookFrom        = vec3(0, 0, 0);
     vec3         lookAt          = vec3(0, 0, -1);
     vec3         vUp             = vec3(0, 1, 0);
-    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+    vec3         backgroundColor = vec3(0.0, 0.0, 0.0);
 
     float distToFocus = 10.0f;
     float aperature   = 0.0;
@@ -524,32 +453,23 @@ namespace rt {
     auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
     auto earth           = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
 
-    auto box               = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
-    auto sphere            = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
-    
-    sphere->transformation = Transformation(vec3(-1, -1, 0));
-    sphere->name = "Earth";
-    box->transformation    = Transformation(vec3(0,0, -5), vec3(0, 0, 0));
-    box->name = "Cube";
-    // auto rotSphere= make_shared<RotateY>(sphere, 45);
+    auto box    = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
+    auto sphere = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
 
-    std::vector<sPtr<Hittable>> objs = {box,sphere};
+    sphere->transformation = Transformation(vec3(-1, -1, 0));
+    sphere->name           = "Earth";
+    box->transformation    = Transformation(vec3(0, 0, -5), vec3(0, 0, 0));
+    box->name              = "Cube";
+    // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
     world //
         .Add(box)
         .Add(sphere);
 
-    s = {
-        .world           = world,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
-    s.objects.objects = objs;
+    // s.objects.objects = objs;
 
     return s;
   }
@@ -577,10 +497,10 @@ namespace rt {
     auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
 
     auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
-    plane->setTransformation(vec3(-3, 10, 0), (0, 0, 0));
+    plane->setTransformation(vec3(-3, 10, 0), vec3(0, 0, 0));
 
     auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
-    auto tri = make_shared<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red);
+    auto tri     = make_shared<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0), red);
 
     std::vector<sPtr<Hittable>> obj = {plane, xzplane, tri};
 
@@ -589,21 +509,9 @@ namespace rt {
         .Add(plane)
         .Add(xzplane);
 
-    HittableList bvh;
-    bvh.Add(make_shared<BVHNode>(world, 0, 1));
-
-    
-
-    s = {
-        .world           = bvh,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
-    s.objects.objects = obj;
+    s = Scene(
+        make_shared<BVHNode>(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    // s.objects.objects = obj;
 
     return s;
   } // namespace rt
@@ -611,10 +519,11 @@ namespace rt {
   Scene Scene::RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
-    vec3         lookFrom        = vec3(4, 4, 4);
-    vec3         lookAt          = vec3(0, 0, 0);
-    vec3         vUp             = vec3(0, 1, 0.1);
-    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+    vec3         lookFrom = vec3(4, 4, 4);
+    vec3         lookAt   = vec3(0, 0, 0);
+    vec3         vUp      = vec3(0, 1, 0.1);
+    // vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+    vec3 backgroundColor = vec3(0.0, 0.0, 0.00);
 
     float distToFocus = 10.0f;
     float aperature   = 0.001F;
@@ -632,16 +541,16 @@ namespace rt {
     world //
         .Add(box);
 
-    s = {
-        .world           = world,
-        .cam             = cam,
-        .maxDepth        = maxDepth,
-        .imageWidth      = imageWidth,
-        .imageHeight     = imageHeight,
-        .samplesPerPixel = samplesPerPixel,
-        .backgroundColor = backgroundColor,
-    };
-    s.objects.objects = obj;
+    s = Scene(
+         make_shared<HittableList>(world),
+         cam,
+         maxDepth,
+         imageWidth,
+         imageHeight,
+         samplesPerPixel,
+         backgroundColor
+    );
+    // s.objects.objects = obj;
 
     return s;
   }

@@ -12,7 +12,7 @@
 #include <ostream>
 #include <raylib.h>
 #include <vector>
-
+#include "../vendor/rlImGui/rlImGui.h"
 /*
  TODO:
     Configure clangd to format in a better way
@@ -70,13 +70,13 @@ int main() {
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   rt::Camera &cam = asyncRenderData.currScene.cam;
-  rt::Editor* editor = new rt::Editor(&asyncRenderData.currScene.world, &cam);
+  rt::Editor* editor = new rt::Editor(asyncRenderData.currScene.worldRoot, &cam);
 
   if (fullscreen)
     ToggleFullscreen();
 
   auto onFrameRender = [&] {
-    for (auto &&obj : asyncRenderData.currScene.world.objects) {
+    for (auto &&obj : asyncRenderData.currScene.worldRoot->getChildrenAsList()) {
       auto t = obj->transformation.translate;
       auto r = obj->transformation.rotate;
       r.y += 1.0f;

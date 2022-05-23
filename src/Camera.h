@@ -12,7 +12,6 @@
 #include <vector>
 
 namespace rt {
-  enum CameraControlType { flyCam, lookAt, controlTypesCount };
 
   class Camera {
   public:
@@ -32,7 +31,9 @@ namespace rt {
     vec3                         angle          = {0, 0, 0}; // Used to rotate the camera using the mouse
     Vector2                      rotSensitity   = {0.003f, 0.003f};
 
-    CameraControlType         controlType         = CameraControlType::flyCam;
+
+    enum ControlType { flyCam, lookAtPoint, controlTypesCount };
+    ControlType         controlType         = ControlType::flyCam;
     inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};
 
     inline static vec3 lineStart, lineEnd;
@@ -73,7 +74,7 @@ namespace rt {
 
     Ray GetRay(float s, float t) const;
 
-    void                         Update(float dt, HittableList &world);
+    void                         Update(float dt);
     void                         MouseLook(Vector2 mousePositionDelta);
     void                         RenderImgui();
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
