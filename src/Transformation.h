@@ -1,15 +1,18 @@
 #pragma once
 
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
+#include "../vendor/rlImGui/imgui/imgui.h"
+#include "editor/Utils.h"
 #include "AABB.h"
 #include "Constants.h"
 #include "Defs.h"
+#include "IImguiDrawable.h"
 #include "Ray.h"
 #include "data_structures/vec3.h"
 #include <cmath>
 
 namespace rt {
-  class Transformation {
+  class Transformation : public IImguiDrawable {
   public:
     vec3 translate;
     vec3 rotate;
@@ -78,6 +81,12 @@ namespace rt {
     glm::mat4 getInverseModelMatrix() const { return glm::inverse(getModelMatrix()); }
 
     glm::mat4 getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
+
+    virtual void OnImgui() override {
+      ImGui::DragFloat3(
+          ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
+      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
+    }
   };
 
   // This is how you use `json.get<Box>()`

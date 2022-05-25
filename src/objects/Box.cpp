@@ -41,7 +41,19 @@ namespace rt {
   }
 
   void Box::Rasterize() {
-    auto extents = (boxMax - boxMin);
-    DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, GREEN);
+    auto  extents  = (boxMax - boxMin);
+    Color boxColor = GREEN;
+
+    if (auto* diffLight = dynamic_cast<DiffuseLight *>(material.get()); diffLight) {
+      vec3 lightColor = diffLight->emitted(0, 0, vec3());
+      boxColor        = lightColor.toRaylibColor(255);
+    }
+
+    DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, boxColor);
+  }
+
+  void Box::OnImgui() {
+    Hittable::OnImgui();
+    material->OnImgui();
   }
 } // namespace rt

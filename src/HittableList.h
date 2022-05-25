@@ -20,14 +20,14 @@ namespace rt {
 
     void Clear() { objects.clear(); }
 
+    // Kept for compatibility with existing code.
     HittableList &Add(shared_ptr<Hittable> object) {
       objects.push_back(object);
       return *this;
     }
 
-    virtual std::optional<Hittable*> addChild(Hittable* newChild) override {
-      objects.push_back(sPtr<Hittable>(newChild));
-      return std::make_optional(this);
+    virtual Hittable* addChild(sPtr<Hittable> newChild) override {
+      return &Add(newChild);
     }
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;

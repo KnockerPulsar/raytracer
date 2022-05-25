@@ -1,6 +1,8 @@
 #include "vec3.h"
 #include "../Defs.h"
 #include "../Util.h"
+#include <cstdint>
+#include <sys/types.h>
 
 vec3::vec3() {}
 
@@ -15,6 +17,11 @@ vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
 
 glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
+
+Color vec3::toRaylibColor(u_char alpha) const {
+  vec3 temp = *this * 255;
+  return Color{(u_char)temp.x, (u_char)temp.y, (u_char)temp.z, alpha };
+}
 
 vec3 vec3::Reflect(const vec3 &norm) const {
   float bScale = vec3::DotProd(norm, *this);

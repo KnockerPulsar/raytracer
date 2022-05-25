@@ -425,12 +425,11 @@ namespace rt {
 
   Scene Scene::TransformationTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
 
-    Scene        s;
-    HittableList world;
-    vec3         lookFrom        = vec3(0, 0, 0);
-    vec3         lookAt          = vec3(0, 0, -1);
-    vec3         vUp             = vec3(0, 1, 0);
-    vec3         backgroundColor = vec3(0.0, 0.0, 0.0);
+    Scene s;
+    vec3  lookFrom        = vec3(0, 0, 0);
+    vec3  lookAt          = vec3(0, 0, -1);
+    vec3  vUp             = vec3(0, 1, 0);
+    vec3  backgroundColor = vec3(0.0, 0.0, 0.0);
 
     float distToFocus = 10.0f;
     float aperature   = 0.0;
@@ -452,11 +451,11 @@ namespace rt {
     box->name              = "Cube";
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
-    world //
-        .Add(box)
-        .Add(sphere);
+    std::vector<sPtr<Hittable>> world = {box, sphere};
+    // HittableList* worldList = new HittableList();
+    // worldList->Add(box).Add(sphere);
 
-    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }
@@ -503,11 +502,10 @@ namespace rt {
   } // namespace rt
 
   Scene Scene::RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
-    Scene         s;
-    HittableList *world    = new HittableList();
-    vec3          lookFrom = vec3(4, 4, 4);
-    vec3          lookAt   = vec3(0, 0, 0);
-    vec3          vUp      = vec3(0, 1, 0.1);
+    Scene s;
+    vec3  lookFrom = vec3(4, 4, 4);
+    vec3  lookAt   = vec3(0, 0, 0);
+    vec3  vUp      = vec3(0, 1, 0.1);
     // vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
     vec3 backgroundColor = vec3(0.0, 0.0, 0.00);
 
@@ -522,13 +520,7 @@ namespace rt {
 
     auto box = ms<Box>(Box(vec3(1, 1, 1), vec3(2, 2, 2), red));
 
-    std::vector<sPtr<Hittable>> obj = {box};
-
-    world //
-        ->Add(box);
-
-    s = Scene(world, cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
-    // s.objects.objects = obj;
+    s = Scene(new HittableList(box), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
     return s;
   }

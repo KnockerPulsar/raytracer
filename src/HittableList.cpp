@@ -1,5 +1,6 @@
 #include "HittableList.h"
 #include "AABB.h"
+#include "Defs.h"
 #include <vector>
 
 namespace rt {
@@ -38,10 +39,10 @@ namespace rt {
     return true;
   }
 
-  std::vector<Hittable *> HittableList::getChildrenAsList() {
+  std::vector<Hittable*> HittableList::getChildrenAsList() {
 
-    std::vector<Hittable *> vec;
-    for (auto e : objects) {
+    std::vector<Hittable*> vec;
+    for (auto&& e : objects) {
       vec.push_back(e.get());
     }
     return vec;
@@ -49,7 +50,7 @@ namespace rt {
 
   std::vector<AABB> HittableList::getChildrenAABBs() {
     std::vector<AABB> vec;
-    for (auto *e : getChildrenAsList()) {
+    for (auto&& e : getChildrenAsList()) {
       AABB output;
       if(e->BoundingBoxTransformed(0, 1, output))
         vec.push_back(output);

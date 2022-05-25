@@ -21,6 +21,8 @@ namespace rt {
 
     BVHNode() = default;
 
+    BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+    
     BVHNode(const HittableList &list, float t0, float t1) : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
 
     BVHNode(const std::vector<shared_ptr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
@@ -105,12 +107,12 @@ namespace rt {
 
     static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 2); }
 
-    std::vector<Hittable *> getChildrenAsList() override {
-      std::vector<Hittable *> leftChildren;
-      std::vector<Hittable *> rightChildren;
+    std::vector<Hittable*> getChildrenAsList() override {
+      std::vector<Hittable*> leftChildren;
+      std::vector<Hittable*> rightChildren;
 
       if (left == nullptr && right == nullptr)
-        return std::vector<Hittable *>{};
+        return std::vector<Hittable*>{};
 
       if (left)
         leftChildren = left->getChildrenAsList();
@@ -120,15 +122,18 @@ namespace rt {
 
       if (!(leftChildren.size() == 1 && rightChildren.size() == 1 && leftChildren[0] == rightChildren[0]))
         leftChildren.insert(leftChildren.end(), rightChildren.begin(), rightChildren.end());
-      // leftChildren.push_back(this);
+      leftChildren.push_back(this);
 
       return leftChildren;
     }
 
     std::vector<AABB> getChildrenAABBs() override {
-      std::vector<Hittable *> children = getChildrenAsList();
-      std::vector<AABB>       childrenAABBs;
-      for (auto *e : children) {
+      std::vector<Hittable*> children = getChildrenAsList();
+      // This is destroyed on function return causing a double
+
+      std::vector<AABB>           childrenAABBs;
+
+      for (auto &&e : children) {
         AABB output;
         if (e->BoundingBoxTransformed(0, 1, output))
           childrenAABBs.push_back(output);
@@ -137,18 +142,18 @@ namespace rt {
       return childrenAABBs;
     }
 
-    std::optional<Hittable*> addChild(Hittable* newChild) override {
-      std::vector<Hittable *>     children = getChildrenAsList();
-      std::vector<sPtr<Hittable>> *sPtrs = new std::vector<sPtr<Hittable>>();
-      sPtrs->reserve(children.size());
+    Hittable* addChild(sPtr<Hittable> newChild) override {
+      std::vector<Hittable*> children = getChildrenAsList();
+      std::vector<sPtr<Hittable>> sPtrs    = std::vector<sPtr<Hittable>>();
+      sPtrs.reserve(children.size());
 
-      for (auto *e : children) {
-        sPtrs->push_back(sPtr<Hittable>(e));
+      for (auto &&e : children) {
+        sPtrs.push_back(sPtr<Hittable>(e));
       }
 
-      sPtrs->push_back(sPtr<Hittable>(newChild));
-    
-      return std::optional<Hittable*>(new BVHNode(*sPtrs, 0, sPtrs->size(), 0.0f, 1.0f));
+      sPtrs.push_back(sPtr<Hittable>(newChild));
+
+      return new BVHNode(sPtrs, 0, sPtrs.size(), 0.0f, 1.0f);
     }
   };
 } // namespace rt

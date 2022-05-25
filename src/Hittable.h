@@ -38,7 +38,7 @@ namespace rt {
     }
   };
 
-  class Hittable : public IRasterizable {
+  class Hittable : public IRasterizable, public IImguiDrawable {
   public:
     std::string    name;
     Transformation transformation;
@@ -94,13 +94,11 @@ namespace rt {
       // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
     }
 
-    void onImmediateGui() {
-      ImGui::DragFloat3(
-          ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.translate.x, 0.05f);
-      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &transformation.rotate.x, 0.05f);
+    virtual void OnImgui() override {
+      transformation.OnImgui();
     }
 
-    virtual std::vector<Hittable *> getChildrenAsList() { return std::vector<Hittable *>{this}; }
+    virtual std::vector<Hittable*> getChildrenAsList() { return std::vector<Hittable*>{this}; }
 
     virtual std::vector<AABB> getChildrenAABBs() {
       AABB outputBox;
@@ -111,7 +109,7 @@ namespace rt {
     }
 
     // Only HittableLists and BVHNodes should override this.
-    virtual std::optional<Hittable*> addChild(Hittable* newChild) { return std::optional<Hittable*>(); }
+    virtual Hittable* addChild(sPtr<Hittable> newChild) { return nullptr; }
 
   };
 } // namespace rt

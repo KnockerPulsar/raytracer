@@ -1,5 +1,7 @@
+#include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
+#include "Defs.h"
 #include "Ray.h"
 #include "RenderAsync.h"
 #include "Scene.h"
@@ -12,10 +14,10 @@
 #include <ostream>
 #include <raylib.h>
 #include <vector>
-#include "../vendor/rlImGui/rlImGui.h"
 /*
  TODO:
-    Figure out a way to update a BVH tree AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    Figure out why BVH rebuild duplicates objects
+    Figure out a way to display different materials in the editor and modify them.
     Configure clangd to format in a better way
     Clean up code and naming
 */
@@ -53,7 +55,7 @@ int main() {
   // Only used when creating hardcoded scenes
   const int   imageWidth      = 1200;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 100;
+  const int   samplesPerPixel = 20;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
@@ -70,8 +72,8 @@ int main() {
   asyncRenderData.currScene =
       rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
-  rt::Camera &cam = asyncRenderData.currScene.cam;
-  rt::Editor* editor = new rt::Editor(asyncRenderData.currScene.worldRoot, &cam);
+  rt::Camera &cam    = asyncRenderData.currScene.cam;
+  rt::Editor *editor = new rt::Editor(sPtr<rt::Scene>(&asyncRenderData.currScene), &cam);
 
   if (fullscreen)
     ToggleFullscreen();
@@ -122,7 +124,7 @@ int main() {
 
       EndDrawing();
     } else {
-      editor->Update(); 
+      editor->Update();
     }
   }
 

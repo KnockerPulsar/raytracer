@@ -32,7 +32,10 @@ namespace rt {
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
-    void Rasterize() override;
+    virtual void Rasterize() override;
+
+    virtual void OnImgui() override;
+    
   };
 
   // This is how you use `json.get<Box>()`

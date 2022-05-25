@@ -14,19 +14,16 @@ namespace rt {
 
     Metal() = default;
 
-    Metal(const vec3 &color, float f)
-        : albedo(std::make_shared<SolidColor>(color)), fuzz(f < 1 ? f : 1) {}
+    Metal(const vec3 &color, float f) : albedo(std::make_shared<SolidColor>(color)), fuzz(f < 1 ? f : 1) {}
 
     Metal(sPtr<Texture> tex) : albedo(tex) {}
 
-    bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
-                 Ray &scattered) const override {
+    bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
       vec3 in_normalized = r_in.direction.Normalize();
       vec3 reflected     = in_normalized.Reflect(rec.normal);
-      scattered =
-          Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, r_in.time);
-      attenuation = albedo->Value(rec.u, rec.v, rec.p);
+      scattered          = Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, r_in.time);
+      attenuation        = albedo->Value(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }
 
