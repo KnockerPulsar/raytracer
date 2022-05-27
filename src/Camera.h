@@ -1,10 +1,7 @@
 #pragma once
 #include "Constants.h"
 #include "Defs.h"
-#include "Hittable.h"
-#include "HittableList.h"
 #include "IRasterizable.h"
-#include "Ray.h"
 #include "data_structures/vec3.h"
 #include <cmath>
 #include <raylib.h>
@@ -17,8 +14,9 @@ namespace rt {
   public:
     vec3 lookFrom, lookAt, moveDir;
     vec3 lower_left_corner, horizontal, vertical;
-    vec3 u, v, w, vUp;
-    vec3 rgt;
+    vec3 localRight, localUp, localForward, worldUp;
+
+    float viewportWidth, viewportHeight;
 
     float time0, time1;
     float vFov, // vertical field-of-view in degrees
@@ -69,7 +67,7 @@ namespace rt {
 
     Camera3D toRaylibCamera3D() const {
       return Camera3D{
-          .position = lookFrom, .target = lookAt, .up = vUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
+          .position = lookFrom, .target = lookAt, .up = worldUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
     }
 
     Ray GetRay(float s, float t) const;
@@ -81,6 +79,8 @@ namespace rt {
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
+
+  void UpdateDirectionVectors();
   };
 
   inline void to_json(json &j, const Camera &c) {
@@ -89,7 +89,7 @@ namespace rt {
         {
             {"look_from", c.lookFrom},
             {"look_at", c.lookAt},
-            {"v_up", c.vUp},
+            {"v_up", c.worldUp},
             {"focus_dist", c.focusDist},
             {"aperature", c.aperature},
             {"move_dir", c.moveDir},

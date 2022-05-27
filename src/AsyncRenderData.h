@@ -1,25 +1,27 @@
 #pragma once
-#include <iostream>
-#include "data_structures/Pixel.h"
+#include "Defs.h"
 #include "Scene.h"
+#include "data_structures/JobQueue.h"
+#include "data_structures/Pixel.h"
 #include <future>
+#include <iostream>
 #include <raylib.h>
 #include <utility>
 #include <vector>
 
-using std::vector, std::future;
+using std::vector, std::thread;
 
 namespace rt {
   struct AsyncRenderData {
-    vector<Pixel>        pixelJobs;
-    vector<future<void>> threads;
-    Scene                currScene;
-    vector<long>         threadTimes;
-    vector<int>          threadProgress;
-    vector<int>          threadShouldRun;
-    vector<bool>         finishedThreads;
-    RenderTexture2D      incrementalBuffer;
-    RenderTexture2D      screenBuffer;
-    bool                 incRender;
+    sPtr<JobQueue<Pixel>> pixelJobs;
+    vector<thread>        threads;
+    Scene                 currScene;
+    vector<long>          threadTimes;
+    vector<int>           threadProgress;
+    bool                  exit;
+    vector<bool>          finishedThreads;
+    RenderTexture2D       incrementalBuffer;
+    RenderTexture2D       screenBuffer;
+    bool                  incRender;
   };
 } // namespace rt

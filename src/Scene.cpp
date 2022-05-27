@@ -15,6 +15,7 @@
 #include "materials/Dielectric.h"
 #include "materials/Material.h"
 
+#include "materials/Metal.h"
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
@@ -23,6 +24,7 @@
 #include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
 #include "textures/NoiseTexture.h"
+#include "textures/SolidColor.h"
 #include "textures/Texture.h"
 #include <bits/types/FILE.h>
 #include <fstream>
@@ -438,14 +440,16 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
-    auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
-    auto earth           = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+    auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
+    auto earth          = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+    auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
+    auto metal          = make_shared<Metal>(vec3(0.8), 0.2f);
 
-    auto box    = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), material_center);
+    auto box    = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), materialGround);
     auto sphere = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
 
-    sphere->transformation = Transformation(vec3(-1, -1, 0));
+    sphere->transformation = Transformation(vec3(-1, -1, -3));
     sphere->name           = "Earth";
     box->transformation    = Transformation(vec3(0, 0, -5), vec3(0, 0, 0));
     box->name              = "Cube";

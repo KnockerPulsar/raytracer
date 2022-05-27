@@ -2,6 +2,7 @@
 #include "AsyncRenderData.h"
 #include "Camera.h"
 #include "Defs.h"
+#include "Hittable.h"
 #include "Ray.h"
 #include "RenderAsync.h"
 #include "Scene.h"
@@ -57,14 +58,15 @@ int main() {
   // Only used when creating hardcoded scenes
   const int   imageWidth      = 1200;
   const float aspectRatio     = 16 / 9.0;
-  const int   samplesPerPixel = 20;
+  const int   samplesPerPixel = 100;
   const int   maxDepth        = 10;
   bool        fullscreen      = false;
   bool        showProg        = false;
-  int         incRender       = 1;
+  int         incRender       = 0;
   bool        raster          = true;
   bool        allFinished     = true;
-  
+  bool        rtInit          = false;
+
   SceneID sceneID = SceneID::cornell;
 
   AsyncRenderData asyncRenderData =
@@ -110,12 +112,19 @@ int main() {
 
   while (!WindowShouldClose()) {
     checkInput();
+
     if (!raster) {
+
+      if (!rtInit) {
+        RenderAsync::Start(asyncRenderData);
+        rtInit = true;
+      }
+
       // Update camera and start async again if last frame is done
       if (allFinished) {
         RenderAsync::ResetThreads(asyncRenderData);
 
-        onFrameRender();
+        // onFrameRender();
       }
 
       BeginDrawing();
@@ -131,7 +140,7 @@ int main() {
   }
 
   rlImGuiShutdown();
-  if (!raster)
+  if (rtInit) // Should have threads running
     RenderAsync::Shutdown(fullscreen, asyncRenderData);
 
   return 0;

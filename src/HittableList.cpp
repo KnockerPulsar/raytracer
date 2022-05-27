@@ -5,7 +5,6 @@
 
 namespace rt {
   bool HittableList::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
-
   {
     HitRecord temp_rec;
     bool      hit_anything   = false;

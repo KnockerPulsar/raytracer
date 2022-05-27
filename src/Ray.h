@@ -1,6 +1,10 @@
 #pragma once
 
-#include "data_structures/vec3.h"
+#include "AsyncRenderData.h"
+// #include "data_structures/JobQueue.h"
+// #include "data_structures/vec3.h"
+
+// clang-format off
 
 namespace rt {
 
@@ -25,9 +29,12 @@ namespace rt {
     static vec3 RayColor(const rt::Ray &r, const vec3 &backgroundColor,
                          const Hittable &world, int depth);
 
-    static void Trace(std::vector<Pixel> &threadJobs, int jobsStart,
-                      int jobsEnd, Scene &currScene, long &thread_time,
-                      int &thread_progress, int &threadShouldRun);
+    static void Trace(
+      AsyncRenderData& ard,
+      int threadIndex
+    );
   };
 
 } // namespace rt
+
+// clang-format on

@@ -31,15 +31,15 @@ namespace rt {
                  float focusDist,
                  float time0,
                  float time1)
-      : lookFrom(lookFrom), lookAt(lookAt), vUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
+      : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
         aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
 
     float theta = DegressToRadians(vFov);
 
     // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-    float h              = tan(theta / 2);
-    float viewportHeight = 2.0 * h;
-    float viewportWidth  = aspectRatio * viewportHeight;
+    float h        = tan(theta / 2);
+    viewportHeight = 2.0 * h;
+    viewportWidth  = aspectRatio * viewportHeight;
 
     // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
     GenerateData();
@@ -70,22 +70,23 @@ namespace rt {
     float viewportHeight = 2.0 * h;
     float viewportWidth  = aspectRatio * viewportHeight;
 
-    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
-    w = (lookFrom - lookAt).Normalize();
-    u = vec3::CrsProd(vUp, w).Normalize();
-    v = vec3::CrsProd(w, u);
-
-    horizontal        = focusDist * viewportWidth * u;
-    vertical          = focusDist * viewportHeight * v;
-    lower_left_corner = this->lookFrom - horizontal / 2 - vertical / 2 - focusDist * w;
-    rgt               = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(lookAt, lookFrom), vUp));
+    UpdateDirectionVectors();
   }
 
+  void Camera::UpdateDirectionVectors() {
+    // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
+    localForward      = (lookAt - lookFrom).Normalize();                   // back vector
+    localRight        = -vec3::CrsProd(worldUp, localForward).Normalize(); // Right vector
+    localUp           = -vec3::CrsProd(localForward, localRight); // Local up vector, vUp is the world up vector
+    horizontal        = focusDist * viewportWidth * localRight;
+    vertical          = focusDist * viewportHeight * localUp;
+    lower_left_corner = this->lookFrom - horizontal / 2 - vertical / 2 + focusDist * localForward;
+  }
 
   // Used for raytracing
   Ray Camera::GetRay(float s, float t) const {
     vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
-    vec3 offset = u * rd.x + v * rd.y;
+    vec3 offset = localRight * rd.x + localUp * rd.y;
     return Ray(lookFrom + offset,
                (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
                RandomFloat(time0, time1));
@@ -100,14 +101,12 @@ namespace rt {
 
     glm::mat4 rotMat     = glm::eulerAngleYX(angle.y, angle.x);
     glm::vec4 defaultFwd = glm::vec4(0, 0, -1, 0);
-    glm::vec4 defaultRgt = glm::vec4(1, 0, 0, 0);
 
     glm::vec3 rotatedFwd = rotMat * defaultFwd;
-    glm::vec3 rotatedRgt = rotMat * defaultRgt;
 
     lookAt = lookFrom + rotatedFwd;
-    rgt    = rotatedRgt;
-    // vUp    = Vector3Normalize(Vector3CrossProduct(rgt, lookAt));
+
+    UpdateDirectionVectors();
   }
 
   void Camera::RenderImgui() {
@@ -117,7 +116,8 @@ namespace rt {
         vec3 deltaPos = lookFrom;
         ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
 
-        ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels, rt::Camera::ControlType::controlTypesCount, 0);
+        ImGui::Combo(
+            "Camera type", (int *)&controlType, controlTypeLabels, rt::Camera::ControlType::controlTypesCount, 0);
 
         if (controlType == rt::Camera::ControlType::lookAtPoint)
           ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
@@ -164,16 +164,17 @@ namespace rt {
         lookFrom += rgtChange;
         lookAt += rgtChange;
       }
+
       MouseLook(GetMouseDelta());
     } else {
       EnableCursor();
     }
-   }
+  }
 
   std::tuple<vec3, vec3, vec3> Camera::getScaledDirectionVectors(float dt) const {
-    vec3 upChange  = vUp * dt * movScale;
-    vec3 fwdChange = (lookAt - lookFrom).Normalize() * dt * movScale;
-    vec3 rgtChange = rgt * dt * movScale;
+    vec3 upChange  = worldUp * dt * movScale;
+    vec3 fwdChange = localForward * dt * movScale;
+    vec3 rgtChange = localRight * dt * movScale;
 
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
@@ -187,8 +188,10 @@ namespace rt {
     // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
     // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
 
-    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), vUp.toGlm());
+    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), worldUp.toGlm());
   }
 
-  glm::mat4 Camera::getProjectionMatrix() const { return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f); }
+  glm::mat4 Camera::getProjectionMatrix() const {
+    return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f);
+  }
 } // namespace rt

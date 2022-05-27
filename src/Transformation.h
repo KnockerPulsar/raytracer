@@ -7,7 +7,6 @@
 #include "Constants.h"
 #include "Defs.h"
 #include "IImguiDrawable.h"
-#include "Ray.h"
 #include "data_structures/vec3.h"
 #include <cmath>
 

@@ -56,7 +56,7 @@ namespace rt {
 
     virtual json GetJsonDerived() const { return {"type", "unimplemented"}; }
 
-    virtual bool HitTransformed(const Ray &r, float t_min, float t_max, HitRecord &rec) {
+    virtual bool HitTransformed(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
 
       // Need to apply inverse translation on ray origin
       // And translation on ray hit point

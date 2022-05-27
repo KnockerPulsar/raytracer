@@ -1,17 +1,12 @@
 #pragma once
 #include "../vendor/nlohmann-json/json.hpp"
-#include "BVHNode.h"
 #include "Camera.h"
 #include "Defs.h"
-#include "HittableList.h"
-#include "Ray.h"
-#include "materials/Dielectric.h"
-#include "materials/Material.h"
-#include "textures/CheckerTexture.h"
 #include <memory>
 #include <vector>
 
 namespace rt {
+  class Hittable;
 
   class Scene {
 
