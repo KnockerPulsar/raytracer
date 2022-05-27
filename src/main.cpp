@@ -6,6 +6,8 @@
 #include "RenderAsync.h"
 #include "Scene.h"
 #include "Transformation.h"
+#include "data_structures/JobQueue.h"
+#include "data_structures/Pixel.h"
 #include "editor/editor.h"
 #include "rt.h"
 #include <algorithm>
@@ -14,9 +16,9 @@
 #include <ostream>
 #include <raylib.h>
 #include <vector>
+
 /*
  TODO:
-    Figure out why BVH rebuild duplicates objects
     Figure out a way to display different materials in the editor and modify them.
     Configure clangd to format in a better way
     Clean up code and naming
@@ -62,7 +64,7 @@ int main() {
   int         incRender       = 1;
   bool        raster          = true;
   bool        allFinished     = true;
-
+  
   SceneID sceneID = SceneID::cornell;
 
   AsyncRenderData asyncRenderData =

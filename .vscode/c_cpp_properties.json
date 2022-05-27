@@ -43,7 +43,8 @@
             "name": "Linux",
             "includePath": [
                 "<path_to_raylib>/**",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceRoot}/vendor/**"
             ],
             "defines": [
                 "_DEBUG",

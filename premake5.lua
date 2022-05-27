@@ -36,11 +36,9 @@ project "Raytracer"
   }
 
   includedirs {
-    "vendor/glm", 
-    "vendor/glm/glm", 
-    "vendor/nlohmann-json", 
-    "vendor/rlImGui/imgui/",
-    "vendor/rlImGui/"
+    "vendor/**",
+    "src/",
+    "src/**"
   }
 
   filter {"configurations:Debug"}

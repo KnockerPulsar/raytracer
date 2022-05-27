@@ -39,11 +39,11 @@ namespace rt {
     return true;
   }
 
-  std::vector<Hittable*> HittableList::getChildrenAsList() {
+  std::vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
 
-    std::vector<Hittable*> vec;
+    std::vector<sPtr<Hittable>> vec;
     for (auto&& e : objects) {
-      vec.push_back(e.get());
+      vec.push_back(e);
     }
     return vec;
   }

@@ -98,7 +98,7 @@ namespace rt {
       transformation.OnImgui();
     }
 
-    virtual std::vector<Hittable*> getChildrenAsList() { return std::vector<Hittable*>{this}; }
+    virtual std::vector<sPtr<Hittable>> getChildrenAsList() { return std::vector<sPtr<Hittable>>{shared_ptr<Hittable>(nullptr)}; }
 
     virtual std::vector<AABB> getChildrenAABBs() {
       AABB outputBox;
