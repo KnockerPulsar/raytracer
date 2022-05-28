@@ -38,6 +38,24 @@ using nlohmann::json;
 
 namespace rt {
 
+  void Scene::addSkysphere(std::string ssTex) {
+
+    skysphereTexture  = ssTex;
+
+    auto tex = std::make_shared<ImageTexture>(ssTex.c_str());
+    tex->FlipH(true);
+    tex->FlipV(false);
+
+    auto skysphereMat = std::make_shared<DiffuseLight>(tex);
+    skysphere = std::make_shared<Sphere>(500.0f, vec3(0), skysphereMat);
+
+    ::Image img = LoadImage(skysphereTexture.c_str());
+    ImageFlipVertical(&img);
+
+    skysphereModel = LoadModelFromMesh(EditorUtils::generateSkysphere(500, {32, 32}));
+    skysphereModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(img);
+  }
+
   Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
     HittableList world;
@@ -269,7 +287,7 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
-    auto earthTexture = make_shared<ImageTexture>("earthmap.png");
+    auto earthTexture = make_shared<ImageTexture>("assets/textures/earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
     // auto earthSurface = make_shared<Metal>(vec3(0.7,0.2,0.7), 0.7);
     auto globe = make_shared<Sphere>(2, vec3(0, 0, 0), earthSurface);
@@ -440,26 +458,26 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
-    auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
-    auto earth          = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
-    auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
-    auto metal          = make_shared<Metal>(vec3(0.8), 0.2f);
+    // auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
 
-    auto box    = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), materialGround);
-    auto sphere = make_shared<Sphere>(0.5f, vec3::Zero(), earth);
+    std::string skyspherePath = "assets/textures/skysphere.png";
+    auto        sphereMat     = make_shared<DiffuseLight>(make_shared<ImageTexture>(skyspherePath.c_str()));
 
-    sphere->transformation = Transformation(vec3(-1, -1, -3));
-    sphere->name           = "Earth";
-    box->transformation    = Transformation(vec3(0, 0, -5), vec3(0, 0, 0));
-    box->name              = "Cube";
+    // auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
+    auto metal          = make_shared<Metal>(vec3(0.8), 0.1f);
+
+    auto box = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), metal);
+
+    box->transformation = Transformation(vec3(0, 0, -5), vec3(0, 0, 0));
+    box->name           = "Cube";
+
     // auto rotSphere= make_shared<RotateY>(sphere, 45);
 
-    std::vector<sPtr<Hittable>> world = {box, sphere};
-    // HittableList* worldList = new HittableList();
-    // worldList->Add(box).Add(sphere);
+    std::vector<sPtr<Hittable>> world = {box};
 
     s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s.addSkysphere(skyspherePath);
 
     return s;
   }
@@ -484,7 +502,7 @@ namespace rt {
         make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
     auto blue = make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
 
-    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("earthmap.png"));
+    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("assets/textures/earthmap.png"));
 
     auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
     plane->setTransformation(vec3(-3, 10, 0), vec3(0, 0, 0));

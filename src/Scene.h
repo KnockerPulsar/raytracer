@@ -2,7 +2,11 @@
 #include "../vendor/nlohmann-json/json.hpp"
 #include "Camera.h"
 #include "Defs.h"
+#include "editor/Utils.h"
+#include "textures/ImageTexture.h"
 #include <memory>
+#include <raylib.h>
+#include <raymath.h>
 #include <vector>
 
 namespace rt {
@@ -13,26 +17,42 @@ namespace rt {
   public:
     /*
       So, setting this as a share pointer was problematic when updating BVHs
-      The issue was that the BVH update I'm using is rebuilding the BVH with the new object 
+      The issue was that the BVH update I'm using is rebuilding the BVH with the new object
       Then I discard the old BVH and set this as its replacement
 
-      So I think what happened was that on discarding the old BVH root, the tree was destroyed 
+      So I think what happened was that on discarding the old BVH root, the tree was destroyed
       (or at least the root node). Then when we constructed the new BVH, that node was already freed
       causing issues when trying to access other nodes below it.
 
       Can potentially cause a memory leak if it's not handled correctly.
     */
-    Hittable* worldRoot; 
+    Hittable *worldRoot;
 
+    sPtr<Hittable> skysphere;
+
+    std::string skysphereTexture;
+    // ::Mesh      skysphereMesh;
+    // ::Material  skysphereMat;
+    ::Model skysphereModel;
 
     Camera cam;
     int    maxDepth, imageWidth, imageHeight, samplesPerPixel;
     vec3   backgroundColor;
 
     Scene() = default;
-    Scene(Hittable* wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
+    Scene(Hittable *wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
         : worldRoot(wr), cam(c), maxDepth(md), imageWidth(iw), imageHeight(ih), samplesPerPixel(spp),
           backgroundColor(bc) {}
+
+    void addSkysphere(std::string ssTex);
+
+    void drawSkysphere() {
+      rlDisableBackfaceCulling();
+      rlDisableDepthMask();
+      DrawModel(skysphereModel, {0, 0, 0}, 1.0f, WHITE);
+      rlEnableDepthMask();
+      rlEnableBackfaceCulling();
+    }
 
     static Scene Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
 

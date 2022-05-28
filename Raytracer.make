@@ -71,7 +71,6 @@ OBJECTS := \
 	$(OBJDIR)/Ray.o \
 	$(OBJDIR)/RenderAsync.o \
 	$(OBJDIR)/Scene.o \
-	$(OBJDIR)/ThreadPool.o \
 	$(OBJDIR)/vec3.o \
 	$(OBJDIR)/Utils.o \
 	$(OBJDIR)/editor.o \
@@ -161,9 +160,6 @@ $(OBJDIR)/RenderAsync.o: src/RenderAsync.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Scene.o: src/Scene.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/ThreadPool.o: src/ThreadPool.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/vec3.o: src/data_structures/vec3.cpp

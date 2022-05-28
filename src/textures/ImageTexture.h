@@ -21,22 +21,26 @@ namespace rt {
   class ImageTexture : public Texture {
   public:
     const static int bytesPerPixel = 3;
+    bool             flipH = false, flipV = false;
 
     ImageTexture() : img{} {}
 
-    ImageTexture(const char *filename) : path(filename) {
-      ImageFromPath(filename);
+    ImageTexture(const char *filename) : path(filename) { ImageFromPath(filename); }
+    void FlipH(bool fh) {
+      flipH = fh;
+    }
+    void FlipV(bool fv) {
+      flipV = fv;
     }
 
     void ImageFromPath(const char *filename) {
       int compsPerPixel = bytesPerPixel;
-      path = filename;
+      path              = filename;
 
       img = LoadImage(filename);
 
       if (img.data == nullptr) {
-        std::cerr << "ERROR: could not load texture image file " << filename
-                  << ".\n";
+        std::cerr << "ERROR: could not load texture image file " << filename << ".\n";
         img.width = img.height = 0;
       }
 
@@ -54,8 +58,12 @@ namespace rt {
         return vec3(0, 1, 1);
 
       // Clamp input texture coordinates to [0,1] x [1,0]
-      u = Clamp(u, 0.0, 1.0);
-      v = 1.0f - Clamp(v, 0.0, 1.0); // Flip v to image coords
+
+      if (flipV)
+        v = 1.0f - Clamp(v, 0.0, 1.0);
+        
+      if (flipH)
+        u = 1.0f - Clamp(u, 0.0, 1.0);
 
       int i = u * img.width;
       int j = v * img.height;
@@ -69,17 +77,12 @@ namespace rt {
       // Since we read 8 bit integer values for r, g, and b.
       // Need to convert them to [0,1.0]
       const float    colorScale = 1.0 / 255.0;
-      unsigned char *pixel =
-          (unsigned char *)img.data + j * bytesPerScanline + i * bytesPerPixel;
+      unsigned char *pixel      = (unsigned char *)img.data + j * bytesPerScanline + i * bytesPerPixel;
       return vec3(pixel[0], pixel[1], pixel[2]) * colorScale;
     }
 
-    virtual json GetJson() const override {
-      return json{{"type", "image"}, {"path", path}};
-    }
-    virtual void GetTexture(const json &j) override {
-      ImageFromPath(j["path"].get<string>().c_str());
-    }
+    virtual json GetJson() const override { return json{{"type", "image"}, {"path", path}}; }
+    virtual void GetTexture(const json &j) override { ImageFromPath(j["path"].get<string>().c_str()); }
 
   private:
     int         bytesPerScanline;

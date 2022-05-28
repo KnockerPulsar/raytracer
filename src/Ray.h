@@ -26,8 +26,7 @@ namespace rt {
 
     vec3 At(float t) const { return Vector3Add(origin, direction * t); }
 
-    static vec3 RayColor(const rt::Ray &r, const vec3 &backgroundColor,
-                         const Hittable &world, int depth);
+    static vec3 RayColor(const rt::Ray &r, Scene& scene, int depth);
 
     static void Trace(
       AsyncRenderData& ard,

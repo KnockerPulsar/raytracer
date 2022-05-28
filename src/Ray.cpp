@@ -1,6 +1,7 @@
 #include "Ray.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
+#include "Constants.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Scene.h"
@@ -14,25 +15,29 @@ using rt::Pixel, rt::Camera, rt::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
 
 namespace rt {
-  vec3 Ray::RayColor(const rt::Ray &r, const vec3 &backgroundColor, const Hittable &world, int depth) {
+  vec3 Ray::RayColor(const rt::Ray &r, Scene &scene, int depth) {
     HitRecord rec;
 
     // Limit max recursion depth
     if (depth <= 0) {
       return vec3::Zero();
-    } 
+    }
 
-    if (!world.Hit(r, 0.001f, infinity, rec))
-      return backgroundColor;
+    if (!scene.worldRoot->Hit(r, 0.001f, infinity, rec)) {
+      if (scene.skysphere)
+        scene.skysphere->Hit(r, -infinity, infinity, rec);
+      else
+        return scene.backgroundColor;
+    }
 
     rt::Ray scattered;
     vec3    attenuation;
-    vec3    emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+     vec3    emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
     if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
       return emitted;
 
-    return emitted + attenuation * RayColor(scattered, backgroundColor, world, depth - 1);
+    return emitted + attenuation * RayColor(scattered, scene, depth - 1);
   }
 
   void Ray::Trace(AsyncRenderData &ard, int threadIndex) {
@@ -40,11 +45,9 @@ namespace rt {
     auto start = high_resolution_clock::now();
     while (true) {
       ard.threadProgress[threadIndex] = 0;
-      auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk();
+      auto [jobsStart, jobsEnd]       = ard.pixelJobs->getChunk();
 
-      int i = 0;
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
-        i++;
 
 #ifdef FAST_EXIT
         // Exit prematurely if signaled to
@@ -61,8 +64,8 @@ namespace rt {
         for (int s = 0; s < currScene.samplesPerPixel; s++) {
           float   u   = (x + RandomFloat()) / (currScene.imageWidth - 1);
           float   v   = (y + RandomFloat()) / (currScene.imageHeight - 1);
-           rt::Ray ray = currScene.cam.GetRay(u, v);
-          job.color += rt::Ray::RayColor(ray, currScene.backgroundColor, *currScene.worldRoot, currScene.maxDepth);
+          rt::Ray ray = currScene.cam.GetRay(u, v);
+          job.color += rt::Ray::RayColor(ray, currScene, currScene.maxDepth);
         }
 
 #ifdef GAMMA_CORRECTION
@@ -78,7 +81,7 @@ namespace rt {
 #else
         job.color /= currScene.samplesPerPixel;
 #endif
-        ard.threadProgress[threadIndex] = ((float)(i) / (jobsEnd - jobsStart)) * 100;
+        ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
       }
     }
   }
