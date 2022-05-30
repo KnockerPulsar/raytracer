@@ -20,6 +20,8 @@ namespace rt {
     // Build an AABB from points
     AABB(std::vector<vec3> points);
 
+    void Pad();
+
     bool Hit(const Ray &r, float tMin, float tMax) const;
     static AABB SurroundingBox(AABB b0, AABB b1);
   };

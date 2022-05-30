@@ -118,7 +118,8 @@ namespace rt {
 
     static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 2); }
 
-    // Using shared pointers causes double free errors
+    // To use a shared pointer, you must have some reference to the shared pointer object itself
+    // and not the pointer it's wrapping.
     std::vector<sPtr<Hittable>> getChildrenAsList() override {
       std::vector<sPtr<Hittable>> leftChildren;
       std::vector<sPtr<Hittable>> rightChildren;
@@ -127,14 +128,14 @@ namespace rt {
         leftChildren.push_back(left);
       else {
         leftChildren = left->getChildrenAsList();
-        leftChildren.push_back(left);
+        // leftChildren.push_back(left);
       }
 
       if (auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right); rightBVH == nullptr && right != nullptr)
         rightChildren.push_back(right);
       else {
         rightChildren = right->getChildrenAsList();
-        rightChildren.push_back(right);
+        // rightChildren.push_back(right);
       }
 
       if (!(leftChildren.size() == 1 && rightChildren.size() == 1 && leftChildren[0] == rightChildren[0]))

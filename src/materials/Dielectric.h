@@ -65,6 +65,11 @@ namespace rt {
       // clang-format on
     }
 
+    virtual void OnImgui() override {
+      albedo->OnImgui();
+      ImGui::DragFloat("Refraction Index", &refractionIndex);
+    }
+
   private:
     /**
      * @brief Uses Schlick's approximation to calculate reflectance.
@@ -79,6 +84,7 @@ namespace rt {
 
       return r0 + (1 - r0) * pow(1 - cos, 5);
     }
+
   };
 
   inline void from_json(const json &j, Dielectric &d) {

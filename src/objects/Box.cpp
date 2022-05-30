@@ -20,7 +20,7 @@ namespace rt {
   }
 
   bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    outputBox = AABB(boxMin, boxMax);
+    outputBox = transformation.regenAABB(AABB(boxMin, boxMax));
     return true;
   }
 

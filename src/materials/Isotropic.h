@@ -1,7 +1,7 @@
-#include "Defs.h"
-#include "materials/Material.h"
-#include "textures/SolidColor.h"
-#include "textures/Texture.h"
+#include "../Defs.h"
+#include "../materials/Material.h"
+#include "../textures/SolidColor.h"
+#include "../textures/Texture.h"
 #include <memory>
 #include <raylib.h>
 namespace rt {
@@ -11,15 +11,14 @@ namespace rt {
     Isotropic(vec3 color) : albedo(std::make_shared<SolidColor>(color)) {}
     Isotropic(sPtr<Texture> tex) : albedo(tex) {}
 
-    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation,
-                         Ray &scattered) const override {
+    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
       scattered   = Ray(rec.p, vec3::RandomInUnitSphere(), r_in.time);
       attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;
     }
 
-    json GetJson() const override {
-      return {"type", "unimplemented - isotropic"};
-    }
+    json GetJson() const override { return {"type", "unimplemented - isotropic"}; }
+
+    virtual void OnImgui() override { albedo->OnImgui(); }
   };
 } // namespace rt

@@ -26,12 +26,12 @@ namespace rt {
     constexpr static const float xAngleClampMax = 89.0f;
     float                        panningDivider = 51.0f;
     float                        movScale       = 10.0f;
+    float                        movMultiplier  = 5.0f;
     vec3                         angle          = {0, 0, 0}; // Used to rotate the camera using the mouse
     Vector2                      rotSensitity   = {0.003f, 0.003f};
 
-
     enum ControlType { flyCam, lookAtPoint, controlTypesCount };
-    ControlType         controlType         = ControlType::flyCam;
+    ControlType               controlType         = ControlType::flyCam;
     inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};
 
     inline static vec3 lineStart, lineEnd;
@@ -50,7 +50,6 @@ namespace rt {
            float time1 = 1.0);
 
     Camera(nlohmann::json cameraJson, float aspectRatio);
-
 
     // Calculates horizontal, vertical, lower_left_corner, rgt from input data.
     void GenerateData();
@@ -80,7 +79,7 @@ namespace rt {
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
 
-  void UpdateDirectionVectors();
+    void UpdateDirectionVectors();
   };
 
   inline void to_json(json &j, const Camera &c) {

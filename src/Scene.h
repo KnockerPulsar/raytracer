@@ -31,8 +31,6 @@ namespace rt {
     sPtr<Hittable> skysphere;
 
     std::string skysphereTexture;
-    // ::Mesh      skysphereMesh;
-    // ::Material  skysphereMat;
     ::Model skysphereModel;
 
     Camera cam;
@@ -46,13 +44,7 @@ namespace rt {
 
     void addSkysphere(std::string ssTex);
 
-    void drawSkysphere() {
-      rlDisableBackfaceCulling();
-      rlDisableDepthMask();
-      DrawModel(skysphereModel, {0, 0, 0}, 1.0f, WHITE);
-      rlEnableDepthMask();
-      rlEnableBackfaceCulling();
-    }
+    void drawSkysphere();
 
     static Scene Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Constants.h"
-#include "Defs.h"
-#include "Hittable.h"
-#include "HittableList.h"
+#include "../Constants.h"
+#include "../Defs.h"
+#include "../Hittable.h"
+#include "../HittableList.h"
 #include "Isotropic.h"
-#include "Util.h"
-#include "textures/Texture.h"
+#include "../Util.h"
+#include "../textures/Texture.h"
 #include <iostream>
 #include <memory>
 #include <raylib.h>
@@ -44,7 +44,8 @@ namespace rt {
     const bool enableDebug = false;
     const bool debugging   = enableDebug && RandomFloat() < 0.00001;
 
-    HitRecord rec1, rec2;
+    HitRecord rec1;
+    HitRecord rec2;
 
     if (!boundry->HitTransformed(r, -infinity, infinity, rec1)) {
       return false;

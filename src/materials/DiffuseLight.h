@@ -13,21 +13,18 @@ namespace rt {
    */
   class DiffuseLight : public Material {
   private:
-    float editorEmissiveIntensity = 1.0f;
-    vec3  editorEmissiveColor;
+    float emissiveIntensity;
 
   public:
     sPtr<Texture> emssiveTex; // Texture that emission follows (can be used as an emissive mask)
-    enum EmissiveTexType { Solid, Tex };
-    EmissiveTexType emssiveTexType;
 
     DiffuseLight() = default;
 
-    DiffuseLight(sPtr<Texture> tex) : emssiveTex(tex) { emssiveTexType = Tex; }
+    DiffuseLight(sPtr<Texture> tex) : emssiveTex(tex) {}
 
-    DiffuseLight(vec3 baseColor) : emssiveTex(ms<SolidColor>(baseColor)) {
-      emssiveTexType      = Solid;
-      editorEmissiveColor = baseColor;
+    DiffuseLight(vec3 baseColor) {
+      auto baseCol = ms<SolidColor>(baseColor);
+      emssiveTex   = baseCol;
     }
 
     /**
@@ -47,7 +44,7 @@ namespace rt {
      * @brief Emission logic, lights always emit lights based on their texture.
      *
      * @param u Horizontal texture coordinate
-     * @param v Horizontal texture coordinate
+     * @param v Vertical texture coordinate
      * @param p Hit point in world space
      * @return vec3 Color of light that this material emits
      */
@@ -56,22 +53,9 @@ namespace rt {
     json GetJson() const override { return json{{"type", "diffuse_light"}, {"texture", emssiveTex->GetJson()}}; }
 
     virtual void OnImgui() override {
-      switch (emssiveTexType) {
-      case Solid: {
-        SolidColor *colorTexture = dynamic_cast<SolidColor *>(emssiveTex.get());
-
-        if (colorTexture != nullptr) {
-          ImGui::ColorPicker3("Emissive Color", &editorEmissiveColor.x);
-          ImGui::DragFloat("Emissive intensity", &editorEmissiveIntensity, 0.05f, 0.01, 100.0f);
-
-          colorTexture->color = editorEmissiveColor * editorEmissiveIntensity;
-        } else
-          std::cerr << EditorUtils::string_format("%s:%s: color texture is null", __FILE__, __LINE__);
-      }
-      case Tex: {
-        // TODO: figure this out?
-      }
-      }
+      emssiveTex->OnImgui();
+      ImGui::DragFloat("Emissive intensity", &emissiveIntensity, 0.1, 1.0f);
+      emssiveTex->setIntensity(emissiveIntensity);
     }
   };
 

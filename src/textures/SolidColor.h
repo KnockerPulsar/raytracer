@@ -1,5 +1,6 @@
 #pragma once
 #include "../data_structures/vec3.h"
+#include "../../vendor/rlImGui/imgui/imgui.h"
 #include "Texture.h"
 #include <raylib.h>
 
@@ -13,15 +14,13 @@ namespace rt {
 
     SolidColor(float r, float g, float b) : color(r, g, b) {}
 
-    virtual json GetJson() const override {
-      return json{{"type", "solid_color"}, {"color", color}};
-    }
-    virtual void GetTexture(const json &j) override {
-      color = j["color"].get<vec3>();
-    }
+    virtual json GetJson() const override { return json{{"type", "solid_color"}, {"color", color}}; }
+    virtual void GetTexture(const json &j) override { color = j["color"].get<vec3>(); }
 
-    virtual vec3 Value(float u, float v, const vec3 &p) const override {
-      return color;
+    virtual vec3 Value(float u, float v, const vec3 &p) const override { return color * intensity; }
+
+    virtual void OnImgui() override {
+      ImGui::ColorPicker3("Albedo color", &color.x);
     }
   };
 

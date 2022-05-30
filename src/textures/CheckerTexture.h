@@ -15,36 +15,33 @@ namespace rt {
 
   public:
     CheckerTexture() = default;
-    CheckerTexture(std::shared_ptr<Texture> _even,
-                   std::shared_ptr<Texture> _odd, float s = 1.0f)
+    CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 1.0f)
         : even(_even), odd(_odd), scale(s) {}
 
     CheckerTexture(vec3 c1, vec3 c2, float s = 1.0f)
-        : even(std::make_shared<SolidColor>(c1)),
-          odd(std::make_shared<SolidColor>(c2)), scale(s) {}
+        : even(std::make_shared<SolidColor>(c1)), odd(std::make_shared<SolidColor>(c2)), scale(s) {}
 
-    void FromColors(vec3 c1, vec3 c2, float s) {
-      *this = CheckerTexture(c1, c2, s);
-    }
+    void FromColors(vec3 c1, vec3 c2, float s) { *this = CheckerTexture(c1, c2, s); }
 
     virtual json GetJson() const override {
-      return json{{"type", "checker"},
-                  {"even", even->GetJson()},
-                  {"odd", odd->GetJson()},
-                  {"scale", scale}};
+      return json{{"type", "checker"}, {"even", even->GetJson()}, {"odd", odd->GetJson()}, {"scale", scale}};
     }
 
     virtual void GetTexture(const json &j) override {
-      FromColors(
-          j["even"].get<vec3>(), j["odd"].get<vec3>(), j["scale"].get<float>());
+      FromColors(j["even"].get<vec3>(), j["odd"].get<vec3>(), j["scale"].get<float>());
     }
 
     virtual vec3 Value(float u, float v, const vec3 &p) const override {
       float sines = sin(scale * p.x) * sin(scale * p.y) * sin(scale * p.z);
       if (sines < 0)
-        return odd->Value(u, v, p);
+        return odd->Value(u, v, p) * intensity;
       else
-        return even->Value(u, v, p);
+        return even->Value(u, v, p) * intensity;
+    }
+
+    virtual void OnImgui() override {
+      even->OnImgui();
+      odd->OnImgui();
     }
   };
 

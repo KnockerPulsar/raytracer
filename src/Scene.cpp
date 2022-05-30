@@ -6,12 +6,12 @@
 #include "materials/DiffuseLight.h"
 
 #include "Camera.h"
-#include "ConstantMedium.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Ray.h"
 #include "Util.h"
 #include "data_structures/vec3.h"
+#include "materials/ConstantMedium.h"
 #include "materials/Dielectric.h"
 #include "materials/Material.h"
 
@@ -40,20 +40,26 @@ namespace rt {
 
   void Scene::addSkysphere(std::string ssTex) {
 
-    skysphereTexture  = ssTex;
+    skysphereTexture = ssTex;
 
-    auto tex = std::make_shared<ImageTexture>(ssTex.c_str());
-    tex->FlipH(true);
-    tex->FlipV(false);
+    auto tex = std::make_shared<ImageTexture>(ssTex.c_str(), false, true);
 
     auto skysphereMat = std::make_shared<DiffuseLight>(tex);
-    skysphere = std::make_shared<Sphere>(500.0f, vec3(0), skysphereMat);
+    skysphere         = std::make_shared<Sphere>(500.0f, vec3(0), skysphereMat);
 
     ::Image img = LoadImage(skysphereTexture.c_str());
     ImageFlipVertical(&img);
 
     skysphereModel = LoadModelFromMesh(EditorUtils::generateSkysphere(500, {32, 32}));
     skysphereModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTextureFromImage(img);
+  }
+
+  void Scene::drawSkysphere() {
+    rlDisableBackfaceCulling();
+    rlDisableDepthMask();
+    DrawModel(skysphereModel, skysphere->transformation.translate, 1.0f, WHITE);
+    rlEnableDepthMask();
+    rlEnableBackfaceCulling();
   }
 
   Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
@@ -71,20 +77,20 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto material_ground = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
-    auto material_center = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
-    auto material_left   = make_shared<Dielectric>(1.5);
-    auto material_right  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 0.1);
+    auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
+    auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
+    auto materialLeft   = make_shared<Dielectric>(1.5);
+    auto materialRight  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 0.1);
 
     world //
-        .Add(make_shared<Sphere>(100.0, vec3(0, -100.5, -1), material_ground))
-        .Add(make_shared<Sphere>(0.5, vec3(0, 0, -1.0), material_center))
+        .Add(make_shared<Sphere>(100.0, vec3(0, -100.5, -1), materialGround))
+        .Add(make_shared<Sphere>(0.5, vec3(0, 0, -1.0), materialCenter))
 
         // These 2 spheres make a "hollow sphere"
-        .Add(make_shared<Sphere>(0.5, vec3(-1., 0, -1), material_left))
-        .Add(make_shared<Sphere>(-0.45, vec3(-1., 0, -1), material_left))
+        .Add(make_shared<Sphere>(0.5, vec3(-1., 0, -1), materialLeft))
+        .Add(make_shared<Sphere>(-0.45, vec3(-1., 0, -1), materialLeft))
 
-        .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), material_right));
+        .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), materialRight));
 
     s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
@@ -93,7 +99,7 @@ namespace rt {
 
   Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
     Scene        s;
-    float        R = cos(pi / 4);
+    float        r = cos(pi / 4);
     HittableList world;
     vec3         lookFrom        = vec3(13, 2, 3);
     vec3         lookAt          = vec3(0, 0, 0);
@@ -107,12 +113,12 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto material_left  = make_shared<Lambertian>(vec3(0, 0, 1));
-    auto material_right = make_shared<Lambertian>(vec3(1, 0, 0));
+    auto materialLeft  = make_shared<Lambertian>(vec3(0, 0, 1));
+    auto materialRight = make_shared<Lambertian>(vec3(1, 0, 0));
 
     world //
-        .Add(make_shared<Sphere>(R, vec3(-R, 0, -1), material_left))
-        .Add(make_shared<Sphere>(R, vec3(R, 0, -1), material_right));
+        .Add(make_shared<Sphere>(r, vec3(-r, 0, -1), materialLeft))
+        .Add(make_shared<Sphere>(r, vec3(r, 0, -1), materialRight));
 
     s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
@@ -333,17 +339,18 @@ namespace rt {
     Scene        s;
     HittableList world;
 
-    vec3 lookFrom        = vec3(278, 278, -800);
-    vec3 lookAt          = vec3(278, 278, 0);
+    vec3 lookFrom        = vec3(27.8, 27.8, -80);
+    vec3 lookAt          = vec3(27.8, 27.8, 0);
     vec3 vUp             = vec3(0, 1, 0);
     vec3 backgroundColor = vec3::Zero();
 
-    float distToFocus = 800.0f;
+    float distToFocus = 80.0f;
     float aperature   = 0.1F;
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    cam.angle.y = 3.14; // Rotate towards the scene
 
     auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
     auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
@@ -356,43 +363,48 @@ namespace rt {
     auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
-    world.Add(make_shared<YZRect>(0, 555, 0, 555, 555, green));
+    auto leftWall = make_shared<Plane>(vec3(0), 55.5, 55.5, light);
+    leftWall->setTransformation(vec3(55.5, leftWall->w / 2, leftWall->h / 2), vec3(0,0,90));
+    leftWall->name = "leftWall";
+    world.Add(leftWall);
 
-    // Right wall
-    world.Add(make_shared<YZRect>(0, 555, 0, 555, 0, red));
+    // // Right wall
+    // auto rightWall = make_shared<Plane>(vec3(0), 55.5, 55.5, red);
+    // rightWall->setTransformation(vec3(0, leftWall->w / 2, leftWall->h / 2), vec3(0, 0, -90));
+    // rightWall->name = "rightWall";
+    // world.Add(rightWall);
 
-    // Top light
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 554, light));
+    // // Top light
+    // auto topLight = make_shared<Plane>(vec3(0), 55.5, 55.5, light);
+    // topLight->setTransformation(vec3(leftWall->w / 2, 55.5, leftWall->h / 2), vec3(0, 0, 180));
+    // topLight->name = "topLight";
+    // world.Add(topLight);
 
-    // floor
-    world.Add(make_shared<XZRect>(0, 555, 0, 555, 0, chrome));
+    // // floor
+    // auto floor = make_shared<Plane>(vec3(0), 55.5, 55.5, chrome);
+    // floor->setTransformation(vec3(leftWall->w / 2, 0, leftWall->h / 2), vec3(0, 0, 0));
+    // floor->name = "floor";
+    // world.Add(floor);
 
-    // ceiling
-    // world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, metal));
+    // // ceiling
+    // // world.Add(make_shared<XZRect>(0, 555, 0, 555, 555, metal));
 
-    // Back wall
-    world.Add(make_shared<XYRect>(0, 555, 0, 555, 555, white));
+    // // Back wall
+    // auto backWall = make_shared<Plane>(vec3(0), 55.5, 55.5, white);
+    // backWall->setTransformation(vec3(leftWall->w / 2, leftWall->h / 2, 55.5), vec3(0, 90, -90));
+    // backWall->name = "backWall";
+    // world.Add(backWall);
 
-    // world.Add(make_shared<Sphere>(100, vec3(330, 330, 165), light));
-
-    auto b1 = Box(vec3(0, 0, 0), vec3(165, 330, 165), white);
-    b1.setTransformation(vec3(265, 0, 295), vec3(0, 15, 0));
-
+    auto b1 = Box(-vec3(16.5, 33, 16.5) / 2, vec3(16.5, 33, 16.5) / 2, white);
+    b1.setTransformation(vec3(40, 16.5, 40), vec3(0, 15, 0));
+    b1.name = "Box1";
     world.Add(make_shared<Box>(b1));
 
-    auto b2 = Box(vec3::Zero(), vec3(100, 100, 100), purplishMetal);
-    b2.setTransformation(vec3(50, 0, 0), vec3(0, 12, 0));
+    auto b2 = Box(vec3(-5), vec3(5), purplishMetal);
+    b2.setTransformation(vec3(10, 5, 10), vec3(0, 12, 0));
+    b2.name   = "Box2";
     auto box2 = make_shared<Box>(b2);
-
-    // auto box2 = make_shared<Translate>(make_shared<Box>(b2), vec3(50, 0, 0));
     world.Add(box2);
-
-    // auto box3 = make_shared<Translate>(
-    //     make_shared<RotateY>(
-    //         make_shared<Box>(vec3(10), vec3(165-10, 165-10, 165-10),
-    //         dielectric), -55),
-    //     vec3(200, 0, 65));
-    // world.Add(box3);
 
     s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
 
@@ -462,19 +474,19 @@ namespace rt {
     // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
 
     std::string skyspherePath = "assets/textures/skysphere.png";
-    auto        sphereMat     = make_shared<DiffuseLight>(make_shared<ImageTexture>(skyspherePath.c_str()));
+    auto        sphereMat     = make_shared<DiffuseLight>(make_shared<ImageTexture>(skyspherePath.c_str(), true));
 
     // auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
-    auto metal          = make_shared<Metal>(vec3(0.8), 0.1f);
+    auto metal = make_shared<Metal>(vec3(0.8), 0.1f);
 
-    auto box = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), metal);
+    auto box    = make_shared<Box>(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), metal);
+    auto sphere = make_shared<Sphere>(0.5f, vec3(0), sphereMat);
 
     box->transformation = Transformation(vec3(0, 0, -5), vec3(0, 0, 0));
     box->name           = "Cube";
+    sphere->name        = "Sphere";
 
-    // auto rotSphere= make_shared<RotateY>(sphere, 45);
-
-    std::vector<sPtr<Hittable>> world = {box};
+    std::vector<sPtr<Hittable>> world = {box, sphere};
 
     s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
     s.addSkysphere(skyspherePath);

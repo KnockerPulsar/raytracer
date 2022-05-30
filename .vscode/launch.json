@@ -13,12 +13,15 @@
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "premake+build debug",
       "setupCommands": [
-
         {
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
         },
+        {
+          "description": "Skip library files",
+          "text": "-interpreter-exec console \"skip -gfi **/bits/*.h\""
+        }
       ],
     },
     {

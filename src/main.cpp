@@ -20,7 +20,23 @@
 
 /*
  TODO:
-    Figure out a way to display different materials in the editor and modify them.
+    Finish up basic shape rasterization for hittables
+    
+    Finish up ImGuizmo integration 
+
+    Figure out a way to display different materials in the editor and modify them. Perhaps
+    move materials to the base hittable to avoid duplication?
+
+    Use a condition variable start stop threads on editor<->raytracer transition
+
+    Cleanup call heirarchy. i.e. Each call to boundingBox currently requires us to call
+    transformation.regenAABB() in case the object was moved. Perhaps something akin to
+    IRasterizable.RasterizeTransformed()?
+
+    Move rendering settings to ImGui (samples per pixel, max depth)
+
+    Cache AABB instead of calculating it every iteration
+
     Configure clangd to format in a better way
     Clean up code and naming
 */
@@ -59,7 +75,7 @@ int main() {
   const int   imageWidth      = 1200;
   const float aspectRatio     = 16 / 9.0;
   const int   samplesPerPixel = 100;
-  const int   maxDepth        = 10;
+  const int   maxDepth        = 100;
   bool        fullscreen      = false;
   bool        showProg        = false;
   int         incRender       = 0;
@@ -74,10 +90,11 @@ int main() {
 
   // asyncRenderData.currScene = rt::Scene::Load("cornell.json");
   asyncRenderData.currScene =
-      rt::Scene::TransformationTest(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
+      rt::Scene::CornellBox(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel);
 
   rt::Camera &cam    = asyncRenderData.currScene.cam;
   rt::Editor *editor = new rt::Editor(sPtr<rt::Scene>(&asyncRenderData.currScene), &cam);
+  editor->screenRT = asyncRenderData.rasterRT;
 
   if (fullscreen)
     ToggleFullscreen();
@@ -90,6 +107,10 @@ int main() {
       obj->setTransformation(t, r);
     }
   };
+
+  ImGuiIO &io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  
 
   auto checkInput = [&] {
     int keyPressed = GetKeyPressed();

@@ -83,9 +83,7 @@ namespace rt {
       if (!this->BoundingBox(t0, t1, outputBox))
         return false;
 
-      outputBox = transformation.regenAABB(outputBox);
       return true;
-      ;
     }
 
     void setTransformation(vec3 translate = vec3::Zero(), vec3 rotate = vec3::Zero()) {

@@ -1,6 +1,8 @@
+#pragma once
+
 namespace rt {
   class IImguiDrawable {
   public:
-    virtual void OnImgui() {};
+    virtual void OnImgui() = 0;
   };
 } // namespace rt

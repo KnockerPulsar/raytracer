@@ -35,14 +35,14 @@ namespace rt {
       // Apply the transform to all 8
       // Get the bounding box of the rotated bounding box
       std::vector<vec3> vertices = {
-          vec3(aabb.min.x, aabb.min.y, aabb.min.z),
-          vec3(aabb.min.x, aabb.min.y, aabb.max.z),
-          vec3(aabb.min.x, aabb.max.y, aabb.min.z),
-          vec3(aabb.min.x, aabb.max.y, aabb.max.z),
-          vec3(aabb.max.x, aabb.min.y, aabb.min.z),
-          vec3(aabb.max.x, aabb.min.y, aabb.max.z),
-          vec3(aabb.max.x, aabb.max.y, aabb.min.z),
-          vec3(aabb.max.x, aabb.max.y, aabb.max.z),
+          aabb.min,                                   // 000
+          vec3(aabb.min.x, aabb.min.y, aabb.max.z),   // 001
+          vec3(aabb.min.x, aabb.max.y, aabb.min.z),   // 010
+          vec3(aabb.min.x, aabb.max.y, aabb.max.z),   // 011
+          vec3(aabb.max.x, aabb.min.y, aabb.min.z),   // 100
+          vec3(aabb.max.x, aabb.min.y, aabb.max.z),   // 101
+          vec3(aabb.max.x, aabb.max.y, aabb.min.z),   // 110
+          aabb.max,                                   // 111
       };
 
       glm::mat4 model = getModelMatrix();
@@ -50,19 +50,20 @@ namespace rt {
         vert = applyGlmMat(vert, model);
       }
 
-      AABB newAABB = {vec3(infinity), vec3(-infinity)};
+      vec3 newMin = vec3(infinity);
+      vec3 newMax = -newMin;
 
       for (auto &&vert : vertices) {
-        newAABB.min.x = fmin(newAABB.min.x, vert.x);
-        newAABB.min.y = fmin(newAABB.min.y, vert.y);
-        newAABB.min.z = fmin(newAABB.min.z, vert.z);
+        newMin.x = fmin(newMin.x, vert.x);
+        newMin.y = fmin(newMin.y, vert.y);
+        newMin.z = fmin(newMin.z, vert.z);
 
-        newAABB.max.x = fmax(newAABB.max.x, vert.x);
-        newAABB.max.y = fmax(newAABB.max.y, vert.y);
-        newAABB.max.z = fmax(newAABB.max.z, vert.z);
+        newMax.x = fmax(newMax.x, vert.x);
+        newMax.y = fmax(newMax.y, vert.y);
+        newMax.z = fmax(newMax.z, vert.z);
       }
 
-      return newAABB;
+      return AABB(newMin, newMax);
     }
 
     glm::mat4 getModelMatrix() const {

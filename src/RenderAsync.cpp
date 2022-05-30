@@ -55,8 +55,8 @@ namespace rt {
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
 
-    RenderTexture2D screenBuffer = LoadRenderTexture(imageWidth, imageHeight);
-    RenderTexture2D incBuffer    = LoadRenderTexture(imageWidth, imageHeight);
+    RenderTexture2D raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
+    RenderTexture2D rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
 
     vector<int>           threadProgress(NUM_THREADS, 0);
     vector<long>          threadTimes(NUM_THREADS, 0);
@@ -78,8 +78,8 @@ namespace rt {
                              threadProgress,
                              false,
                              finishedThreads,
-                             incBuffer,
-                             screenBuffer,
+                             rasterRT,
+                             raytraceRT,
                              (bool)incRender};
   }
 
@@ -114,17 +114,12 @@ namespace rt {
     bool allFinished = ard.pixelJobs->jobsDone();
 
     if (allFinished) {
-      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->getCurrentChunkStart(), ard.screenBuffer);
+      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->getCurrentChunkStart(), ard.raytraceRT);
     }
 
     ClearBackground(BLACK);
 
-    // If we're rendering incrementally
-    // Or we're not rendering incrementally but all threads finished
-    // Render to screen
-    Texture2D &currentTex = ard.screenBuffer.texture;
-
-    DrawTextureRec(currentTex,
+    DrawTextureRec(ard.raytraceRT.texture,
                    (Rectangle){0, 0, (float)ard.currScene.imageWidth, (float)ard.currScene.imageWidth},
                    (Vector2){0, 0},
                    WHITE);
@@ -146,7 +141,8 @@ namespace rt {
       t.join();
     }
 
-    UnloadRenderTexture(ard.incrementalBuffer);
+    UnloadRenderTexture(ard.rasterRT);
+    UnloadRenderTexture(ard.raytraceRT);
     rlImGuiShutdown();
     CloseWindow();
   }

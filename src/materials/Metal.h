@@ -20,8 +20,8 @@ namespace rt {
 
     bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
-      vec3 in_normalized = r_in.direction.Normalize();
-      vec3 reflected     = in_normalized.Reflect(rec.normal);
+      vec3 inNormlized = r_in.direction.Normalize();
+      vec3 reflected     = inNormlized.Reflect(rec.normal);
       scattered          = Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, r_in.time);
       attenuation        = albedo->Value(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
@@ -33,6 +33,11 @@ namespace rt {
           {"fuzz", fuzz},
           {"texture", albedo->GetJson()},
       };
+    }
+
+    virtual void OnImgui() override {
+      albedo->OnImgui();
+      ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
     }
   };
 

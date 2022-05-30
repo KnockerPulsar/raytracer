@@ -3,13 +3,17 @@
 
 namespace rt {
   AABB::AABB(const vec3 &a, const vec3 &b) {
+
     min = a;
     max = b;
+
+    Pad();
   }
 
   AABB::AABB(std::vector<vec3> points) {
-    vec3 _min = vec3(infinity, infinity, infinity);
-    vec3 _max = -min;
+    min = vec3(infinity, infinity, infinity);
+
+    max = -min;
     for (auto &&point : points) {
       min.x = fmin(point.x, min.x);
       min.y = fmin(point.y, min.y);
@@ -19,23 +23,8 @@ namespace rt {
       max.y = fmax(point.y, max.y);
       max.z = fmax(point.z, max.z);
     }
-    min = _min;
-    max = _max;
 
-    // In case the points are coplanar
-    float eps = 1e-6;
-    if (min.x == max.x) {
-      min.x -= eps;
-      max.x += eps;
-    }
-    if (min.y == max.y) {
-      min.y -= eps;
-      max.y += eps;
-    }
-    if (min.z == max.z) {
-      min.z -= eps;
-      max.z += eps;
-    }
+    Pad();
   }
 
   bool AABB::Hit(const Ray &r, float tMin, float tMax) const {
@@ -84,5 +73,22 @@ namespace rt {
     vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y), fmax(b0.max.z, b1.max.z));
 
     return AABB(smol, big);
+  }
+
+  void AABB::Pad() {
+    // In case the points are coplanar
+    float eps = 0.5;
+    if (abs(min.x - max.x) < eps) {
+      min.x -= eps;
+      max.x += eps;
+    }
+    if (abs(min.y - max.y) < eps) {
+      min.y -= eps;
+      max.y += eps;
+    }
+    if (abs(min.z - max.z) < eps) {
+      min.z -= eps;
+      max.z += eps;
+    }
   }
 } // namespace rt

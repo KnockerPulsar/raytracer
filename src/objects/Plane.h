@@ -1,12 +1,15 @@
 #pragma once
 #include "../Hittable.h"
 #include "Triangle.h"
+#include <raylib.h>
 
 namespace rt {
   // Base case is an XZ plane
   class Plane : public Hittable {
   public:
     Triangle t0, t1;
+    vec3     c;
+    float    w, h;
 
     //  _______
     // |      /|
@@ -15,7 +18,7 @@ namespace rt {
     // |  / t1 |
     // |/______|
 
-    Plane(vec3 c, float w, float h, sPtr<Material> mat) {
+    Plane(vec3 c, float w, float h, sPtr<Material> mat) : c(c), w(w), h(h) {
       vec3 width  = vec3(w, 0, 0);
       vec3 height = vec3(0, 0, h);
 
@@ -60,8 +63,22 @@ namespace rt {
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = transformation.regenAABB(
-          AABB({this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
+          AABB(std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
+    // Using shared pointers causes double free errors
       return true;
+    }
+
+    virtual void Rasterize() override {
+      static const Color colors[] = {GREEN, BLUE, RED, ORANGE, MAGENTA};
+      rlDisableBackfaceCulling();   
+      //                                 Get "unique" index based on address
+      //                                                vvvvvvvvvvvvvvvvvvvv
+      DrawPlane(c, {w, h}, colors[(long)this>>4 & 0b11]);
+      // All addresses seem to be aligned on 4's so need to shift down a few bits to get
+      // different numbers
+      // The & with 0b11 is to limit the range to 0->3 to not overflow
+
+      rlEnableBackfaceCulling();
     }
   };
 } // namespace rt

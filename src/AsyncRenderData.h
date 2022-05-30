@@ -20,8 +20,8 @@ namespace rt {
     vector<int>           threadProgress;
     bool                  exit;
     vector<bool>          finishedThreads;
-    RenderTexture2D       incrementalBuffer;
-    RenderTexture2D       screenBuffer;
+    RenderTexture2D       raytraceRT;
+    RenderTexture2D       rasterRT;
     bool                  incRender;
   };
 } // namespace rt
