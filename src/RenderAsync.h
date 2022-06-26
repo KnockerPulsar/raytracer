@@ -25,7 +25,7 @@ namespace rt {
 
     // Need to pass Workers by reference since we can't return a copy of
     // something that contains a future.
-    static AsyncRenderData Perpare(int imageWidth, float aspectRatio, int maxDepth, int samplesPerPixel);
+    static AsyncRenderData Perpare(int imageWidth, float aspectRatio);
 
     static void Start(AsyncRenderData &ard);
 

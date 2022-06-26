@@ -115,6 +115,8 @@ namespace rt {
     }
     ImGui::End();
 
+    RaytraceSettingsImgui();
+
     SelectedObjectGizmo();
   }
 
@@ -286,4 +288,6 @@ namespace rt {
     DrawTextureRec(
         screenRT.texture, {0, 0, float(screenRT.texture.width), -float(screenRT.texture.height)}, {0, 0}, WHITE);
   }
+
+  void Editor::RaytraceSettingsImgui() { currentScene->settings.OnImgui(); }
 } // namespace rt

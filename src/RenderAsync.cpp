@@ -40,7 +40,7 @@ namespace rt {
     return {jobsStart, jobsEnd};
   }
 
-  AsyncRenderData RenderAsync::Perpare(int imageWidth, float aspectRatio, int maxDepth, int samplesPerPixel) {
+  AsyncRenderData RenderAsync::Perpare(int imageWidth, float aspectRatio) {
     int imageHeight = imageWidth / aspectRatio;
 
     vector<int>           threadProgress(NUM_THREADS, 0);

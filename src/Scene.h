@@ -2,12 +2,28 @@
 #include "../vendor/nlohmann-json/json.hpp"
 #include "Camera.h"
 #include "Defs.h"
+#include "IImguiDrawable.h"
 #include "editor/Utils.h"
 #include "textures/ImageTexture.h"
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include <vector>
+
+struct RaytraceSettings : public rt::IImguiDrawable {
+  int samplesPerPixel = 10;
+  int maxDepth        = 10;
+
+  RaytraceSettings() = default;
+  RaytraceSettings(int spp, int md) : samplesPerPixel(spp), maxDepth(md) {}
+
+  void OnImgui() override {
+    ImGui::Begin("Raytrace settings");
+    ImGui::DragInt("Samples per pixel", &samplesPerPixel, 1, 1, 500);
+    ImGui::DragInt("Maximum depth", &maxDepth, 1, 1, 100);
+    ImGui::End();
+  }
+};
 
 namespace rt {
   class Hittable;
@@ -31,53 +47,47 @@ namespace rt {
     sPtr<Hittable> skysphere;
 
     std::string skysphereTexture;
-    ::Model skysphereModel;
+    ::Model     skysphereModel;
 
     Camera cam;
-    int    maxDepth, imageWidth, imageHeight, samplesPerPixel;
+    int    imageWidth, imageHeight;
     vec3   backgroundColor;
+
+    RaytraceSettings settings;
 
     Scene() = default;
     Scene(Hittable *wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
-        : worldRoot(wr), cam(c), maxDepth(md), imageWidth(iw), imageHeight(ih), samplesPerPixel(spp),
-          backgroundColor(bc) {}
+        : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), settings{spp, md}, backgroundColor(bc) {}
+
+    Scene(Hittable *wr, Camera c, int iw, int ih, vec3 bc)
+        : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), backgroundColor(bc) {}
 
     void addSkysphere(std::string ssTex);
 
     void drawSkysphere();
 
-    static Scene Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene Scene1(int imageWidth, int imageHeight);
 
-    static Scene Scene2(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene Scene2(int imageWidth, int imageHeight);
 
-    static Scene Random(int imageWidth,
-                        int imageHeight,
-                        int maxDepth,
-                        int samplesPerPixel,
-                        int ballGridWidth  = 11,
-                        int ballGridHeight = 11);
+    static Scene Random(int imageWidth, int imageHeight, int ballGridWidth = 11, int ballGridHeight = 11);
 
-    static Scene RandomMovingSpheres(int imageWidth,
-                                     int imageHeight,
-                                     int maxDepth,
-                                     int samplesPerPixel,
-                                     int ballGridWidth  = 11,
-                                     int ballGridHeight = 11);
+    static Scene RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth = 11, int ballGridHeight = 11);
 
-    static Scene TwoSpheres(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene TwoSpheres(int imageWidth, int imageHeight);
 
-    static Scene Earth(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene Earth(int imageWidth, int imageHeight);
 
-    static Scene Light(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene Light(int imageWidth, int imageHeight);
 
-    static Scene CornellBox(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene CornellBox(int imageWidth, int imageHeight);
 
     static Scene Load(std::string path);
 
-    static Scene TransformationTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene TransformationTest(int imageWidth, int imageHeight);
 
-    static Scene PlaneTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
-    static Scene RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel);
+    static Scene PlaneTest(int imageWidth, int imageHeight);
+    static Scene RasterTest(int imageWidth, int imageHeight);
 
     json GetObjArray() const {
       std::vector<json> objJsons;
@@ -97,8 +107,8 @@ namespace rt {
                         {
                             {"resolution", {{"x", s.imageWidth}, {"y", s.imageHeight}}},
                             {"background_color", s.backgroundColor},
-                            {"num_samples", s.samplesPerPixel},
-                            {"max_depth", s.maxDepth},
+                            {"num_samples", s.settings.samplesPerPixel},
+                            {"max_depth", s.settings.maxDepth},
               }},
              s.cam,
              {"objects", objArr}};

@@ -62,7 +62,7 @@ namespace rt {
     rlEnableBackfaceCulling();
   }
 
-  Scene Scene::Scene1(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::Scene1(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(-1, 1, 1);
@@ -92,12 +92,12 @@ namespace rt {
 
         .Add(make_shared<Sphere>(0.5, vec3(1., 0, -1), materialRight));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   } // namespace rt
 
-  Scene Scene::Scene2(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::Scene2(int imageWidth, int imageHeight) {
     Scene        s;
     float        r = cos(pi / 4);
     HittableList world;
@@ -120,13 +120,13 @@ namespace rt {
         .Add(make_shared<Sphere>(r, vec3(-r, 0, -1), materialLeft))
         .Add(make_shared<Sphere>(r, vec3(r, 0, -1), materialRight));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
   Scene Scene::Random(
-      int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel, int ballGridWidth, int ballGridHeight) {
+      int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -177,13 +177,13 @@ namespace rt {
     auto groundMaterial = make_shared<Lambertian>(vec3(0.5f));
     world.Add(make_shared<Sphere>(1000, vec3(0, -1000, 0), make_shared<Lambertian>(groundMaterial)));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
   Scene Scene::RandomMovingSpheres(
-      int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel, int ballGridWidth, int ballGridHeight) {
+      int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -240,12 +240,12 @@ namespace rt {
     auto mat3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
     world.Add(make_shared<Sphere>(1.0, vec3(4, 1, 0), mat3));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::TwoSpheres(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     Camera cam(vec3(13, 2, 3),
@@ -272,12 +272,12 @@ namespace rt {
     world.Add(make_shared<Sphere>(10, vec3(0, -10, 0), make_shared<Lambertian>(perText)));
     world.Add(make_shared<Sphere>(10, vec3(0, 10, 0), make_shared<Lambertian>(perText)));
 
-    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Earth(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::Earth(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
 
@@ -299,12 +299,12 @@ namespace rt {
     auto globe = make_shared<Sphere>(2, vec3(0, 0, 0), earthSurface);
     world.Add(globe);
 
-    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Light(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::Light(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
 
@@ -329,12 +329,12 @@ namespace rt {
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
-    s = Scene(new HittableList(world), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::CornellBox(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::CornellBox(int imageWidth, int imageHeight) {
 
     Scene        s;
     HittableList world;
@@ -406,7 +406,7 @@ namespace rt {
     auto box2 = make_shared<Box>(b2);
     world.Add(box2);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
@@ -455,7 +455,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TransformationTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::TransformationTest(int imageWidth, int imageHeight) {
 
     Scene s;
     vec3  lookFrom        = vec3(0, 0, 0);
@@ -488,13 +488,13 @@ namespace rt {
 
     std::vector<sPtr<Hittable>> world = {box, sphere};
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
     s.addSkysphere(skyspherePath);
 
     return s;
   }
 
-  Scene Scene::PlaneTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::PlaneTest(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(0, 3, 0);
@@ -529,13 +529,13 @@ namespace rt {
         .Add(plane)
         .Add(xzplane);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
     // s.objects.objects = obj;
 
     return s;
   } // namespace rt
 
-  Scene Scene::RasterTest(int imageWidth, int imageHeight, int maxDepth, int samplesPerPixel) {
+  Scene Scene::RasterTest(int imageWidth, int imageHeight) {
     Scene s;
     vec3  lookFrom = vec3(4, 4, 4);
     vec3  lookAt   = vec3(0, 0, 0);
@@ -554,7 +554,7 @@ namespace rt {
 
     auto box = ms<Box>(Box(vec3(1, 1, 1), vec3(2, 2, 2), red));
 
-    s = Scene(new HittableList(box), cam, maxDepth, imageWidth, imageHeight, samplesPerPixel, backgroundColor);
+    s = Scene(new HittableList(box), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }

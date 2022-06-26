@@ -65,6 +65,9 @@ namespace rt {
     void UpdateViewportRect(float imguiWidth, float height);
 
     void RenderViewport();
-
+  
+  
+    void RaytraceSettingsImgui();
+  
   }; // namespace Editor
 } // namespace rt

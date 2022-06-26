@@ -25,8 +25,6 @@ namespace rt {
     // Only used when creating hardcoded scenes
     const int   imageWidth      = 1200;
     const float aspectRatio     = 16 / 9.0;
-    const int   samplesPerPixel = 1;
-    const int   maxDepth        = 10;
     bool        fullscreen      = false;
     bool        showProg        = false;
     int         incRender       = 0;
@@ -36,9 +34,9 @@ namespace rt {
 
     InitWindow(imageWidth, imageWidth / aspectRatio, title.c_str());
 
-    ard = RenderAsync::Perpare(imageWidth, aspectRatio, maxDepth, samplesPerPixel)
+    ard = RenderAsync::Perpare(imageWidth, aspectRatio)
               .setScene(std::make_shared<Scene>(
-                  Scene::CornellBox(imageWidth, imageWidth / aspectRatio, maxDepth, samplesPerPixel)));
+                  Scene::CornellBox(imageWidth, imageWidth / aspectRatio)));
 
     ard.rasterRT   = LoadRenderTexture(imageWidth, imageWidth / aspectRatio);
     ard.raytraceRT = LoadRenderTexture(imageWidth, imageWidth / aspectRatio);

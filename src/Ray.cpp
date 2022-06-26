@@ -66,25 +66,25 @@ namespace rt {
         int x = job.x;
         int y = job.y;
 
-        for (int s = 0; s < currScene->samplesPerPixel; s++) {
+        for (int s = 0; s < currScene->settings.samplesPerPixel; s++) {
           float   u   = (x + RandomFloat()) / (currScene->imageWidth - 1);
           float   v   = (y + RandomFloat()) / (currScene->imageHeight - 1);
           rt::Ray ray = currScene->cam.GetRay(u, v);
-          job.color += rt::Ray::RayColor(ray, *currScene, currScene->maxDepth);
+          job.color += rt::Ray::RayColor(ray, *currScene, currScene->settings.maxDepth);
         }
 
 #ifdef GAMMA_CORRECTION
         // Gamma correction
         float r = job.color.x, g = job.color.y, b = job.color.z;
 
-        float scale = 1.0 / currScene->samplesPerPixel;
+        float scale = 1.0 / currScene->settings.samplesPerPixel;
         r           = sqrt(scale * r);
         g           = sqrt(scale * g);
         b           = sqrt(scale * b);
 
         job.color = vec3(r, g, b);
 #else
-        job.color /= currScene->samplesPerPixel;
+        job.color /= currScene->settings.samplesPerPixel;
 #endif
         ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
       }

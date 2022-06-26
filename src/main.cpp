@@ -10,8 +10,6 @@
 
     Modify all hittables so that they're centered at the world origin to use scaling matrices.
 
-    Use a condition variable start stop threads on editor<->raytracer transition
-
     Cleanup call heirarchy. i.e. Each call to boundingBox currently requires us to call
     transformation.regenAABB() in case the object was moved. Perhaps something akin to
     IRasterizable.RasterizeTransformed()?
@@ -21,10 +19,6 @@
     Cache AABB instead of calculating it every iteration
 
     Re-implement incremental rendering with job queue chunks
-
-    Create an application class for application-wide / things not specific to states.
-
-    Add camera movement speed multiplier (on shift) to camera settings
 
     Configure clangd to format in a better way
     Clean up code and naming
