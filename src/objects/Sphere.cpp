@@ -8,7 +8,7 @@
 #include <raymath.h>
 
 namespace rt {
-  Sphere::Sphere(float r, vec3 pos, shared_ptr<Material> m) : radius(r), center(pos), mat_ptr(m) {}
+  Sphere::Sphere(float r, vec3 pos, shared_ptr<Material> m) : radius(r), center(pos) { material = m; }
 
   bool Sphere::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
     // Vector between ray origin and sphere center
@@ -35,7 +35,7 @@ namespace rt {
     const vec3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(r, outward_normal);
     GetSphereUV(outward_normal, rec.u, rec.v);
-    rec.mat_ptr    = mat_ptr;
+    rec.mat_ptr    = material;
     rec.closestHit = (Hittable *)this;
 
     return true;
@@ -48,7 +48,7 @@ namespace rt {
   }
 
   json Sphere::GetJsonDerived() const {
-    return json{{"type", "sphere"}, {"pos", center}, {"radius", radius}, {"material", mat_ptr->GetJson()}};
+    return json{{"type", "sphere"}, {"pos", center}, {"radius", radius}, {"material", material->GetJson()}};
   }
 
   void Sphere::Rasterize() {
@@ -62,10 +62,5 @@ namespace rt {
 
     v = theta / PI;
     u = phi / (2 * PI);
-  }
-
-  void Sphere::OnImgui() {
-    Hittable::OnImgui();
-    mat_ptr->OnImgui();
   }
 } // namespace rt

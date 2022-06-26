@@ -1,5 +1,4 @@
 #pragma once
-#include "AsyncRenderData.h"
 #include "raylib.h"
 #include <future>
 #include <utility>
@@ -13,19 +12,12 @@ using RunningJob = std::pair<bool, future<void>>;
 using Workers    = vector<RunningJob>;
 
 namespace rt {
+
+  class AsyncRenderData;
   class Pixel;
   class Scene;
 
-  enum SceneID {
-    scene1,
-    scene2,
-    random,
-    random_moving,
-    two_spheres,
-    earth,
-    light,
-    cornell
-  };
+  enum SceneID { scene1, scene2, random, random_moving, two_spheres, earth, light, cornell };
 
   class RenderAsync {
   public:
@@ -33,19 +25,16 @@ namespace rt {
 
     // Need to pass Workers by reference since we can't return a copy of
     // something that contains a future.
-    static AsyncRenderData Perpare(int imageWidth, float aspectRatio,
-                                   int maxDepth, int samplesPerPixel,
-                                   SceneID sceneID, int incRender,
-                                   int gridWidth = 11, int gridHeight = 11);
+    static AsyncRenderData Perpare(int imageWidth, float aspectRatio, int maxDepth, int samplesPerPixel);
 
     static void Start(AsyncRenderData &ard);
 
-    static void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart,
-                             int drawEnd, RenderTexture2D &screenBuffer);
+    static void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd, RenderTexture2D &screenBuffer);
 
-    static bool RenderFinished(AsyncRenderData &ard);
+    static bool RenderFinished(AsyncRenderData &ard, bool& allFinished);
 
-    static void Shutdown(bool fullscreen, AsyncRenderData &ard);
+    // Causes all threads to exit and join. Clears `ard.threads`
+    static void Shutdown(AsyncRenderData &ard);
 
     static void RenderImGui(bool showProg, AsyncRenderData &ard);
 

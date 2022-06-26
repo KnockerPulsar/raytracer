@@ -51,9 +51,4 @@ namespace rt {
 
     DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, boxColor);
   }
-
-  void Box::OnImgui() {
-    Hittable::OnImgui();
-    material->OnImgui();
-  }
 } // namespace rt

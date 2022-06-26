@@ -11,23 +11,22 @@ namespace rt {
     vert(vec3 vec, vec3 _uvw) : p(vec), uvw(_uvw) {}
   };
 
+  // Don't really need to rasterize a triangle by iteself YET
   class Triangle : public Hittable {
   public:
     vert v0, v1, v2;
     vec3 normal;
 
-    sPtr<Material> mp;
-
     Triangle() = default;
-    Triangle(vert _v0, vert _v1, vert _v2, sPtr<Material> mat)
-        : v0(_v0), v1(_v1), v2(_v2), mp(mat) {
+    Triangle(vert _v0, vert _v1, vert _v2, sPtr<Material> mat) : v0(_v0), v1(_v1), v2(_v2) {
+      material = mat;
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
       normal = vec3::DotProd(v01, v02);
     }
-    Triangle(vec3 p0, vec3 p1, vec3 p2, sPtr<Material> mat)
-        : v0(p0), v1(p1), v2(p2), mp(mat) {
+    Triangle(vec3 p0, vec3 p1, vec3 p2, sPtr<Material> mat) : v0(p0), v1(p1), v2(p2) {
+      material = mat;
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
@@ -41,8 +40,7 @@ namespace rt {
     }
 
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
-    virtual bool
-    Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
+    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
 
       vec3  v0v1 = v1.p - v0.p;
       vec3  v0v2 = v2.p - v0.p;
@@ -78,16 +76,15 @@ namespace rt {
 
       rec.u       = properUVs.x;
       rec.v       = properUVs.y;
-      rec.mat_ptr = mp;
+      rec.mat_ptr = material;
       rec.t       = t;
       rec.set_face_normal(r, normal);
-      rec.closestHit = (Hittable*)this;
-      
+      rec.closestHit = (Hittable *)this;
+
       return true;
     }
 
-    virtual bool
-    BoundingBox(float t0, float t1, AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = transformation.regenAABB(AABB({v0.p, v1.p, v2.p}));
       return true;
     }

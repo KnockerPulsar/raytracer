@@ -17,6 +17,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "../vendor/glm/glm/gtx/string_cast.hpp"
 #include "../vendor/rlImGui/imgui/imgui.h"
+#include "materials/Material.h"
 #include <vector>
 
 using std::shared_ptr;
@@ -42,6 +43,7 @@ namespace rt {
   public:
     std::string    name;
     Transformation transformation;
+    sPtr<Material> material = nullptr; // Should only exist for raytracable objects
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
 
@@ -94,9 +96,33 @@ namespace rt {
 
     virtual void OnImgui() override {
       transformation.OnImgui();
+      ImGui::Spacing();
+      if (material) {
+        MaterialChanger();
+        ImGui::Spacing();
+
+        material->OnImgui();
+      }
     }
 
-    virtual std::vector<sPtr<Hittable>> getChildrenAsList() { return std::vector<sPtr<Hittable>>{shared_ptr<Hittable>(nullptr)}; }
+    void MaterialChanger() {
+
+      static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
+      static MaterialTypes selectedMaterialType = Emissive;
+
+      ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(), (int *)&selectedMaterialType, materialTypes, MaterialTypes::MaterialTypesCount);
+      ImGui::SameLine();
+      if (ImGui::Button("Change")) {
+        switch (selectedMaterialType) {
+        default: {
+        }
+        }
+      }
+    }
+
+    virtual std::vector<sPtr<Hittable>> getChildrenAsList() {
+      return std::vector<sPtr<Hittable>>{shared_ptr<Hittable>(nullptr)};
+    }
 
     virtual std::vector<AABB> getChildrenAABBs() {
       AABB outputBox;
@@ -107,7 +133,7 @@ namespace rt {
     }
 
     // Only HittableLists and BVHNodes should override this.
-    virtual Hittable* addChild(sPtr<Hittable> newChild) { return nullptr; }
-
+    virtual Hittable *addChild(sPtr<Hittable> newChild) { return nullptr; }
+    virtual Hittable *removeChild(sPtr<Hittable> childToRemove) { return nullptr; }
   };
 } // namespace rt

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../Hittable.h"
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
 #include <memory>
 
 namespace rt {
+
+  enum MaterialTypes { Diffuse, Dielectrical , Metallic, Emissive, MaterialTypesCount };
 
   struct HitRecord;
 

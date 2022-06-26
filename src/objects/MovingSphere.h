@@ -1,27 +1,25 @@
 #pragma once
 #include "../AABB.h"
 #include "../Hittable.h"
-#include "../materials/Material.h"
 #include "../data_structures/vec3.h"
+#include "../materials/Material.h"
 #include <memory>
 
 namespace rt {
   class MovingSphere : public rt::Hittable {
 
   public:
-    vec3                 center0, center1;
-    float                time0, time1;
-    float                radius;
-    shared_ptr<Material> mat_ptr;
+    vec3  center0, center1;
+    float time0, time1;
+    float radius;
 
     MovingSphere() = default;
-    MovingSphere(vec3 c0, vec3 c1, float t0, float t1, float r,
-                 shared_ptr<Material> m)
-        : center0(c0), center1(c1), time0(t0), time1(t1), radius(r),
-          mat_ptr(m) {}
+    MovingSphere(vec3 c0, vec3 c1, float t0, float t1, float r, shared_ptr<Material> m)
+        : center0(c0), center1(c1), time0(t0), time1(t1), radius(r) {
+      this->material = m;
+    }
 
-    virtual bool Hit(const Ray &r, float tMin, float tMax,
-                     HitRecord &rec) const override {
+    virtual bool Hit(const Ray &r, float tMin, float tMax, HitRecord &rec) const override {
       // Vector between ray origin and sphere center
       vec3  oc     = r.origin - this->CurrCenter(r.time);
       float a      = r.direction.SqrLen();
@@ -45,8 +43,8 @@ namespace rt {
       rec.p                     = r.At(rec.t);
       const vec3 outward_normal = (rec.p - CurrCenter(r.time)) / radius;
       rec.set_face_normal(r, outward_normal);
-      rec.mat_ptr = mat_ptr;
-      rec.closestHit = (Hittable*)this;
+      rec.mat_ptr    = material;
+      rec.closestHit = (Hittable *)this;
       return true;
     }
 
@@ -59,11 +57,9 @@ namespace rt {
   }
 
   bool MovingSphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    AABB box0 =
-        AABB(CurrCenter(t0) - vec3(radius), CurrCenter(t0) + vec3(radius));
+    AABB box0 = AABB(CurrCenter(t0) - vec3(radius), CurrCenter(t0) + vec3(radius));
 
-    AABB box1 =
-        AABB(CurrCenter(t1) - vec3(radius), CurrCenter(t1) + vec3(radius));
+    AABB box1 = AABB(CurrCenter(t1) - vec3(radius), CurrCenter(t1) + vec3(radius));
 
     outputBox = AABB::SurroundingBox(box0, box1);
     return true;

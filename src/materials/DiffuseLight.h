@@ -13,7 +13,7 @@ namespace rt {
    */
   class DiffuseLight : public Material {
   private:
-    float emissiveIntensity;
+    float emissiveIntensity = 1.0;
 
   public:
     sPtr<Texture> emssiveTex; // Texture that emission follows (can be used as an emissive mask)

@@ -40,23 +40,8 @@ namespace rt {
     return {jobsStart, jobsEnd};
   }
 
-  AsyncRenderData RenderAsync::Perpare(int     imageWidth,
-                                       float   aspectRatio,
-                                       int     maxDepth,
-                                       int     samplesPerPixel,
-                                       SceneID sceneID,
-                                       int     incRender,
-                                       int     gridWidth,
-                                       int     gridHeight) {
-
+  AsyncRenderData RenderAsync::Perpare(int imageWidth, float aspectRatio, int maxDepth, int samplesPerPixel) {
     int imageHeight = imageWidth / aspectRatio;
-
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    rlImGuiSetup(true);
-    SetTargetFPS(60); // Not like we're gonna hit it...
-
-    RenderTexture2D raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
-    RenderTexture2D rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
 
     vector<int>           threadProgress(NUM_THREADS, 0);
     vector<long>          threadTimes(NUM_THREADS, 0);
@@ -71,24 +56,16 @@ namespace rt {
       }
     }
 
-    return (AsyncRenderData){pixelJobs,
-                             std::vector<std::thread>(),
-                             Scene(),
-                             threadTimes,
-                             threadProgress,
-                             false,
-                             finishedThreads,
-                             rasterRT,
-                             raytraceRT,
-                             (bool)incRender};
+    return AsyncRenderData(pixelJobs, threadTimes, threadProgress, finishedThreads);
   }
 
   void RenderAsync::Start(AsyncRenderData &ard) {
 
+    ard.exit = false;
     // For some reason, incRender gets set to 129 here
     // Need to set it back to it's original value
     for (int t = 0; t < NUM_THREADS; t++) {
-      ard.threads.push_back(std::thread(rt::Ray::Trace, ref(ard), t));
+      ard.threads.push_back(std::make_shared<std::thread>(rt::Ray::Trace, ref(ard), t));
     }
   }
 
@@ -110,41 +87,50 @@ namespace rt {
     EndTextureMode();
   }
 
-  bool RenderAsync::RenderFinished(AsyncRenderData &ard) {
-    bool allFinished = ard.pixelJobs->jobsDone();
-
-    if (allFinished) {
-      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->getCurrentChunkStart(), ard.raytraceRT);
+  bool RenderAsync::RenderFinished(AsyncRenderData &ard, bool &allFinished) {
+    if (ard.pixelJobs->jobsDone() && !allFinished) {
+      allFinished = true;
+      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->numberOfJobs, ard.raytraceRT);
     }
 
-    ClearBackground(BLACK);
-
-    DrawTextureRec(ard.raytraceRT.texture,
-                   (Rectangle){0, 0, (float)ard.currScene.imageWidth, (float)ard.currScene.imageWidth},
-                   (Vector2){0, 0},
-                   WHITE);
+    if (allFinished) {
+      ClearBackground(BLACK);
+      DrawTextureRec(ard.raytraceRT.texture,
+                     (Rectangle){0, 0, (float)ard.currScene->imageWidth, (float)ard.currScene->imageWidth},
+                     (Vector2){0, 0},
+                     WHITE);
+    }
 
     return allFinished;
   }
 
-  void RenderAsync::Shutdown(bool fullscreen, AsyncRenderData &ard) {
+  void RenderAsync::Shutdown(AsyncRenderData &ard) {
+    ard.pixelJobs->awakeAllWorkers();
 
-    // Note that if you kill the ap@plication in fullscreen, the resolution won't
-    // reset to native.
-    if (fullscreen)
-      ToggleFullscreen();
-
-    // Clean up.
+    // Tell threads to exit
     ard.exit = true;
 
+    // Join threads
     for (auto &&t : ard.threads) {
-      t.join();
+      t->join();
     }
 
-    UnloadRenderTexture(ard.rasterRT);
-    UnloadRenderTexture(ard.raytraceRT);
-    rlImGuiShutdown();
-    CloseWindow();
+    // Clear thread vector
+    ard.threads.clear();
+
+    // Reset job queue chunks
+    ard.pixelJobs->setCurrentChunkStart(0);
+
+    // Reset thread times and progress
+    for (int i = 0; i < NUM_THREADS; i++) {
+      ard.threadTimes[i]    = 0;
+      ard.threadProgress[i] = 0;
+    }
+
+    // Clear results from previous job.
+    for (auto it = ard.pixelJobs->getJobsVector().begin(); it != ard.pixelJobs->getJobsVector().end(); ++it) {
+      it->color = vec3(0);
+    }
   }
 
   void RenderAsync::RenderImGui(bool showProg, AsyncRenderData &ard) {
@@ -182,15 +168,5 @@ namespace rt {
     rlImGuiEnd();
   }
 
-  void RenderAsync::ResetThreads(AsyncRenderData &ard) {
-
-    // if (ard.currScene.cam.lookFrom.x < -20 || ard.currScene.cam.lookFrom.x > 20)
-    //   ard.currScene.cam.moveDir *= -1;
-
-    // ard.currScene.cam.Fwd(GetFrameTime());
-
-    // RenderAsync::Start(ard);
-
-    ard.pixelJobs->awakeAllWorkers();
-  }
+  void RenderAsync::ResetThreads(AsyncRenderData &ard) { ard.pixelJobs->awakeAllWorkers(); }
 } // namespace rt

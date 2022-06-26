@@ -8,9 +8,12 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <optional>
+#include <unordered_set>
 #include <vector>
 
 namespace rt {
@@ -121,27 +124,36 @@ namespace rt {
     // To use a shared pointer, you must have some reference to the shared pointer object itself
     // and not the pointer it's wrapping.
     std::vector<sPtr<Hittable>> getChildrenAsList() override {
-      std::vector<sPtr<Hittable>> leftChildren;
-      std::vector<sPtr<Hittable>> rightChildren;
+      std::unordered_set<sPtr<Hittable>> children;
 
-      if (auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left); leftBVH == nullptr && left != nullptr)
-        leftChildren.push_back(left);
-      else {
-        leftChildren = left->getChildrenAsList();
-        // leftChildren.push_back(left);
+      // May god forgive me for I'm about to sin
+      auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
+
+      // If the cast failed and the the left child is not null
+      // Then the child is not an intermediate BVHNode, but a leaf Hittable.
+      // Add it to the list.
+
+      // Otherwise, its an itermediate BVH node, get its left and right children
+      if (leftBVH == nullptr && left != nullptr) {
+        children.insert(left);
+      } else {
+        auto leftChildren = left->getChildrenAsList();
+        children.insert(leftChildren.begin(), leftChildren.end());
+        // children.insert(left);  // Add the intermediate node itself
       }
 
-      if (auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right); rightBVH == nullptr && right != nullptr)
-        rightChildren.push_back(right);
+      auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
+
+      // Same but for the right branch
+      if (rightBVH == nullptr && right != nullptr)
+        children.insert(right);
       else {
-        rightChildren = right->getChildrenAsList();
-        // rightChildren.push_back(right);
+        auto rightChildren = right->getChildrenAsList();
+        children.insert(rightChildren.begin(), rightChildren.end());
+        // children.insert(right);  // Add the intermediate node itself
       }
 
-      if (!(leftChildren.size() == 1 && rightChildren.size() == 1 && leftChildren[0] == rightChildren[0]))
-        leftChildren.insert(leftChildren.end(), rightChildren.begin(), rightChildren.end());
-
-      return leftChildren;
+      return std::vector<sPtr<Hittable>>(children.begin(), children.end());
     }
 
     std::vector<AABB> getChildrenAABBs() override {
@@ -171,6 +183,22 @@ namespace rt {
         sPtrs.push_back(sPtr<Hittable>(newChild));
 
       return new BVHNode(sPtrs, 0, sPtrs.size(), 0.0f, 1.0f);
+    }
+
+    Hittable *removeChild(sPtr<Hittable> childToRemove) override {
+      auto children = getChildrenAsList();
+
+      // TODO: figure out a cleaner way
+      std::vector<sPtr<Hittable>>::iterator toRemove = children.end();
+      for(auto it = children.begin(); it != children.end(); it++){
+        if(*it == childToRemove)
+          toRemove = it;
+      }
+
+      if(toRemove != children.end())
+        children.erase(toRemove);
+
+      return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
     }
 
     bool isLeaf() const { return left == nullptr && right == nullptr; }

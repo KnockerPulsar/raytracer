@@ -19,6 +19,7 @@ namespace rt {
     // |/______|
 
     Plane(vec3 c, float w, float h, sPtr<Material> mat) : c(c), w(w), h(h) {
+      material = mat;
       vec3 width  = vec3(w, 0, 0);
       vec3 height = vec3(0, 0, h);
 

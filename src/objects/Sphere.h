@@ -11,7 +11,6 @@ namespace rt {
   public:
     float          radius;
     vec3           center;
-    sPtr<Material> mat_ptr;
 
     Sphere() = default;
     Sphere(float r, vec3 pos, sPtr<Material> m);
@@ -24,8 +23,6 @@ namespace rt {
 
     void Rasterize() override;
 
-    void OnImgui() override;
-
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v);
   };
@@ -33,7 +30,7 @@ namespace rt {
   inline void from_json(const json &j, Sphere &s) {
     s.center         = j["pos"].get<vec3>();
     s.radius         = j["radius"].get<float>();
-    s.mat_ptr        = MaterialFactory::FromJson(j["material"]);
+    s.material        = MaterialFactory::FromJson(j["material"]);
     s.transformation = j["transform"].get<Transformation>();
   }
 

@@ -18,7 +18,7 @@ namespace rt {
     int                  currentChunkStart;
     std::mutex           queueMutex;
 
-    std::condition_variable jobsRefreshed;
+    std::condition_variable threadBarrier;
 
     const int chunkSize;
 
@@ -38,13 +38,13 @@ namespace rt {
       std::unique_lock<std::mutex> lk{queueMutex};
 
       // All jobs consumed, wait untill the main thread refreshes jobs and notifies threads.
+      // Or main thread wants to stop threads
       if (currentChunkStart > jobs.size() - 1)
-        jobsRefreshed.wait(lk);
+        threadBarrier.wait(lk);
 
       auto start  = jobs.begin() + currentChunkStart;
       auto offset = std::min((currentChunkStart + chunkSize), (int)jobs.size() - 1);
       auto end    = jobs.begin() + offset;
-
 
       // TODO: Updates to currentChunkStart don't seem to be sensed in other threads at the start
       currentChunkStart = getCurrentChunkStart() + chunkSize;
@@ -60,7 +60,9 @@ namespace rt {
 
     void awakeAllWorkers() {
       currentChunkStart = 0;
-      jobsRefreshed.notify_all();
+      threadBarrier.notify_all();
     }
+
+    void setCurrentChunkStart(int ccs) { currentChunkStart = ccs; }
   };
 } // namespace rt
