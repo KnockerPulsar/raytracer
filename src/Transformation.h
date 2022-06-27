@@ -91,8 +91,8 @@ namespace rt {
 
   // This is how you use `json.get<Box>()`
   inline void from_json(const json &objectJson, Transformation &transformation) {
-    auto t = objectJson["translation"].get<vec3>();
-    auto r = objectJson["rotation"].get<vec3>();
+    transformation.translate = objectJson["translation"].get<vec3>();
+    transformation.rotate = objectJson["rotation"].get<vec3>();
   }
 
   inline void to_json(json &j, const Transformation &t) {

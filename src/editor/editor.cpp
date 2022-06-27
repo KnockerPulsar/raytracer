@@ -241,7 +241,7 @@ namespace rt {
     }
 
     case Plane: {
-      added       = new rt::Plane(vec3(0), 1, 1, mat);
+      added       = new rt::Plane(1, 1, mat);
       added->name = "Added Plane @ " + hittableAddress;
       break;
     }
@@ -259,6 +259,9 @@ namespace rt {
       currentScene->worldRoot = newRoot;
     }
   }
+
+  // Regenerate BVH on exit / before entering the raytracer
+  void Editor::onExit() { currentScene->worldRoot = currentScene->worldRoot->addChild(nullptr); }
 
   void Editor::UpdateViewportRect(float imguiWidth, float height) {
 

@@ -1,5 +1,6 @@
 #include "app.h"
 #include "../vendor/rlImGui/rlImGui.h"
+#include "AsyncRenderData.h"
 #include "Camera.h"
 #include "Defs.h"
 #include "Hittable.h"
@@ -15,31 +16,15 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <raylib.h>
 #include <vector>
 
 namespace rt {
-  App::App() {
-    // Rendering constants for easy modifications.
-    // Only used when creating hardcoded scenes
-    const int   imageWidth      = 1200;
-    const float aspectRatio     = 16 / 9.0;
-    bool        fullscreen      = false;
-    bool        showProg        = false;
-    int         incRender       = 0;
-    bool        raster          = true;
-    bool        allFinished     = true;
-    bool        rtInit          = false;
-
-    InitWindow(imageWidth, imageWidth / aspectRatio, title.c_str());
-
-    ard = RenderAsync::Perpare(imageWidth, aspectRatio)
-              .setScene(std::make_shared<Scene>(
-                  Scene::CornellBox(imageWidth, imageWidth / aspectRatio)));
-
-    ard.rasterRT   = LoadRenderTexture(imageWidth, imageWidth / aspectRatio);
-    ard.raytraceRT = LoadRenderTexture(imageWidth, imageWidth / aspectRatio);
+  void App::setup(AsyncRenderData &ard, int imageWidth, int imageHeight) {
+    ard.rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
+    ard.raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
 
     editor           = std::make_shared<Editor>(ard.currScene);
     editor->screenRT = ard.rasterRT;
@@ -62,6 +47,32 @@ namespace rt {
 
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  }
+
+  App::App(int imageWidth, int imageHeight) {
+    InitWindow(imageWidth, imageHeight, title.c_str());
+
+    ard = RenderAsync::Perpare(imageWidth, imageHeight)
+              .setScene(std::make_shared<Scene>(Scene::CornellBox(imageWidth, imageHeight)));
+
+    setup(ard, imageWidth, imageHeight);
+  }
+
+  App::App(int imageWidth, int imageHeight, std::string pathToScene) {
+    InitWindow(imageWidth, imageHeight, title.c_str());
+
+    ard = RenderAsync::Perpare(imageWidth, imageHeight)
+              .setScene(std::make_shared<Scene>(Scene::Load(imageWidth, imageHeight, pathToScene)));
+
+    setup(ard, imageWidth, imageHeight);
+  }
+
+  App::App(int imageWidth, int imageHeight, Scene scene) {
+
+    InitWindow(imageWidth, imageHeight, title.c_str());
+
+    ard = RenderAsync::Perpare(imageWidth, imageHeight).setScene(std::make_shared<Scene>(scene));
+    setup(ard, imageWidth, imageHeight);
   }
 
   void App::run() {
@@ -105,7 +116,7 @@ namespace rt {
   App::~App() {
     // Note that if you kill the application in fullscreen, the resolution won't
     // reset to native.
-    
+
     if (fullscreen)
       ToggleFullscreen();
 
@@ -119,14 +130,13 @@ namespace rt {
   }
 
   // Quick way of exporting hardcoded scenes into JSON
-  int App::jsonExportTest() {
-    rt::Scene scene = rt::Scene::Load("cornell.json");
-    // rt::Scene     scene = rt::Scene::CornellBox(600, 600, 50, 100);
-    json          json = scene;
-    std::ofstream output("cornell.json");
+  void App::jsonExportTest() {
+
+    rt::Scene     scene = rt::Scene::CornellBox(600, 600);
+    json          json  = scene.toJson();
+    std::ofstream output("scenes/cornell.json");
     output << std::setw(4) << json << std::endl;
     output.close();
-
-    return 0;
   }
+
 } // namespace rt

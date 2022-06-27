@@ -60,7 +60,7 @@ namespace rt {
 
     virtual void onEnter() override {}
 
-    virtual void onExit() override {}
+    virtual void onExit() override;
 
     void UpdateViewportRect(float imguiWidth, float height);
 

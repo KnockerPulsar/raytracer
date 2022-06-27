@@ -52,11 +52,13 @@ namespace rt {
     virtual json GetJson() const {
       json derived = this->GetJsonDerived();
       json tJson   = transformation;
+      derived.update({{"name", name}});
       derived.update(tJson);
+      derived.update({{"material", material->GetJson()}});
       return derived;
     }
 
-    virtual json GetJsonDerived() const { return {"type", "unimplemented"}; }
+    virtual json GetJsonDerived() const { return {{"type", "unimplemented"}}; }
 
     virtual bool HitTransformed(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
 
@@ -110,7 +112,10 @@ namespace rt {
       static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
       static MaterialTypes selectedMaterialType = Emissive;
 
-      ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(), (int *)&selectedMaterialType, materialTypes, MaterialTypes::MaterialTypesCount);
+      ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(),
+                   (int *)&selectedMaterialType,
+                   materialTypes,
+                   MaterialTypes::MaterialTypesCount);
       ImGui::SameLine();
       if (ImGui::Button("Change")) {
         switch (selectedMaterialType) {

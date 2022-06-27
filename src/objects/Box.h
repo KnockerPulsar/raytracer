@@ -21,9 +21,11 @@ namespace rt {
 
     Box() = default;
     Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat);
+    Box(const vec3& center, std::shared_ptr<Material> mat);
 
     // To work around not being able to use constructors with references
     void Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat);
+
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
@@ -35,16 +37,20 @@ namespace rt {
   };
 
   // This is how you use `json.get<Box>()`
+  // Box must be default constructable too
   inline void from_json(const json &objectJson, Box &b) {
-    auto center  = objectJson["pos"].get<vec3>();
+    b.transformation = objectJson["transform"].get<Transformation>();
+
+    auto center  = b.transformation.translate;
     auto extents = objectJson["extents"].get<vec3>();
 
     auto min = center - extents / 2;
     auto max = center + extents / 2;
     auto mat = MaterialFactory::FromJson(objectJson["material"]);
 
+    b.name = objectJson["name"].get<std::string>();
+
     b.Create(min, max, mat);
-    b.transformation = objectJson["transform"].get<Transformation>();
   }
 
   inline void to_json(json &j, const Box &b) { j = b.GetJson(); }

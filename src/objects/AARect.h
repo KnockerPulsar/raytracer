@@ -55,4 +55,55 @@ namespace rt {
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
   };
+
+  inline void to_json(json &j, const XYRect &xy) { j = xy.GetJson(); }
+  inline void from_json(const json &j, XYRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x0             = min.x;
+    plane.x1             = max.x;
+    plane.y0             = min.y;
+    plane.y1             = max.y;
+    plane.z              = center.z;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
+
+  inline void to_json(json &j, const XZRect &xz) { j = xz.GetJson(); }
+  inline void from_json(const json &j, XZRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x0             = min.x;
+    plane.x1             = max.x;
+    plane.z0             = min.z;
+    plane.z1             = max.z;
+    plane.y              = center.y;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
+
+  inline void to_json(json &j, const YZRect &yz) { j = yz.GetJson(); }
+  inline void from_json(const json &j, YZRect &plane) {
+    vec3 center  = j["pos"].get<vec3>();
+    vec3 extents = j["extents"].get<vec3>();
+    plane.mp     = MaterialFactory::FromJson(j["material"]);
+
+    vec3 min = center - extents / 2;
+    vec3 max = center + extents / 2;
+
+    plane.x              = center.x;
+    plane.z0             = min.z;
+    plane.z1             = max.z;
+    plane.y0             = min.y;
+    plane.y1             = max.y;
+    plane.transformation = j["transform"].get<Transformation>();
+  }
 } // namespace rt

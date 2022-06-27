@@ -62,6 +62,31 @@ namespace rt {
     rlEnableBackfaceCulling();
   }
 
+  Scene Scene::Default(int imageWidth, int imageHeight) {
+    Scene        s;
+    HittableList world;
+    vec3         lookFrom        = vec3(-1, 1, 1);
+    vec3         lookAt          = vec3(0, 0, 0);
+    vec3         vUp             = vec3(0, 1, 0);
+    vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
+
+    float distToFocus = 10.0f;
+    float aperature   = 0.001F;
+    vec3  moveDir     = vec3(10.0f, 0, 0);
+    int   fov         = 60.0;
+
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+
+    auto mat = make_shared<DiffuseLight>(vec3(2.0f, 2.0f, 2.0f));
+
+    world //
+        .Add(make_shared<Box>(vec3::Zero(), mat));
+
+    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+
+    return s;
+  }
+
   Scene Scene::Scene1(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
@@ -125,8 +150,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::Random(
-      int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
+  Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -182,8 +206,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(
-      int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -349,7 +372,8 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(
+        lookFrom, lookAt, vUp, moveDir, fov, float(imageWidth) / float(imageHeight), aperature, distToFocus, 0.0, 1.0);
     cam.angle.y = 3.14; // Rotate towards the scene
 
     auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
@@ -363,8 +387,8 @@ namespace rt {
     auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     // Left wall
-    auto leftWall = make_shared<Plane>(vec3(0), 55.5, 55.5, light);
-    leftWall->setTransformation(vec3(55.5, leftWall->w / 2, leftWall->h / 2), vec3(0,0,90));
+    auto leftWall = make_shared<Plane>(55.5, 55.5, light);
+    leftWall->setTransformation(vec3(55.5, leftWall->w / 2, leftWall->h / 2), vec3(0, 0, 90));
     leftWall->name = "leftWall";
     world.Add(leftWall);
 
@@ -395,23 +419,23 @@ namespace rt {
     // backWall->name = "backWall";
     // world.Add(backWall);
 
-    auto b1 = Box(-vec3(16.5, 33, 16.5) / 2, vec3(16.5, 33, 16.5) / 2, white);
-    b1.setTransformation(vec3(40, 16.5, 40), vec3(0, 15, 0));
-    b1.name = "Box1";
-    world.Add(make_shared<Box>(b1));
+    // auto b1 = Box(-vec3(16.5, 33, 16.5) / 2, vec3(16.5, 33, 16.5) / 2, white);
+    // b1.setTransformation(vec3(40, 16.5, 40), vec3(0, 15, 0));
+    // b1.name = "Box1";
+    // world.Add(make_shared<Box>(b1));
 
-    auto b2 = Box(vec3(-5), vec3(5), purplishMetal);
-    b2.setTransformation(vec3(10, 5, 10), vec3(0, 12, 0));
-    b2.name   = "Box2";
-    auto box2 = make_shared<Box>(b2);
-    world.Add(box2);
+    // auto b2 = Box(vec3(-5), vec3(5), purplishMetal);
+    // b2.setTransformation(vec3(10, 5, 10), vec3(0, 12, 0));
+    // b2.name   = "Box2";
+    // auto box2 = make_shared<Box>(b2);
+    // world.Add(box2);
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Load(std::string path) {
+  Scene Scene::Load(int imageWidth, int imageHeight, std::string path) {
     std::ifstream jsonFile(path);
     std::cout << "Loading scene from file " << path << std::endl;
 
@@ -419,10 +443,8 @@ namespace rt {
     jsonFile >> readScene;
 
     json  settings    = readScene["settings"];
-    int   imageWidth  = settings["resolution"]["x"].get<int>();
-    int   imageHeight = settings["resolution"]["y"].get<int>();
     float aspectRatio = (float)imageWidth / imageHeight;
-    Scene s           = Scene(new HittableList(),
+    Scene s           = Scene(nullptr,
                     Camera(readScene["camera"], aspectRatio),
                     settings["max_depth"].get<int>(),
                     imageWidth,
@@ -431,7 +453,10 @@ namespace rt {
                     settings["background_color"].get<vec3>());
 
     auto world = HittableList();
+
+    std::cout << std::setw(4) << readScene["objects"] << std::endl;
     for (const auto &obj : readScene["objects"]) {
+
       auto objPtr = ObjectFactory::FromJson(obj);
       if (objPtr)
         world.Add(objPtr);
@@ -441,16 +466,7 @@ namespace rt {
               << "\tsettings " << settings << std::endl
               << "\t#objects " << world.objects.size() << std::endl;
 
-    // s.objects = world;
-
-    auto bvh    = HittableList();
     s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
-
-    for (HittableList o : bvh.objects) {
-      for (auto oo : o.objects) {
-        std::cout << "AA";
-      }
-    }
 
     return s;
   }
@@ -516,7 +532,7 @@ namespace rt {
 
     auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("assets/textures/earthmap.png"));
 
-    auto plane = make_shared<Plane>(vec3(0, 0, 0), 3, 3, magenta);
+    auto plane = make_shared<Plane>(3, 3, magenta);
     plane->setTransformation(vec3(-3, 10, 0), vec3(0, 0, 0));
 
     auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
@@ -557,5 +573,25 @@ namespace rt {
     s = Scene(new HittableList(box), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
+  }
+
+  json Scene::GetObjArray() const {
+
+    auto              objectList = worldRoot->getChildrenAsList();
+    std::vector<json> objJsons;
+
+    for (const auto &obj : objectList) {
+      json temp = obj->GetJson();
+      std::cout << temp << std::endl;
+      objJsons.push_back(temp);
+    }
+
+    return objJsons;
+  }
+
+  json Scene::toJson() const {
+    json sceneJson;
+    to_json(sceneJson, *this);
+    return sceneJson;
   }
 } // namespace rt

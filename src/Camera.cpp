@@ -34,13 +34,6 @@ namespace rt {
       : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
         aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
 
-    float theta = DegressToRadians(vFov);
-
-    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-    float h        = tan(theta / 2);
-    viewportHeight = 2.0 * h;
-    viewportWidth  = aspectRatio * viewportHeight;
-
     // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
     GenerateData();
 
@@ -60,17 +53,24 @@ namespace rt {
                cameraJson["aperature"].get<float>(),
                cameraJson["focus_dist"].get<float>(),
                cameraJson["time0"].get<float>(),
-               cameraJson["time1"].get<float>()) {}
+               cameraJson["time1"].get<float>()) {
+    controlType = cameraJson["type"] == "flycam" ? ControlType::flyCam : ControlType::lookAtPoint;
+  }
 
   void Camera::GenerateData() {
     float theta = DegressToRadians(vFov);
 
     // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-    float h              = tan(theta / 2);
-    float viewportHeight = 2.0 * h;
-    float viewportWidth  = aspectRatio * viewportHeight;
+    float h        = tan(theta / 2);
+    viewportHeight = 2.0 * h;
+    viewportWidth  = aspectRatio * viewportHeight;
 
     UpdateDirectionVectors();
+  }
+
+  Camera3D Camera::toRaylibCamera3D() const {
+    return Camera3D{
+        .position = lookFrom, .target = lookAt, .up = worldUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
   }
 
   void Camera::UpdateDirectionVectors() {
@@ -140,7 +140,7 @@ namespace rt {
 
     if (IsKeyDown(KEY_LEFT_SHIFT))
       speedMultiplier *= movMultiplier;
-      
+
     auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt * speedMultiplier);
 
     if (IsMouseButtonDown(1)) {

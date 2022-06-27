@@ -1,27 +1,27 @@
 #pragma once
 
+#include "../../vendor/glm/glm/glm.hpp"
 #include "../../vendor/nlohmann-json/json.hpp"
 #include "../Defs.h"
 #include "../Util.h"
 #include <raylib.h>
 #include <raymath.h>
 #include <sys/types.h>
-#include "../../vendor/glm/glm/glm.hpp" 
 
 /**
  * @brief Represents any 3 component object (X,Y,Z) or (R,G,B)
  */
 class vec3 : public Vector3 {
 public:
-  vec3();                                      // Creates a 3 component vector with all elements zeroed
-  vec3(float);                                 // Creates a 3 componenet vector with all elements set to the given float
-  vec3(float, float, float);                   // Sets the each component to the corresponding parameter
-  vec3(const Vector3 &);                       // Copy constructor for raylib's Vector3
-  vec3(const glm::vec3&);
+  vec3();                    // Creates a 3 component vector with all elements zeroed
+  vec3(float);               // Creates a 3 componenet vector with all elements set to the given float
+  vec3(float, float, float); // Sets the each component to the corresponding parameter
+  vec3(const Vector3 &);     // Copy constructor for raylib's Vector3
+  vec3(const glm::vec3 &);
 
   static vec3 Zero() { return Vector3Zero(); } // Returns a vector with all components set to zero
-  glm::vec3 toGlm() const ;
-  Color toRaylibColor(u_char alpha ) const;
+  glm::vec3   toGlm() const;
+  Color       toRaylibColor(u_char alpha) const;
 
   bool NearZero() const;                // Checks if all components of the vector are less than epsilon (Constants.h)
   vec3 Reflect(const vec3 &norm) const; // Reflects the vector about a given axisI
@@ -124,3 +124,14 @@ inline void from_json(const json &jsonVec, vec3 &v) {
 }
 
 inline void to_json(json &j, const vec3 &v) { j = json{{"x", v.x}, {"y", v.y}, {"z", v.z}}; }
+
+// https://stackoverflow.com/a/31540219
+inline std::ostream &operator<<(std::ostream &os, const Vector3 &v) {
+  os << "{" << v.x << ", " << v.y << ", " << v.z << "}";
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const vec3 &v) {
+  os << "{" << v.x << ", " << v.y << ", " << v.z << "}";
+  return os;
+}

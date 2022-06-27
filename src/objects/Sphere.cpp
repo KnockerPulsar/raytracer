@@ -47,9 +47,7 @@ namespace rt {
     return true;
   }
 
-  json Sphere::GetJsonDerived() const {
-    return json{{"type", "sphere"}, {"pos", center}, {"radius", radius}, {"material", material->GetJson()}};
-  }
+  json Sphere::GetJsonDerived() const { return json{{"type", "sphere"}, {"radius", radius}}; }
 
   void Sphere::Rasterize() {
     // RasterizeTransformed takes care of the transformation and rotation

@@ -40,14 +40,16 @@ namespace rt {
     return {jobsStart, jobsEnd};
   }
 
-  AsyncRenderData RenderAsync::Perpare(int imageWidth, float aspectRatio) {
-    int imageHeight = imageWidth / aspectRatio;
+  AsyncRenderData RenderAsync::Perpare(int imageWidth, int imageHeight) {
 
     vector<int>           threadProgress(NUM_THREADS, 0);
     vector<long>          threadTimes(NUM_THREADS, 0);
     vector<int>           threadShouldRun(NUM_THREADS, 1); // Used to exit early
     vector<bool>          finishedThreads(NUM_THREADS, false);
-    sPtr<JobQueue<Pixel>> pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, 1024);
+
+
+    int queueChunkSize = 1024;
+    sPtr<JobQueue<Pixel>> pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {
@@ -57,16 +59,6 @@ namespace rt {
     }
 
     return AsyncRenderData(pixelJobs, threadTimes, threadProgress, finishedThreads);
-  }
-
-  void RenderAsync::Start(AsyncRenderData &ard) {
-
-    ard.exit = false;
-    // For some reason, incRender gets set to 129 here
-    // Need to set it back to it's original value
-    for (int t = 0; t < NUM_THREADS; t++) {
-      ard.threads.push_back(std::make_shared<std::thread>(rt::Ray::Trace, ref(ard), t));
-    }
   }
 
   void RenderAsync::BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd, RenderTexture2D &screenBuffer) {

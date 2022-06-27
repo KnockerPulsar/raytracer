@@ -25,9 +25,7 @@ namespace rt {
 
     // Need to pass Workers by reference since we can't return a copy of
     // something that contains a future.
-    static AsyncRenderData Perpare(int imageWidth, float aspectRatio);
-
-    static void Start(AsyncRenderData &ard);
+    static AsyncRenderData Perpare(int imageWidth, int imageHeight);
 
     static void BlitToBuffer(vector<Pixel> &pixelJobs, int drawStart, int drawEnd, RenderTexture2D &screenBuffer);
 

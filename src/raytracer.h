@@ -3,24 +3,28 @@
 #include "IState.h"
 #include "RenderAsync.h"
 #include <algorithm>
+#include <functional>
 #include <raylib.h>
+#include "Ray.h"
+
+
+using std::ref;
 
 namespace rt {
   class Raytracer : public IState {
     AsyncRenderData &ard;
-    bool allFinished;
+    bool             allFinished;
 
   public:
     bool showProg = true;
 
     Raytracer(AsyncRenderData &ard) : ard(ard) {}
 
-    virtual void onEnter() { RenderAsync::Start(ard); }
+    virtual void onEnter() { startRaytracing(); }
 
     virtual void onExit() {
-      RenderAsync::Shutdown(ard) ;
+      RenderAsync::Shutdown(ard);
       allFinished = false;
-      // Clear raytracing render texture.
     }
 
     virtual void onUpdate() {
@@ -30,6 +34,14 @@ namespace rt {
       RenderAsync::RenderImGui(showProg, ard);
 
       EndDrawing();
+    }
+
+    void startRaytracing() {
+      ard.exit = false;
+
+      for (int t = 0; t < NUM_THREADS; t++) {
+        ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), t));
+      }
     }
   };
 } // namespace rt

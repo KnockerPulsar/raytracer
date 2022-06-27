@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Defs.h"
 #include "IImguiDrawable.h"
+#include "Transformation.h"
 #include "editor/Utils.h"
 #include "textures/ImageTexture.h"
 #include <memory>
@@ -11,7 +12,7 @@
 #include <vector>
 
 struct RaytraceSettings : public rt::IImguiDrawable {
-  int samplesPerPixel = 10;
+  int samplesPerPixel = 1;
   int maxDepth        = 10;
 
   RaytraceSettings() = default;
@@ -66,6 +67,8 @@ namespace rt {
 
     void drawSkysphere();
 
+    static Scene Default(int imageWidth, int imageHeight);
+
     static Scene Scene1(int imageWidth, int imageHeight);
 
     static Scene Scene2(int imageWidth, int imageHeight);
@@ -82,30 +85,22 @@ namespace rt {
 
     static Scene CornellBox(int imageWidth, int imageHeight);
 
-    static Scene Load(std::string path);
+    static Scene Load(int imageWidth, int imageHeight, std::string path);
 
     static Scene TransformationTest(int imageWidth, int imageHeight);
 
     static Scene PlaneTest(int imageWidth, int imageHeight);
     static Scene RasterTest(int imageWidth, int imageHeight);
 
-    json GetObjArray() const {
-      std::vector<json> objJsons;
+    json GetObjArray() const;
 
-      // for (auto obj : objects.objects) {
-      //   json temp = obj->GetJson();
-      //   std::cout << temp << std::endl;
-      //   objJsons.push_back(temp);
-      // }
-      return objJsons;
-    }
+    json toJson() const;
   };
 
   inline void to_json(json &j, const Scene &s) {
     json objArr = s.GetObjArray();
     j           = json{{"settings",
                         {
-                            {"resolution", {{"x", s.imageWidth}, {"y", s.imageHeight}}},
                             {"background_color", s.backgroundColor},
                             {"num_samples", s.settings.samplesPerPixel},
                             {"max_depth", s.settings.maxDepth},

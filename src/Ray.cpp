@@ -48,8 +48,6 @@ namespace rt {
     while (true) {
       auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk();
 
-      
-
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
 
 

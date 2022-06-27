@@ -5,13 +5,10 @@ namespace rt {
       : x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
 
   json XYRect::GetJsonDerived() const {
-    vec3 center  = vec3((x0 + x1) / 2, (y0 + y1) / 2, z);
     vec3 extents = vec3((x1 - x0), (y1 - y0), 0);
     return json{
         {"type", "xy_rect"},
-        {"pos", center},
         {"extents", extents},
-        {"material", mp->GetJson()},
     };
   }
 
@@ -50,13 +47,10 @@ namespace rt {
       : x0(_x0), x1(_x1), z0(_z0), z1(_z1), y(_y), mp(mat) {}
 
   json XZRect::GetJsonDerived() const {
-    vec3 center  = vec3((x0 + x1) / 2, y, (z0 + z1) / 2);
     vec3 extents = vec3((x1 - x0), 0, (z1 - z0));
     return json{
         {"type", "xz_rect"},
-        {"pos", center},
         {"extents", extents},
-        {"material", mp->GetJson()},
     };
   }
 
@@ -96,13 +90,10 @@ namespace rt {
       : y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
 
   json YZRect::GetJsonDerived() const {
-    vec3 center  = vec3(x, (y0 + y1) / 2, (z0 + z1) / 2);
     vec3 extents = vec3(0, (y1 - y0), (z1 - z0));
     return json{
         {"type", "yz_rect"},
-        {"pos", center},
         {"extents", extents},
-        {"material", mp->GetJson()},
     };
   }
 

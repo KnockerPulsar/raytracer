@@ -19,15 +19,15 @@ namespace rt {
     float viewportWidth, viewportHeight;
 
     float time0, time1;
-    float vFov, // vertical field-of-view in degrees
-        aspectRatio, aperature, focusDist, lensRadius;
+    float vFov; // vertical field-of-view in degrees
+    float aspectRatio, aperature, focusDist, lensRadius;
 
     constexpr static const float xAngleClampMin = -89.0f;
     constexpr static const float xAngleClampMax = 89.0f;
     float                        panningDivider = 51.0f;
     float                        movScale       = 10.0f;
     float                        movMultiplier  = 5.0f;
-    vec3                         angle          = {0, 0, 0}; // Used to rotate the camera using the mouse
+    vec3                         angle          = {0, -3.14, 0}; // Used to rotate the camera using the mouse
     Vector2                      rotSensitity   = {0.003f, 0.003f};
 
     enum ControlType { flyCam, lookAtPoint, controlTypesCount };
@@ -64,10 +64,7 @@ namespace rt {
       GenerateData();
     }
 
-    Camera3D toRaylibCamera3D() const {
-      return Camera3D{
-          .position = lookFrom, .target = lookAt, .up = worldUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
-    }
+    Camera3D toRaylibCamera3D() const;
 
     Ray GetRay(float s, float t) const;
 
@@ -85,17 +82,16 @@ namespace rt {
   inline void to_json(json &j, const Camera &c) {
     j = json{
         "camera",
-        {
-            {"look_from", c.lookFrom},
-            {"look_at", c.lookAt},
-            {"v_up", c.worldUp},
-            {"focus_dist", c.focusDist},
-            {"aperature", c.aperature},
-            {"move_dir", c.moveDir},
-            {"fov", c.vFov},
-            {"time0", c.time0},
-            {"time1", c.time1},
-        },
+        {{"look_from", c.lookFrom},
+         {"look_at", c.lookAt},
+         {"v_up", c.worldUp},
+         {"focus_dist", c.focusDist},
+         {"aperature", c.aperature},
+         {"move_dir", c.moveDir},
+         {"fov", c.vFov},
+         {"time0", c.time0},
+         {"time1", c.time1},
+         {"type", c.controlType == rt::Camera::ControlType::flyCam ? "flycam" : "look_at"}},
     };
   }
 } // namespace rt

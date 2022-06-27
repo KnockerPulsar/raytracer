@@ -16,7 +16,12 @@ namespace rt {
     sPtr<IState> currentState;
 
   public:
-    App();
+    void setup(AsyncRenderData &ard, int imageWidth, int imageHeight);
+
+    App(int imageWidth, int imageHeight);
+    App(int imageWidth, int imageHeight, std::string pathToScene);
+    App(int imageWidth, int imageHeight, Scene scene);
+
     void run();
     void onFrameRender();
     void checkInput();
@@ -24,6 +29,8 @@ namespace rt {
     ~App();
 
     // Quick way of exporting hardcoded scenes into JSON
-    static int jsonExportTest();
+    static void jsonExportTest();
+
+    static void jsonImportTest();
   };
 } // namespace rt

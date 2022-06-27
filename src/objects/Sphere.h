@@ -9,8 +9,8 @@ namespace rt {
 
   class Sphere : public Hittable {
   public:
-    float          radius;
-    vec3           center;
+    float radius;
+    vec3  center;
 
     Sphere() = default;
     Sphere(float r, vec3 pos, sPtr<Material> m);
@@ -28,10 +28,10 @@ namespace rt {
   };
 
   inline void from_json(const json &j, Sphere &s) {
-    s.center         = j["pos"].get<vec3>();
-    s.radius         = j["radius"].get<float>();
-    s.material        = MaterialFactory::FromJson(j["material"]);
     s.transformation = j["transform"].get<Transformation>();
+    s.center         = s.transformation.translate;
+    s.radius         = j["radius"].get<float>();
+    s.material       = MaterialFactory::FromJson(j["material"]);
   }
 
   inline void to_json(json &j, const Sphere &s) { j = s.GetJson(); }

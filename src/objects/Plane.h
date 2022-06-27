@@ -1,5 +1,6 @@
 #pragma once
 #include "../Hittable.h"
+#include "Sphere.h"
 #include "Triangle.h"
 #include <raylib.h>
 
@@ -8,8 +9,9 @@ namespace rt {
   class Plane : public Hittable {
   public:
     Triangle t0, t1;
-    vec3     c;
     float    w, h;
+
+    Plane() = default;
 
     //  _______
     // |      /|
@@ -18,15 +20,20 @@ namespace rt {
     // |  / t1 |
     // |/______|
 
-    Plane(vec3 c, float w, float h, sPtr<Material> mat) : c(c), w(w), h(h) {
-      material = mat;
-      vec3 width  = vec3(w, 0, 0);
-      vec3 height = vec3(0, 0, h);
+    Plane(float w, float h, sPtr<Material> mat) { Create(w, h, mat); }
 
-      vec3 botLPoint = c - width / 2 - height / 2;
-      vec3 topRPoint = c + width / 2 + height / 2;
-      vec3 topLPoint = c - width / 2 + height / 2;
-      vec3 botRPoint = c + width / 2 - height / 2;
+    void Create(float w, float h, sPtr<Material> mat) {
+      this->w = w;
+      this->h = h;
+
+      this->material = mat;
+      vec3 width     = vec3(w, 0, 0);
+      vec3 height    = vec3(0, 0, h);
+
+      vec3 botLPoint = -width / 2 - height / 2;
+      vec3 topRPoint = width / 2 + height / 2;
+      vec3 topLPoint = -width / 2 + height / 2;
+      vec3 botRPoint = width / 2 - height / 2;
 
       /*
        The x axis is flipped in the triangle test scene
@@ -54,6 +61,13 @@ namespace rt {
       t1 = Triangle(botL, topL, topR, mat);
     }
 
+    static Plane YZPlane(float w, float h, sPtr<Material> mat) {
+      Plane plane                 = Plane(w, h, mat);
+      plane.transformation.rotate = vec3(90.0f, 0.0f, 0.0f);
+
+      return plane;
+    }
+
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
       if (t0.Hit(r, t_min, t_max, rec) || t1.Hit(r, t_min, t_max, rec)) {
         rec.closestHit = (Hittable *)this;
@@ -63,23 +77,46 @@ namespace rt {
     }
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
-      outputBox = transformation.regenAABB(
-          AABB(std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
-    // Using shared pointers causes double free errors
+      outputBox = transformation.regenAABB(AABB(
+          std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
+      // Using shared pointers causes double free errors
       return true;
     }
 
     virtual void Rasterize() override {
       static const Color colors[] = {GREEN, BLUE, RED, ORANGE, MAGENTA};
-      rlDisableBackfaceCulling();   
+      rlDisableBackfaceCulling();
       //                                 Get "unique" index based on address
       //                                                vvvvvvvvvvvvvvvvvvvv
-      DrawPlane(c, {w, h}, colors[(long)this>>4 & 0b11]);
+      DrawPlane({0, 0, 0}, {w, h}, colors[(long)this >> 4 & 0b11]);
       // All addresses seem to be aligned on 4's so need to shift down a few bits to get
       // different numbers
       // The & with 0b11 is to limit the range to 0->3 to not overflow
 
       rlEnableBackfaceCulling();
     }
+
+    json GetJsonDerived() const override {
+      return {
+          {"type", "plane"},
+          {"width", w},
+          {"height", h},
+      };
+    }
   };
+
+  inline void from_json(const json &j, Plane &p) {
+    p.transformation = j["transform"].get<Transformation>();
+
+    auto w   = j["width"].get<float>();
+    auto h   = j["height"].get<float>();
+    auto mat = MaterialFactory::FromJson(j["material"]);
+
+    p.Create(w, h, mat);
+
+    p.name = j["name"].get<std::string>();
+  }
+
+  inline void to_json(json &j, const Plane &p) { j = p.GetJson(); }
+
 } // namespace rt
