@@ -29,6 +29,71 @@
     },
     "objects": [
         {
+            "extents": {
+                "x": 10.0,
+                "y": 10.0,
+                "z": 10.0
+            },
+            "material": {
+                "fuzz": 0.699999988079071,
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.10000000149011612,
+                        "z": 0.800000011920929
+                    },
+                    "type": "solid_color"
+                },
+                "type": "metal"
+            },
+            "name": "Box2",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 12.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 10.0,
+                    "y": 5.0,
+                    "z": 10.0
+                }
+            },
+            "type": "box"
+        },
+        {
+            "extents": {
+                "x": 16.5,
+                "y": 33.0,
+                "z": 16.5
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "name": "Box1",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 15.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 40.0,
+                    "y": 16.5,
+                    "z": 40.0
+                }
+            },
+            "type": "box"
+        },
+        {
             "height": 55.5,
             "material": {
                 "texture": {

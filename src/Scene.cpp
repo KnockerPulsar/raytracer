@@ -65,7 +65,7 @@ namespace rt {
   Scene Scene::Default(int imageWidth, int imageHeight) {
     Scene        s;
     HittableList world;
-    vec3         lookFrom        = vec3(-1, 1, 1);
+    vec3         lookFrom        = vec3(3, 4, -5);
     vec3         lookAt          = vec3(0, 0, 0);
     vec3         vUp             = vec3(0, 1, 0);
     vec3         backgroundColor = vec3(0.70, 0.80, 1.00);
@@ -419,16 +419,16 @@ namespace rt {
     // backWall->name = "backWall";
     // world.Add(backWall);
 
-    // auto b1 = Box(-vec3(16.5, 33, 16.5) / 2, vec3(16.5, 33, 16.5) / 2, white);
-    // b1.setTransformation(vec3(40, 16.5, 40), vec3(0, 15, 0));
-    // b1.name = "Box1";
-    // world.Add(make_shared<Box>(b1));
+    auto b1 = Box(-vec3(16.5, 33, 16.5) / 2, vec3(16.5, 33, 16.5) / 2, white);
+    b1.setTransformation(vec3(40, 16.5, 40), vec3(0, 15, 0));
+    b1.name = "Box1";
+    world.Add(make_shared<Box>(b1));
 
-    // auto b2 = Box(vec3(-5), vec3(5), purplishMetal);
-    // b2.setTransformation(vec3(10, 5, 10), vec3(0, 12, 0));
-    // b2.name   = "Box2";
-    // auto box2 = make_shared<Box>(b2);
-    // world.Add(box2);
+    auto b2 = Box(vec3(-5), vec3(5), purplishMetal);
+    b2.setTransformation(vec3(10, 5, 10), vec3(0, 12, 0));
+    b2.name   = "Box2";
+    auto box2 = make_shared<Box>(b2);
+    world.Add(box2);
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 

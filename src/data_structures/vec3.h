@@ -47,6 +47,9 @@ public:
   static float DotProd(const vec3 &, const vec3 &); // Dot product on the two given vectors
   static vec3  CrsProd(const vec3 &, const vec3 &); // Cross product on the two given vectors
 
+  // https://math.stackexchange.com/a/633243
+  vec3 projectOntoPlane(const vec3 &planeNormal) const;
+
   static vec3 Random();                               // Random vector
   static vec3 Random(float min, float max);           // Random vector where each component is in the given range
   static vec3 RandomInUnitSphere();                   // Random vector with length <= 1

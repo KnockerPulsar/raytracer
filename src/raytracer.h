@@ -29,7 +29,7 @@ namespace rt {
 
     virtual void onUpdate() {
       BeginDrawing();
-      // Check on thread progress.
+      
       RenderAsync::RenderFinished(ard, allFinished);
       RenderAsync::RenderImGui(showProg, ard);
 

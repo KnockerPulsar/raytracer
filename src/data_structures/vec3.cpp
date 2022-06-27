@@ -20,7 +20,7 @@ glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 
 Color vec3::toRaylibColor(u_char alpha) const {
   vec3 temp = *this * 255;
-  return Color{(u_char)temp.x, (u_char)temp.y, (u_char)temp.z, alpha };
+  return Color{(u_char)temp.x, (u_char)temp.y, (u_char)temp.z, alpha};
 }
 
 vec3 vec3::Reflect(const vec3 &norm) const {
@@ -39,6 +39,10 @@ vec3 vec3::Refract(const vec3 &n, float etaIOverEtaT) const {
 float vec3::DotProd(const vec3 &left, const vec3 &right) { return Vector3DotProduct(left, right); }
 
 vec3 vec3::CrsProd(const vec3 &left, const vec3 &right) { return Vector3CrossProduct(left, right); }
+
+vec3 vec3::projectOntoPlane(const vec3 &planeNormal) const {
+  return *this - vec3::DotProd(*this, planeNormal) * planeNormal;
+}
 
 vec3 vec3::Random() { return vec3(RandomFloat(), RandomFloat(), RandomFloat()); }
 

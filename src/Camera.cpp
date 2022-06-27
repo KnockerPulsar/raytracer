@@ -6,6 +6,7 @@
 #include "HittableList.h"
 #include "Ray.h"
 #include "Util.h"
+#include <cmath>
 #include <iostream>
 #include <raylib.h>
 #include <raymath.h>
@@ -36,6 +37,18 @@ namespace rt {
 
     // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
     GenerateData();
+
+    auto yzFwdProj = localForward.projectOntoPlane(vec3(1, 0, 0)).Normalize();
+    auto xzFwdProj = localForward.projectOntoPlane(vec3(0, 1, 0)).Normalize();
+
+    auto cosAnglex = vec3::DotProd(yzFwdProj, {0, 0, -1});
+    auto cosAngley = vec3::DotProd(xzFwdProj, {0, 0, -1});
+    auto signX     = localForward.y >= 0? 1 : -1;
+
+    angle.x = acos(cosAnglex);
+
+    angle.x = angle.x > pi / 2 ? signX * (pi - angle.x) : angle.x;
+    angle.y = acos(cosAngley);
 
     lensRadius    = aperature / 2;
     this->lookAt  = lookAt;

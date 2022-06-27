@@ -42,14 +42,13 @@ namespace rt {
 
   AsyncRenderData RenderAsync::Perpare(int imageWidth, int imageHeight) {
 
-    vector<int>           threadProgress(NUM_THREADS, 0);
-    vector<long>          threadTimes(NUM_THREADS, 0);
-    vector<int>           threadShouldRun(NUM_THREADS, 1); // Used to exit early
-    vector<bool>          finishedThreads(NUM_THREADS, false);
+    vector<int>  threadProgress(NUM_THREADS, 0);
+    vector<long> threadTimes(NUM_THREADS, 0);
+    vector<int>  threadShouldRun(NUM_THREADS, 1); // Used to exit early
+    vector<bool> finishedThreads(NUM_THREADS, false);
 
-
-    int queueChunkSize = 1024;
-    sPtr<JobQueue<Pixel>> pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
+    int                   queueChunkSize = 1024;
+    sPtr<JobQueue<Pixel>> pixelJobs      = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {
@@ -85,8 +84,9 @@ namespace rt {
       BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->numberOfJobs, ard.raytraceRT);
     }
 
+    ClearBackground(BLACK);
+
     if (allFinished) {
-      ClearBackground(BLACK);
       DrawTextureRec(ard.raytraceRT.texture,
                      (Rectangle){0, 0, (float)ard.currScene->imageWidth, (float)ard.currScene->imageWidth},
                      (Vector2){0, 0},

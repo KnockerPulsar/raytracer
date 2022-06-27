@@ -9,7 +9,10 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/Debug/Raytracer",
-      "args": [],
+      "args": [
+        "--image_width", "600",
+        "--scene", "scenes/cornell.json"
+      ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "premake+build debug",
       "setupCommands": [
