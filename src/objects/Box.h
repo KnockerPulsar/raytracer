@@ -41,7 +41,7 @@ namespace rt {
   inline void from_json(const json &objectJson, Box &b) {
     b.transformation = objectJson["transform"].get<Transformation>();
 
-    auto center  = b.transformation.translate;
+    auto center  = vec3::Zero();
     auto extents = objectJson["extents"].get<vec3>();
 
     auto min = center - extents / 2;

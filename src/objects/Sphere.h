@@ -29,7 +29,7 @@ namespace rt {
 
   inline void from_json(const json &j, Sphere &s) {
     s.transformation = j["transform"].get<Transformation>();
-    s.center         = s.transformation.translate;
+    s.center         = vec3::Zero();
     s.radius         = j["radius"].get<float>();
     s.material       = MaterialFactory::FromJson(j["material"]);
   }
