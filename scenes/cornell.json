@@ -1,6 +1,6 @@
 {
     "camera": {
-        "aperature": 0.10000000149011612,
+        "aperature": 0.001,
         "focus_dist": 80.0,
         "fov": 40.0,
         "look_at": {
@@ -29,37 +29,34 @@
     },
     "objects": [
         {
-            "extents": {
-                "x": 10.0,
-                "y": 10.0,
-                "z": 10.0
-            },
+            "height": 55.5,
             "material": {
-                "fuzz": 0.699999988079071,
+                "fuzz": 0.05000000074505806,
                 "texture": {
                     "color": {
                         "x": 0.800000011920929,
-                        "y": 0.10000000149011612,
+                        "y": 0.800000011920929,
                         "z": 0.800000011920929
                     },
                     "type": "solid_color"
                 },
                 "type": "metal"
             },
-            "name": "Box2",
+            "name": "floor",
             "transform": {
                 "rotation": {
                     "x": 0.0,
-                    "y": 12.0,
+                    "y": 0.0,
                     "z": 0.0
                 },
                 "translation": {
-                    "x": 10.0,
-                    "y": 5.0,
-                    "z": 10.0
+                    "x": 27.75,
+                    "y": 0.0,
+                    "z": 27.75
                 }
             },
-            "type": "box"
+            "type": "plane",
+            "width": 55.5
         },
         {
             "extents": {
@@ -98,6 +95,68 @@
             "material": {
                 "texture": {
                     "color": {
+                        "x": 0.6499999761581421,
+                        "y": 0.05000000074505806,
+                        "z": 0.05000000074505806
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "name": "rightWall",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -90.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 27.75,
+                    "z": 27.75
+                }
+            },
+            "type": "plane",
+            "width": 55.5
+        },
+        {
+            "extents": {
+                "x": 10.0,
+                "y": 10.0,
+                "z": 10.0
+            },
+            "material": {
+                "fuzz": 0.699999988079071,
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.10000000149011612,
+                        "z": 0.800000011920929
+                    },
+                    "type": "solid_color"
+                },
+                "type": "metal"
+            },
+            "name": "Box2",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 12.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 10.0,
+                    "y": 5.0,
+                    "z": 10.0
+                }
+            },
+            "type": "box"
+        },
+        {
+            "height": 55.5,
+            "material": {
+                "texture": {
+                    "color": {
                         "x": 2.0,
                         "y": 2.0,
                         "z": 2.0
@@ -105,6 +164,64 @@
                     "type": "solid_color"
                 },
                 "type": "diffuse_light"
+            },
+            "name": "topLight",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 180.0
+                },
+                "translation": {
+                    "x": 27.75,
+                    "y": 55.5,
+                    "z": 27.75
+                }
+            },
+            "type": "plane",
+            "width": 55.5
+        },
+        {
+            "height": 55.5,
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.7300000190734863,
+                        "y": 0.7300000190734863,
+                        "z": 0.7300000190734863
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "name": "backWall",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": -90.0
+                },
+                "translation": {
+                    "x": 27.75,
+                    "y": 27.75,
+                    "z": 55.5
+                }
+            },
+            "type": "plane",
+            "width": 55.5
+        },
+        {
+            "height": 55.5,
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.11999999731779099,
+                        "y": 0.44999998807907104,
+                        "z": 0.15000000596046448
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
             },
             "name": "leftWall",
             "transform": {
@@ -130,6 +247,6 @@
             "z": 0.0
         },
         "max_depth": 10,
-        "num_samples": 1
+        "num_samples": 10
     }
 }

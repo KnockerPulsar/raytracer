@@ -8,33 +8,38 @@
 #include <raymath.h>
 
 namespace rt {
-  Sphere::Sphere(float r, vec3 pos, shared_ptr<Material> m) : radius(r), center(pos) { material = m; }
+  Sphere::Sphere(float r, shared_ptr<Material> m) : radius(r) { material = m; }
 
   bool Sphere::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+
+    // Spheres are centered at zero by default
+    // We transform the ray hitting the object so no need to move it.
+    auto center = vec3::Zero(); 
+
     // Vector between ray origin and sphere center
-    vec3  oc     = r.origin - this->center;
+    vec3  oc     = r.origin - center;
     float a      = r.direction.SqrLen();
-    float half_b = vec3::DotProd(oc, r.direction);
+    float halfB = vec3::DotProd(oc, r.direction);
     float c      = oc.Len() * oc.Len() - radius * radius;
 
-    float discriminant = half_b * half_b - a * c;
+    float discriminant = halfB * halfB - a * c;
     if (discriminant < 0)
       return false;
 
-    float sqrt_disc = sqrt(discriminant);
+    float sqrtDisc = sqrt(discriminant);
 
-    float root = (-half_b - sqrt_disc) / a;
+    float root = (-halfB - sqrtDisc) / a;
     if (root < t_min || t_max < root) {
-      root = (-half_b + sqrt_disc) / a;
+      root = (-halfB + sqrtDisc) / a;
       if (root < t_min || t_max < root)
         return false;
     }
 
     rec.t                     = root;
     rec.p                     = r.At(rec.t);
-    const vec3 outward_normal = (rec.p - center) / radius;
-    rec.set_face_normal(r, outward_normal);
-    GetSphereUV(outward_normal, rec.u, rec.v);
+    const vec3 outwardNormal = (rec.p - center) / radius;
+    rec.set_face_normal(r, outwardNormal);
+    GetSphereUV(outwardNormal, rec.u, rec.v);
     rec.mat_ptr    = material;
     rec.closestHit = (Hittable *)this;
 
@@ -42,16 +47,16 @@ namespace rt {
   }
 
   bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    outputBox = AABB(center - vec3(radius), center + vec3(radius));
+    outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
 
     return true;
   }
 
-  json Sphere::GetJsonDerived() const { return json{{"type", "sphere"}, {"radius", radius}}; }
+  json Sphere::toJsonSpecific() const { return json{{"type", "sphere"}, {"radius", radius}}; }
 
-  void Sphere::Rasterize() {
+  void Sphere::Rasterize(vec3 color) {
     // RasterizeTransformed takes care of the transformation and rotation
-    DrawSphere(Vector3Zero(), radius, RED);
+    DrawSphere(vec3::Zero(), radius, color.toRaylibColor(255));
   }
 
   void Sphere::GetSphereUV(const vec3 &p, float &u, float &v) {

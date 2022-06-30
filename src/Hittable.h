@@ -7,6 +7,7 @@
 #include "Ray.h"
 #include "Transformation.h"
 #include "Util.h"
+#include "app.h"
 #include "data_structures/vec3.h"
 #include "editor/Utils.h"
 #include <cmath>
@@ -14,13 +15,16 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "../vendor/glm/glm/gtx/string_cast.hpp"
 #include "../vendor/rlImGui/imgui/imgui.h"
 #include "materials/Material.h"
 #include <vector>
 
-using std::shared_ptr;
+#include "editor/editor.h"
+
+using std::shared_ptr, std::vector, std::optional, std::nullopt, std::make_optional, std::make_shared;
 
 namespace rt {
   class Material;
@@ -46,20 +50,24 @@ namespace rt {
     sPtr<Material> material = nullptr; // Should only exist for raytracable objects
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const            = 0;
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const = 0;
+    // Specifies specific behaviour that each hittable can implement for json conversion
+    virtual json toJsonSpecific() const { return {{"type", "unimplemented"}}; }
 
-    virtual json GetJson() const {
-      json derived = this->GetJsonDerived();
-      json tJson   = transformation;
+    // Specifies common behaviour all hittables share when converting to json
+    virtual json toJson() const {
+      json derived = this->toJsonSpecific();
       derived.update({{"name", name}});
-      derived.update(tJson);
-      derived.update({{"material", material->GetJson()}});
+      derived.update(transformation);
+      derived.update({{"material", material->toJson()}});
       return derived;
     }
 
-    virtual json GetJsonDerived() const { return {{"type", "unimplemented"}}; }
-
+    // Transforms rays opposite the object's transform
+    // Such that the object is in the correct position relative to the ray
+    // Handles modifying the hit result for correct results
+    // TODO: Add support for scaling? Normals will require some work to get right.
     virtual bool HitTransformed(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
 
       // Need to apply inverse translation on ray origin
@@ -83,62 +91,42 @@ namespace rt {
       return true;
     }
 
-    virtual bool BoundingBoxTransformed(float t0, float t1, AABB &outputBox) const {
-      if (!this->BoundingBox(t0, t1, outputBox))
-        return false;
-
-      return true;
-    }
-
-    void setTransformation(vec3 translate = vec3::Zero(), vec3 rotate = vec3::Zero()) {
-      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
-      transformation = Transformation(translate, rotate);
-      // std::cout << glm::to_string(transformation.modelMatrix) << std::endl;
-    }
-
     virtual void OnImgui() override {
       transformation.OnImgui();
       ImGui::Spacing();
       if (material) {
-        MaterialChanger();
+
+        auto newMat = Editor::MaterialChanger();
+        if (newMat.has_value()) {
+          changeMaterial(newMat.value());
+        }
+
         ImGui::Spacing();
 
         material->OnImgui();
       }
     }
 
-    void MaterialChanger() {
-
-      static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
-      static MaterialTypes selectedMaterialType = Emissive;
-
-      ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(),
-                   (int *)&selectedMaterialType,
-                   materialTypes,
-                   MaterialTypes::MaterialTypesCount);
-      ImGui::SameLine();
-      if (ImGui::Button("Change")) {
-        switch (selectedMaterialType) {
-        default: {
-        }
-        }
-      }
+    void setTransformation(vec3 translate = vec3::Zero(), vec3 rotate = vec3::Zero()) {
+      transformation = Transformation(translate, rotate);
     }
 
-    virtual std::vector<sPtr<Hittable>> getChildrenAsList() {
-      return std::vector<sPtr<Hittable>>{shared_ptr<Hittable>(nullptr)};
-    }
+    virtual vector<sPtr<Hittable>> getChildrenAsList() { return vector<sPtr<Hittable>>{}; }
 
-    virtual std::vector<AABB> getChildrenAABBs() {
+    virtual vector<AABB> getChildrenAABBs() {
       AABB outputBox;
-      if (this->BoundingBoxTransformed(0, 1, outputBox))
-        return std::vector<AABB>{outputBox};
+      if (this->BoundingBox(0, 1, outputBox))
+        return vector<AABB>{outputBox};
 
-      return std::vector<AABB>{};
+      return vector<AABB>();
     }
 
     // Only HittableLists and BVHNodes should override this.
     virtual Hittable *addChild(sPtr<Hittable> newChild) { return nullptr; }
     virtual Hittable *removeChild(sPtr<Hittable> childToRemove) { return nullptr; }
+
+    // Should be overridden by group hittables such as
+    // Boxes, HittableLists if the contain primtivies of one object, etc ...
+    virtual void changeMaterial(sPtr<Material> &newMat) { material = newMat; }
   };
 } // namespace rt

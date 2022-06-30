@@ -3,16 +3,33 @@
 #include "app.h"
 /*
  TODO:
+    
+    ! Boxes seem to be bugged
+      - Open cornell scene 
+      - Go to the small box and try clicking it with the camera facing away from the back wall
+      - Doesn't seem to affect renders?
+
+    Automatic image saving on render complete
+      - stbi should take care of this.
+
     Finish up scene (de)serialization
+      - Saving and loading done
+      - Need more testing
+      - Need to export existing scenes out and test them
+      - Need to filter out common field saving and loading into the base Hittable class.
+      - Hittables don't load their name
+  
+    Add menu with built in scenes 
 
-    Hittable material from the editor (change material from editor).
-      - View done
-      - Logic left
-
-    Finish up ImGuizmo integration. Swapping between translate and rotate. Investigate twitchy rotation issue.
-    Regenerate BVH tree automatically on object transform with ImGuizmo
+    Regenerate BVH tree automatically on object transform with ImGuizmo? 
+      - At least after letting go
+      - Need a regeneration method instead of using addChild(nullptr)
 
     Modify all hittables so that they're centered at the world origin to use scaling matrices.
+      - Box, plane, sphere all done
+      - Not sure about the rest
+
+    Add the ability to change material textures
 
     Cleanup call heirarchy. i.e. Each call to boundingBox currently requires us to call
     transformation.regenAABB() in case the object was moved. Perhaps something akin to
@@ -74,11 +91,10 @@ int main(int argc, char **argv) {
     rt::App app(imageWidth, imageHeight, pathToScene);
     app.run();
   } else {
-    rt::App app(imageWidth, imageHeight, rt::Scene::Default(imageWidth, imageHeight));
+    rt::App app(imageWidth, imageHeight, rt::Scene::Scene1(imageWidth, imageHeight));
     app.run();
   }
 
-  // rt::App::jsonExportTest();
 
   return 0;
 }

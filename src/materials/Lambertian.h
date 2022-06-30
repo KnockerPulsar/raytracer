@@ -45,7 +45,7 @@ namespace rt {
       return true;
     }
 
-    json GetJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->GetJson()}}; }
+    json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }
 
     virtual void OnImgui() override {
       albedo->OnImgui();
@@ -54,5 +54,5 @@ namespace rt {
 
   inline void from_json(const json &j, Lambertian &l) { l.albedo = TextureFactory::FromJson(j["texture"]); }
 
-  inline void to_json(json &j, const Lambertian &l) { j = l.GetJson(); }
+  inline void to_json(json &j, const Lambertian &l) { j = l.toJson(); }
 } // namespace rt

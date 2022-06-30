@@ -34,20 +34,22 @@ project "Raytracer"
 
     "vendor/imguizmo/*",
 
-    "vendor/argumentum/src/*"
+    "vendor/argumentum/src/*",
+    "vendor/ImGuiFileDialog/**"
   }
 
   includedirs {
     "src/",
-    "src/**"
+    "src/**",
+    "vendor/rlImGui/imgui/"
   }
 
   filter {"configurations:Debug"}
-    defines {"DEBUG", "FAST_EXIT"}
+    defines {"DEBUG", "FAST_EXIT", "GAMMA_CORRECTION"}
     symbols "On"
 
   filter {"configurations:Release"}
-    defines {"NDEBUG", "FAST_EXIT"}
+    defines {"NDEBUG", "FAST_EXIT", "GAMMA_CORRECTION"}
     floatingpoint "Fast"
     flags {"LinkTimeOptimization"}
     symbols "Off"

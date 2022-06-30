@@ -10,18 +10,17 @@ namespace rt {
   class Sphere : public Hittable {
   public:
     float radius;
-    vec3  center;
 
     Sphere() = default;
-    Sphere(float r, vec3 pos, sPtr<Material> m);
+    Sphere(float r, sPtr<Material> m);
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    json GetJsonDerived() const override;
+    json toJsonSpecific() const override;
 
-    void Rasterize() override;
+    void Rasterize(vec3 color) override;
 
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v);
@@ -29,11 +28,10 @@ namespace rt {
 
   inline void from_json(const json &j, Sphere &s) {
     s.transformation = j["transform"].get<Transformation>();
-    s.center         = vec3::Zero();
     s.radius         = j["radius"].get<float>();
     s.material       = MaterialFactory::FromJson(j["material"]);
   }
 
-  inline void to_json(json &j, const Sphere &s) { j = s.GetJson(); }
+  inline void to_json(json &j, const Sphere &s) { j = s.toJson(); }
 
 } // namespace rt

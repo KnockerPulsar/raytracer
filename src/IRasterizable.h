@@ -11,11 +11,11 @@ namespace rt {
   public:
     std::string name;
     
-    virtual void Rasterize(){};
-    virtual void RasterizeTransformed(Transformation t){
+    virtual void Rasterize(vec3 color){};
+    virtual void RasterizeTransformed(Transformation t, vec3 color){
       rlPushMatrix();
       Transform(t);
-      Rasterize();
+      Rasterize(color);
       rlPopMatrix();
     };
     static void  Transform(Transformation transformation) {
@@ -26,7 +26,5 @@ namespace rt {
        rlRotatef(rotY, 0, 1, 0);
        rlRotatef(rotZ, 0, 0, 1);
     }
-
-    virtual void onImGui(){ImGui::LabelText("IRasterizable unimplemented", "%s: %d, unimplemented", __FILE__, __LINE__);}
   };
 } // namespace rt

@@ -16,6 +16,6 @@ namespace rt {
 
     virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const = 0;
 
-    virtual json GetJson() const = 0;
+    virtual json toJson() const = 0;
   };
 }; // namespace rt

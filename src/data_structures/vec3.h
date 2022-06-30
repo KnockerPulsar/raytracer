@@ -18,6 +18,7 @@ public:
   vec3(float, float, float); // Sets the each component to the corresponding parameter
   vec3(const Vector3 &);     // Copy constructor for raylib's Vector3
   vec3(const glm::vec3 &);
+  vec3(const Color&);
 
   static vec3 Zero() { return Vector3Zero(); } // Returns a vector with all components set to zero
   glm::vec3   toGlm() const;

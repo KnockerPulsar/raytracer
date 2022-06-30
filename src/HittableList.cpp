@@ -1,11 +1,11 @@
 #include "HittableList.h"
 #include "AABB.h"
 #include "Defs.h"
+#include <optional>
 #include <vector>
 
 namespace rt {
-  bool HittableList::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
-  {
+  bool HittableList::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
     HitRecord temp_rec;
     bool      hit_anything   = false;
     float     closest_so_far = t_max;
@@ -38,20 +38,38 @@ namespace rt {
     return true;
   }
 
-  std::vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
+  Hittable *HittableList::addChild(sPtr<Hittable> newChild) { return &Add(newChild); }
 
-    std::vector<sPtr<Hittable>> vec;
-    for (auto&& e : objects) {
+  Hittable *HittableList::removeChild(sPtr<Hittable> childToRemove) {
+
+    // TODO: figure out a cleaner way
+    vector<sPtr<Hittable>>::iterator toRemove = objects.end();
+    for (auto it = objects.begin(); it != objects.end(); it++) {
+      if (*it == childToRemove)
+        toRemove = it;
+    }
+
+    if (toRemove != objects.end())
+      objects.erase(toRemove);
+
+    return this;
+  }
+
+  vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
+
+    vector<sPtr<Hittable>> vec;
+    for (auto &&e : objects) {
       vec.push_back(e);
     }
     return vec;
   }
 
-  std::vector<AABB> HittableList::getChildrenAABBs() {
-    std::vector<AABB> vec;
-    for (auto&& e : getChildrenAsList()) {
+  vector<AABB> HittableList::getChildrenAABBs() {
+    vector<AABB> vec;
+
+    for (auto &&e : getChildrenAsList()) {
       AABB output;
-      if(e->BoundingBoxTransformed(0, 1, output))
+      if (e->BoundingBox(0, 1, output))
         vec.push_back(output);
     }
     return vec;

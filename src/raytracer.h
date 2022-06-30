@@ -1,12 +1,11 @@
 #include "AsyncRenderData.h"
 #include "Constants.h"
 #include "IState.h"
+#include "Ray.h"
 #include "RenderAsync.h"
 #include <algorithm>
 #include <functional>
 #include <raylib.h>
-#include "Ray.h"
-
 
 using std::ref;
 
@@ -29,7 +28,7 @@ namespace rt {
 
     virtual void onUpdate() {
       BeginDrawing();
-      
+
       RenderAsync::RenderFinished(ard, allFinished);
       RenderAsync::RenderImGui(showProg, ard);
 
@@ -38,6 +37,10 @@ namespace rt {
 
     void startRaytracing() {
       ard.exit = false;
+
+      for (auto &job : ard.pixelJobs->getJobsVector()) {
+        job.color = vec3::Zero();
+      }
 
       for (int t = 0; t < NUM_THREADS; t++) {
         ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), t));

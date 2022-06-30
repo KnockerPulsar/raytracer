@@ -15,8 +15,8 @@ ifeq ($(config),debug)
   TARGETDIR = bin/Debug
   TARGET = $(TARGETDIR)/Raytracer
   OBJDIR = obj/Debug
-  DEFINES += -DDEBUG -DFAST_EXIT
-  INCLUDES += -Isrc -Isrc/materials -Isrc/editor -Isrc/textures -Isrc/data_structures -Isrc/objects
+  DEFINES += -DDEBUG -DFAST_EXIT -DGAMMA_CORRECTION
+  INCLUDES += -Isrc -Isrc/materials -Isrc/editor -Isrc/textures -Isrc/data_structures -Isrc/objects -Ivendor/rlImGui/imgui
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g
@@ -42,8 +42,8 @@ ifeq ($(config),release)
   TARGETDIR = bin/Release
   TARGET = $(TARGETDIR)/Raytracer
   OBJDIR = obj/Release
-  DEFINES += -DNDEBUG -DFAST_EXIT
-  INCLUDES += -Isrc -Isrc/materials -Isrc/editor -Isrc/textures -Isrc/data_structures -Isrc/objects
+  DEFINES += -DNDEBUG -DFAST_EXIT -DGAMMA_CORRECTION
+  INCLUDES += -Isrc -Isrc/materials -Isrc/editor -Isrc/textures -Isrc/data_structures -Isrc/objects -Ivendor/rlImGui/imgui
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -flto -ffast-math -O3
@@ -79,6 +79,7 @@ OBJECTS := \
 	$(OBJDIR)/AARect.o \
 	$(OBJDIR)/Box.o \
 	$(OBJDIR)/Sphere.o \
+	$(OBJDIR)/ImGuiFileDialog.o \
 	$(OBJDIR)/argparser.o \
 	$(OBJDIR)/ImGuizmo.o \
 	$(OBJDIR)/imgui_impl_opengl3.o \
@@ -186,6 +187,9 @@ $(OBJDIR)/Box.o: src/objects/Box.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Sphere.o: src/objects/Sphere.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ImGuiFileDialog.o: vendor/ImGuiFileDialog/ImGuiFileDialog.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/argparser.o: vendor/argumentum/src/argparser.cpp

@@ -50,7 +50,7 @@ namespace rt {
      */
     virtual vec3 emitted(float u, float v, const vec3 &p) const override { return emssiveTex->Value(u, v, p); }
 
-    json GetJson() const override { return json{{"type", "diffuse_light"}, {"texture", emssiveTex->GetJson()}}; }
+    json toJson() const override { return json{{"type", "diffuse_light"}, {"texture", emssiveTex->toJson()}}; }
 
     virtual void OnImgui() override {
       emssiveTex->OnImgui();
@@ -61,5 +61,5 @@ namespace rt {
 
   inline void from_json(const json &j, DiffuseLight &dl) { dl.emssiveTex = TextureFactory::FromJson(j["texture"]); }
 
-  inline void to_json(json &j, const DiffuseLight &dl) { j = dl.GetJson(); }
+  inline void to_json(json &j, const DiffuseLight &dl) { j = dl.toJson(); }
 } // namespace rt

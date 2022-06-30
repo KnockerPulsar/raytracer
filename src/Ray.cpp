@@ -50,15 +50,13 @@ namespace rt {
 
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
 
-
-
 #ifdef FAST_EXIT
         // Exit prematurely if signaled to
         if (ard.exit == true)
           return;
 #endif
 
-        Pixel &job       = *currentJob;
+        Pixel      &job       = *currentJob;
         sPtr<Scene> currScene = ard.currScene;
 
         int x = job.x;
@@ -82,14 +80,13 @@ namespace rt {
 
         job.color = vec3(r, g, b);
 #else
-        job.color /= currScene->settings.samplesPerPixel;
+        job.color /= float(currScene->settings.samplesPerPixel);
 #endif
         ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
       }
+      auto stop                    = high_resolution_clock::now();
+      auto batchTime               = duration_cast<std::chrono::milliseconds>(stop - start).count();
+      ard.threadTimes[threadIndex] += batchTime;
     }
   }
-
-  // auto stop   = high_resolution_clock::now();
-  // thread_time = duration_cast<std::chrono::milliseconds>(stop - start).count();
-
 } // namespace rt

@@ -22,16 +22,18 @@
 
 namespace rt {
 
-  Camera::Camera(vec3  lookFrom,
-                 vec3  lookAt,
-                 vec3  vUp,
-                 vec3  moveDir,
-                 float vFov,
-                 float aspectRatio,
-                 float aperature,
-                 float focusDist,
-                 float time0,
-                 float time1)
+  Camera::Camera(
+      vec3  lookFrom,
+      vec3  lookAt,
+      vec3  vUp,
+      vec3  moveDir,
+      float vFov,
+      float aspectRatio,
+      float aperature,
+      float focusDist,
+      float time0,
+      float time1
+  )
       : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
         aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
 
@@ -41,14 +43,13 @@ namespace rt {
     auto yzFwdProj = localForward.projectOntoPlane(vec3(1, 0, 0)).Normalize();
     auto xzFwdProj = localForward.projectOntoPlane(vec3(0, 1, 0)).Normalize();
 
-    auto cosAnglex = vec3::DotProd(yzFwdProj, {0, 0, -1});
+    // auto cosAnglex = localForward.y;
     auto cosAngley = vec3::DotProd(xzFwdProj, {0, 0, -1});
-    auto signX     = localForward.y >= 0? 1 : -1;
+    auto signY     = localForward.x < 0? 1 : -1;
 
-    angle.x = acos(cosAnglex);
-
-    angle.x = angle.x > pi / 2 ? signX * (pi - angle.x) : angle.x;
-    angle.y = acos(cosAngley);
+    // angle.x = signX * acos(cosAnglex);
+    angle.x = localForward.y;
+    angle.y = signY * acos(cosAngley);
 
     lensRadius    = aperature / 2;
     this->lookAt  = lookAt;
@@ -57,16 +58,18 @@ namespace rt {
 
   // Should probably be moved to from_json()?
   Camera::Camera(nlohmann::json cameraJson, float aspectRatio)
-      : Camera(cameraJson["look_from"].get<vec3>(),
-               cameraJson["look_at"].get<vec3>(),
-               cameraJson["v_up"].get<vec3>(),
-               cameraJson["move_dir"].get<vec3>(),
-               cameraJson["fov"].get<float>(),
-               aspectRatio,
-               cameraJson["aperature"].get<float>(),
-               cameraJson["focus_dist"].get<float>(),
-               cameraJson["time0"].get<float>(),
-               cameraJson["time1"].get<float>()) {
+      : Camera(
+            cameraJson["look_from"].get<vec3>(),
+            cameraJson["look_at"].get<vec3>(),
+            cameraJson["v_up"].get<vec3>(),
+            cameraJson["move_dir"].get<vec3>(),
+            cameraJson["fov"].get<float>(),
+            aspectRatio,
+            cameraJson["aperature"].get<float>(),
+            cameraJson["focus_dist"].get<float>(),
+            cameraJson["time0"].get<float>(),
+            cameraJson["time1"].get<float>()
+        ) {
     controlType = cameraJson["type"] == "flycam" ? ControlType::flyCam : ControlType::lookAtPoint;
   }
 
@@ -77,6 +80,7 @@ namespace rt {
     float h        = tan(theta / 2);
     viewportHeight = 2.0 * h;
     viewportWidth  = aspectRatio * viewportHeight;
+    lensRadius     = aperature / 2;
 
     UpdateDirectionVectors();
   }
@@ -100,9 +104,11 @@ namespace rt {
   Ray Camera::GetRay(float s, float t) const {
     vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
     vec3 offset = localRight * rd.x + localUp * rd.y;
-    return Ray(lookFrom + offset,
-               (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
-               RandomFloat(time0, time1));
+    return Ray(
+        lookFrom + offset,
+        (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
+        RandomFloat(time0, time1)
+    );
   }
 
   void Camera::MouseLook(Vector2 mousePositionDelta) {
@@ -123,29 +129,39 @@ namespace rt {
   }
 
   void Camera::RenderImgui() {
-    {
-      ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize);
-      {
-        vec3 deltaPos = lookFrom;
-        ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
+    if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
+      vec3 deltaPos = lookFrom;
+      ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
 
-        ImGui::Combo(
-            "Camera type", (int *)&controlType, controlTypeLabels, rt::Camera::ControlType::controlTypesCount, 0);
+      ImGui::Combo(
+          "Camera type", (int *)&controlType, controlTypeLabels, rt::Camera::ControlType::controlTypesCount, 0
+      );
 
-        if (controlType == rt::Camera::ControlType::lookAtPoint)
-          ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
-        else {
-          deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
-          lookAt += (deltaPos);
-          ImGui::DragFloat2("rotation", &angle.x, 0.05f);
-          MouseLook({0, 0});
-        }
+      if (controlType == rt::Camera::ControlType::lookAtPoint)
+        ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
+      else {
+        deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
+        lookAt += (deltaPos);
+        ImGui::DragFloat2("rotation", &angle.x, 0.05f);
+        MouseLook({0, 0});
       }
-      ImGui::End();
+
+      ImGui::DragFloat("Camera speed multiplier", &movScale, 0.1, 1, 100);
+
+      ImGui::DragFloat("Camera boost multiplier", &movMultiplier, 0.1, 1, 10);
+
+      ImGui::DragFloat("Vertical FOV", &vFov, 0.1f, 20, 180);
+
+      ImGui::DragFloat("Focus distance", &focusDist, 0.01, 0.1, 1000);
+
+      ImGui::DragFloat("Aperature", &aperature, 0.01, 10e-6, 10);
     }
+    ImGui::End();
   }
 
   void Camera::Update(float dt) {
+    GenerateData();
+
     bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
                       IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
 

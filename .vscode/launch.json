@@ -10,8 +10,10 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/Debug/Raytracer",
       "args": [
-        "--image_width", "600",
-        "--scene", "scenes/cornell.json"
+        "--image_width",
+        "1280",
+        "--image_height",
+        "720",
       ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "premake+build debug",
@@ -32,7 +34,12 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/Release/Raytracer",
-      "args": [],
+      "args": [
+        "--image_width",
+        "1280",
+        "--image_height",
+        "720",
+      ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "premake+build release",
       "setupCommands": [

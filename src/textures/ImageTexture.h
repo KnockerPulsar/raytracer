@@ -80,7 +80,7 @@ namespace rt {
       return vec3(pixel[0], pixel[1], pixel[2]) * colorScale * intensity;
     }
 
-    virtual json GetJson() const override { return json{{"type", "image"}, {"path", path}}; }
+    virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
     virtual void GetTexture(const json &j) override { ImageFromPath(j["path"].get<string>().c_str()); }
 
     virtual void OnImgui() override {
@@ -98,5 +98,5 @@ namespace rt {
 
   inline void from_json(const json &j, ImageTexture &it) { it.GetTexture(j); }
 
-  inline void to_json(json &j, const ImageTexture &it) { j = it.GetJson(); }
+  inline void to_json(json &j, const ImageTexture &it) { j = it.toJson(); }
 } // namespace rt

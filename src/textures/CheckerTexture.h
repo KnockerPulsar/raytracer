@@ -23,8 +23,8 @@ namespace rt {
 
     void FromColors(vec3 c1, vec3 c2, float s) { *this = CheckerTexture(c1, c2, s); }
 
-    virtual json GetJson() const override {
-      return json{{"type", "checker"}, {"even", even->GetJson()}, {"odd", odd->GetJson()}, {"scale", scale}};
+    virtual json toJson() const override {
+      return json{{"type", "checker"}, {"even", even->toJson()}, {"odd", odd->toJson()}, {"scale", scale}};
     }
 
     virtual void GetTexture(const json &j) override {
@@ -46,6 +46,6 @@ namespace rt {
   };
 
   inline void from_json(const json &j, CheckerTexture &ct) { ct.GetTexture(j); }
-  inline void to_json(json &j, const CheckerTexture &ct) { j = ct.GetJson(); }
+  inline void to_json(json &j, const CheckerTexture &ct) { j = ct.toJson(); }
 
 } // namespace rt

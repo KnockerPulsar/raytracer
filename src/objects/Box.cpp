@@ -1,24 +1,50 @@
 #include "Box.h"
 #include "AARect.h"
+#include "Plane.h"
+
+#include "../HittableBuilder.h"
 
 namespace rt {
-  Box::Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) { Create(p0, p1, mat); }
+  Box::Box(const vec3 &p0, const vec3 &p1) { Create(p0, p1); }
+  
+  Box::Box(float edgeLength) : Box(vec3(edgeLength)) {}
+  Box::Box(const vec3 &extents) { Create(-extents / 2, extents / 2); }
 
-  Box::Box(const vec3 &center, std::shared_ptr<Material> mat) : Box(center - vec3(0.5f), center + vec3(0.5f), mat) {}
 
-  void Box::Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat) {
-    boxMin   = p0;
-    boxMax   = p1;
-    material = mat;
+  void Box::Create(const vec3 &p0, const vec3 &p1) {
+    boxMin = p0;
+    boxMax = p1;
 
-    sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p1.z, mat));
-    sides.Add(make_shared<XYRect>(p0.x, p1.x, p0.y, p1.y, p0.z, mat));
+    auto extents = (p1 - p0);
 
-    sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p1.y, mat));
-    sides.Add(make_shared<XZRect>(p0.x, p1.x, p0.z, p1.z, p0.y, mat));
+    auto backCenter  = vec3((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, p0.z);
+    auto frontCenter = vec3((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, p1.z);
 
-    sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p0.x, mat));
-    sides.Add(make_shared<YZRect>(p0.y, p1.y, p0.z, p1.z, p1.x, mat));
+    auto bottomCenter = vec3((p0.x + p1.x) / 2, p0.y, (p0.z + p1.z) / 2);
+    auto topCenter    = vec3((p0.x + p1.x) / 2, p1.y, (p0.z + p1.z) / 2);
+
+    auto leftCenter  = vec3(p0.x, (p0.y + p1.y) / 2, (p0.z + p1.z) / 2);
+    auto rightCenter = vec3(p1.x, (p0.y + p1.y) / 2, (p0.z + p1.z) / 2);
+
+    sides.Add(HittableBuilder<Plane>(Plane::XYPlane(extents.x, extents.y))
+                  .rotate(vec3(180, 0, 0))
+                  .withTranslation(backCenter)
+                  .build());
+
+    sides.Add(HittableBuilder<Plane>(Plane::XYPlane(extents.x, extents.y)).withTranslation(frontCenter).build());
+
+    sides.Add(HittableBuilder<Plane>(extents.x, extents.z).withTranslation(topCenter).build());
+
+    sides.Add(
+        HittableBuilder<Plane>(extents.x, extents.z).withTranslation(bottomCenter).withRotation(vec3(180, 0, 0)).build()
+    );
+
+    sides.Add(HittableBuilder<Plane>(Plane::YZPlane(extents.y, extents.z)).withTranslation(leftCenter).build());
+
+    sides.Add(HittableBuilder<Plane>(Plane::YZPlane(extents.y, extents.z))
+                  .withTranslation(rightCenter)
+                  .rotate(vec3(0, 0, 180))
+                  .build());
   }
 
   bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
@@ -26,7 +52,7 @@ namespace rt {
     return true;
   }
 
-  json Box::GetJsonDerived() const {
+  json Box::toJsonSpecific() const {
     return json{
         {"type", "box"},
         {"extents", boxMax - boxMin},
@@ -34,7 +60,7 @@ namespace rt {
   }
 
   bool Box::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-    if (sides.Hit(r, t_min, t_max, rec)) {
+    if (sides.HitTransformed(r, t_min, t_max, rec)) {
       rec.closestHit = (Hittable *)this;
       return true;
     }
@@ -42,15 +68,16 @@ namespace rt {
     return false;
   }
 
-  void Box::Rasterize() {
-    auto  extents  = (boxMax - boxMin);
-    Color boxColor = GREEN;
-
-    if (auto *diffLight = dynamic_cast<DiffuseLight *>(material.get()); diffLight) {
-      vec3 lightColor = diffLight->emitted(0, 0, vec3());
-      boxColor        = lightColor.toRaylibColor(255);
+  void Box::Rasterize(vec3 color) {
+    for (auto &side : sides.getChildrenAsList()) {
+      side->RasterizeTransformed(side->transformation, color);
     }
+  }
 
-    DrawCube(Vector3Zero(), extents.x, extents.y, extents.z, boxColor);
+  void Box::changeMaterial(sPtr<Material> &newMat) {
+    material = newMat;
+    for (auto &side : sides.objects) {
+      side->changeMaterial(material);
+    }
   }
 } // namespace rt

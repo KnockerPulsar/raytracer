@@ -1,7 +1,10 @@
 #pragma once
+#include "../../vendor/imguizmo/ImGuizmo.h"
 #include "../Defs.h"
 #include "../IState.h"
 #include "../Scene.h"
+#include "../materials/Material.h"
+#include <optional>
 #include <raylib.h>
 #include <vector>
 
@@ -33,6 +36,16 @@ namespace rt {
 
     AddableObjectsTypes selectedAddableObject = Box;
 
+    ImGuizmo::MODE      imguizmoMode = ImGuizmo::MODE::LOCAL;
+    ImGuizmo::OPERATION imguizmoOp   = ImGuizmo::OPERATION::TRANSLATE;
+
+    inline static const Color colors[] = {
+        LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD,   ORANGE,     PINK,  RED,   MAROON,    GREEN, LIME,    DARKGREEN,
+        SKYBLUE,   BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, MAGENTA, RAYWHITE,
+    };
+
+    static const int numColors = sizeof(colors) / sizeof(colors[0]);
+
     Editor(sPtr<Scene> s) : currentScene(s) { cam = &s->cam; }
 
     // Calls overloaded `Rasterize()` function for each object
@@ -50,7 +63,7 @@ namespace rt {
     // Tests a ray against the world and returns whatever it hits (can be null)
     Hittable *CastRay(Vector2 mousePos) const;
 
-    void addObject();
+    void AddObjectImgui();
 
     /*
       Checks for inputs, updates the editor camera and its GUI,
@@ -65,9 +78,14 @@ namespace rt {
     void UpdateViewportRect(float imguiWidth, float height);
 
     void RenderViewport();
-  
-  
+
     void RaytraceSettingsImgui();
-  
+
+    void ObjectListImgui();
+
+    static std::optional<sPtr<Material>> MaterialChanger();
+
+    void TopMenuImgui();
+
   }; // namespace Editor
 } // namespace rt

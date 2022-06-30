@@ -14,6 +14,8 @@ vec3::vec3(const Vector3 &conv) : Vector3{conv} {}
 
 vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
 
+vec3::vec3(const Color& color) : vec3(color.r, color.g, color.b) {}
+
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
 
 glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }

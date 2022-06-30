@@ -1,6 +1,9 @@
 #pragma once
 #include "../Hittable.h"
 #include <cmath>
+#include <raylib.h>
+#include <rlgl.h>
+#include <vector>
 namespace rt {
   struct vert {
     vec3 p;
@@ -18,19 +21,17 @@ namespace rt {
     vec3 normal;
 
     Triangle() = default;
-    Triangle(vert _v0, vert _v1, vert _v2, sPtr<Material> mat) : v0(_v0), v1(_v1), v2(_v2) {
-      material = mat;
+    Triangle(vert _v0, vert _v1, vert _v2) : v0(_v0), v1(_v1), v2(_v2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
-      normal = vec3::DotProd(v01, v02);
+      normal = vec3::CrsProd(v01, v02).Normalize();
     }
-    Triangle(vec3 p0, vec3 p1, vec3 p2, sPtr<Material> mat) : v0(p0), v1(p1), v2(p2) {
-      material = mat;
+    Triangle(vec3 p0, vec3 p1, vec3 p2) : v0(p0), v1(p1), v2(p2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
-      normal = vec3::DotProd(v01, v02);
+      normal = vec3::CrsProd(v01, v02);
 
       v0.uvw = vec3(0, 0, 0);
 
@@ -65,28 +66,43 @@ namespace rt {
 
       float t = vec3::DotProd(v0v2, qvec) * invDet;
 
-      vec3 p     = r.At(t);
-      rec.p      = p;
-      rec.normal = normal;
+      if (t > t_min && t < t_max) {
+        vec3 p     = r.At(t);
+        rec.p      = p;
+        rec.normal = normal;
 
-      // UV interpolation
-      // source:
-      // https://www.gamedev.net/forums/topic/513814-raytracing-and-texture-mapping-triangles/
-      vec3 properUVs = v0.uvw + (v1.uvw - v0.uvw) * u + (v2.uvw - v0.uvw) * v;
+        // UV interpolation
+        // source:
+        // https://www.gamedev.net/forums/topic/513814-raytracing-and-texture-mapping-triangles/
+        vec3 properUVs = v0.uvw + (v1.uvw - v0.uvw) * u + (v2.uvw - v0.uvw) * v;
 
-      rec.u       = properUVs.x;
-      rec.v       = properUVs.y;
-      rec.mat_ptr = material;
-      rec.t       = t;
-      rec.set_face_normal(r, normal);
-      rec.closestHit = (Hittable *)this;
+        rec.u       = properUVs.x;
+        rec.v       = properUVs.y;
+        rec.mat_ptr = material;
+        rec.t       = t;
+        rec.set_face_normal(r, normal);
+        rec.closestHit = (Hittable *)this;
 
-      return true;
+        return true;
+      }
+
+      return false;
     }
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
-      outputBox = transformation.regenAABB(AABB({v0.p, v1.p, v2.p}));
+      outputBox = transformation.regenAABB(AABB(std::vector<vec3>{{v0.p, v1.p, v2.p}}));
       return true;
+    }
+
+    virtual void Rasterize(vec3 color) override {
+
+      // TODO: Figure out a way to order vertices and just draw once
+      DrawTriangle3D(v0.p, v1.p, v2.p, color.toRaylibColor(255));
+      auto  normalStart = (v0.p + v1.p + v2.p) / 3;
+      Color inv         = color.toRaylibColor(255);
+      inv =
+          Color{(unsigned char)(255 - inv.r), (unsigned char)(255 - inv.g), (unsigned char)(255 - inv.b), uint8_t(255)};
+      DrawLine3D(normalStart, normalStart + normal, inv);
     }
   };
 } // namespace rt

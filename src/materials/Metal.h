@@ -4,6 +4,7 @@
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
 #include "../textures/TextureFactory.h"
+#include "../Hittable.h"
 #include <memory>
 
 namespace rt {
@@ -27,11 +28,11 @@ namespace rt {
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }
 
-    json GetJson() const override {
+    json toJson() const override {
       return json{
           {"type", "metal"},
           {"fuzz", fuzz},
-          {"texture", albedo->GetJson()},
+          {"texture", albedo->toJson()},
       };
     }
 
@@ -46,5 +47,5 @@ namespace rt {
     m.albedo = TextureFactory::FromJson(j["texture"]);
   }
 
-  inline void to_json(json &j, const Metal &m) { j = m.GetJson(); }
+  inline void to_json(json &j, const Metal &m) { j = m.toJson(); }
 } // namespace rt

@@ -77,7 +77,7 @@ namespace rt {
 
   void AABB::Pad() {
     // In case the points are coplanar
-    float eps = 0.01;
+    float eps = 0.5;
     if (abs(min.x - max.x) < eps) {
       min.x -= eps;
       max.x += eps;

@@ -16,24 +16,26 @@ namespace rt {
   class Box : public Hittable {
 
   public:
-    vec3           boxMin, boxMax;
-    HittableList   sides;
+    vec3         boxMin, boxMax;
+    HittableList sides;
 
     Box() = default;
-    Box(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat);
-    Box(const vec3& center, std::shared_ptr<Material> mat);
+    Box(const vec3 &p0, const vec3 &p1);
+    Box(float edgeLength);
+    Box(const vec3& extents);
 
     // To work around not being able to use constructors with references
-    void Create(const vec3 &p0, const vec3 &p1, std::shared_ptr<Material> mat);
-
+    void Create(const vec3 &p0, const vec3 &p1);
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    virtual json GetJsonDerived() const override;
+    virtual json toJsonSpecific() const override;
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
-    virtual void Rasterize() override;
+    virtual void Rasterize(vec3 color) override;
+
+    virtual void changeMaterial(sPtr<Material>& newMat) override;
   };
 
   // This is how you use `json.get<Box>()`
@@ -50,8 +52,9 @@ namespace rt {
 
     b.name = objectJson["name"].get<std::string>();
 
-    b.Create(min, max, mat);
+    b.Create(min, max);
+    b.changeMaterial(mat);
   }
 
-  inline void to_json(json &j, const Box &b) { j = b.GetJson(); }
+  inline void to_json(json &j, const Box &b) { j = b.toJson(); }
 } // namespace rt

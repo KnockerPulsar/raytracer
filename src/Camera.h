@@ -11,6 +11,9 @@
 namespace rt {
 
   class Camera {
+  private:
+    float lensRadius;
+
   public:
     vec3 lookFrom, lookAt, moveDir;
     vec3 lower_left_corner, horizontal, vertical;
@@ -20,7 +23,7 @@ namespace rt {
 
     float time0, time1;
     float vFov; // vertical field-of-view in degrees
-    float aspectRatio, aperature, focusDist, lensRadius;
+    float aspectRatio, aperature, focusDist;
 
     constexpr static const float xAngleClampMin = -89.0f;
     constexpr static const float xAngleClampMax = 89.0f;
@@ -38,16 +41,18 @@ namespace rt {
 
     Camera() = default;
 
-    Camera(vec3  lookFrom,
-           vec3  lookAt,
-           vec3  vUp,
-           vec3  moveDir,
-           float vFov,
-           float aspectRatio,
-           float aperature,
-           float focusDist,
-           float time0 = 0.0,
-           float time1 = 1.0);
+    Camera(
+        vec3  lookFrom,
+        vec3  lookAt,
+        vec3  vUp,
+        vec3  moveDir,
+        float vFov,
+        float aspectRatio,
+        float aperature,
+        float focusDist,
+        float time0 = 0.0,
+        float time1 = 1.0
+    );
 
     Camera(nlohmann::json cameraJson, float aspectRatio);
 

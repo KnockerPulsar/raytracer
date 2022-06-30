@@ -17,7 +17,7 @@ namespace rt {
       return true;
     }
 
-    json GetJson() const override { return {"type", "unimplemented - isotropic"}; }
+    json toJson() const override { return {"type", "unimplemented - isotropic"}; }
 
     virtual void OnImgui() override { albedo->OnImgui(); }
   };

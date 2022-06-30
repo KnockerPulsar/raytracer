@@ -20,13 +20,12 @@ namespace rt {
     // |  / t1 |
     // |/______|
 
-    Plane(float w, float h, sPtr<Material> mat) { Create(w, h, mat); }
+    Plane(float w, float h) { Create(w, h); }
 
-    void Create(float w, float h, sPtr<Material> mat) {
+    void Create(float w, float h) {
       this->w = w;
       this->h = h;
 
-      this->material = mat;
       vec3 width     = vec3(w, 0, 0);
       vec3 height    = vec3(0, 0, h);
 
@@ -57,12 +56,19 @@ namespace rt {
       vert topL = vert(topLPoint, vec3(1, 1, 0));
       vert botR = vert(botRPoint, vec3(0, 0, 0));
 
-      t0 = Triangle(botL, topR, botR, mat);
-      t1 = Triangle(botL, topL, topR, mat);
+      t0 = Triangle(botL, topR, botR);
+      t1 = Triangle(botL, topL, topR);
     }
 
-    static Plane YZPlane(float w, float h, sPtr<Material> mat) {
-      Plane plane                 = Plane(w, h, mat);
+    static Plane YZPlane(float w, float h) {
+      Plane plane                 = Plane(w, h);
+      plane.transformation.rotate = vec3(0.0f, 0.0f, 90.0f);
+
+      return plane;
+    }
+
+    static Plane XYPlane(float w, float h) {
+      Plane plane                 = Plane(w, h);
       plane.transformation.rotate = vec3(90.0f, 0.0f, 0.0f);
 
       return plane;
@@ -79,30 +85,39 @@ namespace rt {
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = transformation.regenAABB(AABB(
           std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
-      // Using shared pointers causes double free errors
       return true;
     }
 
-    virtual void Rasterize() override {
+    virtual void Rasterize(vec3 color) override {
       static const Color colors[] = {GREEN, BLUE, RED, ORANGE, MAGENTA};
       rlDisableBackfaceCulling();
       //                                 Get "unique" index based on address
       //                                                vvvvvvvvvvvvvvvvvvvv
-      DrawPlane({0, 0, 0}, {w, h}, colors[(long)this >> 4 & 0b11]);
+      // DrawPlane({0, 0, 0}, {w, h}, colors[(long)this >> 4 & 0b11]);
       // All addresses seem to be aligned on 4's so need to shift down a few bits to get
       // different numbers
       // The & with 0b11 is to limit the range to 0->3 to not overflow
 
+      t0.Rasterize(color);
+      t1.Rasterize(color);
+
       rlEnableBackfaceCulling();
     }
 
-    json GetJsonDerived() const override {
+    json toJsonSpecific() const override {
       return {
           {"type", "plane"},
           {"width", w},
           {"height", h},
       };
     }
+
+    void changeMaterial(sPtr<Material> &newMat) override {
+      this->material = newMat;
+      t0.changeMaterial(newMat);
+      t1.changeMaterial(newMat);
+    }
+
   };
 
   inline void from_json(const json &j, Plane &p) {
@@ -112,11 +127,12 @@ namespace rt {
     auto h   = j["height"].get<float>();
     auto mat = MaterialFactory::FromJson(j["material"]);
 
-    p.Create(w, h, mat);
+    p.Create(w, h);
+    p.changeMaterial(mat);
 
     p.name = j["name"].get<std::string>();
   }
 
-  inline void to_json(json &j, const Plane &p) { j = p.GetJson(); }
+  inline void to_json(json &j, const Plane &p) { j = p.toJson(); }
 
 } // namespace rt

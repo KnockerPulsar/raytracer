@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <cstdio>
 #include <exception>
 #include <future>
 #include <iostream>
@@ -71,7 +72,7 @@ namespace rt {
 
       Color clr = ColorFromFloats(Clamp(pixel.color.x, 0, 1), Clamp(pixel.color.y, 0, 1), Clamp(pixel.color.z, 0, 1));
 
-      pixel.color = vec3::Zero();
+      // pixel.color = vec3::Zero();
 
       DrawPixel(pixel.x, pixel.y, clr);
     }
@@ -79,20 +80,17 @@ namespace rt {
   }
 
   bool RenderAsync::RenderFinished(AsyncRenderData &ard, bool &allFinished) {
-    if (ard.pixelJobs->jobsDone() && !allFinished) {
-      allFinished = true;
-      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->numberOfJobs, ard.raytraceRT);
-    }
-
     ClearBackground(BLACK);
 
-    if (allFinished) {
-      DrawTextureRec(ard.raytraceRT.texture,
-                     (Rectangle){0, 0, (float)ard.currScene->imageWidth, (float)ard.currScene->imageWidth},
-                     (Vector2){0, 0},
-                     WHITE);
-    }
+    if (allFinished = ard.pixelJobs->jobsDone(); allFinished)
+      BlitToBuffer(ard.pixelJobs->getJobsVector(), 0, ard.pixelJobs->numberOfJobs, ard.raytraceRT);
 
+    DrawTextureRec(ard.raytraceRT.texture,
+                   (Rectangle){0, 0, (float)ard.currScene->imageWidth, (float)ard.currScene->imageWidth},
+                   (Vector2){0, 0},
+                   WHITE);
+
+    // printf("%s\n", allFinished ? "all done" : "not yet");
     return allFinished;
   }
 

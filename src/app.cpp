@@ -83,16 +83,21 @@ namespace rt {
   }
 
   void App::onFrameRender() {
-    for (auto &&obj : ard.currScene->worldRoot->getChildrenAsList()) {
+    auto objects = ard.currScene->worldRoot->getChildrenAsList();
+    for (auto &&obj : objects) {
       auto t = obj->transformation.translate;
       auto r = obj->transformation.rotate;
       r.y += 1.0f;
-      obj->setTransformation(t, r);
+      obj->transformation = Transformation(t, r);
     }
   }
 
   void App::checkInput() {
     int keyPressed = GetKeyPressed();
+
+    if (ImGui::GetIO().WantCaptureKeyboard)
+      return;
+
     switch (keyPressed) {
 
     case KEY_F: {

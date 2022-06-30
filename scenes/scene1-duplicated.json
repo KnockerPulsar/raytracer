@@ -1,0 +1,216 @@
+{
+    "camera": {
+        "aperature": 0.0010000000474974513,
+        "focus_dist": 10.0,
+        "fov": 60.0,
+        "look_at": {
+            "x": -1.117600679397583,
+            "y": 1.0796210765838623,
+            "z": 0.7571514844894409
+        },
+        "look_from": {
+            "x": -1.788169026374817,
+            "y": 1.3148497343063354,
+            "z": 1.460717797279358
+        },
+        "move_dir": {
+            "x": 10.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "time0": 0.0,
+        "time1": 1.0,
+        "type": "flycam",
+        "v_up": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0
+        }
+    },
+    "objects": [
+        {
+            "material": {
+                "refraction_index": 1.5,
+                "texture": {
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "type": "solid_color"
+                },
+                "type": "dielectric"
+            },
+            "name": "",
+            "radius": 0.5,
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": -1.0,
+                    "y": 0.0,
+                    "z": -1.0
+                }
+            },
+            "type": "sphere"
+        },
+        {
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.10000000149011612,
+                        "y": 0.20000000298023224,
+                        "z": 0.5
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "name": "",
+            "radius": 0.5,
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.1891232430934906
+                }
+            },
+            "type": "sphere"
+        },
+        {
+            "material": {
+                "refraction_index": 1.5,
+                "texture": {
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "type": "solid_color"
+                },
+                "type": "dielectric"
+            },
+            "name": "",
+            "radius": -0.44999998807907104,
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": -1.0,
+                    "y": 0.0,
+                    "z": -1.0
+                }
+            },
+            "type": "sphere"
+        },
+        {
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.0
+                    },
+                    "type": "solid_color"
+                },
+                "type": "lambertian"
+            },
+            "name": "",
+            "radius": 100.0,
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": -100.5,
+                    "z": -1.0
+                }
+            },
+            "type": "sphere"
+        },
+        {
+            "material": {
+                "fuzz": 0.10000000149011612,
+                "texture": {
+                    "color": {
+                        "x": 0.800000011920929,
+                        "y": 0.6000000238418579,
+                        "z": 0.20000000298023224
+                    },
+                    "type": "solid_color"
+                },
+                "type": "metal"
+            },
+            "name": "",
+            "radius": 0.5,
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": -1.0
+                }
+            },
+            "type": "sphere"
+        },
+        {
+            "extents": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "material": {
+                "texture": {
+                    "color": {
+                        "x": 10.0,
+                        "y": 0.0,
+                        "z": 10.0
+                    },
+                    "type": "solid_color"
+                },
+                "type": "diffuse_light"
+            },
+            "name": "Added Box @ 0",
+            "transform": {
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 1.0083006620407104,
+                    "z": -2.6717529296875
+                }
+            },
+            "type": "box"
+        }
+    ],
+    "settings": {
+        "background_color": {
+            "x": 0.699999988079071,
+            "y": 0.800000011920929,
+            "z": 1.0
+        },
+        "max_depth": 50,
+        "num_samples": 50
+    }
+}

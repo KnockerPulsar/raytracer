@@ -5,6 +5,7 @@
 #include "HittableList.h"
 #include "Ray.h"
 #include "Util.h"
+#include "data_structures/vec3.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -16,21 +17,30 @@
 #include <unordered_set>
 #include <vector>
 
+using std::vector, std::optional, std::make_optional;
+
 namespace rt {
   class BVHNode : public Hittable {
   public:
-    std::shared_ptr<Hittable> left = nullptr, right = nullptr;
-    AABB                      box;
+    sPtr<Hittable> left = nullptr, right = nullptr;
+    AABB           box;
 
     BVHNode() = default;
 
-    BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+    BVHNode(const vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
     BVHNode(const HittableList &list, float t0, float t1) : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
 
-    BVHNode(const std::vector<shared_ptr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
+    BVHNode(const vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
 
-      std::vector<sPtr<Hittable>> objs;
+      if (srcObjects.empty()) {
+        left  = nullptr;
+        right = nullptr;
+        box   = {vec3::Zero(), vec3::Zero()};
+        return;
+      }
+
+      vector<sPtr<Hittable>> objs;
       // If root node, need to filter only at root
       if (start == 0 && end == srcObjects.size()) {
         for (auto &&e : srcObjects) { // If not a bvh node, add to list
@@ -68,7 +78,7 @@ namespace rt {
       AABB boxLeft;
       AABB boxRight;
 
-      if (!left->BoundingBoxTransformed(t0, t1, boxLeft) || !right->BoundingBoxTransformed(t0, t1, boxRight))
+      if (!left->BoundingBox(t0, t1, boxLeft) || !right->BoundingBox(t0, t1, boxRight))
         std::cerr << "No bounding box in BVHNode constructor.\n";
 
       box = AABB::SurroundingBox(boxLeft, boxRight);
@@ -91,7 +101,7 @@ namespace rt {
       return true;
     }
 
-    static inline bool BoxCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b, int axis) {
+    static inline bool BoxCompare(const sPtr<Hittable> a, const sPtr<Hittable> b, int axis) {
       AABB boxA;
       AABB boxB;
 
@@ -115,56 +125,61 @@ namespace rt {
       return false;
     }
 
-    static bool boxXCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 0); }
+    static bool boxXCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 0); }
 
-    static bool boxYCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 1); }
+    static bool boxYCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 1); }
 
-    static bool boxZCompare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b) { return BoxCompare(a, b, 2); }
+    static bool boxZCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 2); }
 
     // To use a shared pointer, you must have some reference to the shared pointer object itself
     // and not the pointer it's wrapping.
-    std::vector<sPtr<Hittable>> getChildrenAsList() override {
+    vector<sPtr<Hittable>> getChildrenAsList() override {
       std::unordered_set<sPtr<Hittable>> children;
 
-      // May god forgive me for I'm about to sin
-      auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
-
-      // If the cast failed and the the left child is not null
-      // Then the child is not an intermediate BVHNode, but a leaf Hittable.
-      // Add it to the list.
-
       // Otherwise, its an itermediate BVH node, get its left and right children
-      if (leftBVH == nullptr && left != nullptr) {
-        children.insert(left);
-      } else {
-        auto leftChildren = left->getChildrenAsList();
-        children.insert(leftChildren.begin(), leftChildren.end());
-        // children.insert(left);  // Add the intermediate node itself
+      if (left != nullptr) {
+
+        // May god forgive me for I'm about to sin
+        auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
+
+        // If the cast failed and the the left child is not null
+        // Then the child is not an intermediate BVHNode, but a leaf Hittable.
+        // Add it to the list.
+
+        if (leftBVH == nullptr) {
+          children.insert(left);
+        } else {
+          auto leftChildren = left->getChildrenAsList();
+          children.insert(leftChildren.begin(), leftChildren.end());
+          // children.insert(left); // Add the intermediate node itself
+        }
       }
 
-      auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
+      if (right != nullptr) {
+        auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
 
-      // Same but for the right branch
-      if (rightBVH == nullptr && right != nullptr)
-        children.insert(right);
-      else {
-        auto rightChildren = right->getChildrenAsList();
-        children.insert(rightChildren.begin(), rightChildren.end());
-        // children.insert(right);  // Add the intermediate node itself
+        // Same but for the right branch
+        if (rightBVH == nullptr && right != nullptr)
+          children.insert(right);
+        else {
+          auto rightChildren = right->getChildrenAsList();
+          children.insert(rightChildren.begin(), rightChildren.end());
+          // children.insert(right); // Add the intermediate node itself
+        }
       }
 
-      return std::vector<sPtr<Hittable>>(children.begin(), children.end());
+      return vector<sPtr<Hittable>>(children.begin(), children.end());
     }
 
-    std::vector<AABB> getChildrenAABBs() override {
-      std::vector<sPtr<Hittable>> children = getChildrenAsList();
+    vector<AABB> getChildrenAABBs() override {
+      vector<sPtr<Hittable>> children = getChildrenAsList();
       // This is destroyed on function return causing a double
 
-      std::vector<AABB> childrenAABBs;
+      vector<AABB> childrenAABBs;
 
       for (auto &&e : children) {
         AABB output;
-        if (e->BoundingBoxTransformed(0, 1, output))
+        if (e->BoundingBox(0, 1, output))
           childrenAABBs.push_back(output);
       }
 
@@ -173,29 +188,29 @@ namespace rt {
 
     // Use with newChild = nullptr to regenerate the tree
     Hittable *addChild(sPtr<Hittable> newChild) override {
-      std::vector<sPtr<Hittable>> children = getChildrenAsList();
-      std::vector<sPtr<Hittable>> sPtrs    = std::vector<sPtr<Hittable>>();
-      sPtrs.reserve(children.size());
+      vector<sPtr<Hittable>> children = getChildrenAsList();
+      // vector<sPtr<Hittable>> sPtrs    = vector<sPtr<Hittable>>();
+      // sPtrs.reserve(children.size());
 
-      std::for_each(children.begin(), children.end(), [&](sPtr<Hittable> e) { sPtrs.push_back(sPtr<Hittable>(e)); });
+      // std::for_each(children.begin(), children.end(), [&](sPtr<Hittable> e) { sPtrs.push_back(sPtr<Hittable>(e)); });
 
       if (newChild != nullptr)
-        sPtrs.push_back(sPtr<Hittable>(newChild));
+        children.push_back(sPtr<Hittable>(newChild));
 
-      return new BVHNode(sPtrs, 0, sPtrs.size(), 0.0f, 1.0f);
+      return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
     }
 
     Hittable *removeChild(sPtr<Hittable> childToRemove) override {
       auto children = getChildrenAsList();
 
       // TODO: figure out a cleaner way
-      std::vector<sPtr<Hittable>>::iterator toRemove = children.end();
-      for(auto it = children.begin(); it != children.end(); it++){
-        if(*it == childToRemove)
+      vector<sPtr<Hittable>>::iterator toRemove = children.end();
+      for (auto it = children.begin(); it != children.end(); it++) {
+        if (*it == childToRemove)
           toRemove = it;
       }
 
-      if(toRemove != children.end())
+      if (toRemove != children.end())
         children.erase(toRemove);
 
       return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);

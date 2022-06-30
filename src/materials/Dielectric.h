@@ -55,19 +55,19 @@ namespace rt {
       return true;
     }
 
-    virtual json GetJson() const override {
+    virtual json toJson() const override {
       // clang-format off
       return json{
         {"type", "dielectric"},
         {"refraction_index", refractionIndex},
-        {"texture", albedo->GetJson()}
+        {"texture", albedo->toJson()}
       };
       // clang-format on
     }
 
     virtual void OnImgui() override {
       albedo->OnImgui();
-      ImGui::DragFloat("Refraction Index", &refractionIndex);
+      ImGui::DragFloat("Refraction Index", &refractionIndex, 0.01, 1, 100);
     }
 
   private:
@@ -92,5 +92,5 @@ namespace rt {
     d.albedo          = TextureFactory::FromJson(j["texture"]);
   }
 
-  inline void to_json(json &j, const Dielectric &d) { j = d.GetJson(); }
+  inline void to_json(json &j, const Dielectric &d) { j = d.toJson(); }
 } // namespace rt
