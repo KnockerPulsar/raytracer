@@ -215,7 +215,7 @@ namespace rt {
     rt::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
-    currentScene->worldRoot->Hit(r, -INFINITY, INFINITY, rec);
+    currentScene->worldRoot->Hit(r, 0, infinity, rec);
 
     return rec.closestHit;
   }

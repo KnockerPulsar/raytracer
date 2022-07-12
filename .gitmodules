@@ -7,3 +7,6 @@
 [submodule "vendor/argumentum"]
 	path = vendor/argumentum
 	url = https://github.com/mmahnic/argumentum.git
+[submodule "vendor/ImGuiFileDialog"]
+	path = vendor/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog
