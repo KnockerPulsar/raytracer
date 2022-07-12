@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
-#include "../vendor/rlImGui/imgui/imgui.h"
+#include <imgui.h>
 #include "editor/Utils.h"
 #include "AABB.h"
 #include "Constants.h"

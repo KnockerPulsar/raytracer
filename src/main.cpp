@@ -1,15 +1,9 @@
-#include "../vendor/argumentum/include/argumentum/argparse.h"
+#include <argumentum/argparse.h>
 #include "Scene.h"
 #include "app.h"
 /*
  TODO:
     
-    ! Boxes seem to be bugged
-      - Open cornell scene 
-      - Go to the small box and try clicking it with the camera facing away from the back wall
-      - Doesn't seem to affect renders?
-      - Probably because I use (-inf, inf) when checking for mouse click ray casts.
-
     Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
     	- For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
 	- For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
