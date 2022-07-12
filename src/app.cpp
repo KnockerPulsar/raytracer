@@ -1,5 +1,4 @@
 #include "app.h"
-#include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Camera.h"
 #include "Defs.h"
@@ -12,6 +11,7 @@
 #include "data_structures/Pixel.h"
 #include "editor/editor.h"
 #include "raytracer.h"
+#include "rlImGui.h"
 #include "rt.h"
 #include <algorithm>
 #include <fstream>
@@ -19,17 +19,19 @@
 #include <memory>
 #include <ostream>
 #include <raylib.h>
+#include <string>
 #include <vector>
 
 namespace rt {
-  void App::setup(AsyncRenderData &ard, int imageWidth, int imageHeight) {
-    ard.rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
-    ard.raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
+  void App::setup(int imageWidth, int imageHeight) {
+    this->imageWidth  = imageWidth;
+    this->imageHeight = imageHeight;
 
-    editor           = std::make_shared<Editor>(ard.currScene);
-    editor->screenRT = ard.rasterRT;
+    ard = AsyncRenderData(imageWidth, imageHeight);
 
-    rt = std::make_shared<Raytracer>(ard);
+    editor = std::make_shared<Editor>(ard);
+
+    rt = std::make_shared<Raytracer>(ard, imageWidth, imageHeight);
 
     editor->nextState = rt;
     rt->nextState     = editor;
@@ -51,28 +53,21 @@ namespace rt {
 
   App::App(int imageWidth, int imageHeight) {
     InitWindow(imageWidth, imageHeight, title.c_str());
-
-    ard = RenderAsync::Perpare(imageWidth, imageHeight)
-              .setScene(std::make_shared<Scene>(Scene::CornellBox(imageWidth, imageHeight)));
-
-    setup(ard, imageWidth, imageHeight);
+    setup(imageWidth, imageHeight);
+    changeScene(Scene::CornellBox(imageWidth, imageHeight));
   }
 
   App::App(int imageWidth, int imageHeight, std::string pathToScene) {
     InitWindow(imageWidth, imageHeight, title.c_str());
-
-    ard = RenderAsync::Perpare(imageWidth, imageHeight)
-              .setScene(std::make_shared<Scene>(Scene::Load(imageWidth, imageHeight, pathToScene)));
-
-    setup(ard, imageWidth, imageHeight);
+    setup(imageWidth, imageHeight);
+    changeScene(Scene::Load(imageWidth, imageHeight, pathToScene));
   }
 
   App::App(int imageWidth, int imageHeight, Scene scene) {
 
     InitWindow(imageWidth, imageHeight, title.c_str());
-
-    ard = RenderAsync::Perpare(imageWidth, imageHeight).setScene(std::make_shared<Scene>(scene));
-    setup(ard, imageWidth, imageHeight);
+    setup(imageWidth, imageHeight);
+    changeScene(scene);
   }
 
   void App::run() {
@@ -83,7 +78,7 @@ namespace rt {
   }
 
   void App::onFrameRender() {
-    auto objects = ard.currScene->worldRoot->getChildrenAsList();
+    auto objects = scene.worldRoot->getChildrenAsList();
     for (auto &&obj : objects) {
       auto t = obj->transformation.translate;
       auto r = obj->transformation.rotate;
@@ -117,6 +112,14 @@ namespace rt {
     }
     }
   }
+  void App::changeScene(Scene scene) {
+    this->scene = scene;
+
+    editor->changeScene(&this->scene);
+    rt->changeScene(&this->scene);
+  }
+
+  void App::changeScene(std::string pathToScene) { changeScene(Scene::Load(imageWidth, imageHeight, pathToScene)); }
 
   App::~App() {
     // Note that if you kill the application in fullscreen, the resolution won't
@@ -143,5 +146,4 @@ namespace rt {
     output << std::setw(4) << json << std::endl;
     output.close();
   }
-
 } // namespace rt

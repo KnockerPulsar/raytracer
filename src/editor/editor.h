@@ -4,6 +4,7 @@
 #include "../IState.h"
 #include "../Scene.h"
 #include "../materials/Material.h"
+#include "RenderAsync.h"
 #include <optional>
 #include <raylib.h>
 #include <vector>
@@ -17,12 +18,8 @@ namespace rt {
   class Scene;
 
   class Editor : public IState {
-
   public:
-    Hittable       *selectedObject = nullptr;
-    Camera         *cam;
-    sPtr<rt::Scene> currentScene;
-    RenderTexture2D screenRT;
+    Hittable *selectedObject = nullptr;
 
     bool   mouseInsideEditorViewport = false;
     ImVec2 viewportMin, viewportMax, viewportSize;
@@ -46,7 +43,7 @@ namespace rt {
 
     static const int numColors = sizeof(colors) / sizeof(colors[0]);
 
-    Editor(sPtr<Scene> s) : currentScene(s) { cam = &s->cam; }
+    Editor(AsyncRenderData &asyncRenderData) {}
 
     // Calls overloaded `Rasterize()` function for each object
     void Rasterize();
@@ -55,13 +52,13 @@ namespace rt {
     void RenderImgui();
 
     // If a selected object is available, renders a gizmo on it
-    void SelectedObjectGizmo() const;
+    void SelectedObjectGizmo();
 
     // Checks for editor related inputs (mouse clicks for picking, gizmo modes)
     void CheckInput();
 
     // Tests a ray against the world and returns whatever it hits (can be null)
-    Hittable *CastRay(Vector2 mousePos) const;
+    Hittable *CastRay(Vector2 mousePos);
 
     void AddObjectImgui();
 
@@ -86,6 +83,8 @@ namespace rt {
     static std::optional<sPtr<Material>> MaterialChanger();
 
     void TopMenuImgui();
+
+    virtual void changeScene(Scene *scene) override;
 
   }; // namespace Editor
 } // namespace rt

@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+add_compile_definitions(FAST_EXIT)
+add_compile_definitions(GAMMA_CORRECTION)
+
+
+set(CMAKE_CXX_FLAGS_RELEASE "-flto -ffast-math -O3 -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp")
+
+# set(CMAKE_BUILD_TYPE Debug)
 CMAKE_POLICY(SET CMP0074 NEW)
 
 # Profiling stuff
@@ -53,16 +60,15 @@ set(SOURCES
 # Define the directories in which to search for the included headers
 include_directories(
   src/
-  src/data_structures/
-  src/editor/
-  src/materials/
-  src/objects/
-  src/textures/
 
-  vendor/argumentum/include/
-  vendor/rlImGui/imgui/  
+  vendor/rlImGui/
   vendor/imguizmo/
+  vendor/rlImGui/imgui/  
   vendor/nlohmann-json/
+  vendor/ImGuiFileDialog
+  vendor/argumentum/include/
+  vendor/ImGuiFileDialog/stb/
+  vendor/stb_image
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR}/bin)

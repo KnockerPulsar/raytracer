@@ -214,7 +214,7 @@ namespace rt {
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
 
-  glm::mat4 Camera::getViewMatrix() const {
+  glm::mat4 Camera::getViewMatrix() {
     // glm::mat4 M = glm::mat4(1);
     // M           = glm::translate(M, lookFrom.toGlm());
     // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
@@ -226,7 +226,7 @@ namespace rt {
     return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), worldUp.toGlm());
   }
 
-  glm::mat4 Camera::getProjectionMatrix() const {
+  glm::mat4 Camera::getProjectionMatrix() {
     return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f);
   }
 } // namespace rt

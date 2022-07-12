@@ -1,5 +1,7 @@
 #pragma once
 #include "AsyncRenderData.h"
+#include "Scene.h"
+#include <string>
 
 namespace rt {
   class Editor;
@@ -7,16 +9,22 @@ namespace rt {
   class IState;
 
   class App {
+
+    Scene           scene;
     AsyncRenderData ard;
+
     sPtr<Editor>    editor;
     sPtr<Raytracer> rt;
+
+    int imageWidth, imageHeight;
 
     bool fullscreen = false;
 
     sPtr<IState> currentState;
 
   public:
-    void setup(AsyncRenderData &ard, int imageWidth, int imageHeight);
+    bool saveOnRender = false;
+    void setup(int imageWidth, int imageHeight);
 
     App(int imageWidth, int imageHeight);
     App(int imageWidth, int imageHeight, std::string pathToScene);
@@ -25,6 +33,8 @@ namespace rt {
     void run();
     void onFrameRender();
     void checkInput();
+    void changeScene(std::string pathToScene);
+    void changeScene(Scene scene);
 
     ~App();
 
@@ -32,5 +42,8 @@ namespace rt {
     static void jsonExportTest();
 
     static void jsonImportTest();
+
+    Scene *getScene() { return &scene; }
+    AsyncRenderData* getARD() { return &ard; }
   };
 } // namespace rt

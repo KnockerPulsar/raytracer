@@ -8,8 +8,6 @@
     	- For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
 	    - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
 
-    Change ColorPicker3 calls to ColorEdit
-
     Automatic image saving on render complete
       - stbi should take care of this.
 

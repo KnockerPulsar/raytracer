@@ -8,15 +8,17 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/Raytracer",
+      "program": "${workspaceFolder}/bin/debug//Raytracer",
       "args": [
         "--image_width",
-        "1280",
+        "400",
         "--image_height",
-        "720",
+        "400",
+        "--scene",
+        "scenes/cornell.json"
       ],
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "cmake",
+      "preLaunchTask": "build debug",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -28,6 +30,22 @@
           "text": "-interpreter-exec console \"skip -gfi **/bits/*.h\""
         }
       ],
+    },
+    {
+      "name": "Release",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/release/Raytracer",
+      "args": [
+        "--image_width",
+        "600",
+        "--image_height",
+        "600",
+        "--scene",
+        "scenes/cornell.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "build release",
     },
   ]
 }

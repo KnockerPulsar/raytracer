@@ -17,7 +17,6 @@ namespace rt {
   struct AsyncRenderData {
     sPtr<JobQueue<Pixel>> pixelJobs;
     vector<sPtr<thread>>  threads;
-    sPtr<Scene>           currScene;
     vector<long>          threadTimes;
     vector<int>           threadProgress;
     bool                  exit = false; // To make threads exit their loops
@@ -29,15 +28,26 @@ namespace rt {
   public:
     AsyncRenderData() = default;
 
-    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<long> tt, vector<int> tp, vector<bool> ft)
-        : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
+    AsyncRenderData(int imageWidth, int imageHeight)
+        : threadProgress(vector(NUM_THREADS, 0)), threadTimes(vector(NUM_THREADS, 0L)),
+          finishedThreads(vector(NUM_THREADS, false)) {
 
-    AsyncRenderData &setScene(sPtr<Scene> s) {
-      currScene = s;
-      return *this;
+      int queueChunkSize = 1024;
+      pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
+
+      raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
+      rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
+
+      // Prepare pixel jobs
+      for (int y = 0; y < imageHeight; y++) {
+        for (int x = 0; x < imageWidth; x++) {
+          pixelJobs->addJobNoLock(Pixel{x, y, vec3::Zero()});
+        }
+      }
     }
 
-    ~AsyncRenderData() { RenderAsync::Shutdown(*this); }
+    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<long> tt, vector<int> tp, vector<bool> ft)
+        : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
   };
 
 } // namespace rt

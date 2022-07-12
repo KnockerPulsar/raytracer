@@ -78,8 +78,8 @@ namespace rt {
     void                         RenderImgui();
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
 
-    glm::mat4 getViewMatrix() const;
-    glm::mat4 getProjectionMatrix() const;
+    glm::mat4 getViewMatrix();
+    glm::mat4 getProjectionMatrix();
 
     void UpdateDirectionVectors();
   };

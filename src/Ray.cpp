@@ -17,7 +17,7 @@ using rt::Pixel, rt::Camera, rt::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
 
 namespace rt {
-  vec3 Ray::RayColor(const rt::Ray &r, Scene &scene, int depth) {
+  vec3 Ray::RayColor(const rt::Ray &r, const Scene* scene, int depth) {
     HitRecord rec;
 
     // Limit max recursion depth
@@ -25,11 +25,11 @@ namespace rt {
       return vec3::Zero();
     }
 
-    if (!scene.worldRoot->Hit(r, 0.001f, infinity, rec)) {
-      if (scene.skysphere)
-        scene.skysphere->Hit(r, -infinity, infinity, rec);
+    if (!scene->worldRoot->Hit(r, 0.001f, infinity, rec)) {
+      if (scene->skysphere)
+        scene->skysphere->Hit(r, -infinity, infinity, rec);
       else
-        return scene.backgroundColor;
+        return scene->backgroundColor;
     }
 
     rt::Ray scattered;
@@ -42,7 +42,7 @@ namespace rt {
     return emitted + attenuation * RayColor(scattered, scene, depth - 1);
   }
 
-  void Ray::Trace(AsyncRenderData &ard, int threadIndex) {
+  void Ray::Trace(AsyncRenderData &ard, const Scene* scene, int threadIndex) {
 
     auto start = high_resolution_clock::now();
     while (true) {
@@ -57,30 +57,29 @@ namespace rt {
 #endif
 
         Pixel      &job       = *currentJob;
-        sPtr<Scene> currScene = ard.currScene;
 
         int x = job.x;
         int y = job.y;
 
-        for (int s = 0; s < currScene->settings.samplesPerPixel; s++) {
-          float   u   = (x + RandomFloat()) / (currScene->imageWidth - 1);
-          float   v   = (y + RandomFloat()) / (currScene->imageHeight - 1);
-          rt::Ray ray = currScene->cam.GetRay(u, v);
-          job.color += rt::Ray::RayColor(ray, *currScene, currScene->settings.maxDepth);
+        for (int s = 0; s < scene->settings.samplesPerPixel; s++) {
+          float   u   = (x + RandomFloat()) / (scene->imageWidth - 1);
+          float   v   = (y + RandomFloat()) / (scene->imageHeight - 1);
+          rt::Ray ray = scene->cam.GetRay(u, v);
+          job.color += rt::Ray::RayColor(ray, scene, scene->settings.maxDepth);
         }
 
 #ifdef GAMMA_CORRECTION
         // Gamma correction
         float r = job.color.x, g = job.color.y, b = job.color.z;
 
-        float scale = 1.0 / currScene->settings.samplesPerPixel;
+        float scale = 1.0 / scene->settings.samplesPerPixel;
         r           = sqrt(scale * r);
         g           = sqrt(scale * g);
         b           = sqrt(scale * b);
 
         job.color = vec3(r, g, b);
 #else
-        job.color /= float(currScene->settings.samplesPerPixel);
+        job.color /= float(scene->settings.samplesPerPixel);
 #endif
         ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
       }
