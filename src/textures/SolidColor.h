@@ -20,7 +20,7 @@ namespace rt {
     virtual vec3 Value(float u, float v, const vec3 &p) const override { return color * intensity; }
 
     virtual void OnImgui() override {
-      ImGui::ColorPicker3("Albedo color", &color.x);
+      ImGui::ColorEdit3("Albedo color", &color.x);
     }
   };
 

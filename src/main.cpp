@@ -6,7 +6,7 @@
     
     Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
     	- For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
-	- For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
+	    - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
 
     Change ColorPicker3 calls to ColorEdit
 

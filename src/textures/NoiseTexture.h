@@ -41,7 +41,7 @@ namespace rt {
 
       ImGui::DragFloat("Noise scale", &scale);
       ImGui::DragFloat("Turbulance scale", &turbScale);
-      ImGui::ColorPicker3("Base color", &baseColor.x);
+      ImGui::ColorEdit3("Base color", &baseColor.x);
     }
   };
 

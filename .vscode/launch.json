@@ -8,7 +8,7 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/Debug/Raytracer",
+      "program": "${workspaceFolder}/bin/Raytracer",
       "args": [
         "--image_width",
         "1280",
@@ -16,7 +16,7 @@
         "720",
       ],
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "premake+build debug",
+      "preLaunchTask": "cmake",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -29,25 +29,5 @@
         }
       ],
     },
-    {
-      "name": "Run",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/bin/Release/Raytracer",
-      "args": [
-        "--image_width",
-        "1280",
-        "--image_height",
-        "720",
-      ],
-      "cwd": "${workspaceFolder}",
-      "preLaunchTask": "premake+build release",
-      "setupCommands": [
-        {
-          "description": "Skip library files",
-          "text": "-interpreter-exec console \"skip -gfi **/bits/*.h\""
-        }
-      ],
-    }
   ]
 }

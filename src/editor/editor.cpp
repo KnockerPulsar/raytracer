@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "../HittableBuilder.h"
+#include "imgui.h"
 
 namespace rt {
 
@@ -326,7 +327,7 @@ namespace rt {
 
   void Editor::RaytraceSettingsImgui() {
     currentScene->settings.OnImgui();
-    ImGui::ColorPicker3("Background color", &currentScene->backgroundColor.x);
+    ImGui::ColorEdit3("Background color", &currentScene->backgroundColor.x);
   }
 
   void Editor::ObjectListImgui() {
