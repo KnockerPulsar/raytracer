@@ -1,5 +1,8 @@
-
+.cache/
+build/
 **/bin/
 **/obj/
-*.log
 modules/premake-ecc/
+
+*.log
+CMakeCache.txt
