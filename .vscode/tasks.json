@@ -21,6 +21,7 @@
         {
             "label": "build debug",
             "type": "shell",
+            "dependsOrder": "sequence",
             "dependsOn": [
                 "cmake debug",
                 "copy compile commands"
@@ -29,6 +30,7 @@
         {
             "label": "build release",
             "type": "shell",
+            "dependsOrder": "sequence",
             "dependsOn": [
                 "cmake release",
                 "copy compile commands"

@@ -420,23 +420,8 @@ namespace rt {
         ImGui::EndMenu();
       }
 
-      std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes = {
-          {"Default", Scene::Default},
-          {"Scene1", Scene::Scene1},
-          {"Scene2", Scene::Scene2},
-          {"Random", std::bind(Scene::Random, std::placeholders::_1, std::placeholders::_2, 11, 11)},
-          {"Random Moving",
-           std::bind(Scene::RandomMovingSpheres, std::placeholders::_1, std::placeholders::_2, 11, 11)},
-          {"TwoSpheres", Scene::TwoSpheres},
-          {"Earth", Scene::Earth},
-          {"Light", Scene::Light},
-          {"Cornell", Scene::CornellBox},
-          {"Transformation test", Scene::TransformationTest},
-          {"Plane test", Scene::PlaneTest},
-          {"Raster test", Scene::RasterTest}};
-
       if (ImGui::BeginMenu("Built in")) {
-        for (auto &[name, loader] : builtInScenes) {
+        for (auto &[name, loader] : Scene::builtInScenes) {
           if (ImGui::MenuItem(name.c_str())) {
             app->changeScene(loader(imageWidth, imageHeight));
           }

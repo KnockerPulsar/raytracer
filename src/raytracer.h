@@ -29,7 +29,7 @@ namespace rt {
     virtual void onEnter() { startRaytracing(); }
 
     virtual void onExit() {
-      KillThreads();
+      ard.KillThreads();
 
       // Reset job queue chunks
       ard.pixelJobs->setCurrentChunkStart(0);
@@ -93,7 +93,7 @@ namespace rt {
       ClearBackground(BLACK);
 
       if (allFinished = ard.pixelJobs->jobsDone(); allFinished) {
-        KillThreads();
+        ard.KillThreads();
         
         BlitToBuffer();
 
@@ -164,21 +164,6 @@ namespace rt {
       // 4 components for RGBA;
       // Couldn't get raylibs ExportImage to work with BMP. It did work with PNG however
       stbi_write_bmp(ss.str().c_str(), raytraced.width, raytraced.height, 4, raytraced.data);
-    }
-
-    void KillThreads() {
-      ard.pixelJobs->awakeAllWorkers();
-
-      // Tell threads to exit
-      ard.exit = true;
-
-      // Join threads
-      for (auto &&t : ard.threads) {
-        t->join();
-      }
-
-      // Clear thread vector
-      ard.threads.clear();
     }
   };
 } // namespace rt

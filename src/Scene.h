@@ -56,6 +56,9 @@ namespace rt {
 
     RaytraceSettings settings;
 
+    // Initialized in Scene.cpp to a list of scene names and loading functions
+    static std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes;
+
     Scene() = default;
     Scene(Hittable *wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
         : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), settings{spp, md}, backgroundColor(bc) {}
@@ -99,13 +102,14 @@ namespace rt {
 
   inline void to_json(json &j, const Scene &s) {
     json objArr = s.GetObjArray();
-    j           = json{{"settings",
-                        {
-                            {"background_color", s.backgroundColor},
-                            {"num_samples", s.settings.samplesPerPixel},
-                            {"max_depth", s.settings.maxDepth},
-              }},
-             s.cam,
-             {"objects", objArr}};
+    j           = json{
+        {"settings",
+                   {
+                       {"background_color", s.backgroundColor},
+                       {"num_samples", s.settings.samplesPerPixel},
+                       {"max_depth", s.settings.maxDepth},
+         }},
+        s.cam,
+        {"objects", objArr}};
   }
 } // namespace rt

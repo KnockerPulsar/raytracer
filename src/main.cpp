@@ -3,9 +3,6 @@
 #include "app.h"
 /*
  TODO:
-    ! BUG: Random moving spheres scene doesn't rasterize properly
-        - Shows "ERROR: RLGL: Batch elements overflow"
-        - Raytracing works fine
 
     Make the number of threads a controllable variable
         - Mostly just used in AsyncRenderData when spawning threads 

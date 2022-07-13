@@ -48,6 +48,24 @@ namespace rt {
 
     AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<long> tt, vector<int> tp, vector<bool> ft)
         : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
-  };
 
+    void KillThreads() {
+      this->pixelJobs->awakeAllWorkers();
+
+      // Tell threads to exit
+      this->exit = true;
+
+      // Join threads
+      for (auto &&t : this->threads) {
+        t->join();
+      }
+
+      // Clear thread vector
+      this->threads.clear();
+    }
+
+    ~AsyncRenderData() {
+      KillThreads();
+    }
+  };
 } // namespace rt

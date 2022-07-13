@@ -41,6 +41,20 @@ using nlohmann::json;
 
 namespace rt {
 
+  std::vector<std::pair<std::string, std::function<Scene(int, int)>>> Scene::builtInScenes = {
+      {"Default", Default},
+      {"Scene1", Scene1},
+      {"Scene2", Scene2},
+      {"Random", std::bind(Random, std::placeholders::_1, std::placeholders::_2, 10, 10)},
+      {"Random Moving", std::bind(RandomMovingSpheres, std::placeholders::_1, std::placeholders::_2, 10, 10)},
+      {"TwoSpheres", TwoSpheres},
+      {"Earth", Earth},
+      {"Light", Light},
+      {"Cornell", CornellBox},
+      {"Transformation test", TransformationTest},
+      {"Plane test", PlaneTest},
+      {"Raster test", RasterTest}};
+
   void Scene::addSkysphere(std::string ssTex) {
 
     skysphereTexture = ssTex;
@@ -509,7 +523,7 @@ namespace rt {
                    .withName("Box 2")
                    .build());
 
-    s = Scene( new BVHNode(world->objects, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world->objects, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
     return s;
   }

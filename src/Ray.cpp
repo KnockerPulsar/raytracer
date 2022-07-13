@@ -61,7 +61,7 @@ namespace rt {
         int x = job.x;
         int y = job.y;
 
-        for (int s = 0; s < scene->settings.samplesPerPixel; s++) {
+          for (int s = 0; s < scene->settings.samplesPerPixel; s++) {
           float   u   = (x + RandomFloat()) / (scene->imageWidth - 1);
           float   v   = (y + RandomFloat()) / (scene->imageHeight - 1);
           rt::Ray ray = scene->cam.GetRay(u, v);
