@@ -23,15 +23,15 @@
 #include <vector>
 
 namespace rt {
-  void App::setup(int imageWidth, int imageHeight) {
+  void App::setup(int imageWidth, int imageHeight, int numThreads) {
     this->imageWidth  = imageWidth;
     this->imageHeight = imageHeight;
 
-    ard = AsyncRenderData(imageWidth, imageHeight);
+    ard = AsyncRenderData(imageWidth, imageHeight, numThreads);
 
     editor = std::make_shared<Editor>(ard);
 
-    rt = std::make_shared<Raytracer>(ard, imageWidth, imageHeight);
+    rt = std::make_shared<Raytracer>(ard);
 
     editor->nextState = rt;
     rt->nextState     = editor;
@@ -51,22 +51,22 @@ namespace rt {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   }
 
-  App::App(int imageWidth, int imageHeight) {
+  App::App(int imageWidth, int imageHeight, int numThreads) : numThreads(numThreads) {
     InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight);
+    setup(imageWidth, imageHeight, numThreads);
     changeScene(Scene::CornellBox(imageWidth, imageHeight));
   }
 
-  App::App(int imageWidth, int imageHeight, std::string pathToScene) {
+  App::App(int imageWidth, int imageHeight, std::string pathToScene, int numThreads) : numThreads(numThreads) {
     InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight);
+    setup(imageWidth, imageHeight, numThreads);
     changeScene(Scene::Load(imageWidth, imageHeight, pathToScene));
   }
 
-  App::App(int imageWidth, int imageHeight, Scene scene) {
+  App::App(int imageWidth, int imageHeight, Scene scene, int numThreads) : numThreads(numThreads) {
 
     InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight);
+    setup(imageWidth, imageHeight, numThreads);
     changeScene(scene);
   }
 

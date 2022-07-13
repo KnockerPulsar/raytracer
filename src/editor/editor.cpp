@@ -334,6 +334,12 @@ namespace rt {
     ImGui::Begin("Other settings");
     ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
     ImGui::Checkbox("Save on render?", &app->saveOnRender);
+
+    int numThreads = app->getNumThreads();
+    if(ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
+      app->changeNumThreads(numThreads);
+    }
+    
     ImGui::End();
   }
 

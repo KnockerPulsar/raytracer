@@ -22,9 +22,7 @@ namespace rt {
     bool             showProg = true;
     AsyncRenderData &ard;
 
-    Raytracer(AsyncRenderData &ard, int imageWidth, int imageHeight) : ard(ard) {
-      ard = AsyncRenderData(imageWidth, imageHeight);
-    }
+    Raytracer(AsyncRenderData &ard) : ard(ard) {}
 
     virtual void onEnter() { startRaytracing(); }
 
@@ -35,7 +33,7 @@ namespace rt {
       ard.pixelJobs->setCurrentChunkStart(0);
 
       // Reset thread times and progress
-      for (int i = 0; i < NUM_THREADS; i++) {
+      for (int i = 0; i < app->getNumThreads(); i++) {
         ard.threadTimes[i]    = 0;
         ard.threadProgress[i] = 0;
       }
@@ -64,8 +62,8 @@ namespace rt {
         job.color = vec3::Zero();
       }
 
-      for (int t = 0; t < NUM_THREADS; t++) {
-        ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), getScene() , t));
+      for (int t = 0; t < app->getNumThreads(); t++) {
+        ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), getScene(), t));
       }
     }
 
@@ -94,10 +92,10 @@ namespace rt {
 
       if (allFinished = ard.pixelJobs->jobsDone(); allFinished) {
         ard.KillThreads();
-        
+
         BlitToBuffer();
 
-        if(app->saveOnRender)
+        if (app->saveOnRender)
           Autosave();
       }
 
@@ -128,7 +126,7 @@ namespace rt {
           if (ImGui::BeginTable("Thread status", 3)) {
             ImGui::TableNextRow();
 
-            for (int t = 0; t < NUM_THREADS; t++) {
+            for (int t = 0; t < app->getNumThreads(); t++) {
               // Thread labels
               ImGui::TableNextRow();
               ImGui::TableNextColumn();

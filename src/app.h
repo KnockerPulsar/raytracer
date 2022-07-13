@@ -16,7 +16,7 @@ namespace rt {
     sPtr<Editor>    editor;
     sPtr<Raytracer> rt;
 
-    int imageWidth, imageHeight;
+    int imageWidth, imageHeight, numThreads;
 
     bool fullscreen = false;
 
@@ -24,11 +24,11 @@ namespace rt {
 
   public:
     bool saveOnRender = true;
-    void setup(int imageWidth, int imageHeight);
+    void setup(int imageWidth, int imageHeight, int numThreads);
 
-    App(int imageWidth, int imageHeight);
-    App(int imageWidth, int imageHeight, std::string pathToScene);
-    App(int imageWidth, int imageHeight, Scene scene);
+    App(int imageWidth, int imageHeight, int numThreads);
+    App(int imageWidth, int imageHeight, std::string pathToScene, int numThreads);
+    App(int imageWidth, int imageHeight, Scene scene, int numThreads);
 
     void run();
     void onFrameRender();
@@ -43,7 +43,13 @@ namespace rt {
 
     static void jsonImportTest();
 
-    Scene *getScene() { return &scene; }
-    AsyncRenderData* getARD() { return &ard; }
+    Scene           *getScene() { return &scene; }
+    AsyncRenderData *getARD() { return &ard; }
+    int              getNumThreads() const { return numThreads; }
+
+    void changeNumThreads(int newNumThreads) {
+      numThreads = newNumThreads;
+      ard.changeNumThreads(numThreads);
+    }
   };
 } // namespace rt

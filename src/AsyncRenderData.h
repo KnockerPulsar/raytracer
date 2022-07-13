@@ -15,12 +15,15 @@ using std::vector, std::thread;
 
 namespace rt {
   struct AsyncRenderData {
-    sPtr<JobQueue<Pixel>> pixelJobs;
     vector<sPtr<thread>>  threads;
+
+    sPtr<JobQueue<Pixel>> pixelJobs;
+
     vector<long>          threadTimes;
     vector<int>           threadProgress;
-    bool                  exit = false; // To make threads exit their loops
     vector<bool>          finishedThreads;
+
+    bool                  exit = false; // To make threads exit their loops
 
     RenderTexture2D raytraceRT;
     RenderTexture2D rasterRT;
@@ -28,9 +31,9 @@ namespace rt {
   public:
     AsyncRenderData() = default;
 
-    AsyncRenderData(int imageWidth, int imageHeight)
-        : threadProgress(vector(NUM_THREADS, 0)), threadTimes(vector(NUM_THREADS, 0L)),
-          finishedThreads(vector(NUM_THREADS, false)) {
+    AsyncRenderData(int imageWidth, int imageHeight, int numThreads)
+        : threadProgress(vector(numThreads, 0)), threadTimes(vector(numThreads, 0L)),
+          finishedThreads(vector(numThreads, false)) {
 
       int queueChunkSize = 1024;
       pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
@@ -64,8 +67,13 @@ namespace rt {
       this->threads.clear();
     }
 
-    ~AsyncRenderData() {
+    void changeNumThreads(int newNumThreads) {
       KillThreads();
+      threadProgress.resize(newNumThreads);
+      threadTimes.resize(newNumThreads);
+      finishedThreads.resize(newNumThreads);
     }
+
+    ~AsyncRenderData() { KillThreads(); }
   };
 } // namespace rt

@@ -11,11 +11,13 @@
       "program": "${workspaceFolder}/bin/debug//Raytracer",
       "args": [
         "--image_width",
-        "1080",
+        "400",
         "--image_height",
-        "1080",
+        "400",
         "--scene",
-        "scenes/cornell.json"
+        "scenes/cornell.json",
+        "--threads",
+        "1"
       ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build debug",
@@ -42,7 +44,9 @@
         "--image_height",
         "600",
         "--scene",
-        "scenes/cornell.json"
+        "scenes/cornell.json",
+        "--threads",
+        "1"
       ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build release",
