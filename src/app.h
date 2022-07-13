@@ -23,7 +23,7 @@ namespace rt {
     sPtr<IState> currentState;
 
   public:
-    bool saveOnRender = false;
+    bool saveOnRender = true;
     void setup(int imageWidth, int imageHeight);
 
     App(int imageWidth, int imageHeight);

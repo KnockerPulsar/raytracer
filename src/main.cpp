@@ -3,13 +3,16 @@
 #include "app.h"
 /*
  TODO:
+    ! BUG: Random moving spheres scene doesn't rasterize properly
+        - Shows "ERROR: RLGL: Batch elements overflow"
+        - Raytracing works fine
+
+    Make the number of threads a controllable variable
+        - Mostly just used in AsyncRenderData when spawning threads 
     
     Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
     	- For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
 	    - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
-
-    Automatic image saving on render complete
-      - stbi should take care of this.
 
     Finish up scene (de)serialization
       - Saving and loading done
@@ -18,8 +21,6 @@
       - Need to filter out common field saving and loading into the base Hittable class.
       - Hittables don't load their name
   
-    Add menu with built in scenes 
-
     Regenerate BVH tree automatically on object transform with ImGuizmo? 
       - At least after letting go
       - Need a regeneration method instead of using addChild(nullptr)

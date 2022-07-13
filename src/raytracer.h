@@ -92,16 +92,13 @@ namespace rt {
     bool onFinished() {
       ClearBackground(BLACK);
 
-      if (bool renderDone = ard.pixelJobs->jobsDone(); renderDone && !allFinished) {
+      if (allFinished = ard.pixelJobs->jobsDone(); allFinished) {
         KillThreads();
         
-        std::cout << "Blitting frame \n";
         BlitToBuffer();
 
         if(app->saveOnRender)
           Autosave();
-
-        allFinished = renderDone;
       }
 
       DrawTextureRec(
@@ -153,14 +150,14 @@ namespace rt {
 
     void Autosave() {
       std::stringstream ss;
-      std::cout << "Finished render " << ss.str() << std::endl;
 
       auto t  = std::time(nullptr);
       auto tm = *std::localtime(&t);
       ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageWidth << "x"
          << getScene()->imageHeight << "_" << getScene()->settings.samplesPerPixel << "_"
-         << getScene()->settings.maxDepth << ".bmp" << std::endl;
-      ;
+         << getScene()->settings.maxDepth << ".bmp";
+
+      std::cout << "Finished render: " << ss.str() << std::endl;
 
       Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);
 
