@@ -96,7 +96,6 @@ namespace rt {
 
     virtual void Rasterize(vec3 color) override {
 
-      // TODO: Figure out a way to order vertices and just draw once
       DrawTriangle3D(v0.p, v1.p, v2.p, color.toRaylibColor(255));
       auto  normalStart = (v0.p + v1.p + v2.p) / 3;
       Color inv         = color.toRaylibColor(255);

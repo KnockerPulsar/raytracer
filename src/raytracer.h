@@ -3,6 +3,8 @@
 #include "IState.h"
 #include "Ray.h"
 #include "RenderAsync.h"
+#include "data_structures/JobQueue.h"
+#include "data_structures/Pixel.h"
 #include "stb_image_write.h"
 #include <algorithm>
 #include <functional>
@@ -68,24 +70,33 @@ namespace rt {
       }
     }
 
-    // TODO: Figure out a cleaner way
     void BlitToBuffer() {
-      BeginTextureMode(ard.raytraceRT);
 
-      auto pixelJobsVector = ard.pixelJobs->getJobsVector();
-      for (int i = 0; i < ard.pixelJobs->numberOfJobs; i++) {
-        Pixel &pixel = pixelJobsVector[i];
+      auto* pixelData = new Color[getScene()->imageWidth * getScene()->imageHeight];
+      auto jobs      = ard.pixelJobs->getJobsVector();
 
-        // Clamp r, g, and b to prevent underflows and artifacts
-
-        Color clr = ColorFromFloats(Clamp(pixel.color.x, 0, 1), Clamp(pixel.color.y, 0, 1), Clamp(pixel.color.z, 0, 1));
-
-        // pixel.color = vec3::Zero();
-
-        DrawPixel(pixel.x, pixel.y, clr);
+      // Copy over only the color data
+      for (int i = 0; i < jobs.size(); ++i) {
+        pixelData[i] = jobs[i].color.toRaylibColor(255);
       }
 
-      EndTextureMode();
+      // Unload old texture
+      UnloadTexture(ard.raytraceRT.texture);
+
+      // Create texture from image containing the color data
+      Image raytraced = {
+          .data    = pixelData,
+          .width   = getScene()->imageWidth,
+          .height  = getScene()->imageHeight,
+          .mipmaps = 1,
+          .format  = RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+
+      // Deletes pixelData afte copying it to another buffer
+      ImageFlipVertical(&raytraced);
+
+      ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
+
+      UnloadImage(raytraced);
     }
 
     bool onFinished() {
@@ -170,6 +181,8 @@ namespace rt {
       // 4 components for RGBA;
       // Couldn't get raylibs ExportImage to work with BMP. It did work with PNG however
       stbi_write_bmp(ss.str().c_str(), raytraced.width, raytraced.height, 4, raytraced.data);
+
+      UnloadImage(raytraced);
     }
   };
 } // namespace rt

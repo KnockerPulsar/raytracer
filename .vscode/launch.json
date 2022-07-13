@@ -8,7 +8,7 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/debug//Raytracer",
+      "program": "${workspaceFolder}/bin/debug/Raytracer",
       "args": [
         "--image_width",
         "400",
@@ -17,7 +17,7 @@
         "--scene",
         "scenes/cornell.json",
         "--threads",
-        "1"
+        "12 "
       ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build debug",
@@ -40,9 +40,9 @@
       "program": "${workspaceFolder}/bin/release/Raytracer",
       "args": [
         "--image_width",
-        "600",
+        "1080",
         "--image_height",
-        "600",
+        "1080",
         "--scene",
         "scenes/cornell.json",
         "--threads",

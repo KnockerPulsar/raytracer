@@ -12,12 +12,17 @@
 #include <utility>
 #include <vector>
 
+using std::vector, std::pair;
+
 namespace rt {
+
+  class AsyncRenderData;
+
   template <typename JobData> class JobQueue {
   private:
-    std::vector<JobData> jobs;
-    int                  currentChunkStart;
-    std::mutex           queueMutex;
+    vector<JobData> jobs;
+    int             currentChunkStart;
+    std::mutex      queueMutex;
 
     std::condition_variable threadBarrier;
 
@@ -33,10 +38,8 @@ namespace rt {
     // Used to add jobs by the main thread.
     void addJobNoLock(JobData newJobData) { jobs.push_back(newJobData); }
 
-    typedef typename std::vector<JobData>::iterator JobIter;
-
-
-    std::pair<JobIter, JobIter> getChunk(AsyncRenderData& ard, int threadIndex) {
+    pair<typename vector<JobData>::iterator, typename vector<JobData>::iterator>
+    getChunk(AsyncRenderData &ard, int threadIndex) {
 
       // Unlocks automatically on scope end
       std::unique_lock<std::mutex> lk{queueMutex};
@@ -57,10 +60,11 @@ namespace rt {
       return std::make_pair(start, end);
     }
 
-    std::vector<JobData> &getJobsVector() { return jobs; }
+    vector<JobData> &getJobsVector() { return jobs; }
 
-    int  getCurrentChunkStart() { return currentChunkStart; }
-    int  getChunkSize() const { return chunkSize; }
+    int getCurrentChunkStart() { return currentChunkStart; }
+
+    int getChunkSize() const { return chunkSize; }
 
     void awakeAllWorkers() {
       currentChunkStart = 0;

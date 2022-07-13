@@ -14,7 +14,7 @@ vec3::vec3(const Vector3 &conv) : Vector3{conv} {}
 
 vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
 
-vec3::vec3(const Color& color) : vec3(color.r, color.g, color.b) {}
+vec3::vec3(const Color &color) : vec3(float(color.r) / 255, float(color.g) / 255, float(color.b) / 255) {}
 
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
 
@@ -22,6 +22,9 @@ glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 
 Color vec3::toRaylibColor(u_char alpha) const {
   vec3 temp = *this * 255;
+  temp.x    = std::min(temp.x, 255.0f);
+  temp.y    = std::min(temp.y, 255.0f);
+  temp.z    = std::min(temp.z, 255.0f);
   return Color{(u_char)temp.x, (u_char)temp.y, (u_char)temp.z, alpha};
 }
 

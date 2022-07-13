@@ -37,8 +37,8 @@ namespace rt {
     ImGuizmo::OPERATION imguizmoOp   = ImGuizmo::OPERATION::TRANSLATE;
 
     inline static const Color colors[] = {
-        LIGHTGRAY, GRAY, DARKGRAY, YELLOW, GOLD,   ORANGE,     PINK,  RED,   MAROON,    GREEN, LIME,    DARKGREEN,
-        SKYBLUE,   BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, WHITE, MAGENTA, RAYWHITE,
+        GOLD,   GRAY,      DARKPURPLE, SKYBLUE,  MAROON, ORANGE, GREEN, RED,       DARKGRAY, PURPLE, LIGHTGRAY, BEIGE,
+        VIOLET, DARKBROWN, MAGENTA,    RAYWHITE, LIME,   WHITE,  BROWN, DARKGREEN, DARKBLUE, BLUE,   YELLOW,    PINK,
     };
 
     static const int numColors = sizeof(colors) / sizeof(colors[0]);
