@@ -6,3 +6,6 @@ modules/premake-ecc/
 
 *.log
 CMakeCache.txt
+compile_commands.json
+compile_commands.json
+*.bmp
