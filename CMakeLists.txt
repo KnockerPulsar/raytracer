@@ -32,6 +32,7 @@ set(SOURCES
   src/HittableList.cpp
   src/RenderAsync.cpp
   src/Ray.cpp
+  src/AsyncRenderData.cpp
 
   src/data_structures/vec3.cpp
 

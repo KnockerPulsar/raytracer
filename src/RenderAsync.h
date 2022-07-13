@@ -19,9 +19,5 @@ namespace rt {
 
   enum SceneID { scene1, scene2, random, random_moving, two_spheres, earth, light, cornell };
 
-  class RenderAsync {
-  public:
-    static void ResetThreads(AsyncRenderData &ard);
-  };
 
 } // namespace rt

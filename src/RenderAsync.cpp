@@ -34,6 +34,4 @@ using std::string, std::vector, std::chrono::high_resolution_clock, std::chrono:
     std::chrono::milliseconds, std::pair, std::future, std::future, std::async, std::ref, std::make_pair, std::launch,
     std::future, std::async, std::ref, std::make_pair, std::launch;
 
-namespace rt {
-  void RenderAsync::ResetThreads(AsyncRenderData &ard) { ard.pixelJobs->awakeAllWorkers(); }
-} // namespace rt
+namespace rt {} // namespace rt

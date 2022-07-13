@@ -46,7 +46,7 @@
         "--scene",
         "scenes/cornell.json",
         "--threads",
-        "1"
+        "12"
       ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build release",

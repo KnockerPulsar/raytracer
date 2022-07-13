@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "data_structures/Pixel.h"
 #include "materials/Material.h"
+#include "data_structures/JobQueue.h"
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -46,7 +47,7 @@ namespace rt {
 
     auto start = high_resolution_clock::now();
     while (true) {
-      auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk();
+      auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk(ard, threadIndex);
 
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
 

@@ -16,7 +16,7 @@ using std::ref;
 
 namespace rt {
   class Raytracer : public IState {
-    bool allFinished;
+    bool allFinished = false;
 
   public:
     bool             showProg = true;
@@ -34,8 +34,9 @@ namespace rt {
 
       // Reset thread times and progress
       for (int i = 0; i < app->getNumThreads(); i++) {
-        ard.threadTimes[i]    = 0;
-        ard.threadProgress[i] = 0;
+        ard.threadTimes[i]     = 0;
+        ard.threadProgress[i]  = 0;
+        ard.finishedThreads[i] = false;
       }
 
       // Clear results from previous job.
@@ -90,7 +91,14 @@ namespace rt {
     bool onFinished() {
       ClearBackground(BLACK);
 
-      if (allFinished = ard.pixelJobs->jobsDone(); allFinished) {
+      bool finished = true;
+      for (auto finishedThread : ard.finishedThreads) {
+        finished &= finishedThread;
+      }
+
+      if (finished && !allFinished) {
+        allFinished = true;
+
         ard.KillThreads();
 
         BlitToBuffer();
