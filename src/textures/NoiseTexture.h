@@ -4,6 +4,9 @@
 #include "../data_structures/vec3.h"
 
 #include "Texture.h"
+#include "Util.h"
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 
@@ -23,7 +26,7 @@ namespace rt {
     virtual vec3 Value(float u, float v, const vec3 &p) const override {
       // The noise fn can return negative values
       // Scale it to between 0 and 1
-      return (vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale * p.z + turbScale * noise->Turb(p))) * baseColor) * intensity;
+      return (vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale * (p.z) + turbScale * noise->Turb(p))) * baseColor) * multiplier;
     }
 
     virtual json toJson() const override {
@@ -36,12 +39,23 @@ namespace rt {
       baseColor = j["base_color"].get<vec3>();
     }
 
-    virtual void OnImgui() override {
-      // TODO: figure a way out to preview perlin noise
+    // TODO: Better perlin preview
+    // Main issue: result depends on the given point and not the uv coords
+    // uvs give 2 degrees of freedom while points have 3 degrees of freedom
+    // Can't use RNG since, well, it's random
+    void generatePreview() override {
+      Texture::generatePreviewUtil([](float u, float v) { return v * u; });
+    }
 
-      ImGui::DragFloat("Noise scale", &scale);
-      ImGui::DragFloat("Turbulance scale", &turbScale);
+    virtual void OnImgui() override {
+
+      ImGui::DragFloat("Noise scale", &scale, 0.1f);
+      ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f);
       ImGui::ColorEdit3("Base color", &baseColor.x);
+
+      ImGui::Spacing();
+
+      Texture::previewOrGenerate();
     }
   };
 

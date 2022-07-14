@@ -8,19 +8,20 @@
 #include <raymath.h>
 
 namespace rt {
-  Sphere::Sphere(float r, shared_ptr<Material> m) : radius(r) { material = m; }
+  Sphere::Sphere(float r) : radius(r) {}
+  Sphere::Sphere(float r, shared_ptr<Material> m) : Sphere(r) { material = m; }
 
   bool Sphere::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
 
     // Spheres are centered at zero by default
     // We transform the ray hitting the object so no need to move it.
-    auto center = vec3::Zero(); 
+    auto center = vec3::Zero();
 
     // Vector between ray origin and sphere center
-    vec3  oc     = r.origin - center;
-    float a      = r.direction.SqrLen();
+    vec3  oc    = r.origin - center;
+    float a     = r.direction.SqrLen();
     float halfB = vec3::DotProd(oc, r.direction);
-    float c      = oc.Len() * oc.Len() - radius * radius;
+    float c     = oc.Len() * oc.Len() - radius * radius;
 
     float discriminant = halfB * halfB - a * c;
     if (discriminant < 0)
@@ -35,8 +36,8 @@ namespace rt {
         return false;
     }
 
-    rec.t                     = root;
-    rec.p                     = r.At(rec.t);
+    rec.t                    = root;
+    rec.p                    = r.At(rec.t);
     const vec3 outwardNormal = (rec.p - center) / radius;
     rec.set_face_normal(r, outwardNormal);
     GetSphereUV(outwardNormal, rec.u, rec.v);

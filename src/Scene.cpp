@@ -355,23 +355,17 @@ namespace rt {
     //     make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9,
     //     0.9));
 
-    auto           perlinTexture    = make_shared<NoiseTexture>(4.0f);
-    sPtr<Material> lambertianPerlin = make_shared<Lambertian>(perlinTexture);
+    auto perlinTexture  = make_shared<NoiseTexture>(4.0f);
+    auto checkerTexture = make_shared<CheckerTexture>(vec3(0), vec3(1), 6);
+
+    sPtr<Material> lambertianPerlin  = make_shared<Lambertian>(perlinTexture);
+    sPtr<Material> lambertianChecker = make_shared<Lambertian>(checkerTexture);
 
     HittableList world;
 
     // No need to use a BVH since there are only two spheres
-
-    auto sphere1 = Sphere(10, lambertianPerlin);
-    sphere1.changeMaterial(lambertianPerlin);
-    sphere1.transformation.translate = vec3(0, -10, 0);
-
-    auto sphere2 = Sphere(10, lambertianPerlin);
-    sphere2.changeMaterial(lambertianPerlin);
-    sphere2.transformation.translate = vec3(0, 10, 0);
-
-    world.Add(make_shared<Sphere>(sphere1));
-    world.Add(make_shared<Sphere>(sphere2));
+    world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin).build());
+    world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker).build());
 
     s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
 

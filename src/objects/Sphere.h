@@ -12,6 +12,7 @@ namespace rt {
     float radius;
 
     Sphere() = default;
+    Sphere(float r);
     Sphere(float r, sPtr<Material> m);
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;

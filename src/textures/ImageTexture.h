@@ -21,23 +21,21 @@ namespace rt {
 
   class ImageTexture : public Texture {
   private:
-    Texture2D editorPreviewTexture;
-
   public:
     const static int bytesPerPixel = 3;
     bool             flipH = false, flipV = false;
 
     ImageTexture() : img{} {}
 
-    ImageTexture(const char *filename, bool fv = false, bool fh = false) : path(filename), flipH(fh), flipV(fv) { ImageFromPath(filename); }
+    ImageTexture(const char *filename, bool fv = false, bool fh = false) : path(filename), flipH(fh), flipV(fv) {
+      ImageFromPath(filename);
+    }
 
     void ImageFromPath(const char *filename) {
       int compsPerPixel = bytesPerPixel;
       path              = filename;
 
-      img                  = LoadImage(filename);
-      editorPreviewTexture = LoadTexture(filename);
-
+      img = LoadImage(filename);
       if (img.data == nullptr) {
         std::cerr << "ERROR: could not load texture image file " << filename << ".\n";
         img.width = img.height = 0;
@@ -77,18 +75,17 @@ namespace rt {
       // Need to convert them to [0,1.0]
       const float    colorScale = 1.0 / 255.0;
       unsigned char *pixel      = (unsigned char *)img.data + j * bytesPerScanline + i * bytesPerPixel;
-      return vec3(pixel[0], pixel[1], pixel[2]) * colorScale * intensity;
+      return vec3(pixel[0], pixel[1], pixel[2]) * colorScale * multiplier;
     }
 
     virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
     virtual void GetTexture(const json &j) override { ImageFromPath(j["path"].get<string>().c_str()); }
 
-    virtual void OnImgui() override {
-      float imguiWidth = ImGui::GetContentRegionAvail().x;
-      float height     = imguiWidth * float(img.height) / img.width;
-
-      ImGui::Image(&editorPreviewTexture.id, {std::min(float(img.width), imguiWidth), height});
+    void generatePreview() override {
+      Texture::generatePreviewUtil([](float u, float v) { return vec3(u, v, 0); });
     }
+
+    virtual void OnImgui() override { Texture::previewOrGenerate(); }
 
   private:
     int         bytesPerScanline;

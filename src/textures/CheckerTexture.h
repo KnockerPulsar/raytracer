@@ -2,6 +2,7 @@
 #include "../data_structures/vec3.h"
 #include "SolidColor.h"
 #include "Texture.h"
+#include "imgui.h"
 #include <future>
 #include <memory>
 #include <raylib.h>
@@ -11,14 +12,14 @@ namespace rt {
   private:
     std::shared_ptr<Texture> even;
     std::shared_ptr<Texture> odd;
-    float                    scale = 1.0;
+    float                    scale;
 
   public:
     CheckerTexture() = default;
-    CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 1.0f)
+    CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 6.0f)
         : even(_even), odd(_odd), scale(s) {}
 
-    CheckerTexture(vec3 c1, vec3 c2, float s = 1.0f)
+    CheckerTexture(vec3 c1, vec3 c2, float s = 6.0f)
         : even(std::make_shared<SolidColor>(c1)), odd(std::make_shared<SolidColor>(c2)), scale(s) {}
 
     void FromColors(vec3 c1, vec3 c2, float s) { *this = CheckerTexture(c1, c2, s); }
@@ -34,14 +35,23 @@ namespace rt {
     virtual vec3 Value(float u, float v, const vec3 &p) const override {
       float sines = sin(scale * p.x) * sin(scale * p.y) * sin(scale * p.z);
       if (sines < 0)
-        return odd->Value(u, v, p) * intensity;
-      else
-        return even->Value(u, v, p) * intensity;
+        return odd->Value(u, v, p) * multiplier;
+
+      return even->Value(u, v, p) * multiplier;
+    }
+
+    void generatePreview() override {
+      Texture::generatePreviewUtil([&](float u, float v) { return vec3(u, v , 1); });
     }
 
     virtual void OnImgui() override {
       even->OnImgui();
       odd->OnImgui();
+      ImGui::DragFloat("Checker scale", &scale);
+
+      ImGui::Spacing();
+
+      Texture::previewOrGenerate();
     }
   };
 

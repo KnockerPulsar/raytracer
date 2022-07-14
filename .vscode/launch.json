@@ -11,11 +11,9 @@
       "program": "${workspaceFolder}/bin/debug/Raytracer",
       "args": [
         "--image_width",
-        "400",
+        "800",
         "--image_height",
-        "400",
-        "--scene",
-        "scenes/cornell.json",
+        "800",
         "--threads",
         "12 "
       ],
