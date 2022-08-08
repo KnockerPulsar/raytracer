@@ -3,7 +3,6 @@
 #include "BVHNode.h"
 #include "Defs.h"
 #include "Transformation.h"
-#include "materials/DiffuseLight.h"
 
 #include "Camera.h"
 #include "Hittable.h"
@@ -11,17 +10,20 @@
 #include "Ray.h"
 #include "Util.h"
 #include "data_structures/vec3.h"
-#include "materials/ConstantMedium.h"
+
+#include "materials/DiffuseLight.h"
 #include "materials/Dielectric.h"
 #include "materials/Lambertian.h"
 #include "materials/Material.h"
+#include "materials/MaterialBuilder.h"
 
-#include "materials/Metal.h"
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
 #include "objects/Sphere.h"
 #include "objects/Triangle.h"
+#include "objects/ConstantMedium.h"
+
 #include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
 #include "textures/NoiseTexture.h"
@@ -61,7 +63,7 @@ namespace rt {
 
     auto tex = std::make_shared<ImageTexture>(ssTex.c_str(), false, true);
 
-    auto skysphereMat = std::make_shared<DiffuseLight>(tex);
+    auto skysphereMat = MaterialBuilder<DiffuseLight>().setTexture(tex).build();
     skysphere         = std::make_shared<Sphere>(500.0f, skysphereMat);
 
     ::Image img = LoadImage(skysphereTexture.c_str());

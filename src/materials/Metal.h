@@ -10,14 +10,9 @@
 namespace rt {
   class Metal : public Material {
   public:
-    sPtr<Texture> albedo;
     float         fuzz;
 
     Metal() = default;
-
-    Metal(const vec3 &color, float f) : albedo(std::make_shared<SolidColor>(color)), fuzz(f < 1 ? f : 1) {}
-
-    Metal(sPtr<Texture> tex) : albedo(tex) {}
 
     bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 

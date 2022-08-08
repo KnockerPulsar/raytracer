@@ -13,17 +13,10 @@ namespace rt {
    */
   class Lambertian : public Material {
   public:
-    sPtr<Texture> albedo; // Base matte/diffuse texture
 
     Lambertian() = default;
 
-    Lambertian(const vec3 &color) : albedo(ms<SolidColor>(color)) {}
-
-    Lambertian(sPtr<Texture> color) : albedo(color) {}
-
-    Lambertian(const sPtr<Lambertian> &l) : albedo(l->albedo) {}
-
-    /**
+   /**
      * @brief Scattering logic, scatters ray in random direction.
      *
      * @param r_in

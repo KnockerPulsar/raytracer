@@ -4,9 +4,11 @@
 #include "../Defs.h"
 #include "../Hittable.h"
 #include "../HittableList.h"
-#include "Isotropic.h"
 #include "../Util.h"
 #include "../textures/Texture.h"
+
+#include "materials/Isotropic.h"
+
 #include <iostream>
 #include <memory>
 #include <raylib.h>
@@ -19,14 +21,21 @@ namespace rt {
     sPtr<Hittable> boundry;
     sPtr<Material> phaseFunction;
     double         negInvDensity;
+  
+    ConstantMedium(sPtr<Hittable> _boundary, double _density) : 
+     boundry(_boundary), negInvDensity(-1 / _density) {
+      phaseFunction = make_shared<Isotropic>();
+    }
 
-    ConstantMedium(sPtr<Hittable> _boundry, double _density, sPtr<Texture> _tex)
-        : boundry(_boundry), negInvDensity(-1 / _density),
-          phaseFunction(make_shared<Isotropic>(_tex)) {}
+    ConstantMedium(sPtr<Hittable> _boundary, double _density, sPtr<Texture> _tex)
+        : ConstantMedium(_boundary, _density)  {
+      phaseFunction->setTexture(_tex);
+    }
 
-    ConstantMedium(sPtr<Hittable> _boundry, double _density, vec3 color)
-        : boundry(_boundry), negInvDensity(-1 / _density),
-          phaseFunction(make_shared<Isotropic>(color)) {}
+    ConstantMedium(sPtr<Hittable> _boundary, double _density, vec3 color)
+        : ConstantMedium(_boundary, _density) {
+      phaseFunction->setTexture(color);
+    }
 
     virtual bool Hit(const Ray &r, float t_min, float t_max,
                      HitRecord &rec) const override;

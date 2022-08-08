@@ -4,25 +4,23 @@
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
 #include "../textures/TextureFactory.h"
+#include "Hittable.h"
 #include "Material.h"
 #include <memory>
 
 namespace rt {
+
+
   /**
    * @brief Contains logic to model dielectric (glass) materials.
    */
   class Dielectric : public Material {
   public:
-    sPtr<Texture> albedo;          // Shared pointer to the texture this material has
     float         refractionIndex; // Controls how likely a ray is to reflect or refract
 
     Dielectric() = default;
 
-    Dielectric(float refIdx, vec3 color = vec3(1.0)) : refractionIndex(refIdx), albedo(ms<SolidColor>(color)) {}
-
-    Dielectric(float refIdx, sPtr<Texture> tex) : refractionIndex(refIdx), albedo(tex) {}
-
-    /**
+   /**
      * @brief Hit logic, simulates dielectric/glass materials
      *
      * @param rIn Input ray

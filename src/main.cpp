@@ -7,6 +7,8 @@
 #include <tuple>
 /*
  TODO:
+    Add the ability to change material textures
+
     Can add a prepass before raytracing where triangles and AABBs  are transformed  
         Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
           - For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
@@ -29,13 +31,13 @@
       - At least after letting go
       - Need a regeneration method instead of using addChild(nullptr)
 
-    Add the ability to change material textures
 
     For previewing procedural textures, could sample a small (50x50) preview from the texture
       - Compute shader might be able to make things faster at the cost of more complexity
       - Caching results is a must, can't calculate a preview each frame (I think)
       - Need to setup a way to rebuild previews on parameter change -> Done manually
       - Perlin noise is difficult to preview since it's 3D 
+      - Can have an option to have a second raytraced preview for a more precise preview.
 
     Cleanup call heirarchy. i.e. Each call to boundingBox currently requires us to call
     transformation.regenAABB() in case the object was moved. Perhaps something akin to
