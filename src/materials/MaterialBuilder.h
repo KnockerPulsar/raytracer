@@ -2,6 +2,7 @@
 
 // Perhaps this isn't the best of ideas? Theres nothing to chain with materials...
 // The only thing this helps with is to return a shared pointer when creating a material.
+// Can probably be replaced by a `std::shared_ptr(builder)` where `builder` returns a reference.
 namespace rt {
   template <typename T = Material> class MaterialBuilder {
     T* material;
