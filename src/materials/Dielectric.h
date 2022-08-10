@@ -19,6 +19,10 @@ namespace rt {
     float         refractionIndex; // Controls how likely a ray is to reflect or refract
 
     Dielectric() = default;
+  
+    Dielectric(float initialRefIndex) : refractionIndex(initialRefIndex) {
+      setTexture(vec3(1.0f));
+    }
 
    /**
      * @brief Hit logic, simulates dielectric/glass materials

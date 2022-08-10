@@ -10,14 +10,19 @@
 #include "../../vendor/glm/glm/gtx/transform.hpp"
 #include "../../vendor/imguizmo/ImGuizmo.h"
 #include "../../vendor/rlImGui/rlImGui.h"
-#include "../BVHNode.h"
-#include "../Camera.h"
-#include "../Hittable.h"
-#include "../HittableList.h"
-#include "../materials/DiffuseLight.h"
-#include "../objects/Box.h"
-#include "../objects/Plane.h"
-#include "../objects/Sphere.h"
+
+#include "BVHNode.h"
+#include "Camera.h"
+#include "Hittable.h"
+#include "HittableList.h"
+
+#include "materials/DiffuseLight.h"
+#include "materials/MaterialBuilder.h"
+
+#include "objects/Box.h"
+#include "objects/Plane.h"
+#include "objects/Sphere.h"
+
 #include "Utils.h"
 #include <algorithm>
 #include <cstddef>
@@ -249,7 +254,7 @@ namespace rt {
     ImGui::SameLine();
     if (ImGui::Button("+", {-1, 0})) {
 
-      sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
+      sPtr<Material> defaultMaterial = MaterialBuilder<DiffuseLight>().setTexture(vec3(10, 0, 10)).build();
       Hittable      *newRoot;
 
       switch (selectedAddableObject) {
@@ -382,22 +387,22 @@ namespace rt {
       switch (selectedMaterialType) {
 
       case MaterialTypes::Emissive: {
-        return std::make_optional(std::make_shared<DiffuseLight>(vec3(1, 1, 1)));
+        return std::make_optional(MaterialBuilder<DiffuseLight>().setTexture(vec3(1, 1, 1)).build());
         break;
       }
 
       case MaterialTypes::Diffuse: {
-        return std::make_optional(std::make_shared<Lambertian>(vec3(0.4, 0.6, 0.8)));
+        return std::make_optional(MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.6, 0.8)).build());
         break;
       }
 
       case MaterialTypes::Dielectrical: {
-        return std::make_optional(std::make_shared<Dielectric>(1.3, vec3(0.9, 0.9, 0.9)));
+        return std::make_optional(MaterialBuilder<Dielectric>(1.3).setTexture(vec3(0.9, 0.9, 0.9)).build());
         break;
       }
 
       case MaterialTypes::Metallic: {
-        return std::make_optional(std::make_shared<Metal>(vec3(0.3, 0.3, 0.3), 0.7));
+        return std::make_optional(MaterialBuilder<Metal>(0.7f).setTexture(vec3(0.3, 0.3, 0.3)).build());
       }
 
       default:

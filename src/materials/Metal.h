@@ -13,6 +13,8 @@ namespace rt {
     float         fuzz;
 
     Metal() = default;
+  
+    Metal(float initialFuzz) : fuzz(initialFuzz) {}
 
     bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
@@ -35,6 +37,12 @@ namespace rt {
       albedo->OnImgui();
       ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
     }
+  
+    Metal& setFuzz(float newFuzz) { 
+      fuzz = newFuzz; 
+      return *this;
+    }
+  
   };
 
   inline void from_json(const json &j, Metal &m) {

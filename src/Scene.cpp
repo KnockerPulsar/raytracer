@@ -39,11 +39,11 @@
 
 #include "HittableBuilder.h"
 
-using nlohmann::json;
+using nlohmann::json, std::vector, std::pair, std::string, std::function;
 
 namespace rt {
 
-  std::vector<std::pair<std::string, std::function<Scene(int, int)>>> Scene::builtInScenes = {
+  vector<pair<string, function<Scene(int, int)>>> Scene::builtInScenes = {
       {"Default", Default},
       {"Scene1", Scene1},
       {"Scene2", Scene2},
@@ -96,8 +96,8 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto mat   = make_shared<Lambertian>(vec3(0.6, 0.6, 0.6));
-    auto light = make_shared<DiffuseLight>(vec3(3, 3, 3));
+    auto mat   = MaterialBuilder<Lambertian>().setTexture(vec3(3,3,3)).build();
+    auto light = MaterialBuilder<DiffuseLight>().setTexture(vec3(3,3,3)).build();
 
     world //
         .Add(HittableBuilder<Box>(1).withMaterial(mat).build())
@@ -128,10 +128,10 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
-    auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
-    auto materialLeft   = make_shared<Dielectric>(1.5);
-    auto materialRight  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 0.1);
+    auto materialGround = MaterialBuilder<Lambertian>().setTexture(vec3(0.8, 0.8, 0.0)).build();
+    auto materialCenter = MaterialBuilder<Lambertian>().setTexture(vec3(0.1, 0.2, 0.5)).build();
+    auto materialLeft   = MaterialBuilder<Dielectric>().setTexture(vec3(1.5)).build();
+    auto materialRight  = MaterialBuilder<Metal>(0.1f).setTexture(vec3(0.8, 0.6, 0.2)).build();
 
     auto groundSphere                     = Sphere(100.0, materialGround);
     groundSphere.transformation.translate = vec3(0, -100.5, -1);
@@ -180,14 +180,12 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto materialLeft  = make_shared<Lambertian>(vec3(0, 0, 1));
-    auto materialRight = make_shared<Lambertian>(vec3(1, 0, 0));
+    auto materialLeft  = MaterialBuilder<Lambertian>().setTexture(vec3(0, 0, 1)).build();
+    auto materialRight = MaterialBuilder<Lambertian>().setTexture(vec3(1, 0, 0)).build();
 
-    auto leftSphere                      = make_shared<Sphere>(Sphere(r, materialLeft));
-    leftSphere->transformation.translate = vec3(-r, 0, -1);
-
-    auto rightSphere                      = make_shared<Sphere>(Sphere(r, materialRight));
-    rightSphere->transformation.translate = vec3(r, 0, -1);
+    auto leftSphere = HittableBuilder<Sphere>(r).withMaterial(materialLeft).withTranslation(vec3(-r, 0, -1)).build();
+    
+    auto rightSphere= HittableBuilder<Sphere>(r).withMaterial(materialRight).withTranslation(vec3(r,0,-1)).build();
 
     world // Scene::Scene
         .Add(leftSphere)
@@ -224,39 +222,42 @@ namespace rt {
           if (chooseMat < 0.8) {
             // Diffuse
             auto albedo    = vec3::Random() * vec3::Random();
-            sphereMaterial = make_shared<Lambertian>(albedo);
+            sphereMaterial = MaterialBuilder<Lambertian>().setTexture(albedo).build();
           } else if (chooseMat < 0.95) {
             // Metal
             auto  albedo   = vec3::Random(0.5, 1);
             float fuzz     = RandomFloat(0, 0.5);
-            sphereMaterial = make_shared<Metal>(albedo, fuzz);
+            sphereMaterial = MaterialBuilder<Metal>(fuzz).setTexture(albedo).build();
           } else {
-            sphereMaterial = make_shared<Dielectric>(1.5);
+            sphereMaterial = MaterialBuilder<Dielectric>(1.5).build();
           }
 
-          auto sphere                     = Sphere(0.2, sphereMaterial);
-          sphere.transformation.translate = center;
-          world.Add(make_shared<Sphere>(sphere));
+          world.Add(HittableBuilder<Sphere>(0.2).withMaterial(sphereMaterial).withTranslation(center).build());
         }
       }
     }
-    auto mat1                        = make_shared<Dielectric>(1.5);
-    auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.translate = vec3(0, 1, 0);
-    world.Add(make_shared<Sphere>(sphere1));
+    world.Add(
+      HittableBuilder<Sphere>(1.0f)
+        .withMaterial(
+          MaterialBuilder<Dielectric>(1.5f)
+            .build()
+        )
+        .withTranslation(vec3(0,1,0))
+        .build()
+    );
 
-    auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
+    auto mat2                        = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
     auto sphere2                     = Sphere(1.0, mat2);
     sphere2.transformation.translate = vec3(-4, 1, 0);
     world.Add(make_shared<Sphere>(sphere2));
 
-    auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
+    auto mat3                        = MaterialBuilder<Metal>(0.0f).setTexture(vec3(0.7, 0.6, 0.5)).build();
     auto sphere3                     = Sphere(1.0, mat3);
     sphere3.transformation.translate = vec3(4, 1, 0);
     world.Add(make_shared<Sphere>(sphere3));
 
-    auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
-    auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(groundMaterial));
+    auto groundMaterial                   = MaterialBuilder<Lambertian>().setTexture(vec3(0.5f)).build();
+    auto groundSphere                     = Sphere(1000, groundMaterial);
     groundSphere.transformation.translate = vec3(0, -1000, 0);
     world.Add(make_shared<Sphere>(groundSphere));
 
@@ -283,8 +284,8 @@ namespace rt {
 
     auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
-    auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
-    auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(checker));
+    auto groundMaterial                   = MaterialBuilder<Lambertian>().setTexture(vec3(0.5f));
+    auto groundSphere                     = Sphere(1000, MaterialBuilder<Lambertian>().setTexture(checker).build());
     groundSphere.transformation.translate = vec3(0, -1000, 0);
     world.Add(make_shared<Sphere>(groundSphere));
 
@@ -298,21 +299,21 @@ namespace rt {
           if (chooseMat < 0.8) {
             // Diffuse
             auto albedo    = vec3::Random() * vec3::Random();
-            sphereMaterial = make_shared<Lambertian>(albedo);
+            sphereMaterial = MaterialBuilder<Lambertian>().setTexture(albedo).build();
             vec3 center2   = center + vec3(0, RandomFloat(0, .5), 0);
             world.Add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           } else if (chooseMat < 0.95) {
             // Metal
             auto  albedo   = vec3::Random(0.5, 1);
             float fuzz     = RandomFloat(0, 0.5);
-            sphereMaterial = make_shared<Metal>(albedo, fuzz);
+            sphereMaterial = MaterialBuilder<Metal>(fuzz).setTexture(albedo).build();
 
             auto sphere                     = Sphere(0.2, sphereMaterial);
             sphere.transformation.translate = center;
             world.Add(make_shared<Sphere>(sphere));
 
           } else {
-            sphereMaterial                  = make_shared<Dielectric>(1.5);
+            sphereMaterial                  = MaterialBuilder<Dielectric>(1.5f).build();
             auto sphere                     = Sphere(0.2, sphereMaterial);
             sphere.transformation.translate = center;
             world.Add(make_shared<Sphere>(sphere));
@@ -321,19 +322,19 @@ namespace rt {
       }
     }
 
-    auto mat1                        = make_shared<Dielectric>(1.5);
+    auto mat1                        = MaterialBuilder<Dielectric>(1.5).build();
     auto sphere1                     = Sphere(1.0, mat1);
     sphere1.transformation.translate = vec3(0, 1, 0);
 
     world.Add(make_shared<Sphere>(sphere1));
 
-    auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
+    auto mat2                        = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
     auto sphere2                     = Sphere(1.0, mat2);
     sphere2.transformation.translate = vec3(-4, 1, 0);
 
     world.Add(make_shared<Sphere>(sphere2));
 
-    auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
+    auto mat3                        = MaterialBuilder<Metal>( 0.0).setTexture(vec3(0.7, 0.6, 0.5)).build();
     auto sphere3                     = Sphere(1.0, mat3);
     sphere3.transformation.translate = vec3(4, 1, 0);
 
@@ -360,8 +361,8 @@ namespace rt {
     auto perlinTexture  = make_shared<NoiseTexture>(4.0f);
     auto checkerTexture = make_shared<CheckerTexture>(vec3(0), vec3(1), 6);
 
-    sPtr<Material> lambertianPerlin  = make_shared<Lambertian>(perlinTexture);
-    sPtr<Material> lambertianChecker = make_shared<Lambertian>(checkerTexture);
+    sPtr<Material> lambertianPerlin  = MaterialBuilder<Lambertian>().setTexture(perlinTexture).build();
+    sPtr<Material> lambertianChecker = MaterialBuilder<Lambertian>().setTexture(checkerTexture).build();
 
     HittableList world;
 
@@ -391,7 +392,7 @@ namespace rt {
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto earthTexture = make_shared<ImageTexture>("assets/textures/earthmap.png");
-    auto earthSurface = make_shared<Lambertian>(earthTexture);
+    auto earthSurface = MaterialBuilder<Lambertian>().setTexture(earthTexture).build();
     // auto earthSurface = make_shared<Metal>(vec3(0.7,0.2,0.7), 0.7);
     auto globe = make_shared<Sphere>(2, earthSurface);
     world.Add(globe);
@@ -418,13 +419,13 @@ namespace rt {
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto perText   = make_shared<NoiseTexture>(4.0f);
-    auto diffLight = make_shared<DiffuseLight>(vec3(4, 4, 4));
+    auto diffLight = MaterialBuilder<DiffuseLight>().setTexture(vec3(4, 4, 4)).build();
 
-    auto sphere1                     = Sphere(1000, make_shared<Lambertian>(perText));
+    auto sphere1                     = Sphere(1000, MaterialBuilder<Lambertian>().setTexture(perText).build());
     sphere1.transformation.translate = vec3(0, -1000, 0);
     world.Add(make_shared<Sphere>(sphere1));
 
-    auto sphere2                     = Sphere(2, make_shared<Lambertian>(perText));
+    auto sphere2                     = Sphere(2, MaterialBuilder<Lambertian>().setTexture(perText).build());
     sphere2.transformation.translate = vec3(0, 2, 0);
     world.Add(make_shared<Sphere>(sphere2));
 
@@ -455,14 +456,14 @@ namespace rt {
     );
     cam.angle.y = 3.14; // Rotate towards the scene
 
-    auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
-    auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
-    auto green         = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
-    auto light         = make_shared<DiffuseLight>(vec3(2, 2, 2));
-    auto purplishMetal = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
-    auto chrome        = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
-    auto dielectric    = make_shared<Dielectric>(1.5f);
-    auto noise         = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
+    auto red           = MaterialBuilder<Lambertian>().setTexture(vec3(0.65, 0.05, 0.05)).build();
+    auto white         = MaterialBuilder<Lambertian>().setTexture(vec3(0.73, 0.73, 0.73)).build();
+    auto green         = MaterialBuilder<Lambertian>().setTexture(vec3(0.12, 0.45, 0.15)).build();
+    auto light         = MaterialBuilder<DiffuseLight>().setTexture(vec3(2, 2, 2)).build();
+    auto purplishMetal = MaterialBuilder<Metal>(0.7f).setTexture(vec3(0.8, 0.1, 0.8)).build();
+    auto chrome        = MaterialBuilder<Metal>(0.05f).setTexture(vec3(0.8, 0.8, 0.8)).build();
+    auto dielectric    = MaterialBuilder<Dielectric>().setTexture(1.5f).build();
+    auto noise         = MaterialBuilder<Lambertian>().setTexture(make_shared<NoiseTexture>(0.1f)).build();
     auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
 
     float wallWidth  = 55.5;
@@ -581,10 +582,10 @@ namespace rt {
     // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
 
     std::string skyspherePath = "assets/textures/skysphere.png";
-    auto        sphereMat     = make_shared<DiffuseLight>(make_shared<ImageTexture>(skyspherePath.c_str(), true));
+    auto        sphereMat     = MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>(skyspherePath.c_str(), true)).build();
 
     // auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
-    auto metal = make_shared<Metal>(vec3(0.8), 0.1f);
+    auto metal = MaterialBuilder<Metal>(0.1f).setTexture(vec3(0.8)).build();
 
     auto box    = HittableBuilder<Box>(1).withMaterial(metal).build();
     auto sphere = make_shared<Sphere>(0.5f, sphereMat);
@@ -616,12 +617,12 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
+    auto red = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
     auto magenta =
-        make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)));
-    auto blue = make_shared<DiffuseLight>(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)));
+        MaterialBuilder<DiffuseLight>().setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40))).build();
+    auto blue = MaterialBuilder<DiffuseLight>().setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40))).build();
 
-    auto earth = make_shared<DiffuseLight>(make_shared<ImageTexture>("assets/textures/earthmap.png"));
+    auto earth = MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>("assets/textures/earthmap.png")).build();
 
     auto plane = HittableBuilder<Plane>(3, 3).withMaterial(magenta).withTranslation(vec3(-3, 10, 0)).build();
 
@@ -656,7 +657,7 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
+    auto red = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
 
     auto box = HittableBuilder<Box>(vec3(1, 1, 1), vec3(2, 2, 2)).withMaterial(red).build();
 
