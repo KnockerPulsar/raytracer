@@ -15,6 +15,9 @@
 #include "GroupPanel.h"
 
 namespace rt {
+
+  enum TextureTypes { SolidColorTex, ImageTex, Noise, Checker, TextureTypesCount };
+
   class Texture : public IImguiDrawable {
   protected:
     float multiplier = 1.0f;
@@ -39,6 +42,11 @@ namespace rt {
     virtual ~Texture() { UnloadTexture(previewTexture); }
 
     virtual void generatePreview() {}
+
+    virtual void OnBaseImgui() {
+      Texture::previewOrGenerate(); 
+      OnDerivedImgui();
+    }
 
   protected:
     void generatePreviewUtil(std::function<vec3(float, float)> pointSampler) {

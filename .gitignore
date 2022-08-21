@@ -2,6 +2,7 @@
 build/
 **/bin/
 **/obj/
+**/CMakeFiles/
 modules/premake-ecc/
 
 *.log

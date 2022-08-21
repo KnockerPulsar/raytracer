@@ -9,7 +9,10 @@
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
+#include <tuple>
 #include <vector>
+
+using std::string, std::vector, std::function, std::pair;
 
 struct RaytraceSettings : public rt::IImguiDrawable {
   int samplesPerPixel = 1;
@@ -18,7 +21,7 @@ struct RaytraceSettings : public rt::IImguiDrawable {
   RaytraceSettings() = default;
   RaytraceSettings(int spp, int md) : samplesPerPixel(spp), maxDepth(md) {}
 
-  void OnImgui() override {
+  void OnBaseImgui() override {
     ImGui::Begin("Raytrace settings");
     ImGui::DragInt("Samples per pixel", &samplesPerPixel, 1, 1, 500);
     ImGui::DragInt("Maximum depth", &maxDepth, 1, 1, 100);
@@ -32,33 +35,6 @@ namespace rt {
   class Scene {
 
   public:
-    /*
-      So, setting this as a share pointer was problematic when updating BVHs
-      The issue was that the BVH update I'm using is rebuilding the BVH with the new object
-      Then I discard the old BVH and set this as its replacement
-
-      So I think what happened was that on discarding the old BVH root, the tree was destroyed
-      (or at least the root node). Then when we constructed the new BVH, that node was already freed
-      causing issues when trying to access other nodes below it.
-
-      Can potentially cause a memory leak if it's not handled correctly.
-    */
-    Hittable *worldRoot;
-
-    sPtr<Hittable> skysphere;
-
-    std::string skysphereTexture;
-    ::Model     skysphereModel;
-
-    Camera cam;
-    int    imageWidth, imageHeight;
-    vec3   backgroundColor;
-
-    RaytraceSettings settings;
-
-    // Initialized in Scene.cpp to a list of scene names and loading functions
-    static std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes;
-
     Scene() = default;
     Scene(Hittable *wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
         : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), settings{spp, md}, backgroundColor(bc) {}
@@ -98,6 +74,35 @@ namespace rt {
     json GetObjArray() const;
 
     json toJson() const;
+  
+    public: 
+  
+    /*
+      So, setting this as a share pointer was problematic when updating BVHs
+      The issue was that the BVH update I'm using is rebuilding the BVH with the new object
+      Then I discard the old BVH and set this as its replacement
+
+      So I think what happened was that on discarding the old BVH root, the tree was destroyed
+      (or at least the root node). Then when we constructed the new BVH, that node was already freed
+      causing issues when trying to access other nodes below it.
+
+      Can potentially cause a memory leak if it's not handled correctly.
+    */
+    Hittable *worldRoot;
+
+    sPtr<Hittable> skysphere;
+
+    std::string skysphereTexture;
+    ::Model     skysphereModel;
+
+    Camera cam;
+    int    imageWidth, imageHeight;
+    vec3   backgroundColor;
+
+    RaytraceSettings settings;
+
+    // Initialized in Scene.cpp to a list of scene names and loading functions
+    static vector<pair<string, function<Scene(int, int)>>> builtInScenes;
   };
 
   inline void to_json(json &j, const Scene &s) {

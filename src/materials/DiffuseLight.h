@@ -44,8 +44,8 @@ namespace rt {
 
     json toJson() const override { return json{{"type", "diffuse_light"}, {"texture", albedo->toJson()}}; }
 
-    virtual void OnImgui() override {
-      albedo->OnImgui();
+    virtual void OnDerivedImgui() override {
+      albedo->OnDerivedImgui();
       ImGui::DragFloat("Emissive intensity", &emissiveIntensity, 0.1, 1.0f);
       albedo->setIntensity(emissiveIntensity);
     }

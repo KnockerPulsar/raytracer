@@ -43,6 +43,8 @@
 
 #include "../HittableBuilder.h"
 #include "imgui.h"
+#include "textures/CheckerTexture.h"
+#include "textures/Texture.h"
 
 namespace rt {
 
@@ -168,7 +170,7 @@ namespace rt {
       }
 
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
-      selectedObject->OnImgui();
+      selectedObject->OnBaseImgui();
 
       ImGui::End();
     }
@@ -334,7 +336,7 @@ namespace rt {
   }
 
   void Editor::RaytraceSettingsImgui() {
-    getScene()->settings.OnImgui();
+    getScene()->settings.OnBaseImgui();
     
     ImGui::Begin("Other settings");
     ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
@@ -382,23 +384,20 @@ namespace rt {
     );
 
     ImGui::SameLine();
-    if (ImGui::Button("Change")) {
+    if (ImGui::Button("Change Material")) {
 
       switch (selectedMaterialType) {
 
       case MaterialTypes::Emissive: {
         return std::make_optional(MaterialBuilder<DiffuseLight>().setTexture(vec3(1, 1, 1)).build());
-        break;
       }
 
       case MaterialTypes::Diffuse: {
         return std::make_optional(MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.6, 0.8)).build());
-        break;
       }
 
       case MaterialTypes::Dielectrical: {
         return std::make_optional(MaterialBuilder<Dielectric>(1.3).setTexture(vec3(0.9, 0.9, 0.9)).build());
-        break;
       }
 
       case MaterialTypes::Metallic: {
@@ -412,6 +411,43 @@ namespace rt {
     return std::nullopt;
   }
 
+  std::optional<sPtr<Texture>> Editor::TextureChanger() {
+    static const char   *textureTypes[]      = { "SolidColor", "ImageTexture", "Noise", "Checker "};
+    static TextureTypes selectedTextureType  = TextureTypes::Checker ;
+
+    ImGui::Combo(
+        ("##" + EditorUtils::GetIDFromPointer(textureTypes)).c_str(),
+        (int *)&selectedTextureType,
+        textureTypes,
+        TextureTypes::TextureTypesCount
+    );
+
+    ImGui::SameLine();
+    if (ImGui::Button("Change Texture")) {
+    
+      switch (selectedTextureType) {
+      case TextureTypes::SolidColorTex: {
+       return std::make_optional(std::make_shared<rt::SolidColor>(vec3(1,0,1))) ;
+      } 
+      
+      case TextureTypes::Checker: {
+        return std::make_optional(std::make_shared<rt::CheckerTexture>(vec3(0,0,0), vec3(1,1,1)));
+      }
+
+      case TextureTypes::ImageTex: {
+        return std::make_optional(std::make_shared<rt::ImageTexture>());
+      }
+      
+      case TextureTypes::Noise: {
+        return std::make_optional(std::make_shared<rt::NoiseTexture>());
+      }
+
+      default:
+        return std::nullopt;
+      }
+    }
+    return std::nullopt;
+  }
   void Editor::TopMenuImgui() {
 
     auto imageWidth  = getScene()->imageWidth;

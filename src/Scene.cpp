@@ -11,18 +11,18 @@
 #include "Util.h"
 #include "data_structures/vec3.h"
 
-#include "materials/DiffuseLight.h"
 #include "materials/Dielectric.h"
+#include "materials/DiffuseLight.h"
 #include "materials/Lambertian.h"
 #include "materials/Material.h"
 #include "materials/MaterialBuilder.h"
 
+#include "objects/ConstantMedium.h"
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
 #include "objects/Sphere.h"
 #include "objects/Triangle.h"
-#include "objects/ConstantMedium.h"
 
 #include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
@@ -44,18 +44,18 @@ using nlohmann::json, std::vector, std::pair, std::string, std::function;
 namespace rt {
 
   vector<pair<string, function<Scene(int, int)>>> Scene::builtInScenes = {
-      {"Default", Default},
-      {"Scene1", Scene1},
-      {"Scene2", Scene2},
-      {"Random", std::bind(Random, std::placeholders::_1, std::placeholders::_2, 10, 10)},
-      {"Random Moving", std::bind(RandomMovingSpheres, std::placeholders::_1, std::placeholders::_2, 10, 10)},
-      {"TwoSpheres", TwoSpheres},
-      {"Earth", Earth},
-      {"Light", Light},
-      {"Cornell", CornellBox},
-      {"Transformation test", TransformationTest},
-      {"Plane test", PlaneTest},
-      {"Raster test", RasterTest}};
+      {"Default", Scene::Default},
+      {"Scene1", Scene::Scene1},
+      {"Scene2", Scene::Scene2},
+      {"Random", std::bind(Scene::Random, std::placeholders::_1, std::placeholders::_2, 10, 10)},
+      {"Random Moving", std::bind(Scene::RandomMovingSpheres, std::placeholders::_1, std::placeholders::_2, 10, 10)},
+      {"TwoSpheres", Scene::TwoSpheres},
+      {"Earth", Scene::Earth},
+      {"Light", Scene::Light},
+      {"Cornell", Scene::CornellBox},
+      {"Transformation test", Scene::TransformationTest},
+      {"Plane test", Scene::PlaneTest},
+      {"Raster test", Scene::RasterTest}};
 
   void Scene::addSkysphere(std::string ssTex) {
 
@@ -96,8 +96,8 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto mat   = MaterialBuilder<Lambertian>().setTexture(vec3(3,3,3)).build();
-    auto light = MaterialBuilder<DiffuseLight>().setTexture(vec3(3,3,3)).build();
+    auto mat   = MaterialBuilder<Lambertian>().setTexture(vec3(3, 3, 3)).build();
+    auto light = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 3, 3)).build();
 
     world //
         .Add(HittableBuilder<Box>(1).withMaterial(mat).build())
@@ -184,8 +184,8 @@ namespace rt {
     auto materialRight = MaterialBuilder<Lambertian>().setTexture(vec3(1, 0, 0)).build();
 
     auto leftSphere = HittableBuilder<Sphere>(r).withMaterial(materialLeft).withTranslation(vec3(-r, 0, -1)).build();
-    
-    auto rightSphere= HittableBuilder<Sphere>(r).withMaterial(materialRight).withTranslation(vec3(r,0,-1)).build();
+
+    auto rightSphere = HittableBuilder<Sphere>(r).withMaterial(materialRight).withTranslation(vec3(r, 0, -1)).build();
 
     world // Scene::Scene
         .Add(leftSphere)
@@ -236,15 +236,10 @@ namespace rt {
         }
       }
     }
-    world.Add(
-      HittableBuilder<Sphere>(1.0f)
-        .withMaterial(
-          MaterialBuilder<Dielectric>(1.5f)
-            .build()
-        )
-        .withTranslation(vec3(0,1,0))
-        .build()
-    );
+    world.Add(HittableBuilder<Sphere>(1.0f)
+                  .withMaterial(MaterialBuilder<Dielectric>(1.5f).build())
+                  .withTranslation(vec3(0, 1, 0))
+                  .build());
 
     auto mat2                        = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
     auto sphere2                     = Sphere(1.0, mat2);
@@ -334,7 +329,7 @@ namespace rt {
 
     world.Add(make_shared<Sphere>(sphere2));
 
-    auto mat3                        = MaterialBuilder<Metal>( 0.0).setTexture(vec3(0.7, 0.6, 0.5)).build();
+    auto mat3                        = MaterialBuilder<Metal>(0.0).setTexture(vec3(0.7, 0.6, 0.5)).build();
     auto sphere3                     = Sphere(1.0, mat3);
     sphere3.transformation.translate = vec3(4, 1, 0);
 
@@ -421,15 +416,22 @@ namespace rt {
     auto perText   = make_shared<NoiseTexture>(4.0f);
     auto diffLight = MaterialBuilder<DiffuseLight>().setTexture(vec3(4, 4, 4)).build();
 
-    auto sphere1                     = Sphere(1000, MaterialBuilder<Lambertian>().setTexture(perText).build());
-    sphere1.transformation.translate = vec3(0, -1000, 0);
-    world.Add(make_shared<Sphere>(sphere1));
-
-    auto sphere2                     = Sphere(2, MaterialBuilder<Lambertian>().setTexture(perText).build());
-    sphere2.transformation.translate = vec3(0, 2, 0);
-    world.Add(make_shared<Sphere>(sphere2));
-
-    world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
+    world
+        .Add(HittableBuilder<Plane>(100, 100)
+                 .withMaterial(MaterialBuilder<Lambertian>().setTexture(perText).build())
+                 .withName("Plane")
+                 .build())
+        .Add(HittableBuilder<Sphere>(2)
+                 .withTranslation(vec3(0, 2, 0))
+                 .withMaterial(MaterialBuilder<Lambertian>().setTexture(perText).build())
+                 .withName("Sphere")
+                 .build())
+        .Add(HittableBuilder<Plane>(2, 2)
+                 .withMaterial(diffLight)
+                 .withRotation(vec3(90, 0, 0))
+                 .withTranslation(vec3(4, 2, -2))
+                 .withName("Light")
+                 .build());
 
     s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
 
@@ -582,7 +584,8 @@ namespace rt {
     // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
 
     std::string skyspherePath = "assets/textures/skysphere.png";
-    auto        sphereMat     = MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>(skyspherePath.c_str(), true)).build();
+    auto        sphereMat =
+        MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>(skyspherePath.c_str(), true)).build();
 
     // auto light          = make_shared<DiffuseLight>(make_shared<SolidColor>(vec3(3)));
     auto metal = MaterialBuilder<Metal>(0.1f).setTexture(vec3(0.8)).build();
@@ -617,12 +620,16 @@ namespace rt {
 
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
-    auto red = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
-    auto magenta =
-        MaterialBuilder<DiffuseLight>().setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40))).build();
-    auto blue = MaterialBuilder<DiffuseLight>().setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40))).build();
+    auto red     = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
+    auto magenta = MaterialBuilder<DiffuseLight>()
+                       .setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(3, 0, 3), vec3::Zero(), 40)))
+                       .build();
+    auto blue = MaterialBuilder<DiffuseLight>()
+                    .setTexture(make_shared<CheckerTexture>(CheckerTexture(vec3(0, 0, 3), vec3::Zero(), 40)))
+                    .build();
 
-    auto earth = MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>("assets/textures/earthmap.png")).build();
+    auto earth =
+        MaterialBuilder<DiffuseLight>().setTexture(make_shared<ImageTexture>("assets/textures/earthmap.png")).build();
 
     auto plane = HittableBuilder<Plane>(3, 3).withMaterial(magenta).withTranslation(vec3(-3, 10, 0)).build();
 

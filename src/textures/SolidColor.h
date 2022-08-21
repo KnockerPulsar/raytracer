@@ -23,11 +23,9 @@ namespace rt {
 
     virtual vec3 Value(float u, float v, const vec3 &p) const override { return color * multiplier; }
 
-    virtual void OnImgui() override {
+    virtual void OnDerivedImgui() override {
       std::string id = EditorUtils::GetIDFromPointer(this);
       ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x);
-
-      Texture::previewOrGenerate();
     }
 
     void generatePreview() override {

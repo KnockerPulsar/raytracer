@@ -12,7 +12,6 @@ add_compile_definitions(GAMMA_CORRECTION)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-flto -ffast-math -O3 -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp")
 
-# set(CMAKE_BUILD_TYPE Debug)
 CMAKE_POLICY(SET CMP0074 NEW)
 
 # Profiling stuff

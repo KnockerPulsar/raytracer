@@ -44,14 +44,12 @@ namespace rt {
       Texture::generatePreviewUtil([&](float u, float v) { return vec3(u, v , 1); });
     }
 
-    virtual void OnImgui() override {
-      even->OnImgui();
-      odd->OnImgui();
+    virtual void OnDerivedImgui() override {
+      even->OnBaseImgui();
+      odd->OnBaseImgui();
       ImGui::DragFloat("Checker scale", &scale);
 
       ImGui::Spacing();
-
-      Texture::previewOrGenerate();
     }
   };
 

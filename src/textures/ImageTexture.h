@@ -1,4 +1,5 @@
 #pragma once
+#include "ImGuiFileDialog.h"
 #include "../../vendor/rlImGui/imgui/imgui.h"
 #include "../Perlin.h"
 #include "Texture.h"
@@ -25,7 +26,7 @@ namespace rt {
     const static int bytesPerPixel = 3;
     bool             flipH = false, flipV = false;
 
-    ImageTexture() : img{} {}
+    ImageTexture() : ImageTexture("assets/textures/source-default.png") { }
 
     ImageTexture(const char *filename, bool fv = false, bool fh = false) : path(filename), flipH(fh), flipV(fv) {
       ImageFromPath(filename);
@@ -42,6 +43,7 @@ namespace rt {
       }
 
       bytesPerScanline = bytesPerPixel * img.width;
+      previewTexture.width = -1; // Invalidate preview
     }
 
     ~ImageTexture() {
@@ -85,7 +87,19 @@ namespace rt {
       Texture::generatePreviewUtil([](float u, float v) { return vec3(u, v, 0); });
     }
 
-    virtual void OnImgui() override { Texture::previewOrGenerate(); }
+    virtual void OnDerivedImgui() override { 
+      if(ImGui::Button("Pick texture")) {
+        ImGuiFileDialog::Instance()->OpenDialog("PickTexture", "Pick Texture", ".png", "assets/textures");
+      }
+
+      if(ImGuiFileDialog::Instance()->Display("PickTexture")) {
+        if(ImGuiFileDialog::Instance()->IsOk()){
+          std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+          ImageFromPath(filePathName.c_str());
+          ImGuiFileDialog::Instance()->Close();
+        }
+      }
+    }
 
   private:
     int         bytesPerScanline;

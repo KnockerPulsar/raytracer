@@ -47,15 +47,13 @@ namespace rt {
       Texture::generatePreviewUtil([](float u, float v) { return v * u; });
     }
 
-    virtual void OnImgui() override {
+    virtual void OnDerivedImgui() override {
 
       ImGui::DragFloat("Noise scale", &scale, 0.1f);
       ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f);
       ImGui::ColorEdit3("Base color", &baseColor.x);
 
       ImGui::Spacing();
-
-      Texture::previewOrGenerate();
     }
   };
 

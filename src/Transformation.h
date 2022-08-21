@@ -82,7 +82,7 @@ namespace rt {
 
     glm::mat4 getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
 
-    virtual void OnImgui() override {
+    virtual void OnDerivedImgui() override {
       ImGui::DragFloat3(
           ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);

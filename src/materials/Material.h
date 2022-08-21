@@ -19,7 +19,13 @@ namespace rt {
     virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const = 0;
 
     virtual json toJson() const = 0;
-  
+ 
+    
+    virtual void OnBaseImgui() {
+      albedo->OnBaseImgui();
+      OnDerivedImgui();
+    }
+
     Material& setTexture(sPtr<Texture> texture) {
       albedo = texture;
       return *this;

@@ -24,8 +24,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o"
   "CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o"
   "CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o"
-  "bin/Raytracer"
-  "bin/Raytracer.pdb"
+  "bin/release/Raytracer"
+  "bin/release/Raytracer.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

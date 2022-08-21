@@ -82,6 +82,8 @@ namespace rt {
 
     static std::optional<sPtr<Material>> MaterialChanger();
 
+    static std::optional<sPtr<Texture>> TextureChanger();
+
     void TopMenuImgui();
 
     virtual void changeScene(Scene *scene) override;

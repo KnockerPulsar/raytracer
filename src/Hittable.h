@@ -91,8 +91,9 @@ namespace rt {
       return true;
     }
 
-    virtual void OnImgui() override {
-      transformation.OnImgui();
+    virtual void OnBaseImgui() override {
+      transformation.OnDerivedImgui();
+
       ImGui::Spacing();
       if (material) {
 
@@ -101,10 +102,17 @@ namespace rt {
           changeMaterial(newMat.value());
         }
 
+        auto newTex = Editor::TextureChanger();
+        if (newTex.has_value()) {
+          material->setTexture(newTex.value());
+        }
+
         ImGui::Spacing();
 
-        material->OnImgui();
+        material->OnBaseImgui();
       }
+
+      OnDerivedImgui();
     }
 
     void setTransformation(vec3 translate = vec3::Zero(), vec3 rotate = vec3::Zero()) {
@@ -127,6 +135,15 @@ namespace rt {
 
     // Should be overridden by group hittables such as
     // Boxes, HittableLists if the contain primtivies of one object, etc ...
-    virtual void changeMaterial(sPtr<Material> &newMat) { material = newMat; }
+    virtual void changeMaterial(sPtr<Material> &newMat) {
+      if (material && material->albedo) {
+        auto oldTexture = material->albedo;
+        material        = newMat;
+
+        material->albedo = oldTexture;
+      } else {
+        material = newMat;
+      }
+    }
   };
 } // namespace rt

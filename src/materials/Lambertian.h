@@ -40,8 +40,7 @@ namespace rt {
 
     json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }
 
-    virtual void OnImgui() override {
-      albedo->OnImgui();
+    virtual void OnDerivedImgui() override {
     }
   };
 
