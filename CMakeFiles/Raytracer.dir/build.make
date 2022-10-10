@@ -174,9 +174,22 @@ CMakeFiles/Raytracer.dir/src/AsyncRenderData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Raytracer.dir/src/AsyncRenderData.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tarek/raytracer/src/AsyncRenderData.cpp -o CMakeFiles/Raytracer.dir/src/AsyncRenderData.cpp.s
 
+CMakeFiles/Raytracer.dir/src/Transformation.cpp.o: CMakeFiles/Raytracer.dir/flags.make
+CMakeFiles/Raytracer.dir/src/Transformation.cpp.o: src/Transformation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/Raytracer.dir/src/Transformation.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/Transformation.cpp.o -c /home/tarek/raytracer/src/Transformation.cpp
+
+CMakeFiles/Raytracer.dir/src/Transformation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Raytracer.dir/src/Transformation.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tarek/raytracer/src/Transformation.cpp > CMakeFiles/Raytracer.dir/src/Transformation.cpp.i
+
+CMakeFiles/Raytracer.dir/src/Transformation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Raytracer.dir/src/Transformation.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tarek/raytracer/src/Transformation.cpp -o CMakeFiles/Raytracer.dir/src/Transformation.cpp.s
+
 CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o: src/GroupPanel.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o -c /home/tarek/raytracer/src/GroupPanel.cpp
 
 CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.i: cmake_force
@@ -189,7 +202,7 @@ CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o: src/data_structures/vec3.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o -c /home/tarek/raytracer/src/data_structures/vec3.cpp
 
 CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.i: cmake_force
@@ -202,7 +215,7 @@ CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o: src/objects/Box.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o -c /home/tarek/raytracer/src/objects/Box.cpp
 
 CMakeFiles/Raytracer.dir/src/objects/Box.cpp.i: cmake_force
@@ -215,7 +228,7 @@ CMakeFiles/Raytracer.dir/src/objects/Box.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.o: src/objects/Sphere.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.o -c /home/tarek/raytracer/src/objects/Sphere.cpp
 
 CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.i: cmake_force
@@ -228,7 +241,7 @@ CMakeFiles/Raytracer.dir/src/objects/Sphere.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.o: src/objects/AARect.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.o -c /home/tarek/raytracer/src/objects/AARect.cpp
 
 CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.i: cmake_force
@@ -241,7 +254,7 @@ CMakeFiles/Raytracer.dir/src/objects/AARect.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/editor/editor.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/editor/editor.cpp.o: src/editor/editor.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/Raytracer.dir/src/editor/editor.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/Raytracer.dir/src/editor/editor.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/editor/editor.cpp.o -c /home/tarek/raytracer/src/editor/editor.cpp
 
 CMakeFiles/Raytracer.dir/src/editor/editor.cpp.i: cmake_force
@@ -254,7 +267,7 @@ CMakeFiles/Raytracer.dir/src/editor/editor.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o: src/editor/Utils.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o -c /home/tarek/raytracer/src/editor/Utils.cpp
 
 CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.i: cmake_force
@@ -267,7 +280,7 @@ CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.o: vendor/argumentum/src/argparser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.o -c /home/tarek/raytracer/vendor/argumentum/src/argparser.cpp
 
 CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.i: cmake_force
@@ -280,7 +293,7 @@ CMakeFiles/Raytracer.dir/vendor/argumentum/src/argparser.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.o: vendor/ImGuiFileDialog/ImGuiFileDialog.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.o -c /home/tarek/raytracer/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp
 
 CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.i: cmake_force
@@ -293,7 +306,7 @@ CMakeFiles/Raytracer.dir/vendor/ImGuiFileDialog/ImGuiFileDialog.cpp.s: cmake_for
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o: vendor/rlImGui/rlImGui.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/rlImGui.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.i: cmake_force
@@ -306,7 +319,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/rlImGui.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.o: vendor/rlImGui/imgui/imgui.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/imgui/imgui.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.i: cmake_force
@@ -319,7 +332,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o: vendor/rlImGui/imgui/imgui_widgets.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/imgui/imgui_widgets.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.i: cmake_force
@@ -332,7 +345,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_widgets.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.o: vendor/rlImGui/imgui/imgui_draw.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/imgui/imgui_draw.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.i: cmake_force
@@ -345,7 +358,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_draw.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o: vendor/rlImGui/imgui/imgui_tables.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/imgui/imgui_tables.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.i: cmake_force
@@ -358,7 +371,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/imgui_tables.cpp.s: cmake_force
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.o: vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/tarek/raytracer/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp
 
 CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.i: cmake_force
@@ -371,7 +384,7 @@ CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp.s:
 
 CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o: CMakeFiles/Raytracer.dir/flags.make
 CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o: vendor/imguizmo/ImGuizmo.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o -c /home/tarek/raytracer/vendor/imguizmo/ImGuizmo.cpp
 
 CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.i: cmake_force
@@ -393,6 +406,7 @@ Raytracer_OBJECTS = \
 "CMakeFiles/Raytracer.dir/src/RenderAsync.cpp.o" \
 "CMakeFiles/Raytracer.dir/src/Ray.cpp.o" \
 "CMakeFiles/Raytracer.dir/src/AsyncRenderData.cpp.o" \
+"CMakeFiles/Raytracer.dir/src/Transformation.cpp.o" \
 "CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o" \
 "CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o" \
 "CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o" \
@@ -422,6 +436,7 @@ bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/HittableList.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/RenderAsync.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/Ray.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/AsyncRenderData.cpp.o
+bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/Transformation.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/GroupPanel.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/src/objects/Box.cpp.o
@@ -440,7 +455,7 @@ bin/release/Raytracer: CMakeFiles/Raytracer.dir/vendor/rlImGui/imgui/backends/im
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/vendor/imguizmo/ImGuizmo.cpp.o
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/build.make
 bin/release/Raytracer: CMakeFiles/Raytracer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Linking CXX executable bin/release/Raytracer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/tarek/raytracer/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Linking CXX executable bin/release/Raytracer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Raytracer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

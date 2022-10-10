@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/tarek/raytracer/src/Ray.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/Ray.cpp.o"
   "/home/tarek/raytracer/src/RenderAsync.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/RenderAsync.cpp.o"
   "/home/tarek/raytracer/src/Scene.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/Scene.cpp.o"
+  "/home/tarek/raytracer/src/Transformation.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/Transformation.cpp.o"
   "/home/tarek/raytracer/src/app.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/app.cpp.o"
   "/home/tarek/raytracer/src/data_structures/vec3.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o"
   "/home/tarek/raytracer/src/editor/Utils.cpp" "/home/tarek/raytracer/CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o"

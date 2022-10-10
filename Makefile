@@ -339,6 +339,33 @@ src/Scene.cpp.s:
 	$(MAKE) -f CMakeFiles/Raytracer.dir/build.make CMakeFiles/Raytracer.dir/src/Scene.cpp.s
 .PHONY : src/Scene.cpp.s
 
+src/Transformation.o: src/Transformation.cpp.o
+
+.PHONY : src/Transformation.o
+
+# target to build an object file
+src/Transformation.cpp.o:
+	$(MAKE) -f CMakeFiles/Raytracer.dir/build.make CMakeFiles/Raytracer.dir/src/Transformation.cpp.o
+.PHONY : src/Transformation.cpp.o
+
+src/Transformation.i: src/Transformation.cpp.i
+
+.PHONY : src/Transformation.i
+
+# target to preprocess a source file
+src/Transformation.cpp.i:
+	$(MAKE) -f CMakeFiles/Raytracer.dir/build.make CMakeFiles/Raytracer.dir/src/Transformation.cpp.i
+.PHONY : src/Transformation.cpp.i
+
+src/Transformation.s: src/Transformation.cpp.s
+
+.PHONY : src/Transformation.s
+
+# target to generate assembly for a file
+src/Transformation.cpp.s:
+	$(MAKE) -f CMakeFiles/Raytracer.dir/build.make CMakeFiles/Raytracer.dir/src/Transformation.cpp.s
+.PHONY : src/Transformation.cpp.s
+
 src/app.o: src/app.cpp.o
 
 .PHONY : src/app.o
@@ -831,6 +858,9 @@ help:
 	@echo "... src/Scene.o"
 	@echo "... src/Scene.i"
 	@echo "... src/Scene.s"
+	@echo "... src/Transformation.o"
+	@echo "... src/Transformation.i"
+	@echo "... src/Transformation.s"
 	@echo "... src/app.o"
 	@echo "... src/app.i"
 	@echo "... src/app.s"

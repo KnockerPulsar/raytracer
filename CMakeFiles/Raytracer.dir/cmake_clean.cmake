@@ -7,6 +7,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/Raytracer.dir/src/Ray.cpp.o"
   "CMakeFiles/Raytracer.dir/src/RenderAsync.cpp.o"
   "CMakeFiles/Raytracer.dir/src/Scene.cpp.o"
+  "CMakeFiles/Raytracer.dir/src/Transformation.cpp.o"
   "CMakeFiles/Raytracer.dir/src/app.cpp.o"
   "CMakeFiles/Raytracer.dir/src/data_structures/vec3.cpp.o"
   "CMakeFiles/Raytracer.dir/src/editor/Utils.cpp.o"

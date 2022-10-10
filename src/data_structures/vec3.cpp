@@ -20,6 +20,9 @@ bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && f
 
 glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 
+glm::vec4 vec3::toPoint() const { return glm::vec4(toGlm(), 1); }
+glm::vec4 vec3::toVec() const { return glm::vec4(toGlm(), 0); }
+
 Color vec3::toRaylibColor(u_char alpha) const {
   vec3 temp = *this * 255;
   temp.x    = std::min(temp.x, 255.0f);

@@ -23,6 +23,8 @@ public:
   static vec3 Zero() { return Vector3Zero(); } // Returns a vector with all components set to zero
   glm::vec3   toGlm() const;
   Color       toRaylibColor(u_char alpha) const;
+  glm::vec4   toPoint() const;
+  glm::vec4   toVec() const;
 
   bool NearZero() const;                // Checks if all components of the vector are less than epsilon (Constants.h)
   vec3 Reflect(const vec3 &norm) const; // Reflects the vector about a given axisI

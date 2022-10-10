@@ -48,7 +48,6 @@ namespace rt {
       ToggleFullscreen();
 
     ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   }
 
   App::App(int imageWidth, int imageHeight, int numThreads) : numThreads(numThreads) {
