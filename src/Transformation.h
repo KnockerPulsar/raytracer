@@ -20,8 +20,10 @@ namespace rt {
 
     static vec3 matMul(const glm::vec4& v, const glm::mat4& m);
 
-    vec3 Apply(const vec3 &inVec) const;
-    vec3 Inverse(const vec3 &inVec) const;
+    vec3 ApplyPoint(const vec3 &inVec) const;
+    vec3 ApplyVec(const vec3 &inVec) const;
+    vec3 InversePoint(const vec3 &inVec) const;
+    vec3 InverseVec(const vec3 &inVec) const;
 
     AABB regenAABB(const AABB &aabb) const;
 

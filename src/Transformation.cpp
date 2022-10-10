@@ -9,9 +9,12 @@ namespace rt {
       return vec3( m * v );
     }
 
-    vec3 Transformation::Apply(const vec3 &inVec) const { return matMul(inVec.toPoint(), getModelMatrix()); }
+    vec3 Transformation::ApplyPoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), getModelMatrix()); }
+    vec3 Transformation::InversePoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), getInverseModelMatrix()); }
 
-    vec3 Transformation::Inverse(const vec3 &inVec) const { return matMul(inVec.toPoint(), getInverseModelMatrix()); }
+    vec3 Transformation::ApplyVec(const vec3 &inVec) const { return matMul(inVec.toVec(), getModelMatrix()); }
+    vec3 Transformation::InverseVec(const vec3 &inVec) const { return matMul(inVec.toVec(), getInverseModelMatrix()); }
+
     AABB Transformation::regenAABB(const AABB &aabb) const {
       // Generate all 8 vertices of the input AABB
       // Apply the transform to all 8
