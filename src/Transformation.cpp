@@ -5,17 +5,13 @@ namespace rt {
   Transformation::Transformation(vec3 translation , vec3 rotation )
         : translate(translation), rotate(rotation) {}
 
-    vec3 Transformation::applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat) {
-      auto glmVec     = glm::vec4(vec.x, vec.y, vec.z, 1);
-      auto rotatedVec = mat * glmVec;
-
-      return vec3(rotatedVec.x, rotatedVec.y, rotatedVec.z);
+    vec3 Transformation::matMul(const glm::vec4& v, const glm::mat4& m) {
+      return vec3( m * v );
     }
 
-    vec3 Transformation::Apply(const vec3 &inVec) const { return applyGlmMat(inVec, getModelMatrix()); }
+    vec3 Transformation::Apply(const vec3 &inVec) const { return matMul(inVec.toPoint(), getModelMatrix()); }
 
-    vec3 Transformation::Inverse(const vec3 &inVec) const { return applyGlmMat(inVec, getInverseModelMatrix()); }
-
+    vec3 Transformation::Inverse(const vec3 &inVec) const { return matMul(inVec.toPoint(), getInverseModelMatrix()); }
     AABB Transformation::regenAABB(const AABB &aabb) const {
       // Generate all 8 vertices of the input AABB
       // Apply the transform to all 8
@@ -33,7 +29,7 @@ namespace rt {
 
       glm::mat4 model = getModelMatrix();
       for (auto &&vert : vertices) {
-        vert = applyGlmMat(vert, model);
+        vert = matMul(vert.toPoint(), model);
       }
 
       vec3 newMin = vec3(infinity);

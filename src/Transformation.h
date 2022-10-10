@@ -18,7 +18,7 @@ namespace rt {
 
     Transformation(vec3 translation = vec3::Zero(), vec3 rotation = vec3::Zero());
 
-    static vec3 applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat);
+    static vec3 matMul(const glm::vec4& v, const glm::mat4& m);
 
     vec3 Apply(const vec3 &inVec) const;
     vec3 Inverse(const vec3 &inVec) const;

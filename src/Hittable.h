@@ -77,16 +77,18 @@ namespace rt {
       // Compare against RotateY and Translate implementations for accuracy
 
       Ray transformedRay = r;
+      glm::mat4 m = transformation.getModelMatrix();
+      glm::mat4 im = transformation.getInverseModelMatrix();
 
       // Apply inverse transformations in reverse
       transformedRay.origin    = transformation.Inverse(r.origin);
-      transformedRay.direction = Transformation::applyGlmMat(r.direction, transformation.getInverseRotationMatrix());
+      transformedRay.direction = Transformation::matMul(r.direction.toVec(), im);
 
       if (!this->Hit(transformedRay, t_min, t_max, rec))
         return false;
 
       rec.p = transformation.Apply(rec.p);
-      rec.set_face_normal(transformedRay, Transformation::applyGlmMat(rec.normal, transformation.getRotationMatrix()));
+      rec.set_face_normal(transformedRay, Transformation::matMul(rec.normal.toVec(), m));
 
       return true;
     }
