@@ -38,7 +38,7 @@ namespace rt {
     Hittable            *closestHit = nullptr;
 
     inline void set_face_normal(const Ray &r, const vec3 &outward_normal) {
-      front_face = vec3::DotProd(outward_normal, r.direction) < 0;
+      front_face = vec3::DotProd(outward_normal, r.direction.D3) < 0;
       normal     = front_face ? outward_normal : outward_normal * -1;
     }
   };
@@ -79,14 +79,14 @@ namespace rt {
       Ray transformedRay = r;
 
       // Apply inverse transformations in reverse
-      transformedRay.origin    = transformation.InversePoint(r.origin);
-      transformedRay.direction = transformation.InverseVec(r.direction);
+      transformedRay.origin.O3    = transformation.InversePoint(r.origin.O3).v;
+      transformedRay.direction.D3 = transformation.InverseVec(r.direction.D3).v;
 
       if (!this->Hit(transformedRay, t_min, t_max, rec))
         return false;
 
-      rec.p = transformation.ApplyPoint(rec.p);
-      rec.set_face_normal(transformedRay, transformation.ApplyVec(rec.normal));
+      rec.p = transformation.ApplyPoint(rec.p).v;
+      rec.set_face_normal(transformedRay, transformation.ApplyVec(rec.normal).v);
 
       return true;
     }

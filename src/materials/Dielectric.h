@@ -38,7 +38,7 @@ namespace rt {
       attenuation  = albedo->Value(rec.u, rec.v, rec.p);
       float refIdx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
-      vec3  unitDir  = rIn.direction.Normalize();
+      vec3  unitDir  = rIn.direction.D3.Normalize();
       float cosTheta = fmin(vec3::DotProd(-unitDir, rec.normal), 1.0);
       float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 

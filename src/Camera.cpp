@@ -112,7 +112,7 @@ namespace rt {
     return Ray(
         lookFrom + offset,
         dir.Normalize(),
-        RandomFloat(time0, time1)
+        RandomFloat(time0, time1) + 10e3
     );
   }
 
@@ -220,7 +220,7 @@ namespace rt {
   }
 
   glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(lookFrom, lookAt, worldUp);
+    return glm::lookAt(lookFrom.v, lookAt.v, worldUp.v);
   }
 
   glm::mat4 Camera::getProjectionMatrix() const {

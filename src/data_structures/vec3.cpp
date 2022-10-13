@@ -4,24 +4,25 @@
 #include <cstdint>
 #include <sys/types.h>
 
-vec3::vec3() {}
+vec3::vec3() : v(0) {}
 
-vec3::vec3(const float x, const float y, const float z) : glm::vec3(x,y,z) {}
+vec3::vec3(const float x, const float y, const float z) : x(x), y(y), z(z) {}
 
-vec3::vec3(const float f) : vec3(f, f, f) {}
+vec3::vec3(const float f) : v(f, f, f) {}
 
-vec3::vec3(const Vector3 &conv) : glm::vec3(conv.x, conv.y, conv.z) {}
+vec3::vec3(const Vector3 &conv) : x(conv.x), y(conv.y), z(conv.z) {}
 
-vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
+vec3::vec3(const glm::vec3 &glmVec) : v(glmVec.x, glmVec.y, glmVec.z) {}
 
-vec3::vec3(const Color &color) : vec3(float(color.r) / 255, float(color.g) / 255, float(color.b) / 255) {}
+vec3::vec3(const Color &color) : v(float(color.r) / 255, float(color.g) / 255, float(color.b) / 255) {}
+
 
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
 
 
 Vector3 vec3::toRlVec3() const { return Vector3{x,y,z}; }
-glm::vec4 vec3::toPoint() const { return glm::vec4(*this, 1); }
-glm::vec4 vec3::toVec() const { return glm::vec4(*this, 0); }
+glm::vec4 vec3::toPoint() const { return glm::vec4(this->v, 1); }
+glm::vec4 vec3::toVec() const { return glm::vec4(this->v, 0); }
 
 Color vec3::toRaylibColor(u_char alpha) const {
   vec3 temp = *this * 255;
@@ -39,14 +40,14 @@ vec3 vec3::Reflect(const vec3 &norm) const {
 
 vec3 vec3::Refract(const vec3 &n, float etaIOverEtaT) const {
   float cosTheta     = fmin(DotProd(-*this, n), 1.0);
-  vec3  rOutPerp     = etaIOverEtaT * (*this + cosTheta * n);
+  vec3  rOutPerp     = etaIOverEtaT * (this->v + cosTheta * n);
   vec3  rOutParallel = -sqrt(fabs(1.0 - rOutPerp.SqrLen())) * n;
   return rOutPerp + rOutParallel;
 }
 
-float vec3::DotProd(const vec3 &left, const vec3 &right) { return glm::dot((glm::vec3)left, (glm::vec3)right); }
+float vec3::DotProd(const vec3 &left, const vec3 &right) { return glm::dot(left.v, right.v); }
 
-vec3 vec3::CrsProd(const vec3 &left, const vec3 &right) { return glm::cross((glm::vec3)left, (glm::vec3)right); }
+vec3 vec3::CrsProd(const vec3 &left, const vec3 &right) { return glm::cross(left.v, right.v); }
 
 vec3 vec3::projectOntoPlane(const vec3 &planeNormal) const {
   return *this - vec3::DotProd(*this, planeNormal) * planeNormal;
@@ -88,7 +89,9 @@ vec3 vec3::RandomInUnitDisc() {
 
 // Binary operators
 vec3 operator*(const vec3 &lVec3, const float rFloat) {
-  return (glm::vec3)lVec3 * rFloat;
+  return lVec3.v * rFloat;
 }
 
 vec3 operator*(const float lFloat, const vec3 &rVec3) { return operator*(rVec3, lFloat); }
+
+vec3 operator+(const glm::vec3& lVec3, const vec3 &rVec3) { return lVec3 + rVec3.v; }

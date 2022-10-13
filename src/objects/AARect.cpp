@@ -13,7 +13,7 @@ namespace rt {
   }
 
   bool XYRect::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-    float t = (z - r.origin.z) / r.direction.z;
+    float t = (z - r.origin.O3.z) / r.direction.D3.z;
 
     if (t < t_min || t > t_max)
       return false;
@@ -56,7 +56,7 @@ namespace rt {
   }
 
   bool XZRect::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-    float t = (y - r.origin.y) / r.direction.y;
+    float t = (y - r.origin.O3.y) / r.direction.D3.y;
 
     if (t < t_min || t > t_max)
       return false;
@@ -100,7 +100,7 @@ namespace rt {
   }
 
   bool YZRect::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-    float t = (x - r.origin.x) / r.direction.x;
+    float t = (x - r.origin.O3.x) / r.direction.D3.x;
 
     if (t < t_min || t > t_max)
       return false;

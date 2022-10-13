@@ -90,8 +90,8 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
       .absent("default")
       .help("Path to scene json");
 
-  
   int availableThreads = std::thread::hardware_concurrency();
+
   parser.add_argument(numThreads, "--threads")
       .maxargs(1)
       .metavar("UNSIGNED INT")

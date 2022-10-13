@@ -108,6 +108,7 @@ namespace rt {
       // Copy over only the color data
       for (int i = 0; i < jobs.size(); ++i) {
         pixelData[i] = jobs[i].color;
+        pixelData[i].a = 1.0f;
       }
 
       if (firstFrame) {
@@ -117,7 +118,7 @@ namespace rt {
             .width   = getScene()->imageWidth,
             .height  = getScene()->imageHeight,
             .mipmaps = 1,
-            .format  = RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32
+            .format  = RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32A32
           };
 
         ard.raytraceRT.texture = LoadTextureFromImage(raytraced);

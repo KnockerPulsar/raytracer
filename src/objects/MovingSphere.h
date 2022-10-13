@@ -21,9 +21,9 @@ namespace rt {
 
     virtual bool Hit(const Ray &r, float tMin, float tMax, HitRecord &rec) const override {
       // Vector between ray origin and sphere center
-      vec3  oc     = r.origin - this->CurrCenter(r.time);
-      float a      = r.direction.SqrLen();
-      float half_b = vec3::DotProd(oc, r.direction);
+      vec3  oc     = r.origin.O3 - this->CurrCenter(r.time);
+      float a      = r.direction.D3.SqrLen();
+      float half_b = vec3::DotProd(oc, r.direction.D3);
       float c      = oc.Len() * oc.Len() - radius * radius;
 
       float discriminant = half_b * half_b - a * c;

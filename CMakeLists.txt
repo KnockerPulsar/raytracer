@@ -10,7 +10,7 @@ add_compile_definitions(FAST_EXIT)
 add_compile_definitions(GAMMA_CORRECTION)
 
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops -msse")
 
 CMAKE_POLICY(SET CMP0074 NEW)
 

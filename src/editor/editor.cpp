@@ -75,7 +75,7 @@ namespace rt {
       aabBs.push_back(rootAABB);
 
       for (auto &&bb : aabBs) {
-        DrawBoundingBox({bb.min.toRlVec3(), bb.max.toRlVec3()}, {255, 0, 255, 255});
+        DrawBoundingBox({bb.b3.min.toRlVec3(), bb.b3.max.toRlVec3()}, {255, 0, 255, 255});
       }
 
       vec3 focusSpherePos = getCamera()->lookFrom + getCamera()->localForward * getCamera()->focusDist;
@@ -219,9 +219,9 @@ namespace rt {
   Hittable *Editor::CastRay(Vector2 mousePos) {
 
     ::Ray raylibRay = GetMouseRay(mousePos, getCamera()->toRaylibCamera3D());
-    Ray   r         = {raylibRay.position, raylibRay.direction, 0};
+    Ray   r         = {raylibRay.position, raylibRay.direction, 1e-6f};
 
-    rt::Camera::lineStart = r.origin;
+    rt::Camera::lineStart = r.origin.O3;
     rt::Camera::lineEnd   = r.At(1000);
 
     rt::HitRecord rec;

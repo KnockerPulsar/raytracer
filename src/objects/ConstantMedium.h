@@ -78,7 +78,7 @@ namespace rt {
     if (rec1.t < 0)
       rec1.t = 0;
 
-    const auto rayLength         = r.direction.Len();
+    const auto rayLength         = r.direction.D3.Len();
     const auto distInsideBoundry = (rec2.t - rec1.t) * rayLength;
     const auto hitDist           = negInvDensity * log(RandomFloat());
 

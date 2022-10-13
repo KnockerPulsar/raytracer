@@ -108,14 +108,14 @@ namespace rt {
       switch (axis) {
       // X
       case 0:
-        return boxA.min.x < boxB.min.x;
+        return boxA.b3.min.x < boxB.b3.min.x;
       // Y
       case 1:
-        return boxA.min.y < boxB.min.y;
+        return boxA.b3.min.y < boxB.b3.min.y;
 
       // Z
       case 2:
-        return boxA.min.z < boxB.min.z;
+        return boxA.b3.min.z < boxB.b3.min.z;
 
       _:
         return false;

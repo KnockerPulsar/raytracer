@@ -46,7 +46,7 @@ namespace rt {
 
       vec3  v0v1 = v1.p - v0.p;
       vec3  v0v2 = v2.p - v0.p;
-      vec3  pvec = vec3::CrsProd(r.direction, v0v2);
+      vec3  pvec = vec3::CrsProd(r.direction.D3, v0v2);
       float det  = vec3::DotProd(v0v1, pvec);
 
       // ray and triangle are parallel if det is close to 0
@@ -55,13 +55,13 @@ namespace rt {
 
       float invDet = 1 / det;
 
-      vec3  tvec = r.origin - v0.p;
+      vec3  tvec = r.origin.O3 - v0.p;
       float u    = vec3::DotProd(tvec, pvec) * invDet;
       if (u < 0 || u > 1)
         return false;
 
       vec3  qvec = vec3::CrsProd(tvec, v0v1);
-      float v    = vec3::DotProd(r.direction, qvec) * invDet;
+      float v    = vec3::DotProd(r.direction.D3, qvec) * invDet;
       if (v < 0 || u + v > 1)
         return false;
 

@@ -12,9 +12,12 @@ namespace rt {
 
   class AABB {
   public:
-    vec3 min, max;
+    union {
+      struct { vec3 min, max; } b3;
+      struct { __m128 min, max; } b4;
+    };
 
-    AABB() = default;
+    AABB() { b3.min = b3.max = 0; }
     AABB(const vec3 &a, const vec3 &b);
 
     // Build an AABB from points

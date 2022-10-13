@@ -25,14 +25,14 @@ namespace rt {
       // Apply the transform to all 8
       // Get the bounding box of the rotated bounding box
       std::vector<vec3> vertices = {
-          aabb.min,                                   // 000
-          vec3(aabb.min.x, aabb.min.y, aabb.max.z),   // 001
-          vec3(aabb.min.x, aabb.max.y, aabb.min.z),   // 010
-          vec3(aabb.min.x, aabb.max.y, aabb.max.z),   // 011
-          vec3(aabb.max.x, aabb.min.y, aabb.min.z),   // 100
-          vec3(aabb.max.x, aabb.min.y, aabb.max.z),   // 101
-          vec3(aabb.max.x, aabb.max.y, aabb.min.z),   // 110
-          aabb.max,                                   // 111
+          aabb.b3.min,                                   // 000
+          vec3(aabb.b3.min.x, aabb.b3.min.y, aabb.b3.max.z),   // 001
+          vec3(aabb.b3.min.x, aabb.b3.max.y, aabb.b3.min.z),   // 010
+          vec3(aabb.b3.min.x, aabb.b3.max.y, aabb.b3.max.z),   // 011
+          vec3(aabb.b3.max.x, aabb.b3.min.y, aabb.b3.min.z),   // 100
+          vec3(aabb.b3.max.x, aabb.b3.min.y, aabb.b3.max.z),   // 101
+          vec3(aabb.b3.max.x, aabb.b3.max.y, aabb.b3.min.z),   // 110
+          aabb.b3.max,                                   // 111
       };
 
       constructMatrices();
@@ -64,9 +64,9 @@ namespace rt {
     }
 
     void Transformation::constructMatrices() {
-        glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translate);
+        glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translate.v);
 
-        glm::vec3 r              = glm::radians((glm::vec3)rotate);
+        glm::vec3 r              = glm::radians(rotate.v);
         glm::mat4 rotationMatrix = glm::eulerAngleXYZ(r.x, r.y, r.z);
 
         tMatrix = translationMat * rotationMatrix;
