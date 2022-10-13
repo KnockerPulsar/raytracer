@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ostream>
 #include <string>
+#include <thread>
 #include <tuple>
 /*
  TODO:
@@ -128,7 +129,7 @@ int main(int argc, char **argv) {
     rt::App app(imageWidth, imageHeight, pathToScene, numThreads);
     app.run();
   } else {
-    rt::App app(imageWidth, imageHeight, rt::Scene::Earth(imageWidth, imageHeight), numThreads);
+    rt::App app(imageWidth, imageHeight, rt::Scene::Random(imageWidth, imageHeight), numThreads);
     app.run();
   }
 
