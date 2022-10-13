@@ -10,7 +10,7 @@ add_compile_definitions(FAST_EXIT)
 add_compile_definitions(GAMMA_CORRECTION)
 
 
-set(CMAKE_CXX_FLAGS_RELEASE "-flto -ffast-math -O3 -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops")
 
 CMAKE_POLICY(SET CMP0074 NEW)
 
@@ -74,9 +74,9 @@ include_directories(
   vendor/stb_image
 )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG    ${PROJECT_SOURCE_DIR}/bin/debug)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR}/bin/release)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG    ${PROJECT_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # For each example, we add an executable target

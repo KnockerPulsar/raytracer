@@ -61,11 +61,10 @@ using namespace argumentum;
 
 std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
   const int imageWidthDefault = 900;
-  const int numThreadsDefault = 6;
 
   int         imageWidth  = -1;
   int         imageHeight = -1;
-  int         numThreads  = 6;
+  int         numThreads;
   std::string pathToScene;
 
   argument_parser parser = argument_parser{};
@@ -90,19 +89,21 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
       .absent("default")
       .help("Path to scene json");
 
+  
+  int availableThreads = std::thread::hardware_concurrency();
   parser.add_argument(numThreads, "--threads")
       .maxargs(1)
       .metavar("UNSIGNED INT")
-      .absent(numThreadsDefault)
+      .absent(availableThreads)
       .help("Number of threads to raytrace with")
       .action([&](auto &target, const std::string &value) {
         int parsedValue = std::atoi(value.c_str());
 
         if (parsedValue <= 0) {
-          std::cout << "WARNING: Invalid number of threads entered (" << value << "), using default number of threads ("
-                    << numThreadsDefault << ")" << std::endl;
+          std::cout << "WARNING: Invalid number of threads entered (" << value << "), using all available threads ("
+                    << availableThreads << ")" << std::endl;
                     
-          target = numThreadsDefault;
+          target = availableThreads;
         } else {
           target = parsedValue;
         }

@@ -45,9 +45,10 @@ namespace rt {
 
   void Ray::Trace(AsyncRenderData &ard, const Scene* scene, int threadIndex) {
 
-    auto start = high_resolution_clock::now();
     while (true) {
       auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk(ard, threadIndex);
+      float progressStep = 1.0f / (jobsEnd - jobsStart);
+      ard.threadProgress[threadIndex] = 0;
 
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
 
@@ -82,11 +83,8 @@ namespace rt {
 #else
         job.color /= float(scene->settings.samplesPerPixel);
 #endif
-        ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
+        ard.threadProgress[threadIndex] += progressStep;
       }
-      auto stop                    = high_resolution_clock::now();
-      auto batchTime               = duration_cast<std::chrono::milliseconds>(stop - start).count();
-      ard.threadTimes[threadIndex] += batchTime;
     }
   }
 } // namespace rt

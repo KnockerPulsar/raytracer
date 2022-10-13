@@ -20,8 +20,7 @@ namespace rt {
 
     sPtr<JobQueue<Pixel>> pixelJobs;
 
-    vector<long> threadTimes;
-    vector<int>  threadProgress;
+    vector<float>  threadProgress;
     vector<bool> finishedThreads;
 
     bool exit = false; // To make threads exit their loops
@@ -34,8 +33,8 @@ namespace rt {
 
     AsyncRenderData(int imageWidth, int imageHeight, int numThreads);
 
-    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<long> tt, vector<int> tp, vector<bool> ft)
-        : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
+    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<float> tp, vector<bool> ft)
+        : pixelJobs(pj), threadProgress(tp), finishedThreads(ft) {}
 
     void KillThreads();
 

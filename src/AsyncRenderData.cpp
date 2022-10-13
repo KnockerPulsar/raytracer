@@ -5,7 +5,7 @@
 
 namespace rt {
   AsyncRenderData::AsyncRenderData(int imageWidth, int imageHeight, int numThreads)
-      : threadProgress(vector(numThreads, 0)), threadTimes(vector(numThreads, 0L)),
+      : threadProgress(vector(numThreads, 0.0f)), 
         finishedThreads(vector(numThreads, false)) {
 
     int queueChunkSize = imageWidth * 4;
@@ -40,7 +40,6 @@ namespace rt {
   void AsyncRenderData::changeNumThreads(int newNumThreads) {
     KillThreads();
     threadProgress.resize(newNumThreads);
-    threadTimes.resize(newNumThreads);
     finishedThreads.resize(newNumThreads);
   }
 } // namespace rt

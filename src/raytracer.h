@@ -5,8 +5,10 @@
 #include "RenderAsync.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
+#include "imgui.h"
 #include "stb_image_write.h"
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -19,6 +21,7 @@ using std::ref;
 namespace rt {
   class Raytracer : public IState {
     bool allFinished = false;
+    float renderTime = 0;
 
   public:
     bool             showProg = true;
@@ -36,7 +39,6 @@ namespace rt {
 
       // Reset thread times and progress
       for (int i = 0; i < app->getNumThreads(); i++) {
-        ard.threadTimes[i]     = 0;
         ard.threadProgress[i]  = 0;
         ard.finishedThreads[i] = false;
       }
@@ -50,6 +52,9 @@ namespace rt {
     }
 
     virtual void onUpdate() {
+      if(!allFinished)
+        renderTime += GetFrameTime();
+
       BeginDrawing();
 
       onFinished();
@@ -78,6 +83,8 @@ namespace rt {
       for (int t = 0; t < app->getNumThreads(); t++) {
         ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), getScene(), t));
       }
+
+      renderTime = 0;
     }
 
     void BlitToBuffer() {
@@ -104,11 +111,13 @@ namespace rt {
         ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
 
         UnloadImage(raytraced);
+        firstFrame = false;
       } else {
         UpdateTexture(ard.raytraceRT.texture, pixelData);
+
+        delete[] pixelData;
       }
 
-      // delete[] pixelData;
     }
 
     bool onFinished() {
@@ -139,10 +148,17 @@ namespace rt {
         if (ImGui::Begin("Thread status", 0)) {
           ImGui::Text("%s", "Press space to toggle this menu");
           ImGui::Text("%s", "Press escape to quit");
-          // ImGui::Checkbox("Incremental rendering", &ard.incRender);
 
-          ImGui::ProgressBar(float(ard.pixelJobs->getCurrentChunkStart()) / ard.pixelJobs->getJobsVector().size());
+          ImGui::Spacing();
+
+          ImGui::Text("Render time: %f seconds", renderTime);
+
+          ImGui::Spacing();
+
           ImGui::Text("Rendering progress");
+          ImGui::ProgressBar(allFinished? 1.0f : float(ard.pixelJobs->getCurrentChunkStart()) / ard.pixelJobs->getJobsVector().size());
+
+          ImGui::Spacing();
 
           if (ImGui::BeginTable("Thread status", 3)) {
             ImGui::TableNextRow();
@@ -153,9 +169,8 @@ namespace rt {
               ImGui::TableNextColumn();
               ImGui::Text("Thread %d: ", t);
               ImGui::TableNextColumn();
-              ImGui::ProgressBar(ard.threadProgress[t] / 100.0f);
+              ImGui::ProgressBar(allFinished ? 1.0f : ard.threadProgress[t]);
               ImGui::TableNextColumn();
-              ImGui::Text("Time: %ld ms", ard.threadTimes[t]);
             }
 
             ImGui::EndTable();
