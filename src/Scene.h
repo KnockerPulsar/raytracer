@@ -15,8 +15,8 @@
 using std::string, std::vector, std::function, std::pair;
 
 struct RaytraceSettings : public rt::IImguiDrawable {
-  int samplesPerPixel = 1;
-  int maxDepth        = 10;
+  int samplesPerPixel = 16;
+  int maxDepth        = 4;
 
   RaytraceSettings() = default;
   RaytraceSettings(int spp, int md) : samplesPerPixel(spp), maxDepth(md) {}

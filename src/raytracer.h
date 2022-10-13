@@ -53,6 +53,16 @@ namespace rt {
       BeginDrawing();
 
       onFinished();
+
+      BlitToBuffer();
+
+      DrawTextureRec(
+          ard.raytraceRT.texture,
+          (Rectangle){0, 0, (float)getScene()->imageWidth, -(float)getScene()->imageHeight},
+          (Vector2){0, 0},
+          WHITE
+      );
+
       RenderImGui();
 
       EndDrawing();
@@ -71,32 +81,34 @@ namespace rt {
     }
 
     void BlitToBuffer() {
+      static bool firstFrame = true;
 
-      auto* pixelData = new Color[getScene()->imageWidth * getScene()->imageHeight];
+      auto* pixelData = new vec3[getScene()->imageWidth * getScene()->imageHeight];
       auto jobs      = ard.pixelJobs->getJobsVector();
 
       // Copy over only the color data
       for (int i = 0; i < jobs.size(); ++i) {
-        pixelData[i] = jobs[i].color.toRaylibColor(255);
+        pixelData[i] = jobs[i].color;
       }
 
-      // Unload old texture
-      UnloadTexture(ard.raytraceRT.texture);
+      if (firstFrame) {
+        // Create texture from image containing the color data
+        Image raytraced = {
+            .data    = pixelData,
+            .width   = getScene()->imageWidth,
+            .height  = getScene()->imageHeight,
+            .mipmaps = 1,
+            .format  = RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32
+          };
 
-      // Create texture from image containing the color data
-      Image raytraced = {
-          .data    = pixelData,
-          .width   = getScene()->imageWidth,
-          .height  = getScene()->imageHeight,
-          .mipmaps = 1,
-          .format  = RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+        ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
 
-      // Deletes pixelData afte copying it to another buffer
-      ImageFlipVertical(&raytraced);
+        UnloadImage(raytraced);
+      } else {
+        UpdateTexture(ard.raytraceRT.texture, pixelData);
+      }
 
-      ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
-
-      UnloadImage(raytraced);
+      // delete[] pixelData;
     }
 
     bool onFinished() {
@@ -112,19 +124,9 @@ namespace rt {
 
         ard.KillThreads();
 
-        BlitToBuffer();
-
         if (app->saveOnRender)
           Autosave();
       }
-
-      DrawTextureRec(
-          ard.raytraceRT.texture,
-          (Rectangle){0, 0, (float)getScene()->imageWidth, (float)getScene()->imageHeight},
-          (Vector2){0, 0},
-          WHITE
-      );
-
       // printf("%s\n", allFinished ? "all done" : "not yet");
       return allFinished;
     }
