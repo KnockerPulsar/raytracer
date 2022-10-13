@@ -6,11 +6,11 @@
 
 vec3::vec3() {}
 
-vec3::vec3(const float x, const float y, const float z) : Vector3{x, y, z} {}
+vec3::vec3(const float x, const float y, const float z) : glm::vec3(x,y,z) {}
 
 vec3::vec3(const float f) : vec3(f, f, f) {}
 
-vec3::vec3(const Vector3 &conv) : Vector3{conv} {}
+vec3::vec3(const Vector3 &conv) : glm::vec3(conv.x, conv.y, conv.z) {}
 
 vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
 
@@ -18,10 +18,10 @@ vec3::vec3(const Color &color) : vec3(float(color.r) / 255, float(color.g) / 255
 
 bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
 
-glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 
-glm::vec4 vec3::toPoint() const { return glm::vec4(toGlm(), 1); }
-glm::vec4 vec3::toVec() const { return glm::vec4(toGlm(), 0); }
+Vector3 vec3::toRlVec3() const { return Vector3{x,y,z}; }
+glm::vec4 vec3::toPoint() const { return glm::vec4(*this, 1); }
+glm::vec4 vec3::toVec() const { return glm::vec4(*this, 0); }
 
 Color vec3::toRaylibColor(u_char alpha) const {
   vec3 temp = *this * 255;
@@ -44,9 +44,9 @@ vec3 vec3::Refract(const vec3 &n, float etaIOverEtaT) const {
   return rOutPerp + rOutParallel;
 }
 
-float vec3::DotProd(const vec3 &left, const vec3 &right) { return Vector3DotProduct(left, right); }
+float vec3::DotProd(const vec3 &left, const vec3 &right) { return glm::dot((glm::vec3)left, (glm::vec3)right); }
 
-vec3 vec3::CrsProd(const vec3 &left, const vec3 &right) { return Vector3CrossProduct(left, right); }
+vec3 vec3::CrsProd(const vec3 &left, const vec3 &right) { return glm::cross((glm::vec3)left, (glm::vec3)right); }
 
 vec3 vec3::projectOntoPlane(const vec3 &planeNormal) const {
   return *this - vec3::DotProd(*this, planeNormal) * planeNormal;
@@ -88,8 +88,7 @@ vec3 vec3::RandomInUnitDisc() {
 
 // Binary operators
 vec3 operator*(const vec3 &lVec3, const float rFloat) {
-  auto [x, y, z] = lVec3;
-  return vec3(x * rFloat, y * rFloat, z * rFloat);
+  return (glm::vec3)lVec3 * rFloat;
 }
 
 vec3 operator*(const float lFloat, const vec3 &rVec3) { return operator*(rVec3, lFloat); }

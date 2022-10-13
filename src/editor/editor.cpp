@@ -75,12 +75,13 @@ namespace rt {
       aabBs.push_back(rootAABB);
 
       for (auto &&bb : aabBs) {
-        DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
+        DrawBoundingBox({bb.min.toRlVec3(), bb.max.toRlVec3()}, {255, 0, 255, 255});
       }
 
-      DrawSphere(getCamera()->lookFrom + getCamera()->localForward * getCamera()->focusDist, 0.05f, LIME);
+      vec3 focusSpherePos = getCamera()->lookFrom + getCamera()->localForward * getCamera()->focusDist;
+      DrawSphere(focusSpherePos.toRlVec3(), 0.05f, LIME);
 
-      DrawLine3D(rt::Camera::lineStart, rt::Camera::lineEnd, BLUE);
+      DrawLine3D(rt::Camera::lineStart.toRlVec3(), rt::Camera::lineEnd.toRlVec3(), BLUE);
     }
     EndMode3D();
     EndTextureMode();
@@ -220,8 +221,8 @@ namespace rt {
     ::Ray raylibRay = GetMouseRay(mousePos, getCamera()->toRaylibCamera3D());
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
 
-    rt::Camera::lineStart = r.origin.toGlm();
-    rt::Camera::lineEnd   = r.At(1000).toGlm();
+    rt::Camera::lineStart = r.origin;
+    rt::Camera::lineEnd   = r.At(1000);
 
     rt::HitRecord rec;
     getScene()->worldRoot->Hit(r, 0, infinity, rec);

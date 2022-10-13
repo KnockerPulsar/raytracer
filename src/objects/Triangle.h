@@ -26,7 +26,8 @@ namespace rt {
       vec3 v02 = (v2.p - v0.p).Normalize();
 
       normal = vec3::CrsProd(v01, v02).Normalize();
-    }
+    } 
+
     Triangle(vec3 p0, vec3 p1, vec3 p2) : v0(p0), v1(p1), v2(p2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
@@ -89,19 +90,20 @@ namespace rt {
       return false;
     }
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) override {
       outputBox = transformation.regenAABB(AABB(std::vector<vec3>{{v0.p, v1.p, v2.p}}));
       return true;
     }
 
     virtual void Rasterize(vec3 color) override {
 
-      DrawTriangle3D(v0.p, v1.p, v2.p, color.toRaylibColor(255));
-      auto  normalStart = (v0.p + v1.p + v2.p) / 3;
+      DrawTriangle3D(v0.p.toRlVec3(), v1.p.toRlVec3(), v2.p.toRlVec3(), color.toRaylibColor(255));
+      vec3  normalStart = (v0.p + v1.p + v2.p) / 3.0f;
+      vec3  normalEnd   = (normalStart + normal);
       Color inv         = color.toRaylibColor(255);
       inv =
           Color{(unsigned char)(255 - inv.r), (unsigned char)(255 - inv.g), (unsigned char)(255 - inv.b), uint8_t(255)};
-      DrawLine3D(normalStart, normalStart + normal, inv);
+      DrawLine3D(normalStart.toRlVec3(), normalEnd.toRlVec3(), inv);
     }
   };
 } // namespace rt

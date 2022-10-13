@@ -91,12 +91,10 @@ namespace rt {
       bool leftHit  = left->HitTransformed(r, t_min, t_max, rec);
       bool rightHit = right->HitTransformed(r, t_min, leftHit ? rec.t : t_max, rec);
 
-      // if(leftHit || rightHit)
-      //   std::cout << "AAAA";
       return leftHit || rightHit;
     }
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) override {
       outputBox = box;
       return true;
     }

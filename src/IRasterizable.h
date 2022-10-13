@@ -19,12 +19,12 @@ namespace rt {
       rlPopMatrix();
     };
     static void  Transform(Transformation transformation) {
-       auto [rotX, rotY, rotZ] = transformation.getRotation();
-       auto [x, y, z]          = transformation.getTranslation();
-       rlTranslatef(x, y, z);
-       rlRotatef(rotX, 1, 0, 0);
-       rlRotatef(rotY, 0, 1, 0);
-       rlRotatef(rotZ, 0, 0, 1);
+       vec3 r = transformation.getRotation();
+       vec3 t          = transformation.getTranslation();
+       rlTranslatef(t.x, t.y, t.z);
+       rlRotatef(r.x, 1, 0, 0);
+       rlRotatef(r.y, 0, 1, 0);
+       rlRotatef(r.z, 0, 0, 1);
     }
   };
 } // namespace rt

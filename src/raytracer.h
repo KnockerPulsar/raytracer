@@ -15,6 +15,7 @@
 #include <raylib.h>
 #include <rlImGui.h>
 #include <sstream>
+#include "BVHNode.h"
 
 using std::ref;
 
@@ -29,7 +30,16 @@ namespace rt {
 
     Raytracer(AsyncRenderData &ard) : ard(ard) {}
 
-    virtual void onEnter() { startRaytracing(); }
+    void prepass() {
+      for (auto& obj : getScene()->worldRoot->getChildrenAsList()) {
+        obj->transformation.constructMatrices();
+      }
+    }
+
+    virtual void onEnter() {
+      prepass();
+      startRaytracing();
+    }
 
     virtual void onExit() {
       ard.KillThreads();
@@ -85,6 +95,8 @@ namespace rt {
       }
 
       renderTime = 0;
+
+      std::cout << "Raytracing started! (" << app->getNumThreads() << ")\n";
     }
 
     void BlitToBuffer() {
@@ -157,6 +169,8 @@ namespace rt {
 
           ImGui::Text("Rendering progress");
           ImGui::ProgressBar(allFinished? 1.0f : float(ard.pixelJobs->getCurrentChunkStart()) / ard.pixelJobs->getJobsVector().size());
+
+          // std::cout << "Progress: " << float(ard.pixelJobs->getCurrentChunkStart()) / ard.pixelJobs->getJobsVector().size() << "\n";
 
           ImGui::Spacing();
 

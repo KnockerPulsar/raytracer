@@ -82,7 +82,7 @@ namespace rt {
       return false;
     }
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) override {
       outputBox = transformation.regenAABB(AABB(
           std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
       return true;

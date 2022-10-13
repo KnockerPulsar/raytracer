@@ -47,7 +47,7 @@ namespace rt {
     return true;
   }
 
-  bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) {
     outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
 
     return true;
@@ -57,7 +57,7 @@ namespace rt {
 
   void Sphere::Rasterize(vec3 color) {
     // RasterizeTransformed takes care of the transformation and rotation
-    DrawSphere(vec3::Zero(), radius, color.toRaylibColor(255));
+    DrawSphere({0}, radius, color.toRaylibColor(255));
   }
 
   void Sphere::GetSphereUV(const vec3 &p, float &u, float &v) {

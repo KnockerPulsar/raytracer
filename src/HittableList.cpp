@@ -20,7 +20,7 @@ namespace rt {
     return hit_anything;
   }
 
-  bool HittableList::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool HittableList::BoundingBox(float t0, float t1, AABB &outputBox) {
     if (objects.empty())
       return false;
 

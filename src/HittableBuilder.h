@@ -49,6 +49,9 @@ namespace rt {
       return *this;
     }
 
-    sPtr<T> build() { return std::shared_ptr<T>(hittable); }
+    sPtr<T> build() { 
+      hittable->transformation.constructMatrices();
+      return std::shared_ptr<T>(hittable); 
+    }
   };
 } // namespace rt

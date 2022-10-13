@@ -33,7 +33,7 @@ namespace rt {
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) override;
 
     virtual vector<sPtr<Hittable>> getChildrenAsList() override;
 

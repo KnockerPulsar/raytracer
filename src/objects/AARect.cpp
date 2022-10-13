@@ -18,7 +18,8 @@ namespace rt {
     if (t < t_min || t > t_max)
       return false;
 
-    auto [x, y, _] = r.At(t);
+    auto p = r.At(t);
+    float x = p.x, y = p.y;
 
     if (x < x0 || x > x1 || y < y0 || y > y1)
       return false;
@@ -35,7 +36,7 @@ namespace rt {
     return true;
   }
 
-  bool XYRect::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool XYRect::BoundingBox(float t0, float t1, AABB &outputBox) {
     // Add some padding to the thin dimension to prevent issues
     outputBox = AABB(vec3(x0, y0, z - 1e-4), vec3(x1, y1, z + 1e-4));
     return true;
@@ -60,7 +61,8 @@ namespace rt {
     if (t < t_min || t > t_max)
       return false;
 
-    auto [x, _, z] = r.At(t);
+    auto p = r.At(t);
+    float x = p.x, y = p.y, z=p.z;
 
     if (x < x0 || x > x1 || z < z0 || z > z1)
       return false;
@@ -77,7 +79,7 @@ namespace rt {
     return true;
   }
 
-  bool XZRect::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool XZRect::BoundingBox(float t0, float t1, AABB &outputBox) {
     // Add some padding to the thin dimension to prevent issues
     outputBox = AABB(vec3(x0, y - 1e-4, z0), vec3(x1, y + 1e-4, z1));
     return true;
@@ -103,7 +105,8 @@ namespace rt {
     if (t < t_min || t > t_max)
       return false;
 
-    auto [_, y, z] = r.At(t);
+    auto p = r.At(t);
+    float y = p.y, z=p.z;
 
     if (y < y0 || y > y1 || z < z0 || z > z1)
       return false;
@@ -120,7 +123,7 @@ namespace rt {
     return true;
   }
 
-  bool YZRect::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool YZRect::BoundingBox(float t0, float t1, AABB &outputBox) {
     // Add some padding to the thin dimension to prevent issues
     outputBox = AABB(vec3(x - 1e-4, y0, z0), vec3(x + 1e-4, y1, z1));
     return true;

@@ -1,21 +1,26 @@
 #include "Transformation.h"
+#include "objects/ConstantMedium.h"
+#include <cassert>
+#include <ostream>
+#include <utility>
 
 namespace rt {
 
-  Transformation::Transformation(vec3 translation , vec3 rotation )
-        : translate(translation), rotate(rotation) {}
+  Transformation::Transformation(vec3 translation, vec3 rotation) : translate(translation), rotate(rotation) {
+    constructMatrices();
+  }
 
     vec3 Transformation::matMul(const glm::vec4& v, const glm::mat4& m) {
       return vec3( m * v );
     }
 
-    vec3 Transformation::ApplyPoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), getModelMatrix()); }
-    vec3 Transformation::InversePoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), getInverseModelMatrix()); }
+    vec3 Transformation::ApplyPoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), tMatrix); }
+    vec3 Transformation::InversePoint(const vec3 &inVec) const { return matMul(inVec.toPoint(), invTMatrix); }
 
-    vec3 Transformation::ApplyVec(const vec3 &inVec) const { return matMul(inVec.toVec(), getModelMatrix()); }
-    vec3 Transformation::InverseVec(const vec3 &inVec) const { return matMul(inVec.toVec(), getInverseModelMatrix()); }
+    vec3 Transformation::ApplyVec(const vec3 &inVec) const { return matMul(inVec.toVec(), tMatrix); }
+    vec3 Transformation::InverseVec(const vec3 &inVec) const { return matMul(inVec.toVec(), invTMatrix); }
 
-    AABB Transformation::regenAABB(const AABB &aabb) const {
+    AABB Transformation::regenAABB(const AABB &aabb) {
       // Generate all 8 vertices of the input AABB
       // Apply the transform to all 8
       // Get the bounding box of the rotated bounding box
@@ -30,6 +35,7 @@ namespace rt {
           aabb.max,                                   // 111
       };
 
+      constructMatrices();
       glm::mat4 model = getModelMatrix();
       for (auto &&vert : vertices) {
         vert = matMul(vert.toPoint(), model);
@@ -51,39 +57,33 @@ namespace rt {
       return AABB(newMin, newMax);
     }
 
-    glm::mat4 Transformation::getModelMatrix() const {
-      glm::mat4 model          = glm::mat4(1.0f);
-      glm::mat4 translationMat = glm::translate(model, translate.toGlm());
-      glm::mat4 rotationMatrix = getRotationMatrix();
+    glm::mat4 Transformation::getModelMatrix() const { return tMatrix; }
 
-      return translationMat * rotationMatrix;
+    glm::mat4 Transformation::getInverseModelMatrix() const {
+      return invTMatrix;
     }
-
-    glm::mat4 Transformation::getRotationMatrix() const {
-      return glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z));
-    }
-
-    glm::mat4 Transformation::getInverseModelMatrix() const { return glm::inverse(getModelMatrix()); }
-
-    glm::mat4 Transformation::getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
 
     void Transformation::constructMatrices() {
-      glm::vec3 r = glm::radians(rotate.toGlm());
-      tMatrix = glm::translate(glm::mat4(1.0f), translate.toGlm()) * glm::eulerAngleXYZ(r.x, r.y, r.z);
-      invTMatrix = glm::inverse(tMatrix);
+        glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), translate);
+
+        glm::vec3 r              = glm::radians((glm::vec3)rotate);
+        glm::mat4 rotationMatrix = glm::eulerAngleXYZ(r.x, r.y, r.z);
+
+        tMatrix = translationMat * rotationMatrix;
+        invTMatrix = glm::inverse(tMatrix);
     }
 
     Transformation& Transformation::setTranslation(vec3 translation) {
       translate = translation;
-      constructMatrices();
+      changed = true;
 
       return *this;
     }
 
     Transformation& Transformation::setRotation(vec3 rotation) {
       rotate = rotation;
-      constructMatrices();
-      
+      changed = true;
+
       return *this;
     }
 

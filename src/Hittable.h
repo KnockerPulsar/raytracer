@@ -38,7 +38,7 @@ namespace rt {
     Hittable            *closestHit = nullptr;
 
     inline void set_face_normal(const Ray &r, const vec3 &outward_normal) {
-      front_face = Vector3DotProduct(outward_normal, r.direction) < 0;
+      front_face = vec3::DotProd(outward_normal, r.direction) < 0;
       normal     = front_face ? outward_normal : outward_normal * -1;
     }
   };
@@ -50,7 +50,7 @@ namespace rt {
     sPtr<Material> material = nullptr; // Should only exist for raytracable objects
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const            = 0;
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) = 0;
 
     // Specifies specific behaviour that each hittable can implement for json conversion
     virtual json toJsonSpecific() const { return {{"type", "unimplemented"}}; }

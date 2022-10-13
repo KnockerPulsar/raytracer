@@ -17,7 +17,7 @@ namespace rt {
 
     bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
-    bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+    bool BoundingBox(float t0, float t1, AABB &outputBox) override;
 
     json toJsonSpecific() const override;
 

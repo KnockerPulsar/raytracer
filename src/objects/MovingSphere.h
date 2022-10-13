@@ -49,14 +49,14 @@ namespace rt {
     }
 
     vec3 CurrCenter(float time) const;
-    bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+    bool BoundingBox(float t0, float t1, AABB &outputBox) override;
   };
 
   vec3 MovingSphere::CurrCenter(float time) const {
     return center0 + ((time - time0) / (time1 - time0)) * (center1 - center0);
   }
 
-  bool MovingSphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
+  bool MovingSphere::BoundingBox(float t0, float t1, AABB &outputBox) {
     AABB box0 = AABB(CurrCenter(t0) - vec3(radius), CurrCenter(t0) + vec3(radius));
 
     AABB box1 = AABB(CurrCenter(t1) - vec3(radius), CurrCenter(t1) + vec3(radius));

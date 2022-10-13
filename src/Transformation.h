@@ -15,6 +15,7 @@ namespace rt {
   private:
     vec3 translate, rotate;
     glm::mat4 tMatrix, invTMatrix;
+    bool changed = true;
 
   public:
 
@@ -27,12 +28,10 @@ namespace rt {
     vec3 InversePoint(const vec3 &inVec) const;
     vec3 InverseVec(const vec3 &inVec) const;
 
-    AABB regenAABB(const AABB &aabb) const;
+    AABB regenAABB(const AABB &aabb);
 
     glm::mat4 getModelMatrix() const;
-    glm::mat4 getRotationMatrix() const;
     glm::mat4 getInverseModelMatrix() const;
-    glm::mat4 getInverseRotationMatrix() const;
 
     void constructMatrices();
     Transformation& setTranslation(vec3 translation);

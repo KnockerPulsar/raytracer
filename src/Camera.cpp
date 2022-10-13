@@ -87,7 +87,11 @@ namespace rt {
 
   Camera3D Camera::toRaylibCamera3D() const {
     return Camera3D{
-        .position = lookFrom, .target = lookAt, .up = worldUp, .fovy = vFov, .projection = CAMERA_PERSPECTIVE};
+        .position   = lookFrom.toRlVec3(),
+        .target     = lookAt.toRlVec3(),
+        .up         = worldUp.toRlVec3(),
+        .fovy       = vFov,
+        .projection = CAMERA_PERSPECTIVE};
   }
 
   void Camera::UpdateDirectionVectors() {
@@ -104,9 +108,10 @@ namespace rt {
   Ray Camera::GetRay(float s, float t) const {
     vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
     vec3 offset = localRight * rd.x + localUp * rd.y;
+    vec3 dir = (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset);
     return Ray(
         lookFrom + offset,
-        (lower_left_corner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
+        dir.Normalize(),
         RandomFloat(time0, time1)
     );
   }
@@ -214,19 +219,11 @@ namespace rt {
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
 
-  glm::mat4 Camera::getViewMatrix() {
-    // glm::mat4 M = glm::mat4(1);
-    // M           = glm::translate(M, lookFrom.toGlm());
-    // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
-
-    // glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
-    // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
-    // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
-
-    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), worldUp.toGlm());
+  glm::mat4 Camera::getViewMatrix() const {
+    return glm::lookAt(lookFrom, lookAt, worldUp);
   }
 
-  glm::mat4 Camera::getProjectionMatrix() {
+  glm::mat4 Camera::getProjectionMatrix() const {
     return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f);
   }
 } // namespace rt

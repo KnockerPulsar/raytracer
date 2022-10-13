@@ -2,6 +2,7 @@
 
 #include "../../vendor/glm/glm/glm.hpp"
 #include "../../vendor/nlohmann-json/json.hpp"
+#include "../../vendor/glm/glm/gtx/norm.hpp"
 #include "../Defs.h"
 #include "../Util.h"
 #include <raylib.h>
@@ -11,7 +12,7 @@
 /**
  * @brief Represents any 3 component object (X,Y,Z) or (R,G,B)
  */
-class vec3 : public Vector3 {
+class vec3 : public glm::vec3 {
 public:
   vec3();                    // Creates a 3 component vector with all elements zeroed
   vec3(float);               // Creates a 3 componenet vector with all elements set to the given float
@@ -21,8 +22,9 @@ public:
   vec3(const Color&);
 
   static vec3 Zero() { return Vector3Zero(); } // Returns a vector with all components set to zero
-  glm::vec3   toGlm() const;
+
   Color       toRaylibColor(u_char alpha) const;
+  Vector3     toRlVec3() const;
   glm::vec4   toPoint() const;
   glm::vec4   toVec() const;
 
@@ -38,7 +40,6 @@ public:
 
   inline vec3 operator-() const;              // Negates all components
   inline vec3 operator-(const vec3 &v) const; // Element-wise subtraction
-  inline vec3 operator+(const vec3 &v) const; // Element-wise addition
   inline vec3 operator*(const vec3 &v) const; // Element-wise multiplication
   inline vec3 operator/(float f) const;       // Divides all components by the given float, returns a new vector
 
@@ -68,42 +69,36 @@ vec3 operator*(float, const vec3 &); // Same but with a different order
 // Inline definitions
 // ==================
 
-inline vec3 vec3::Normalize() const { return Vector3Normalize(*this); }
+inline vec3 vec3::Normalize() const { return glm::normalize(*this); }
 
 inline float vec3::SqrLen() const {
-  auto [x, y, z] = *this;
-  return x * x + y * y + z * z;
+  return DotProd(*this, *this);
 }
 
-inline float vec3::Len() const { return sqrt(SqrLen()); }
+inline float vec3::Len() const { return glm::length((glm::vec3)*this); }
 
-inline vec3 vec3::operator-() const { return Vector3Negate(*this); }
-
-inline vec3 vec3::operator-(const vec3 &v) const { return Vector3Subtract(*this, v); }
-
-inline vec3 vec3::operator+(const vec3 &v) const { return Vector3Add(*this, v); }
+inline vec3 vec3::operator-() const { return -(glm::vec3)(*this); }
+inline vec3 vec3::operator-(const vec3 &v) const { return (glm::vec3)*this - (glm::vec3)(v); }
 
 inline vec3 vec3::operator*(const vec3 &v) const {
-  auto [lX, lY, lZ] = *this;
-  auto [rX, rY, rZ] = v;
-  return vec3(lX * rX, lY * rY, lZ * rZ);
+  return (glm::vec3)*this * (glm::vec3)v;
 }
 
 inline vec3 vec3::operator/(const float f) const {
-  auto [x, y, z] = *this;
-  return vec3(x / f, y / f, z / f);
+  return (glm::vec3)*this / f; 
 }
 
 inline vec3 &vec3::operator+=(const vec3 &v) {
-  auto [rX, rY, rZ] = v;
-  x += rX;
-  y += rY;
-  z += rZ;
+  x += v.x;
+  y += v.y;
+  z += v.z;
   return *this;
 }
 
 inline vec3 &vec3::operator-=(const vec3 &v) {
-  *this += -v;
+  x -= v.x;
+  y -= v.y;
+  z -= v.z;
   return *this;
 }
 

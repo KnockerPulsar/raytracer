@@ -17,7 +17,6 @@
 #include "materials/Material.h"
 #include "materials/MaterialBuilder.h"
 
-#include "objects/ConstantMedium.h"
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
@@ -77,7 +76,7 @@ namespace rt {
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
 
-    DrawModel(skysphereModel, skysphere->transformation.getTranslation(), 1.0f, WHITE);
+    DrawModel(skysphereModel, skysphere->transformation.getTranslation().toRlVec3(), 1.0f, WHITE);
 
     rlEnableDepthMask();
     rlEnableBackfaceCulling();

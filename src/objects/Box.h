@@ -27,7 +27,7 @@ namespace rt {
     // To work around not being able to use constructors with references
     void Create(const vec3 &p0, const vec3 &p1);
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) override;
 
     virtual json toJsonSpecific() const override;
 

@@ -24,7 +24,7 @@ namespace rt {
     Ray(vec3 org, vec3 dir, float time = 0.0)
         : origin(org), direction(dir), time(time) {}
 
-    vec3 At(float t) const { return Vector3Add(origin, direction * t); }
+    vec3 At(float t) const { return origin + direction * t; }
 
     static vec3 RayColor(const rt::Ray &r, const Scene* scene, int depth);
 
