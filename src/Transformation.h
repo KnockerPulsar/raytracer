@@ -12,9 +12,11 @@
 
 namespace rt {
   class Transformation : public IImguiDrawable {
+  private:
+    vec3 translate, rotate;
+    glm::mat4 tMatrix, invTMatrix;
+
   public:
-    vec3 translate;
-    vec3 rotate;
 
     Transformation(vec3 translation = vec3::Zero(), vec3 rotation = vec3::Zero());
 
@@ -28,23 +30,30 @@ namespace rt {
     AABB regenAABB(const AABB &aabb) const;
 
     glm::mat4 getModelMatrix() const;
-
     glm::mat4 getRotationMatrix() const;
-
     glm::mat4 getInverseModelMatrix() const;
-
     glm::mat4 getInverseRotationMatrix() const;
 
+    void constructMatrices();
+    Transformation& setTranslation(vec3 translation);
+    Transformation& setRotation(vec3 rotation);
+
+    vec3& getTranslation() { return translate; }
+    vec3& getRotation() { return rotate; }
+
     virtual void OnDerivedImgui() override;
+
+    json toJson() const;
   };
 
   // This is how you use `json.get<Box>()`
   inline void from_json(const json &objectJson, Transformation &transformation) {
-    transformation.translate = objectJson["translation"].get<vec3>();
-    transformation.rotate = objectJson["rotation"].get<vec3>();
+    transformation
+      .setTranslation(objectJson["translation"].get<vec3>())
+      .setRotation( objectJson["rotation"].get<vec3>());
   }
 
   inline void to_json(json &j, const Transformation &t) {
-    j = {{"transform", {{"translation", t.translate}, {"rotation", t.rotate}}}};
+    j = t.toJson();
   }
 } // namespace rt

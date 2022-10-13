@@ -76,7 +76,9 @@ namespace rt {
   void Scene::drawSkysphere() {
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
-    DrawModel(skysphereModel, skysphere->transformation.translate, 1.0f, WHITE);
+
+    DrawModel(skysphereModel, skysphere->transformation.getTranslation(), 1.0f, WHITE);
+
     rlEnableDepthMask();
     rlEnableBackfaceCulling();
   }
@@ -133,31 +135,43 @@ namespace rt {
     auto materialLeft   = MaterialBuilder<Dielectric>().setTexture(vec3(1.5)).build();
     auto materialRight  = MaterialBuilder<Metal>(0.1f).setTexture(vec3(0.8, 0.6, 0.2)).build();
 
-    auto groundSphere                     = Sphere(100.0, materialGround);
-    groundSphere.transformation.translate = vec3(0, -100.5, -1);
-    groundSphere.name                     = "Ground Sphere";
+    auto groundSphere = HittableBuilder<Sphere>(100.0)
+                            .withMaterial(materialGround)
+                            .withTranslation(vec3(0, -100.5, -1))
+                            .withName("Ground Sphere")
+                            .build();
 
-    auto centerSphere                     = Sphere(0.5, materialCenter);
-    centerSphere.transformation.translate = vec3(0, 0, -1.0);
-    centerSphere.name                     = "Center Sphere";
+    auto centerSphere = HittableBuilder<Sphere>(0.5)
+                            .withMaterial(materialCenter)
+                            .withTranslation(vec3(0, 0, -1.0f))
+                            .withName("Center Sphere")
+                            .build();
 
-    auto leftSphereOuter                     = Sphere(0.5, materialLeft);
-    leftSphereOuter.transformation.translate = vec3(-1, 0, -1);
-    leftSphereOuter.name                     = "Left Sphere Outer";
-    auto leftSphereInner                     = Sphere(-0.45, materialLeft);
-    leftSphereInner.transformation.translate = vec3(-1, 0, -1);
-    leftSphereInner.name                     = "Left Sphere Inner";
-    auto rightSphere                         = Sphere(0.5, materialRight);
-    rightSphere.transformation.translate     = vec3(1, 0, -1);
-    rightSphere.name                         = "Right Sphere";
+    auto leftSphereOuter = HittableBuilder<Sphere>(0.5)
+                               .withMaterial(materialLeft)
+                               .withTranslation(vec3(-1, 0, -1))
+                               .withName("Left Sphere Outer")
+                               .build();
+
+    auto leftSphereInner = HittableBuilder<Sphere>(-0.45)
+                               .withMaterial(materialLeft)
+                               .withTranslation(vec3(-1, 0, -1))
+                               .withName("Left Sphere Inner")
+                               .build();
+
+    auto rightSphere = HittableBuilder<Sphere>(0.5)
+                           .withMaterial(materialRight)
+                           .withTranslation(vec3(1, 0, -1))
+                           .withName("Right Sphere")
+                           .build();
 
     world //
-        .Add(make_shared<Sphere>(groundSphere))
-        .Add(make_shared<Sphere>(centerSphere))
-        // These 2 spheres make a "hollow sphere"
-        .Add(make_shared<Sphere>(leftSphereOuter))
-        .Add(make_shared<Sphere>(leftSphereInner))
-        .Add(make_shared<Sphere>(rightSphere));
+        .Add(groundSphere)
+        .Add(centerSphere)
+        // Th "hollow sphere"
+        .Add(leftSphereOuter)
+        .Add(leftSphereInner)
+        .Add(rightSphere);
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
@@ -241,20 +255,20 @@ namespace rt {
                   .withTranslation(vec3(0, 1, 0))
                   .build());
 
-    auto mat2                        = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
-    auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.translate = vec3(-4, 1, 0);
-    world.Add(make_shared<Sphere>(sphere2));
+    world.Add(HittableBuilder<Sphere>(1.0)
+                  .withMaterial(MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build())
+                  .withTranslation(vec3(-4, 1, 0))
+                  .build());
 
-    auto mat3                        = MaterialBuilder<Metal>(0.0f).setTexture(vec3(0.7, 0.6, 0.5)).build();
-    auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.translate = vec3(4, 1, 0);
-    world.Add(make_shared<Sphere>(sphere3));
+    world.Add(HittableBuilder<Sphere>(1.0)
+                  .withMaterial(MaterialBuilder<Metal>(0.0f).setTexture(vec3(0.7, 0.6, 0.5)).build())
+                  .withTranslation(vec3(4, 1, 0))
+                  .build());
 
-    auto groundMaterial                   = MaterialBuilder<Lambertian>().setTexture(vec3(0.5f)).build();
-    auto groundSphere                     = Sphere(1000, groundMaterial);
-    groundSphere.transformation.translate = vec3(0, -1000, 0);
-    world.Add(make_shared<Sphere>(groundSphere));
+    world.Add(HittableBuilder<Sphere>(1000)
+                  .withMaterial(MaterialBuilder<Lambertian>().setTexture(vec3(0.5f)).build())
+                  .withTranslation(vec3(0, -1000, 0))
+                  .build());
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 
@@ -279,17 +293,19 @@ namespace rt {
 
     auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
-    auto groundMaterial                   = MaterialBuilder<Lambertian>().setTexture(vec3(0.5f));
-    auto groundSphere                     = Sphere(1000, MaterialBuilder<Lambertian>().setTexture(checker).build());
-    groundSphere.transformation.translate = vec3(0, -1000, 0);
-    world.Add(make_shared<Sphere>(groundSphere));
+    auto groundMaterial = MaterialBuilder<Lambertian>().setTexture(vec3(0.5f));
+
+    auto groundSphere = HittableBuilder<Sphere>(1000)
+                            .withMaterial(MaterialBuilder<Lambertian>().setTexture(checker).build())
+                            .withTranslation(vec3(0, -1000, 0))
+                            .build();
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
         float chooseMat = RandomFloat();
         vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
         if ((center - vec3(4, 0.2, 0)).Len() > 0.9) {
-          shared_ptr<Material> sphereMaterial;
+          sPtr<Material> sphereMaterial;
 
           if (chooseMat < 0.8) {
             // Diffuse
@@ -302,38 +318,30 @@ namespace rt {
             auto  albedo   = vec3::Random(0.5, 1);
             float fuzz     = RandomFloat(0, 0.5);
             sphereMaterial = MaterialBuilder<Metal>(fuzz).setTexture(albedo).build();
+            auto sphere    = HittableBuilder<Sphere>(0.2).withMaterial(sphereMaterial).withTranslation(center).build();
 
-            auto sphere                     = Sphere(0.2, sphereMaterial);
-            sphere.transformation.translate = center;
-            world.Add(make_shared<Sphere>(sphere));
+            world.Add(sphere);
 
           } else {
-            sphereMaterial                  = MaterialBuilder<Dielectric>(1.5f).build();
-            auto sphere                     = Sphere(0.2, sphereMaterial);
-            sphere.transformation.translate = center;
-            world.Add(make_shared<Sphere>(sphere));
+            sphereMaterial = MaterialBuilder<Dielectric>(1.5f).build();
+            auto sphere    = HittableBuilder<Sphere>(0.2).withMaterial(sphereMaterial).withTranslation(center).build();
+            world.Add(sphere);
           }
         }
       }
     }
 
-    auto mat1                        = MaterialBuilder<Dielectric>(1.5).build();
-    auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.translate = vec3(0, 1, 0);
+    auto mat1    = MaterialBuilder<Dielectric>(1.5).build();
+    auto sphere1 = HittableBuilder<Sphere>(1.0).withMaterial(mat1).withTranslation(vec3(0, 1, 0)).build();
+    world.Add(sphere1);
 
-    world.Add(make_shared<Sphere>(sphere1));
+    auto mat2    = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
+    auto sphere2 = HittableBuilder<Sphere>(1.0).withMaterial(mat2).withTranslation(vec3(-4, 1, 0)).build();
+    world.Add(sphere2);
 
-    auto mat2                        = MaterialBuilder<Lambertian>().setTexture(vec3(0.4, 0.2, 0.1)).build();
-    auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.translate = vec3(-4, 1, 0);
-
-    world.Add(make_shared<Sphere>(sphere2));
-
-    auto mat3                        = MaterialBuilder<Metal>(0.0).setTexture(vec3(0.7, 0.6, 0.5)).build();
-    auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.translate = vec3(4, 1, 0);
-
-    world.Add(make_shared<Sphere>(sphere3));
+    auto mat3    = MaterialBuilder<Metal>(0.0).setTexture(vec3(0.7, 0.6, 0.5)).build();
+    auto sphere3 = HittableBuilder<Sphere>(1.0).withMaterial(mat3).withTranslation(vec3(4, 1, 0)).build();
+    world.Add(sphere3);
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
 

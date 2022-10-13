@@ -67,9 +67,33 @@ namespace rt {
 
     glm::mat4 Transformation::getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
 
+    void Transformation::constructMatrices() {
+      glm::vec3 r = glm::radians(rotate.toGlm());
+      tMatrix = glm::translate(glm::mat4(1.0f), translate.toGlm()) * glm::eulerAngleXYZ(r.x, r.y, r.z);
+      invTMatrix = glm::inverse(tMatrix);
+    }
+
+    Transformation& Transformation::setTranslation(vec3 translation) {
+      translate = translation;
+      constructMatrices();
+
+      return *this;
+    }
+
+    Transformation& Transformation::setRotation(vec3 rotation) {
+      rotate = rotation;
+      constructMatrices();
+      
+      return *this;
+    }
+
     void Transformation::OnDerivedImgui() {
       ImGui::DragFloat3(
           ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
+    }
+
+    json Transformation::toJson() const {
+      return {{"transform", {{"translation", translate}, {"rotation", rotate}}}};
     }
 }

@@ -78,12 +78,6 @@ namespace rt {
 
   void App::onFrameRender() {
     auto objects = scene.worldRoot->getChildrenAsList();
-    for (auto &&obj : objects) {
-      auto t = obj->transformation.translate;
-      auto r = obj->transformation.rotate;
-      r.y += 1.0f;
-      obj->transformation = Transformation(t, r);
-    }
   }
 
   void App::checkInput() {
