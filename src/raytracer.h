@@ -3,6 +3,7 @@
 #include "IState.h"
 #include "Ray.h"
 #include "RenderAsync.h"
+#include "app.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 #include "imgui.h"
@@ -71,10 +72,12 @@ namespace rt {
 
       BlitToBuffer();
 
+      float topLeftX = (App::getApp().getEditorWidth() - App::getApp().getImageWidth())/2.0f;
+      float topLeftY = (App::getApp().getEditorHeight() - App::getApp().getImageHeight())/2.0f;
       DrawTextureRec(
           ard.raytraceRT.texture,
           (Rectangle){0, 0, (float)getScene()->imageWidth, -(float)getScene()->imageHeight},
-          (Vector2){0, 0},
+          (Vector2){topLeftX, topLeftY},
           WHITE
       );
 

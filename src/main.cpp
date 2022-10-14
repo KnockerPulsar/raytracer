@@ -60,11 +60,15 @@
 
 using namespace argumentum;
 
-std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
+std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char **argv) {
   const int imageWidthDefault = 900;
+  const int editorWidthDefault  = 1280;
+  const int editorHeightDefault = 720;
 
   int         imageWidth  = -1;
   int         imageHeight = -1;
+  int         editorWidth  = -1;
+  int         editorHeight = -1;
   int         numThreads;
   std::string pathToScene;
 
@@ -73,19 +77,16 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
 
   parser.config().program(argv[0]).description("Raytracer");
   parser.add_argument(imageWidth, "--image_width")
-      .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(imageWidthDefault)
       .help("Window and rendering resolution width in pixels");
 
   parser.add_argument(imageHeight, "--image_height")
-      .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(-1)
       .help("Window and rendering resolution width in pixels");
 
   parser.add_argument(pathToScene, "--scene")
-      .maxargs(1)
       .metavar("STRING PATH")
       .absent("default")
       .help("Path to scene json");
@@ -93,7 +94,6 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
   
   int availableThreads = std::thread::hardware_concurrency();
   parser.add_argument(numThreads, "--threads")
-      .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(availableThreads)
       .help("Number of threads to raytrace with")
@@ -110,15 +110,18 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
         }
       });
 
+  parser.add_argument(editorWidth, "--editor_width").absent(editorWidthDefault);
+  parser.add_argument(editorHeight, "--editor_height").absent(editorHeightDefault);
+
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
 
-  return std::make_tuple(imageWidth, imageHeight, pathToScene, numThreads);
+  return std::make_tuple(imageWidth, imageHeight, editorWidth, editorHeight, pathToScene, numThreads);
 }
 
 int main(int argc, char **argv) {
 
-  auto [imageWidth, imageHeight, pathToScene, numThreads] = setupArguments(argc, argv);
+  auto [imageWidth, imageHeight, editorWidth, editorHeight, pathToScene, numThreads] = setupArguments(argc, argv);
 
   // Image width is set but image height is not
   if (imageHeight == -1) {
@@ -126,10 +129,10 @@ int main(int argc, char **argv) {
   }
 
   if (pathToScene != "default") {
-    rt::App app(imageWidth, imageHeight, pathToScene, numThreads);
+    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, pathToScene, numThreads);
     app.run();
   } else {
-    rt::App app(imageWidth, imageHeight, rt::Scene::Random(imageWidth, imageHeight), numThreads);
+    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, rt::Scene::Random(imageWidth, imageHeight), numThreads);
     app.run();
   }
 

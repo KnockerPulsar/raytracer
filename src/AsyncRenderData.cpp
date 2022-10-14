@@ -1,18 +1,22 @@
 #include "AsyncRenderData.h"
+#include "app.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 
 
 namespace rt {
-  AsyncRenderData::AsyncRenderData(int imageWidth, int imageHeight, int numThreads)
+  AsyncRenderData::AsyncRenderData(int numThreads)
       : threadProgress(vector(numThreads, 0.0f)), 
         finishedThreads(vector(numThreads, false)) {
+
+    int imageWidth = App::getApp().getImageWidth(); 
+    int imageHeight = App::getApp().getImageHeight(); 
 
     int queueChunkSize = imageWidth * 4;
     pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
 
     raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
-    rasterRT   = LoadRenderTexture(imageWidth, imageHeight);
+    rasterRT   = LoadRenderTexture(App::getApp().getEditorWidth(), App::getApp().getEditorHeight());
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {

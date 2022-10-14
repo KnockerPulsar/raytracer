@@ -24,10 +24,7 @@
 
 namespace rt {
   void App::setup(int imageWidth, int imageHeight, int numThreads) {
-    this->imageWidth  = imageWidth;
-    this->imageHeight = imageHeight;
-
-    ard = AsyncRenderData(imageWidth, imageHeight, numThreads);
+    ard = AsyncRenderData(numThreads);
 
     editor = std::make_shared<Editor>(ard);
 
@@ -50,21 +47,20 @@ namespace rt {
     ImGuiIO &io = ImGui::GetIO();
   }
 
-  App::App(int imageWidth, int imageHeight, int numThreads) : numThreads(numThreads) {
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight, numThreads);
-    changeScene(Scene::CornellBox(imageWidth, imageHeight));
-  }
+  App::App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, std::string pathToScene, int numThreads)
+      : App(imageWidth,
+            imageHeight,
+            editorWidth,
+            editorHeight,
+            Scene::Load(imageWidth, imageHeight, pathToScene),
+            numThreads) {}
 
-  App::App(int imageWidth, int imageHeight, std::string pathToScene, int numThreads) : numThreads(numThreads) {
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight, numThreads);
-    changeScene(Scene::Load(imageWidth, imageHeight, pathToScene));
-  }
+  App::App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, Scene scene, int numThreads)
+      : numThreads(numThreads), editorWidth(editorWidth), editorHeight(editorHeight), imageHeight(imageHeight),
+        imageWidth(imageWidth) {
 
-  App::App(int imageWidth, int imageHeight, Scene scene, int numThreads) : numThreads(numThreads) {
-
-    InitWindow(imageWidth, imageHeight, title.c_str());
+    InitWindow(editorWidth, editorHeight, title.c_str());
+    App::setApp(*this);
     setup(imageWidth, imageHeight, numThreads);
     changeScene(scene);
   }

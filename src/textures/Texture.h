@@ -75,9 +75,15 @@ namespace rt {
         ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
 
         // Being exactly the available content width causes some twitching in the UI
-        float imageWidth  = (contentMax.x - contentMin.x) * 0.99;
+        float width = contentMax.x - contentMin.x;
+        float height = contentMax.y - contentMin.y;
+        float imageWidth  = width * 0.9f;
         float imageHeight = imageWidth * aspectRatio;
 
+        float drawX = contentMin.x + (width - imageWidth) * 0.5f;
+        float drawY = contentMin.y + (height - imageHeight) * 0.5f;
+
+        ImGui::SetCursorPos(ImVec2{drawX, drawY});
         ImGui::Image(&previewTexture.id, {imageWidth, imageHeight});
 
         Texture::previewSettingsImgui();

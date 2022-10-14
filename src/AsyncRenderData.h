@@ -31,7 +31,7 @@ namespace rt {
   public:
     AsyncRenderData() = default;
 
-    AsyncRenderData(int imageWidth, int imageHeight, int numThreads);
+    AsyncRenderData(int numThreads);
 
     AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<float> tp, vector<bool> ft)
         : pixelJobs(pj), threadProgress(tp), finishedThreads(ft) {}

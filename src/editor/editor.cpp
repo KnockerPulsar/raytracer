@@ -331,7 +331,7 @@ namespace rt {
     // Flip on Y axis since ImGui and opengl/raylib use different axis
     DrawTextureRec(
         app->getARD()->rasterRT.texture,
-        {0, 0, float(app->getARD()->rasterRT.texture.width), -float(app->getARD()->rasterRT.texture.height)},
+        {0, 0, float(app->getEditorWidth()), -float(app->getEditorHeight())},
         {0, 0},
         WHITE
     );
