@@ -2,7 +2,7 @@
 #include "data_structures/vec3.h"
 
 namespace Defaults {
-  const int imageWidth   = 100;
+  const int imageWidth   = 512;
   const int editorWidth  = 1920;
   const int editorHeight = 1080;
 

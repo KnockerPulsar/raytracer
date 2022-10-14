@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
     rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, pathToScene, numThreads);
     app.run();
   } else {
-    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, rt::Scene::Random(), numThreads);
+    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, rt::Scene::CornellBox(), numThreads);
     app.run();
   }
 

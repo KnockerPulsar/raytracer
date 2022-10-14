@@ -39,7 +39,10 @@ namespace rt {
     virtual void GetTexture(const json &j)                    = 0;
     virtual void setIntensity(float i) { multiplier = i; }
 
-    virtual ~Texture() { UnloadTexture(previewTexture); }
+    virtual ~Texture() {
+      if (previewTexture.id < std::numeric_limits<unsigned int>::max())
+        UnloadTexture(previewTexture);
+    }
 
     virtual void generatePreview() {}
 

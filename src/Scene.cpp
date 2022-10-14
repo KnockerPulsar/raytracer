@@ -454,7 +454,7 @@ namespace rt {
     vec3 lookFrom        = vec3(27.8, 27.8, -80);
     vec3 lookAt          = vec3(27.8, 27.8, 0);
     vec3 vUp             = vec3(0, 1, 0);
-    vec3 backgroundColor = vec3(0.2, 0.2, 0.2);
+    vec3 backgroundColor = vec3::Zero();
 
     float distToFocus = 80.0f;
     float aperature   = 0.1f;
@@ -467,7 +467,7 @@ namespace rt {
     auto red           = MaterialBuilder<Lambertian>().setTexture(vec3(0.65, 0.05, 0.05)).build();
     auto white         = MaterialBuilder<Lambertian>().setTexture(vec3(0.73, 0.73, 0.73)).build();
     auto green         = MaterialBuilder<Lambertian>().setTexture(vec3(0.12, 0.45, 0.15)).build();
-    auto light         = MaterialBuilder<DiffuseLight>().setTexture(vec3(2, 2, 2)).build();
+    auto light         = MaterialBuilder<DiffuseLight>().setTexture(vec3(15, 15, 15)).build();
     auto purplishMetal = MaterialBuilder<Metal>(0.7f).setTexture(vec3(0.8, 0.1, 0.8)).build();
     auto chrome        = MaterialBuilder<Metal>(0.05f).setTexture(vec3(0.8, 0.8, 0.8)).build();
     auto dielectric    = MaterialBuilder<Dielectric>().setTexture(1.5f).build();
@@ -492,9 +492,17 @@ namespace rt {
                    .withMaterial(red)
                    .withName("right wall")
                    .build());
+
     // Top light
     world->Add(HittableBuilder<Plane>(wallWidth, wallHeight)
                    .withTranslation(vec3(wallWidth / 2, wallHeight, wallHeight / 2))
+                   .withRotation(vec3(0, 0, 180))
+                   .withMaterial(white)
+                   .withName("top wall")
+                   .build());
+
+    world->Add(HittableBuilder<Plane>(wallWidth/4, wallHeight/4)
+                   .withTranslation(vec3(wallWidth / 2, wallHeight - 0.01, wallHeight / 2))
                    .withRotation(vec3(0, 0, 180))
                    .withMaterial(light)
                    .withName("light")
@@ -502,7 +510,7 @@ namespace rt {
     // floor
     world->Add(HittableBuilder<Plane>(wallWidth, wallHeight)
                    .withTranslation(vec3(wallWidth / 2, 0, wallHeight / 2))
-                   .withMaterial(chrome)
+                   .withMaterial(white)
                    .withName("floor")
                    .build());
 
@@ -515,16 +523,16 @@ namespace rt {
                    .build());
 
     world->Add(HittableBuilder<Box>(vec3(16.5, 33, 16.5))
-                   .withTranslation(vec3(40, 16.5, 40))
+                   .withTranslation(vec3(37, 16.5, 40))
                    .withRotation(vec3(0, 15, 0))
                    .withMaterial(white)
                    .withName("Box 1")
                    .build());
 
-    world->Add(HittableBuilder<Box>(vec3(10))
-                   .withTranslation(vec3(10, 5, 10))
-                   .withRotation(vec3(0, 12, 0))
-                   .withMaterial(purplishMetal)
+    world->Add(HittableBuilder<Box>(vec3(16.5))
+                   .withTranslation(vec3(19, 16.5f/2.0f, 16.5))
+                   .withRotation(vec3(0, -18, 0))
+                   .withMaterial(white)
                    .withName("Box 2")
                    .build());
 
