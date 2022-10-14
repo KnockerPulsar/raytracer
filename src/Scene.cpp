@@ -42,12 +42,12 @@ using nlohmann::json, std::vector, std::pair, std::string, std::function;
 
 namespace rt {
 
-  vector<pair<string, function<Scene(int, int)>>> Scene::builtInScenes = {
+  vector<pair<string, function<Scene()>>> Scene::builtInScenes = {
       {"Default", Scene::Default},
       {"Scene1", Scene::Scene1},
       {"Scene2", Scene::Scene2},
-      {"Random", std::bind(Scene::Random, std::placeholders::_1, std::placeholders::_2, 10, 10)},
-      {"Random Moving", std::bind(Scene::RandomMovingSpheres, std::placeholders::_1, std::placeholders::_2, 10, 10)},
+      {"Random", std::bind(Scene::Random, 10, 10)},
+      {"Random Moving", std::bind(Scene::RandomMovingSpheres, 10, 10)},
       {"TwoSpheres", Scene::TwoSpheres},
       {"Earth", Scene::Earth},
       {"Light", Scene::Light},
@@ -82,7 +82,7 @@ namespace rt {
     rlEnableBackfaceCulling();
   }
 
-  Scene Scene::Default(int imageWidth, int imageHeight) {
+  Scene Scene::Default() {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(3, 3, -3);
@@ -95,7 +95,7 @@ namespace rt {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     auto mat   = MaterialBuilder<Lambertian>().setTexture(vec3(3, 3, 3)).build();
     auto light = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 3, 3)).build();
@@ -109,12 +109,12 @@ namespace rt {
                  .withMaterial(light)
                  .build());
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Scene1(int imageWidth, int imageHeight) {
+  Scene Scene::Scene1() {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(-1, 1, 1);
@@ -127,7 +127,7 @@ namespace rt {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     auto materialGround = MaterialBuilder<Lambertian>().setTexture(vec3(0.8, 0.8, 0.0)).build();
     auto materialCenter = MaterialBuilder<Lambertian>().setTexture(vec3(0.1, 0.2, 0.5)).build();
@@ -172,12 +172,12 @@ namespace rt {
         .Add(leftSphereInner)
         .Add(rightSphere);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
 
     return s;
   } // namespace rt
 
-  Scene Scene::Scene2(int imageWidth, int imageHeight) {
+  Scene Scene::Scene2() {
     Scene        s;
     float        r = cos(pi / 4);
     HittableList world;
@@ -191,7 +191,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.1f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     auto materialLeft  = MaterialBuilder<Lambertian>().setTexture(vec3(0, 0, 1)).build();
     auto materialRight = MaterialBuilder<Lambertian>().setTexture(vec3(1, 0, 0)).build();
@@ -204,12 +204,12 @@ namespace rt {
         .Add(leftSphere)
         .Add(rightSphere);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
+  Scene Scene::Random(int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -223,7 +223,7 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -269,12 +269,12 @@ namespace rt {
                   .withTranslation(vec3(0, -1000, 0))
                   .build());
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
+  Scene Scene::RandomMovingSpheres(int ballGridWidth, int ballGridHeight) {
     Scene        s;
     HittableList world;
 
@@ -288,7 +288,7 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus, 0.0, 1.0);
 
     auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
@@ -342,16 +342,16 @@ namespace rt {
     auto sphere3 = HittableBuilder<Sphere>(1.0).withMaterial(mat3).withTranslation(vec3(4, 1, 0)).build();
     world.Add(sphere3);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
+  Scene Scene::TwoSpheres() {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     Camera cam(
-        vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), vec3::Zero(), 20.0, (float)imageWidth / imageHeight, 0.0, 10, 0, 0
+        vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), vec3::Zero(), 20.0, 0.0, 10, 0, 0
     );
 
     Scene s;
@@ -372,12 +372,12 @@ namespace rt {
     world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin).build());
     world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker).build());
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Earth(int imageWidth, int imageHeight) {
+  Scene Scene::Earth() {
     Scene        s;
     HittableList world;
 
@@ -391,7 +391,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus, 0.0, 1.0);
 
     auto earthTexture = make_shared<ImageTexture>("assets/textures/earthmap.png");
     auto earthSurface = MaterialBuilder<Lambertian>().setTexture(earthTexture).build();
@@ -399,12 +399,12 @@ namespace rt {
     auto globe = make_shared<Sphere>(2, earthSurface);
     world.Add(globe);
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Light(int imageWidth, int imageHeight) {
+  Scene Scene::Light() {
     Scene        s;
     HittableList world;
 
@@ -418,7 +418,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus, 0.0, 1.0);
 
     auto perText   = make_shared<NoiseTexture>(4.0f);
     auto diffLight = MaterialBuilder<DiffuseLight>().setTexture(vec3(4, 4, 4)).build();
@@ -440,12 +440,12 @@ namespace rt {
                  .withName("Light")
                  .build());
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::CornellBox(int imageWidth, int imageHeight) {
+  Scene Scene::CornellBox() {
 
     Scene         s;
     HittableList *world = new HittableList();
@@ -460,9 +460,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 40.0;
 
-    Camera cam(
-        lookFrom, lookAt, vUp, moveDir, fov, float(imageWidth) / float(imageHeight), aperature, distToFocus, 0.0, 1.0
-    );
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus, 0.0, 1.0);
     cam.angle.y = 3.14; // Rotate towards the scene
 
     auto red           = MaterialBuilder<Lambertian>().setTexture(vec3(0.65, 0.05, 0.05)).build();
@@ -529,12 +527,12 @@ namespace rt {
                    .withName("Box 2")
                    .build());
 
-    s = Scene(new BVHNode(world->objects, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world->objects, 0, 1), cam, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Load(int imageWidth, int imageHeight, std::string path) {
+  Scene Scene::Load(std::string path) {
     std::ifstream jsonFile(path);
     std::cout << "Loading scene from file " << path << std::endl;
 
@@ -542,13 +540,10 @@ namespace rt {
     jsonFile >> readScene;
 
     json  settings    = readScene["settings"];
-    float aspectRatio = (float)imageWidth / imageHeight;
     Scene s           = Scene(
         nullptr,
-        Camera(readScene["camera"], aspectRatio),
+        Camera(readScene["camera"]),
         settings["max_depth"].get<int>(),
-        imageWidth,
-        imageHeight,
         settings["num_samples"].get<int>(),
         settings["background_color"].get<vec3>()
     );
@@ -572,7 +567,7 @@ namespace rt {
     return s;
   }
 
-  Scene Scene::TransformationTest(int imageWidth, int imageHeight) {
+  Scene Scene::TransformationTest() {
 
     Scene s;
     vec3  lookFrom        = vec3(0, 0, 0);
@@ -585,7 +580,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     // auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
@@ -606,13 +601,13 @@ namespace rt {
 
     std::vector<sPtr<Hittable>> world = {box, sphere};
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
     s.addSkysphere(skyspherePath);
 
     return s;
   }
 
-  Scene Scene::PlaneTest(int imageWidth, int imageHeight) {
+  Scene Scene::PlaneTest() {
     Scene        s;
     HittableList world;
     vec3         lookFrom        = vec3(0, 3, 0);
@@ -625,7 +620,7 @@ namespace rt {
     vec3  moveDir     = vec3(0, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     auto red     = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
     auto magenta = MaterialBuilder<DiffuseLight>()
@@ -650,13 +645,13 @@ namespace rt {
         .Add(plane)
         .Add(xzplane);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, backgroundColor);
     // s.objects.objects = obj;
 
     return s;
   } // namespace rt
 
-  Scene Scene::RasterTest(int imageWidth, int imageHeight) {
+  Scene Scene::RasterTest() {
     Scene s;
     vec3  lookFrom = vec3(4, 4, 4);
     vec3  lookAt   = vec3(0, 0, 0);
@@ -669,13 +664,13 @@ namespace rt {
     vec3  moveDir     = vec3(0, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus);
 
     auto red = MaterialBuilder<DiffuseLight>().setTexture(vec3(3, 0, 0)).build();
 
     auto box = HittableBuilder<Box>(vec3(1, 1, 1), vec3(2, 2, 2)).withMaterial(red).build();
 
-    s = Scene(new HittableList(box), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(box), cam, backgroundColor);
 
     return s;
   }

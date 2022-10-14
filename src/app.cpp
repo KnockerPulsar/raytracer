@@ -23,7 +23,8 @@
 #include <vector>
 
 namespace rt {
-  void App::setup(int imageWidth, int imageHeight, int numThreads) {
+  void App::setup(int numThreads) {
+    App::numThreads = numThreads;
     ard = AsyncRenderData(numThreads);
 
     editor = std::make_shared<Editor>(ard);
@@ -48,21 +49,20 @@ namespace rt {
   }
 
   App::App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, std::string pathToScene, int numThreads)
-      : App(imageWidth,
-            imageHeight,
-            editorWidth,
-            editorHeight,
-            Scene::Load(imageWidth, imageHeight, pathToScene),
-            numThreads) {}
+      : App(imageWidth, imageHeight, editorWidth, editorHeight, Scene::Load(pathToScene), numThreads) {}
 
-  App::App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, Scene scene, int numThreads)
-      : numThreads(numThreads), editorWidth(editorWidth), editorHeight(editorHeight), imageHeight(imageHeight),
-        imageWidth(imageWidth) {
+  App::App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, Scene scene, int numThreads) {
 
+    if(editorWidth == -1)  editorWidth = Defaults::editorWidth; 
+    if(editorHeight == -1)  editorHeight = Defaults::editorHeight;
+
+    App::editorWidth = editorWidth, App::editorHeight = editorHeight;
     InitWindow(editorWidth, editorHeight, title.c_str());
+    
     App::setApp(*this);
-    setup(imageWidth, imageHeight, numThreads);
-    changeScene(scene);
+    setup(numThreads);
+
+    changeScene(scene).setImageHeight(imageHeight).setImageWidth(imageWidth);
   }
 
   void App::run() {
@@ -101,14 +101,17 @@ namespace rt {
     }
     }
   }
-  void App::changeScene(Scene scene) {
-    this->scene = scene;
 
-    editor->changeScene(&this->scene);
-    rt->changeScene(&this->scene);
+   Scene &App::changeScene(Scene scene) {
+    App::scene = scene;
+
+    editor->changeScene(&App::scene);
+    rt->changeScene(&App::scene);
+
+    return App::scene;
   }
 
-  void App::changeScene(std::string pathToScene) { changeScene(Scene::Load(imageWidth, imageHeight, pathToScene)); }
+  Scene &App::changeScene(std::string pathToScene) { return changeScene(Scene::Load(pathToScene)); }
 
   App::~App() {
     // Note that if you kill the application in fullscreen, the resolution won't
@@ -129,7 +132,7 @@ namespace rt {
   // Quick way of exporting hardcoded scenes into JSON
   void App::jsonExportTest() {
 
-    rt::Scene     scene = rt::Scene::CornellBox(600, 600);
+    rt::Scene     scene = rt::Scene::CornellBox();
     json          json  = scene.toJson();
     std::ofstream output("scenes/cornell.json");
     output << std::setw(4) << json << std::endl;

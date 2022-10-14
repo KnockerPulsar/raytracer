@@ -1,3 +1,6 @@
+#pragma once
+#include "stb_image_write.h"
+
 #include "AsyncRenderData.h"
 #include "Constants.h"
 #include "IState.h"
@@ -7,7 +10,6 @@
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 #include "imgui.h"
-#include "stb_image_write.h"
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -16,6 +18,7 @@
 #include <raylib.h>
 #include <rlImGui.h>
 #include <sstream>
+#include <sys/types.h>
 #include "BVHNode.h"
 
 using std::ref;
@@ -72,14 +75,24 @@ namespace rt {
 
       BlitToBuffer();
 
-      float topLeftX = (App::getApp().getEditorWidth() - App::getApp().getImageWidth())/2.0f;
-      float topLeftY = (App::getApp().getEditorHeight() - App::getApp().getImageHeight())/2.0f;
-      DrawTextureRec(
-          ard.raytraceRT.texture,
-          (Rectangle){0, 0, (float)getScene()->imageWidth, -(float)getScene()->imageHeight},
-          (Vector2){topLeftX, topLeftY},
-          WHITE
-      );
+      float edW = App::getEditorWidth();
+      float edH = App::getEditorHeight();
+      float iW = App::getImageWidth();
+      float iH = App::getImageHeight();
+
+      float heightRatio = iH / edH;
+      float widthRatio  = iW / edW;
+
+      float ratio        = std::max(heightRatio, widthRatio) * 1.05;
+      float scaledWidth  = iW / ratio;
+      float scaledHeight = iH / ratio;
+
+      float topLeftX = (edW - scaledWidth) / 2.0f;
+      float topLeftY = (edH - scaledHeight) / 2.0f;
+
+      DrawTexturePro(
+          ard.raytraceRT.texture, {0, 0, iW, -iH}, {0, 0, scaledWidth, scaledHeight}, {-topLeftX, -topLeftY}, 0, WHITE
+      ); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 
       RenderImGui();
 
@@ -105,7 +118,10 @@ namespace rt {
     void BlitToBuffer() {
       static bool firstFrame = true;
 
-      auto* pixelData = new vec3[getScene()->imageWidth * getScene()->imageHeight];
+      int w = App::getImageWidth();
+      int h = App::getImageHeight();
+
+      auto* pixelData = new vec3[w * h];
       auto jobs      = ard.pixelJobs->getJobsVector();
 
       // Copy over only the color data
@@ -117,8 +133,8 @@ namespace rt {
         // Create texture from image containing the color data
         Image raytraced = {
             .data    = pixelData,
-            .width   = getScene()->imageWidth,
-            .height  = getScene()->imageHeight,
+            .width   = w,
+            .height  = h,
             .mipmaps = 1,
             .format  = RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32
           };
@@ -202,21 +218,34 @@ namespace rt {
     void Autosave() {
       std::stringstream ss;
 
+      int w = App::getImageWidth(), h = App::getImageHeight();
+
       auto t  = std::time(nullptr);
       auto tm = *std::localtime(&t);
-      ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageWidth << "x"
-         << getScene()->imageHeight << "_" << getScene()->settings.samplesPerPixel << "_"
-         << getScene()->settings.maxDepth << ".bmp";
+      ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << w << "x" << h << "_"
+         << getScene()->samplesPerPixel << "_" << getScene()->maxDepth << ".bmp";
+
+      auto jobs = ard.pixelJobs->getJobsVector();
+
+      // Tried writing using 32 bit (perc component) RGB and RGBA to no avail
+      // The only way that this works is to convert each component to an 8 bit value
+      // then write the converted data.
+      u_char * pixels = new u_char[w * h * 3];
+      for (int i = 0, j = 0; i < w * h * 3; i += 3, ++j) {
+        Color c = jobs[j].color.toRaylibColor(255);
+        pixels[i + 0] = c.r;
+        pixels[i + 1] = c.g;
+        pixels[i + 2] = c.b;
+      }
+
+      // Flip verticall for correct oreintation.
+      stbi_flip_vertically_on_write(1);
+      
+      stbi_write_bmp(ss.str().c_str(), w, h, 3, pixels);
+
+      delete[] pixels;
 
       std::cout << "Finished render: " << ss.str() << std::endl;
-
-      Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);
-
-      // 4 components for RGBA;
-      // Couldn't get raylibs ExportImage to work with BMP. It did work with PNG however
-      stbi_write_bmp(ss.str().c_str(), raytraced.width, raytraced.height, 4, raytraced.data);
-
-      UnloadImage(raytraced);
     }
   };
 } // namespace rt

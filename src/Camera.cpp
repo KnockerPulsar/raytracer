@@ -28,13 +28,12 @@ namespace rt {
       vec3  vUp,
       vec3  moveDir,
       float vFov,
-      float aspectRatio,
       float aperature,
       float focusDist,
       float time0,
       float time1
   )
-      : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), moveDir(moveDir), vFov(vFov), aspectRatio(aspectRatio),
+      : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), moveDir(moveDir), vFov(vFov),
         aperature(aperature), focusDist(focusDist), time0(time0), time1(time1) {
 
     // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
@@ -57,14 +56,13 @@ namespace rt {
   }
 
   // Should probably be moved to from_json()?
-  Camera::Camera(nlohmann::json cameraJson, float aspectRatio)
+  Camera::Camera(nlohmann::json cameraJson)
       : Camera(
             cameraJson["look_from"].get<vec3>(),
             cameraJson["look_at"].get<vec3>(),
             cameraJson["v_up"].get<vec3>(),
             cameraJson["move_dir"].get<vec3>(),
             cameraJson["fov"].get<float>(),
-            aspectRatio,
             cameraJson["aperature"].get<float>(),
             cameraJson["focus_dist"].get<float>(),
             cameraJson["time0"].get<float>(),
@@ -165,6 +163,8 @@ namespace rt {
   }
 
   void Camera::Update(float dt) {
+    aspectRatio = App::getAspectRatio();
+
     GenerateData();
 
     bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||

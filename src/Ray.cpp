@@ -6,6 +6,7 @@
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Scene.h"
+#include "app.h"
 #include "data_structures/Pixel.h"
 #include "materials/Material.h"
 #include "data_structures/JobQueue.h"
@@ -63,21 +64,22 @@ namespace rt {
         int x = job.x;
         int y = job.y;
 
-          for (int s = 0; s < scene->settings.samplesPerPixel; s++) {
-          float   u   = (x + RandomFloat()) / (scene->imageWidth - 1);
-          float   v   = (y + RandomFloat()) / (scene->imageHeight - 1);
+        float rWidth = 1.0f / (App::getImageWidth() - 1);
+        float rHeight = 1.0f / (App::getImageHeight() - 1);
+
+        for (int s = 0; s < scene->samplesPerPixel; s++) {
+          float   u   = (x + RandomFloat()) * rWidth;
+          float   v   = (y + RandomFloat()) * rHeight;
           rt::Ray ray = scene->cam.GetRay(u, v);
-          job.color += rt::Ray::RayColor(ray, scene, scene->settings.maxDepth);
+          job.color += rt::Ray::RayColor(ray, scene, scene->maxDepth);
         }
 
 #ifdef GAMMA_CORRECTION
         // Gamma correction
-        float r = job.color.x, g = job.color.y, b = job.color.z;
-
-        float scale = 1.0 / scene->settings.samplesPerPixel;
-        r           = sqrt(scale * r);
-        g           = sqrt(scale * g);
-        b           = sqrt(scale * b);
+        float scale = 1.0 / scene->samplesPerPixel;
+        float r     = sqrt(scale * job.color.x);
+        float g     = sqrt(scale * job.color.y);
+        float b     = sqrt(scale * job.color.z);
 
         job.color = vec3(r, g, b);
 #else

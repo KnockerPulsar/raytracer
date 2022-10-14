@@ -338,7 +338,11 @@ namespace rt {
   }
 
   void Editor::RaytraceSettingsImgui() {
-    getScene()->settings.OnBaseImgui();
+
+    ImGui::Begin("Raytrace settings");
+    ImGui::DragInt("Samples per pixel", &App::scene.samplesPerPixel, 1, 1, 500);
+    ImGui::DragInt("Maximum depth", &App::scene.maxDepth, 1, 1, 100);
+    ImGui::End();
     
     ImGui::Begin("Other settings");
     ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
@@ -450,10 +454,11 @@ namespace rt {
     }
     return std::nullopt;
   }
+
   void Editor::TopMenuImgui() {
 
-    auto imageWidth  = getScene()->imageWidth;
-    auto imageHeight = getScene()->imageHeight;
+    auto imageWidth  = App::getImageWidth();
+    auto imageHeight = App::getImageHeight();
 
     if (ImGui::BeginMainMenuBar()) {
 
@@ -472,7 +477,7 @@ namespace rt {
       if (ImGui::BeginMenu("Built in")) {
         for (auto &[name, loader] : Scene::builtInScenes) {
           if (ImGui::MenuItem(name.c_str())) {
-            app->changeScene(loader(imageWidth, imageHeight));
+            app->changeScene(loader());
           }
         }
 
@@ -491,7 +496,7 @@ namespace rt {
         // std::string filePath     = ImGuiFileDialog::Instance()->GetCurrentPath();
 
         // action
-        app->changeScene(Scene::Load(imageWidth, imageHeight, filePathName));
+        app->changeScene(Scene::Load(filePathName));
       }
 
       // close
@@ -521,6 +526,4 @@ namespace rt {
       ImGuiFileDialog::Instance()->Close();
     }
   }
-
-  void Editor::changeScene(Scene *scene) {}
 } // namespace rt

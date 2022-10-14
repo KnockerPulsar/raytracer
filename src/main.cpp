@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "app.h"
+#include "rt.h"
 #include <argumentum/argparse.h>
 #include <cstdlib>
 #include <ostream>
@@ -61,14 +62,12 @@
 using namespace argumentum;
 
 std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char **argv) {
-  const int imageWidthDefault = 900;
-  const int editorWidthDefault  = 1280;
-  const int editorHeightDefault = 720;
 
   int         imageWidth  = -1;
   int         imageHeight = -1;
   int         editorWidth  = -1;
   int         editorHeight = -1;
+
   int         numThreads;
   std::string pathToScene;
 
@@ -76,24 +75,27 @@ std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char *
   auto            params = parser.params();
 
   parser.config().program(argv[0]).description("Raytracer");
-  parser.add_argument(imageWidth, "--image_width")
-      .metavar("UNSIGNED INT")
-      .absent(imageWidthDefault)
-      .help("Window and rendering resolution width in pixels");
-
-  parser.add_argument(imageHeight, "--image_height")
+  params.add_parameter(imageWidth, "--image_width")
       .metavar("UNSIGNED INT")
       .absent(-1)
       .help("Window and rendering resolution width in pixels");
 
-  parser.add_argument(pathToScene, "--scene")
+  params.add_parameter(imageHeight, "--image_height")
+      .metavar("UNSIGNED INT")
+      .absent(-1)
+      .help("Window and rendering resolution width in pixels");
+
+  params.add_parameter(editorWidth, "--editor_width").absent(Defaults::editorWidth);
+  params.add_parameter(editorHeight, "--editor_height").absent(Defaults::editorHeight);
+
+  params.add_parameter(pathToScene, "--scene")
       .metavar("STRING PATH")
-      .absent("default")
+      .absent(Defaults::scenePath)
       .help("Path to scene json");
 
   
   int availableThreads = std::thread::hardware_concurrency();
-  parser.add_argument(numThreads, "--threads")
+  params.add_parameter(numThreads, "--threads")
       .metavar("UNSIGNED INT")
       .absent(availableThreads)
       .help("Number of threads to raytrace with")
@@ -110,8 +112,7 @@ std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char *
         }
       });
 
-  parser.add_argument(editorWidth, "--editor_width").absent(editorWidthDefault);
-  parser.add_argument(editorHeight, "--editor_height").absent(editorHeightDefault);
+
 
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
@@ -132,7 +133,7 @@ int main(int argc, char **argv) {
     rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, pathToScene, numThreads);
     app.run();
   } else {
-    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, rt::Scene::Random(imageWidth, imageHeight), numThreads);
+    rt::App app(imageWidth, imageHeight, editorWidth, editorHeight, rt::Scene::Random(), numThreads);
     app.run();
   }
 

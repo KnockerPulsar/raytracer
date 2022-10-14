@@ -9,56 +9,53 @@ namespace rt {
   class IState;
 
   class App {
+    inline static AsyncRenderData ard;
 
-    Scene           scene;
-    AsyncRenderData ard;
+    inline static sPtr<IState>    currentState;
+    inline static sPtr<Editor>    editor;
+    inline static sPtr<Raytracer> rt;
 
-    sPtr<Editor>    editor;
-    sPtr<Raytracer> rt;
-
-    int imageWidth, imageHeight, numThreads, editorWidth, editorHeight;
-
-    bool fullscreen = false;
-
-    sPtr<IState> currentState;
+    inline static bool fullscreen = false;
     inline static App* app;
-
   public:
-    bool saveOnRender = true;
-    void setup(int imageWidth, int imageHeight, int numThreads);
+    inline static Scene           scene;
+    inline static int numThreads, editorWidth, editorHeight;
 
-    App(
-        int imageWidth, int imageHeight, int editorWidth, int editorHeight, std::string pathToScene, int numThreads
-    );
+    bool saveOnRender = true;
+    void setup(int numThreads);
+
+    App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, std::string pathToScene, int numThreads);
     App(int imageWidth, int imageHeight, int editorWidth, int editorHeight, Scene scene, int numThreads);
 
     void run();
     void onFrameRender();
     void checkInput();
-    void changeScene(std::string pathToScene);
-    void changeScene(Scene scene);
+
+    static Scene& changeScene(std::string pathToScene);
+    static Scene& changeScene(Scene scene);
 
     ~App();
 
     // Quick way of exporting hardcoded scenes into JSON
     static void jsonExportTest();
-
     static void jsonImportTest();
 
-    Scene           *getScene() { return &scene; }
-    AsyncRenderData *getARD() { return &ard; }
-    int              getNumThreads() const { return numThreads; }
+    static Scene           *getScene() { return &scene; }
+    static AsyncRenderData *getARD() { return &ard; }
+    static int              getNumThreads() { return numThreads; }
 
-    int getImageWidth() const { return imageWidth; };
-    int getImageHeight() const { return imageHeight; };
+    static int getImageWidth()  { return rt::App::scene.imageWidth; };
+    static int getImageHeight()  { return rt::App::scene.imageHeight; };
 
-    int getEditorWidth() const { return editorWidth; };
-    int getEditorHeight() const { return editorHeight; };
+    static int getEditorWidth()  { return rt::App::editorWidth; };
+    static int getEditorHeight()  { return rt::App::editorHeight; };
+
+    static float getAspectRatio() { return float(getImageWidth()) / getImageHeight(); }
 
     static App &getApp() { return *App::app; };
     static void setApp(App &app) { App::app = &app; }
 
-    void changeNumThreads(int newNumThreads) {
+    static void changeNumThreads(int newNumThreads) {
       numThreads = newNumThreads;
       ard.changeNumThreads(numThreads);
     }

@@ -71,20 +71,15 @@ namespace rt {
 
         float aspectRatio = float(previewTexture.width) / previewTexture.height;
 
-        ImVec2 contentMax = ImGui::GetWindowContentRegionMax();
+
+        ImVec2 avail = ImGui::GetContentRegionAvail();
         ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
 
-        // Being exactly the available content width causes some twitching in the UI
-        float width = contentMax.x - contentMin.x;
-        float height = contentMax.y - contentMin.y;
-        float imageWidth  = width * 0.9f;
-        float imageHeight = imageWidth * aspectRatio;
-
-        float drawX = contentMin.x + (width - imageWidth) * 0.5f;
-        float drawY = contentMin.y + (height - imageHeight) * 0.5f;
+        float drawX = (avail.x - previewWidth) * 0.5f;
+        float drawY = (avail.y - previewHeight) * 0.5f;
 
         ImGui::SetCursorPos(ImVec2{drawX, drawY});
-        ImGui::Image(&previewTexture.id, {imageWidth, imageHeight});
+        ImGui::Image(&previewTexture.id, {float(previewWidth), float(previewHeight)});
 
         Texture::previewSettingsImgui();
         

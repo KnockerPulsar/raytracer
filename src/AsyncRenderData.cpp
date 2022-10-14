@@ -9,14 +9,14 @@ namespace rt {
       : threadProgress(vector(numThreads, 0.0f)), 
         finishedThreads(vector(numThreads, false)) {
 
-    int imageWidth = App::getApp().getImageWidth(); 
-    int imageHeight = App::getApp().getImageHeight(); 
+    int imageWidth = App::getImageWidth(); 
+    int imageHeight = App::getImageHeight(); 
 
     int queueChunkSize = imageWidth * 4;
     pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight, queueChunkSize);
 
     raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
-    rasterRT   = LoadRenderTexture(App::getApp().getEditorWidth(), App::getApp().getEditorHeight());
+    rasterRT   = LoadRenderTexture(App::getEditorWidth(), App::getEditorHeight());
 
     // Prepare pixel jobs
     for (int y = 0; y < imageHeight; y++) {

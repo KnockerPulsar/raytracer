@@ -47,14 +47,13 @@ namespace rt {
         vec3  vUp,
         vec3  moveDir,
         float vFov,
-        float aspectRatio,
         float aperature,
         float focusDist,
         float time0 = 0.0,
         float time1 = 1.0
     );
 
-    Camera(nlohmann::json cameraJson, float aspectRatio);
+    Camera(nlohmann::json cameraJson);
 
     // Calculates horizontal, vertical, lower_left_corner, rgt from input data.
     void GenerateData();

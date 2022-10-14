@@ -48,9 +48,6 @@ namespace rt {
     // Calls overloaded `Rasterize()` function for each object
     void Rasterize();
 
-    // Renders editor specific GUI
-    void RenderImgui();
-
     // If a selected object is available, renders a gizmo on it
     void SelectedObjectGizmo();
 
@@ -60,33 +57,29 @@ namespace rt {
     // Tests a ray against the world and returns whatever it hits (can be null)
     Hittable *CastRay(Vector2 mousePos);
 
-    void AddObjectImgui();
 
     /*
       Checks for inputs, updates the editor camera and its GUI,
       rasterizes object, renders editor GUI.
     */
     virtual void onUpdate() override;
-
     virtual void onEnter() override {}
-
     virtual void onExit() override;
 
-    void UpdateViewportRect(float imguiWidth, float height);
 
     void RenderViewport();
+    void UpdateViewportRect(float imguiWidth, float height);
 
+    // Renders editor specific GUI
+    void RenderImgui();
+    void AddObjectImgui();
     void RaytraceSettingsImgui();
-
     void ObjectListImgui();
+    void TopMenuImgui();
+    void SettingsImGui();
 
     static std::optional<sPtr<Material>> MaterialChanger();
 
     static std::optional<sPtr<Texture>> TextureChanger();
-
-    void TopMenuImgui();
-
-    virtual void changeScene(Scene *scene) override;
-
   }; // namespace Editor
 } // namespace rt
