@@ -6,7 +6,6 @@ namespace rt {
   class IState {
   public:
     sPtr<IState> nextState;
-    App         *app;
 
     virtual void         onEnter()  = 0;
     virtual void         onExit()   = 0;
@@ -18,7 +17,6 @@ namespace rt {
     };
 
     virtual void changeScene(Scene *scene) {}
-    Scene       *getScene() { return app->getScene(); }
-    Camera      *getCamera() { return &getScene()->cam; }
+    Camera      *getCamera() { return &App::scene.cam; }
   };
 } // namespace rt

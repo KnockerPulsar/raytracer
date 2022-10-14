@@ -24,7 +24,8 @@
 
 namespace rt {
   void App::setup(int numThreads) {
-    App::numThreads = numThreads;
+
+    App::rtSettings.numThreads = numThreads;
     ard = AsyncRenderData(numThreads);
 
     editor = std::make_shared<Editor>(ard);
@@ -34,10 +35,7 @@ namespace rt {
     editor->nextState = rt;
     rt->nextState     = editor;
 
-    editor->app = this;
-    rt->app     = this;
-
-    currentState = editor;
+    App::currentState = editor;
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
@@ -62,7 +60,8 @@ namespace rt {
     App::setApp(*this);
     setup(numThreads);
 
-    changeScene(scene).setImageHeight(imageHeight).setImageWidth(imageWidth);
+    changeScene(scene);
+    App::rtSettings.setImageHeight(imageHeight).setImageWidth(imageWidth);
   }
 
   void App::run() {

@@ -35,7 +35,7 @@ namespace rt {
     Raytracer(AsyncRenderData &ard) : ard(ard) {}
 
     void prepass() {
-      for (auto& obj : getScene()->worldRoot->getChildrenAsList()) {
+      for (auto& obj : App::scene.worldRoot->getChildrenAsList()) {
         obj->transformation.constructMatrices();
       }
     }
@@ -52,7 +52,7 @@ namespace rt {
       ard.pixelJobs->setCurrentChunkStart(0);
 
       // Reset thread times and progress
-      for (int i = 0; i < app->getNumThreads(); i++) {
+      for (int i = 0; i < App::getNumThreads(); i++) {
         ard.threadProgress[i]  = 0;
         ard.finishedThreads[i] = false;
       }
@@ -106,13 +106,13 @@ namespace rt {
         job.color = vec3::Zero();
       }
 
-      for (int t = 0; t < app->getNumThreads(); t++) {
-        ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), getScene(), t));
+      for (int t = 0; t < App::getNumThreads(); t++) {
+        ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), &App::scene, t));
       }
 
       renderTime = 0;
 
-      std::cout << "Raytracing started! (" << app->getNumThreads() << ")\n";
+      std::cout << "Raytracing started! (" << App::getNumThreads() << ")\n";
     }
 
     void BlitToBuffer() {
@@ -164,7 +164,7 @@ namespace rt {
 
         ard.KillThreads();
 
-        if (app->saveOnRender)
+        if (App::saveOnRender)
           Autosave();
       }
       // printf("%s\n", allFinished ? "all done" : "not yet");
@@ -196,7 +196,7 @@ namespace rt {
           if (ImGui::BeginTable("Thread status", 3)) {
             ImGui::TableNextRow();
 
-            for (int t = 0; t < app->getNumThreads(); t++) {
+            for (int t = 0; t < App::getNumThreads(); t++) {
               // Thread labels
               ImGui::TableNextRow();
               ImGui::TableNextColumn();
@@ -223,7 +223,7 @@ namespace rt {
       auto t  = std::time(nullptr);
       auto tm = *std::localtime(&t);
       ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << w << "x" << h << "_"
-         << getScene()->samplesPerPixel << "_" << getScene()->maxDepth << ".bmp";
+         << App::rtSettings.samplesPerPixel << "_" << App::rtSettings.maxDepth << ".bmp";
 
       auto jobs = ard.pixelJobs->getJobsVector();
 

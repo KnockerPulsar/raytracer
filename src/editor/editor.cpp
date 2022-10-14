@@ -50,28 +50,28 @@ namespace rt {
 
   void Editor::Rasterize() {
 
-    BeginTextureMode(app->getARD()->rasterRT);
-    ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
+    BeginTextureMode(App::getARD()->rasterRT);
+    ClearBackground(App::scene.backgroundColor.toRaylibColor(255));
 
     BeginMode3D(getCamera()->toRaylibCamera3D());
     {
       DrawGrid(10, 10);
 
-      if (!getScene()->skysphereTexture.empty()) {
-        getScene()->skysphere->transformation.setTranslation(getCamera()->lookFrom);
-        getScene()->drawSkysphere();
+      if (!App::scene.skysphereTexture.empty()) {
+        App::scene.skysphere->transformation.setTranslation(getCamera()->lookFrom);
+        App::scene.drawSkysphere();
       }
 
-      auto rasterizables = getScene()->worldRoot->getChildrenAsList();
+      auto rasterizables = App::scene.worldRoot->getChildrenAsList();
 
       for (int i = 0; i < rasterizables.size(); i++) {
         rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
       }
 
-      auto aabBs = getScene()->worldRoot->getChildrenAABBs();
+      auto aabBs = App::scene.worldRoot->getChildrenAABBs();
 
       AABB rootAABB;
-      getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
+      App::scene.worldRoot->BoundingBox(0, 1, rootAABB);
       aabBs.push_back(rootAABB);
 
       for (auto &&bb : aabBs) {
@@ -107,11 +107,11 @@ namespace rt {
 
     ImGui::Begin("Objects");
     {
-      if (dynamic_cast<BVHNode *>(getScene()->worldRoot) != nullptr) {
+      if (dynamic_cast<BVHNode *>(App::scene.worldRoot) != nullptr) {
         if (ImGui::Button("Regenerate BVH", {-1, 0})) {
 
           // Regenerate tree
-          getScene()->worldRoot = getScene()->worldRoot->addChild(nullptr);
+          App::scene.worldRoot = App::scene.worldRoot->addChild(nullptr);
         }
       }
 
@@ -225,7 +225,7 @@ namespace rt {
     rt::Camera::lineEnd   = r.At(1000);
 
     rt::HitRecord rec;
-    getScene()->worldRoot->Hit(r, 0, infinity, rec);
+    App::scene.worldRoot->Hit(r, 0, infinity, rec);
 
     return rec.closestHit;
   }
@@ -265,16 +265,16 @@ namespace rt {
       case Box: {
         auto added = HittableBuilder<rt::Box>(1)
                          .withMaterial(defaultMaterial)
-                         .withName("Added Box##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
+                         .withName("Added Box##" + EditorUtils::GetIDFromPointer(App::scene.worldRoot));
+        newRoot = App::scene.worldRoot->addChild(added.build());
         break;
       }
 
       case Sphere: {
         auto added = HittableBuilder<rt::Sphere>(1, defaultMaterial)
                          .withMaterial(defaultMaterial)
-                         .withName("Added Sphere##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
+                         .withName("Added Sphere##" + EditorUtils::GetIDFromPointer(App::scene.worldRoot));
+        newRoot = App::scene.worldRoot->addChild(added.build());
 
         break;
       }
@@ -282,8 +282,8 @@ namespace rt {
       case Plane: {
         auto added = HittableBuilder<rt::Plane>(1, 1)
                          .withMaterial(defaultMaterial)
-                         .withName("Added Plane##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
+                         .withName("Added Plane##" + EditorUtils::GetIDFromPointer(App::scene.worldRoot));
+        newRoot = App::scene.worldRoot->addChild(added.build());
 
         break;
       }
@@ -296,8 +296,8 @@ namespace rt {
       if (newRoot == nullptr) {
         std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
       } else {
-        // getScene()->oldWorldRoot = getScene()->worldRoot;
-        getScene()->worldRoot = newRoot;
+        // App::scene.oldWorldRoot = App::scene.worldRoot;
+        App::scene.worldRoot = newRoot;
       }
     }
   }
@@ -330,8 +330,8 @@ namespace rt {
 
     // Flip on Y axis since ImGui and opengl/raylib use different axis
     DrawTextureRec(
-        app->getARD()->rasterRT.texture,
-        {0, 0, float(app->getEditorWidth()), -float(app->getEditorHeight())},
+        App::getARD()->rasterRT.texture,
+        {0, 0, float(App::getEditorWidth()), -float(App::getEditorHeight())},
         {0, 0},
         WHITE
     );
@@ -340,24 +340,24 @@ namespace rt {
   void Editor::RaytraceSettingsImgui() {
 
     ImGui::Begin("Raytrace settings");
-    ImGui::DragInt("Samples per pixel", &App::scene.samplesPerPixel, 1, 1, 500);
-    ImGui::DragInt("Maximum depth", &App::scene.maxDepth, 1, 1, 100);
+    ImGui::DragInt("Samples per pixel", &App::rtSettings.samplesPerPixel, 1, 1, 500);
+    ImGui::DragInt("Maximum depth", &App::rtSettings.maxDepth, 1, 1, 100);
     ImGui::End();
     
     ImGui::Begin("Other settings");
-    ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
-    ImGui::Checkbox("Save on render?", &app->saveOnRender);
+    ImGui::ColorEdit3("Background color", &App::scene.backgroundColor.x);
+    ImGui::Checkbox("Save on render?", &App::saveOnRender);
 
-    int numThreads = app->getNumThreads();
+    int numThreads = App::getNumThreads();
     if(ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
-      app->changeNumThreads(numThreads);
+      App::changeNumThreads(numThreads);
     }
     
     ImGui::End();
   }
 
   void Editor::ObjectListImgui() {
-    auto objects = getScene()->worldRoot->getChildrenAsList();
+    auto objects = App::scene.worldRoot->getChildrenAsList();
     for (auto &&o : objects) {
       std::string idPlusName = o->name + "##" + EditorUtils::GetIDFromPointer(o.get());
 
@@ -370,7 +370,7 @@ namespace rt {
 
       // Remove current object from world and rebuild
       if (ImGui::Button(("x##" + EditorUtils::GetIDFromPointer(o.get())).c_str())) {
-        getScene()->worldRoot = getScene()->worldRoot->removeChild(o);
+        App::scene.worldRoot = App::scene.worldRoot->removeChild(o);
       }
 
       ImGui::Separator();
@@ -477,7 +477,7 @@ namespace rt {
       if (ImGui::BeginMenu("Built in")) {
         for (auto &[name, loader] : Scene::builtInScenes) {
           if (ImGui::MenuItem(name.c_str())) {
-            app->changeScene(loader());
+            App::changeScene(loader());
           }
         }
 
@@ -496,7 +496,7 @@ namespace rt {
         // std::string filePath     = ImGuiFileDialog::Instance()->GetCurrentPath();
 
         // action
-        app->changeScene(Scene::Load(filePathName));
+        App::changeScene(Scene::Load(filePathName));
       }
 
       // close
@@ -516,7 +516,7 @@ namespace rt {
         std::stringstream sceneNamePlusTime;
         sceneNamePlusTime << fileDir << "/" << fileName;
 
-        json          json = getScene()->toJson();
+        json          json = App::scene.toJson();
         std::ofstream outputFile(sceneNamePlusTime.str());
         outputFile << std::setw(4) << json << std::endl;
         outputFile.close();

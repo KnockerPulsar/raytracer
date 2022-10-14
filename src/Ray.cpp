@@ -31,7 +31,7 @@ namespace rt {
       if (scene->skysphere)
         scene->skysphere->Hit(r, -infinity, infinity, rec);
       else
-        return scene->backgroundColor;
+        return App::scene.backgroundColor;
     }
 
     rt::Ray scattered;
@@ -67,16 +67,16 @@ namespace rt {
         float rWidth = 1.0f / (App::getImageWidth() - 1);
         float rHeight = 1.0f / (App::getImageHeight() - 1);
 
-        for (int s = 0; s < scene->samplesPerPixel; s++) {
+        for (int s = 0; s < App::rtSettings.samplesPerPixel; s++) {
           float   u   = (x + RandomFloat()) * rWidth;
           float   v   = (y + RandomFloat()) * rHeight;
           rt::Ray ray = scene->cam.GetRay(u, v);
-          job.color += rt::Ray::RayColor(ray, scene, scene->maxDepth);
+          job.color += rt::Ray::RayColor(ray, scene, App::rtSettings.samplesPerPixel);
         }
 
 #ifdef GAMMA_CORRECTION
         // Gamma correction
-        float scale = 1.0 / scene->samplesPerPixel;
+        float scale = 1.0 / App::rtSettings.samplesPerPixel;
         float r     = sqrt(scale * job.color.x);
         float g     = sqrt(scale * job.color.y);
         float b     = sqrt(scale * job.color.z);

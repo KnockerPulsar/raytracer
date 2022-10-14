@@ -42,8 +42,6 @@ namespace rt {
     Camera cam;
 
     vec3 backgroundColor = Defaults::backgroundColor;
-    int  samplesPerPixel = Defaults::samplesPerPixel, maxDepth = Defaults::maxDepth, imageWidth = Defaults::imageWidth,
-        imageHeight = Defaults::imageWidth;
 
     // Initialized in Scene.cpp to a list of scene names and loading functions
     static vector<pair<string, function<Scene()>>> builtInScenes;
@@ -72,27 +70,6 @@ namespace rt {
     static Scene PlaneTest();
     static Scene RasterTest();
 
-    Scene& setSamplesPerPixel(int newSpp) { samplesPerPixel = newSpp; return *this; }
-    Scene& setMaxDepth(int newMd) { maxDepth = newMd; return *this; }
-
-    Scene& setImageWidth(int newIW) {
-      if (newIW == -1)
-        imageWidth = Defaults::imageWidth;
-      else
-        imageWidth = newIW;
-
-      return *this;
-    }
-
-    Scene& setImageHeight(int newIH) {
-
-      if (newIH == -1)
-        imageHeight = Defaults::imageWidth;
-      else
-        imageHeight = newIH;
-
-      return *this;
-    }
 
     json GetObjArray() const;
     json toJson() const;
@@ -103,11 +80,6 @@ namespace rt {
 
     // clang-format off
     j = json{
-        {"settings",{
-            {"background_color", s.backgroundColor},
-            {"num_samples", s.samplesPerPixel},
-            {"max_depth", s.maxDepth},
-        }},
         s.cam,
         {"objects", objArr}
     };
