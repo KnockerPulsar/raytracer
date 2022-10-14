@@ -40,8 +40,7 @@ namespace rt {
 
     json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }
 
-    virtual void OnDerivedImgui() override {
-    }
+    virtual void OnDerivedImgui() override {}
   };
 
   inline void from_json(const json &j, Lambertian &l) { l.albedo = TextureFactory::FromJson(j["texture"]); }

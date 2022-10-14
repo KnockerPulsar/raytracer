@@ -242,7 +242,8 @@ namespace rt {
             float fuzz     = RandomFloat(0, 0.5);
             sphereMaterial = MaterialBuilder<Metal>(fuzz).setTexture(albedo).build();
           } else {
-            sphereMaterial = MaterialBuilder<Dielectric>(1.5).build();
+            sphereMaterial =
+                MaterialBuilder<DiffuseLight>().setTexture(make_shared<NoiseTexture>(1, 5, vec3(1))).build();
           }
 
           world.Add(HittableBuilder<Sphere>(0.2).withMaterial(sphereMaterial).withTranslation(center).build());

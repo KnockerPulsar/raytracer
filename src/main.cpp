@@ -94,7 +94,7 @@ std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char *
       .help("Path to scene json");
 
   
-  int availableThreads = std::thread::hardware_concurrency();
+  int availableThreads = std::thread::hardware_concurrency() - 2;
   params.add_parameter(numThreads, "--threads")
       .metavar("UNSIGNED INT")
       .absent(availableThreads)

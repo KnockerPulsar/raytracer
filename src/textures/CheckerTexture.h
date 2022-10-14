@@ -45,8 +45,17 @@ namespace rt {
     }
 
     virtual void OnDerivedImgui() override {
+
+      ImGui::BeginGroup();
       even->OnBaseImgui();
+      ImGui::EndGroup();
+
+      ImGui::SameLine();
+
+      ImGui::BeginGroup();
       odd->OnBaseImgui();
+      ImGui::EndGroup();
+
       ImGui::DragFloat("Checker scale", &scale);
 
       ImGui::Spacing();

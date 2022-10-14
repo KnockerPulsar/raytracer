@@ -68,7 +68,6 @@ namespace rt {
     }
 
     virtual void OnDerivedImgui() override {
-      albedo->OnDerivedImgui();
       ImGui::DragFloat("Refraction Index", &refractionIndex, 0.01, 1, 100);
     }
 

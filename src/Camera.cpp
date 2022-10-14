@@ -55,6 +55,18 @@ namespace rt {
     this->moveDir = moveDir;
   }
 
+  void Camera::GenerateData() {
+    float theta = DegressToRadians(vFov);
+
+    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
+    float h        = tan(theta / 2);
+    viewportHeight = 2.0 * h;
+    viewportWidth  = aspectRatio * viewportHeight;
+    lensRadius     = aperature / 2;
+
+    UpdateDirectionVectors();
+  }
+
   // Should probably be moved to from_json()?
   Camera::Camera(nlohmann::json cameraJson)
       : Camera(
@@ -69,18 +81,6 @@ namespace rt {
             cameraJson["time1"].get<float>()
         ) {
     controlType = cameraJson["type"] == "flycam" ? ControlType::flyCam : ControlType::lookAtPoint;
-  }
-
-  void Camera::GenerateData() {
-    float theta = DegressToRadians(vFov);
-
-    // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-    float h        = tan(theta / 2);
-    viewportHeight = 2.0 * h;
-    viewportWidth  = aspectRatio * viewportHeight;
-    lensRadius     = aperature / 2;
-
-    UpdateDirectionVectors();
   }
 
   Camera3D Camera::toRaylibCamera3D() const {
@@ -163,7 +163,7 @@ namespace rt {
   }
 
   void Camera::Update(float dt) {
-    aspectRatio = App::getAspectRatio();
+    aspectRatio = App::getRTAspectRatio();
 
     GenerateData();
 
@@ -223,7 +223,7 @@ namespace rt {
     return glm::lookAt(lookFrom, lookAt, worldUp);
   }
 
-  glm::mat4 Camera::getProjectionMatrix() const {
+  glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
     return glm::perspective(glm::radians(vFov), aspectRatio, 0.01f, 1000.0f);
   }
 } // namespace rt

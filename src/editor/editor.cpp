@@ -121,9 +121,13 @@ namespace rt {
     }
     ImGui::End();
 
+    SelectedObjectGizmo();
+
     RaytraceSettingsImgui();
 
-    SelectedObjectGizmo();
+    App::OnBaseImgui();
+
+    App::scene.OnBaseImgui();
   }
 
   void Editor::SelectedObjectGizmo() {
@@ -139,6 +143,8 @@ namespace rt {
       ImGuizmo::BeginFrame();
 
       ImGui::Begin("Selected object", 0, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
+      selectedObject->OnBaseImgui();
 
       // Tell ImGuizmo to draw in the foreground
       // ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
@@ -152,7 +158,7 @@ namespace rt {
       // clang-format off
         ImGuizmo::Manipulate(
           glm::value_ptr(getCamera()->getViewMatrix()),
-    glm::value_ptr(getCamera()->getProjectionMatrix()),
+    glm::value_ptr(getCamera()->getProjectionMatrix(App::getEditorAspectRatio())),
      imguizmoOp,
           imguizmoMode,
         model
@@ -171,8 +177,6 @@ namespace rt {
           .setRotation(rotation);
       }
 
-      ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
-      selectedObject->OnBaseImgui();
 
       ImGui::End();
     }
@@ -218,7 +222,8 @@ namespace rt {
 
   Hittable *Editor::CastRay(Vector2 mousePos) {
 
-    ::Ray raylibRay = GetMouseRay(mousePos, getCamera()->toRaylibCamera3D());
+    Camera3D cam = getCamera()->toRaylibCamera3D();
+    ::Ray    raylibRay = GetMouseRay(mousePos, cam);
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
 
     rt::Camera::lineStart = r.origin;
@@ -338,22 +343,7 @@ namespace rt {
   }
 
   void Editor::RaytraceSettingsImgui() {
-
-    ImGui::Begin("Raytrace settings");
-    ImGui::DragInt("Samples per pixel", &App::rtSettings.samplesPerPixel, 1, 1, 500);
-    ImGui::DragInt("Maximum depth", &App::rtSettings.maxDepth, 1, 1, 100);
-    ImGui::End();
-    
-    ImGui::Begin("Other settings");
-    ImGui::ColorEdit3("Background color", &App::scene.backgroundColor.x);
-    ImGui::Checkbox("Save on render?", &App::saveOnRender);
-
-    int numThreads = App::getNumThreads();
-    if(ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
-      App::changeNumThreads(numThreads);
-    }
-    
-    ImGui::End();
+    App::rtSettings.OnBaseImgui();
   }
 
   void Editor::ObjectListImgui() {

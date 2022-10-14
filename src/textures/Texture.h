@@ -65,25 +65,20 @@ namespace rt {
 
     void previewOrGenerate() {
       if (previewTexture.width != -1 && previewTexture.height != -1) {
-        ImGui::BeginGroupPanel("Texture preview");
-
+        // ImGui::BeginGroupPanel("Texture preview");
+        ImGui::Separator();
         ImGui::Dummy({-1, 10});
 
         float aspectRatio = float(previewTexture.width) / previewTexture.height;
 
-
-        ImVec2 avail = ImGui::GetContentRegionAvail();
-        ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
-
-        float drawX = (avail.x - previewWidth) * 0.5f;
-        float drawY = (avail.y - previewHeight) * 0.5f;
-
-        ImGui::SetCursorPos(ImVec2{drawX, drawY});
-        ImGui::Image(&previewTexture.id, {float(previewWidth), float(previewHeight)});
+        float iW  = previewWidth;
+        float iH  = previewHeight;
+        ImGui::Image(&previewTexture.id, ImVec2{iW, iH});
 
         Texture::previewSettingsImgui();
         
-        ImGui::EndGroupPanel();
+        ImGui::Separator();
+        // ImGui::EndGroupPanel();
       } else
         generatePreview();
     }
@@ -93,8 +88,9 @@ namespace rt {
       ImGui::DragInt2("Preview resolution", &previewWidth);
       ImGui::DragFloat("Preview scale", &previewScale);
 
-      if (ImGui::Button("Regen preview"))
+      if (ImGui::Button(("Regen preview##" + EditorUtils::GetIDFromPointer(this)).c_str())) {
         generatePreview();
+      }
     }
 
     virtual void generatePreviewTexture(vec3 *data, int previewWidth, int previewHeight) {

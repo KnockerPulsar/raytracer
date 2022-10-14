@@ -122,7 +122,7 @@ namespace rt {
     rlImGuiShutdown();
 
     UnloadRenderTexture(ard.rasterRT);
-    UnloadRenderTexture(ard.raytraceRT);
+    UnloadTexture(ard.raytraceRT);
 
     rlImGuiShutdown();
     CloseWindow();

@@ -34,7 +34,6 @@ namespace rt {
     }
 
     virtual void OnDerivedImgui() override {
-      albedo->OnDerivedImgui();
       ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
     }
   

@@ -18,6 +18,6 @@ namespace rt {
 
     json toJson() const override { return {"type", "unimplemented - isotropic"}; }
 
-    virtual void OnDerivedImgui() override { albedo->OnDerivedImgui(); }
+    virtual void OnDerivedImgui() override {}
   };
 } // namespace rt

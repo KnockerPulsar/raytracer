@@ -1,4 +1,5 @@
 #pragma once
+#include "rt.h"
 #include "stb_image_write.h"
 
 #include "AsyncRenderData.h"
@@ -35,6 +36,7 @@ namespace rt {
     Raytracer(AsyncRenderData &ard) : ard(ard) {}
 
     void prepass() {
+      App::changeRTResolution(App::getImageWidth(), App::getImageHeight());
       for (auto& obj : App::scene.worldRoot->getChildrenAsList()) {
         obj->transformation.constructMatrices();
       }
@@ -91,7 +93,7 @@ namespace rt {
       float topLeftY = (edH - scaledHeight) / 2.0f;
 
       DrawTexturePro(
-          ard.raytraceRT.texture, {0, 0, iW, -iH}, {0, 0, scaledWidth, scaledHeight}, {-topLeftX, -topLeftY}, 0, WHITE
+          ard.raytraceRT, {0, 0, iW, -iH}, {0, 0, scaledWidth, scaledHeight}, {-topLeftX, -topLeftY}, 0, WHITE
       ); // Draw a part of a texture defined by a rectangle with 'pro' parameters
 
       RenderImGui();
@@ -129,26 +131,9 @@ namespace rt {
         pixelData[i] = jobs[i].color;
       }
 
-      if (firstFrame) {
-        // Create texture from image containing the color data
-        Image raytraced = {
-            .data    = pixelData,
-            .width   = w,
-            .height  = h,
-            .mipmaps = 1,
-            .format  = RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32
-          };
+      UpdateTexture(ard.raytraceRT, pixelData);
 
-        ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
-
-        UnloadImage(raytraced);
-        firstFrame = false;
-      } else {
-        UpdateTexture(ard.raytraceRT.texture, pixelData);
-
-        delete[] pixelData;
-      }
-
+      delete[] pixelData;
     }
 
     bool onFinished() {

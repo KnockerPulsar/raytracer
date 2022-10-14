@@ -33,6 +33,7 @@ set(SOURCES
   src/Ray.cpp
   src/AsyncRenderData.cpp
   src/Transformation.cpp
+  src/raytrace_settings.cpp
 
   src/GroupPanel.cpp
 

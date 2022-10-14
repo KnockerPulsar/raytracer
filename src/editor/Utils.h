@@ -11,9 +11,7 @@
 #include "../../vendor/glm/glm/gtc/constants.hpp"
 
 using std::vector, std::tuple;
-
-class Vector3;
-class Vector2;
+class Vector3; class Vector2;
 class Color;
 class BoundingBox;
 
@@ -110,4 +108,5 @@ namespace EditorUtils {
 
     return mesh;
   }
+
 } // namespace EditorUtils

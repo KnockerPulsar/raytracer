@@ -1,5 +1,5 @@
 #pragma once
-#include "Defs.h"
+
 #include "RenderAsync.h"
 #include "Scene.h"
 #include <condition_variable>
@@ -25,20 +25,18 @@ namespace rt {
 
     bool exit = false; // To make threads exit their loops
 
-    RenderTexture2D raytraceRT;
+    Texture2D raytraceRT;
     RenderTexture2D rasterRT;
 
   public:
     AsyncRenderData() = default;
-
     AsyncRenderData(int numThreads);
-
     AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<float> tp, vector<bool> ft)
         : pixelJobs(pj), threadProgress(tp), finishedThreads(ft) {}
 
     void KillThreads();
-
     void changeNumThreads(int newNumThreads);
+    void changeRTResolution(int w, int h);
 
     ~AsyncRenderData() { KillThreads(); }
   };

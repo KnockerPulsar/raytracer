@@ -78,7 +78,7 @@ namespace rt {
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
 
     glm::mat4 getViewMatrix() const;
-    glm::mat4 getProjectionMatrix() const;
+    glm::mat4 getProjectionMatrix(float aspectRatio) const;
 
     void UpdateDirectionVectors();
   };

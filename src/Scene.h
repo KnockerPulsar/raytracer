@@ -5,6 +5,7 @@
 #include "IImguiDrawable.h"
 #include "Transformation.h"
 #include "editor/Utils.h"
+#include "imgui.h"
 #include "rt.h"
 #include "textures/ImageTexture.h"
 #include <memory>
@@ -19,7 +20,7 @@ using std::string, std::vector, std::function, std::pair;
 namespace rt {
   class Hittable;
 
-  class Scene {
+  class Scene : public IImguiDrawable {
 
   public:
     /*
@@ -73,6 +74,13 @@ namespace rt {
 
     json GetObjArray() const;
     json toJson() const;
+
+    void OnBaseImgui() override {
+      ImGui::Begin("Scene settings");
+      ImGui::ColorEdit3("Background color", &backgroundColor.x);
+      ImGui::End();
+    } 
+
   };
 
   inline void to_json(json &j, const Scene &s) {

@@ -3,8 +3,8 @@
 
 namespace Defaults {
   const int imageWidth   = 100;
-  const int editorWidth  = 1280;
-  const int editorHeight = 720;
+  const int editorWidth  = 1920;
+  const int editorHeight = 1080;
 
   const int samplesPerPixel = 32;
   const int maxDepth = 4;
