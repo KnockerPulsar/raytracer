@@ -33,9 +33,9 @@ namespace rt {
      * @param scattered Scattered/output ray
      * @return true Always, independent of whether the ray reflects or refracts
      */
-    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &alb, Ray &scattered, float& pdf) const override{
 
-      attenuation  = albedo->Value(rec.u, rec.v, rec.p);
+      alb  = albedo->Value(rec.u, rec.v, rec.p);
       float refIdx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
       vec3  unitDir  = rIn.direction.Normalize();

@@ -464,15 +464,10 @@ namespace rt {
     Camera cam(lookFrom, lookAt, vUp, moveDir, fov, aperature, distToFocus, 0.0, 1.0);
     cam.angle.y = 3.14; // Rotate towards the scene
 
-    auto red           = MaterialBuilder<Lambertian>().setTexture(vec3(0.65, 0.05, 0.05)).build();
-    auto white         = MaterialBuilder<Lambertian>().setTexture(vec3(0.73, 0.73, 0.73)).build();
-    auto green         = MaterialBuilder<Lambertian>().setTexture(vec3(0.12, 0.45, 0.15)).build();
-    auto light         = MaterialBuilder<DiffuseLight>().setTexture(vec3(15, 15, 15)).build();
-    auto purplishMetal = MaterialBuilder<Metal>(0.7f).setTexture(vec3(0.8, 0.1, 0.8)).build();
-    auto chrome        = MaterialBuilder<Metal>(0.05f).setTexture(vec3(0.8, 0.8, 0.8)).build();
-    auto dielectric    = MaterialBuilder<Dielectric>().setTexture(1.5f).build();
-    auto noise         = MaterialBuilder<Lambertian>().setTexture(make_shared<NoiseTexture>(0.1f)).build();
-    auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
+    auto red    = MaterialBuilder<Lambertian>().setTexture(vec3(0.65, 0.05, 0.05)).build();
+    auto white  = MaterialBuilder<Lambertian>().setTexture(vec3(0.73, 0.73, 0.73)).build();
+    auto green  = MaterialBuilder<Lambertian>().setTexture(vec3(0.12, 0.45, 0.15)).build();
+    auto light  = MaterialBuilder<DiffuseLight>().setTexture(vec3(15)).build();
 
     float wallWidth  = 55.5;
     float wallHeight = wallWidth;
@@ -573,7 +568,7 @@ namespace rt {
 
     s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
 
-    return s;
+    return s; 
   }
 
   Scene Scene::TransformationTest() {

@@ -2,6 +2,7 @@
 #include "../Defs.h"
 #include "../Hittable.h"
 #include "../textures/TextureFactory.h"
+#include "Constants.h"
 #include "Material.h"
 
 using nlohmann::json;
@@ -26,16 +27,19 @@ namespace rt {
      * @return true
      * @return false
      */
-    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &alb, Ray &scattered, float& pdf) const override{
 
-      vec3 scatterDir = rec.normal + vec3::RandomUnitVec();
+      vec3 scatterDir = vec3::RandomInHemisphere(rec.normal);
 
-      if (scatterDir.NearZero())
-        scatterDir = rec.normal;
-
-      scattered   = Ray(rec.p, scatterDir, rIn.time);
-      attenuation = albedo->Value(rec.u, rec.v, rec.p);
+      scattered   = Ray(rec.p, scatterDir.Normalize(), rIn.time);
+      alb = albedo->Value(rec.u, rec.v, rec.p);
+      pdf = 0.5f / pi;
       return true;
+    }
+
+    virtual float scatteringPdf(const Ray& rIn, const HitRecord& rec, const Ray& scattered) override{ 
+      auto cosine = vec3::DotProd(rec.normal, scattered.direction.Normalize());
+      return cosine < 0? epsilon : cosine / pi;
     }
 
     json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }

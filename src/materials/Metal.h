@@ -16,12 +16,11 @@ namespace rt {
   
     Metal(float initialFuzz) : fuzz(initialFuzz) {}
 
-    bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
-
-      vec3 inNormlized = r_in.direction.Normalize();
+    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &alb, Ray &scattered, float& pdf) const {
+      vec3 inNormlized = rIn.direction.Normalize();
       vec3 reflected     = inNormlized.Reflect(rec.normal);
-      scattered          = Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, r_in.time);
-      attenuation        = albedo->Value(rec.u, rec.v, rec.p);
+      scattered          = Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, rIn.time);
+      alb        = albedo->Value(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }
 

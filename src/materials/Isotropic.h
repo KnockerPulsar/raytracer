@@ -10,7 +10,7 @@
 namespace rt {
   class Isotropic : public Material {
   public:
-    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const {
       scattered   = Ray(rec.p, vec3::RandomInUnitSphere(), r_in.time);
       attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;

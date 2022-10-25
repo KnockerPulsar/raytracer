@@ -11,6 +11,7 @@ add_compile_definitions(GAMMA_CORRECTION)
 
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
 
 CMAKE_POLICY(SET CMP0074 NEW)
 

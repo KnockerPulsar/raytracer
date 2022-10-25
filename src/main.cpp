@@ -94,19 +94,18 @@ std::tuple<int, int, int, int, std::string, int> setupArguments(int argc, char *
       .help("Path to scene json");
 
   
-  int availableThreads = std::thread::hardware_concurrency() - 2;
   params.add_parameter(numThreads, "--threads")
       .metavar("UNSIGNED INT")
-      .absent(availableThreads)
+      .absent(Defaults::availableThreads)
       .help("Number of threads to raytrace with")
       .action([&](auto &target, const std::string &value) {
         int parsedValue = std::atoi(value.c_str());
 
         if (parsedValue <= 0) {
+          target = Defaults::availableThreads;
           std::cout << "WARNING: Invalid number of threads entered (" << value << "), using all available threads ("
-                    << availableThreads << ")" << std::endl;
+                    << target  << ")" << std::endl;
                     
-          target = availableThreads;
         } else {
           target = parsedValue;
         }

@@ -14,6 +14,7 @@
 #include <chrono>
 #include <iostream>
 #include <mutex>
+#include <regex>
 
 using rt::Pixel, rt::Camera, rt::HittableList;
 using std::chrono::high_resolution_clock, std::chrono::duration_cast;
@@ -35,13 +36,18 @@ namespace rt {
     }
 
     rt::Ray scattered;
-    vec3    attenuation;
+    vec3    albedo = vec3(1);
     vec3    emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+    float pdf;
 
-    if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+    if (!rec.mat_ptr->scatter(r, rec, albedo, scattered, pdf))
       return emitted;
 
-    return emitted + attenuation * RayColor(scattered, scene, depth - 1);
+    return emitted 
+      + albedo 
+        * rec.mat_ptr->scatteringPdf(r, rec, scattered)
+        * RayColor(scattered, scene, depth - 1)
+        / pdf;
   }
 
   void Ray::Trace(AsyncRenderData &ard, const Scene* scene, int threadIndex) {

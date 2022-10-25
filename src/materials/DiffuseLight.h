@@ -28,7 +28,7 @@ namespace rt {
      * @param scattered Scattered/output ray
      * @return false Always as in real life lights only emit and not absorb, things are flipped with camera raytracing.
      */
-    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &alb, Ray &scattered, float& pdf) const override{
       return false;
     }
 
