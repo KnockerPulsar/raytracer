@@ -1,8 +1,13 @@
 .cache/
 build/
+debug/
+release/
+
 **/bin/
 **/obj/
 **/CMakeFiles/
+**/Raytracer
+
 modules/premake-ecc/
 
 *.log

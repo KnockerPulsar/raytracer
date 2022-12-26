@@ -1,0 +1,7 @@
+set -xe
+
+cd ./release
+cmake -DCMAKE_BUILD_TYPE=Release ../
+cmake --build ./ -j12
+cp compile_commands.json ../
+cd ./
