@@ -25,41 +25,6 @@ add_subdirectory(vendor/glm)
 
 # A variable with all our source files that are common between executable targets (examples)
 set(SOURCES 
-  src/Scene.cpp
-  src/app.cpp
-  src/AABB.cpp
-  src/Camera.cpp
-  src/HittableList.cpp
-  src/RenderAsync.cpp
-  src/Ray.cpp
-  src/AsyncRenderData.cpp
-  src/Transformation.cpp
-  src/raytrace_settings.cpp
-
-  src/GroupPanel.cpp
-
-  src/data_structures/vec3.cpp
-
-  src/objects/Box.cpp
-  src/objects/Sphere.cpp
-  src/objects/AARect.cpp
-  
-  src/editor/editor.cpp
-  src/editor/Utils.cpp
-
-  vendor/argumentum/src/argparser.cpp
-
-  vendor/ImGuiFileDialog/ImGuiFileDialog.cpp
-
-  vendor/rlImGui/rlImGui.cpp
-
-  vendor/rlImGui/imgui/imgui.cpp
-  vendor/rlImGui/imgui/imgui_widgets.cpp
-  vendor/rlImGui/imgui/imgui_draw.cpp
-  vendor/rlImGui/imgui/imgui_tables.cpp
-  vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp
-
-  vendor/imguizmo/ImGuizmo.cpp
 )
 
 # Define the directories in which to search for the included headers

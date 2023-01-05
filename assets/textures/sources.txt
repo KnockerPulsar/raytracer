@@ -1,2 +1,0 @@
-earth.png - Raytracing in One Weekend
-skysphere.png - https://cgi.tutsplus.com/articles/freebie-8-awesome-ocean-hdris--cg-5684
