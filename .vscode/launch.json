@@ -8,15 +8,8 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/debug/Raytracer",
-      "args": [
-        "--image_width",
-        "800",
-        "--image_height",
-        "800",
-        "--threads",
-        "12 "
-      ],
+      "program": "${workspaceFolder}/debug/Raytracer",
+      "args": [ ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build debug",
       "setupCommands": [
@@ -35,17 +28,8 @@
       "name": "Release",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/release/Raytracer",
-      "args": [
-        "--image_width",
-        "1080",
-        "--image_height",
-        "1080",
-        "--scene",
-        "scenes/cornell.json",
-        "--threads",
-        "12"
-      ],
+      "program": "${workspaceFolder}/release/Raytracer",
+      "args": [ ],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build release",
     },
