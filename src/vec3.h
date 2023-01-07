@@ -154,3 +154,11 @@ vec3 refract(const vec3& uv, const vec3& n, float etaIOverEtaT) {
 
 	return rOutPerp + rOutParallel;
 }
+
+vec3 randomInUnitDisk() {
+	while(true) {
+		vec3 p = vec3(randomFloat(-1, 1), randomFloat(-1, 1), 0);
+		if(p.lengthSquared() >= 1) continue;
+		return p;
+	}
+}
