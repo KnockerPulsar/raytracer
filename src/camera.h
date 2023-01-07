@@ -4,7 +4,7 @@
 
 class camera {
 	public:
-		camera(float aspectRatio) {
+		void initialize(float aspectRatio = 1.0f) {
 			float viewportHeight = 2.0f;
 			float viewportWidth = aspectRatio * viewportHeight;
 			float focalLength = 1.0f;
