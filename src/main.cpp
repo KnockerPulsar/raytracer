@@ -59,7 +59,7 @@ color rayColor(const ray& r, const hittable_list& world, int depth) {
 		color attenutaion;
 
 		if(rec.mat->scatter(r, rec, attenutaion, scattered)) {
-			return attenutaion * rayColor(scattered, world, depth - 1);
+            return attenutaion * rayColor(scattered, world, depth - 1);
 		}
 
 		return color(0, 0, 0);
@@ -114,21 +114,21 @@ int main() {
 	const int windowHeight = 720;
 
 	const float aspectRatio = float(imageWidth) / imageHeight;
-	const int samplesPerPixel = 100;
-	const int maxDepth = 5;
+	const int samplesPerPixel = 10;
+	const int maxDepth = 12;
 
 	hittable_list world;
 	auto materialGround = make_shared<lambertian>(color(0.8, 0.8, 0.0));
 	auto materialCenter = make_shared<lambertian>(color(0.7, 0.3, 0.3));
 	auto materialLeft = make_shared<dielectric>(1.5);
-	auto materialRight = make_shared<metal>(color(0.8, 0.6, 0.2), 1);
+	auto materialRight = make_shared<metal>(color(0.8, 0.6, 0.2), 0);
 
 
 	world.add(make_shared<sphere>(point3( 0, -100.5, -1), 100, materialGround));
-	// world.add(make_shared<sphere>(point3( 0, 			0, -1), 0.5, materialCenter));
-	world.add(make_shared<sphere>(point3(0, 			0, -1), 0.5, materialLeft));
-	world.add(make_shared<sphere>(point3(0, 			0, -1), -0.4, materialLeft));
-	// world.add(make_shared<sphere>(point3( 1, 			0, -1), 0.5, materialRight));
+	world.add(make_shared<sphere>(point3( 0, 			0, -1), 0.5, materialCenter));
+	world.add(make_shared<sphere>(point3(-1, 			0, -1), 0.5, materialLeft));
+	world.add(make_shared<sphere>(point3(-1, 			0, -1), -0.4, materialLeft));
+	world.add(make_shared<sphere>(point3( 1, 			0, -1), 0.5, materialRight));
 
 	camera cam(aspectRatio);
 
@@ -152,9 +152,6 @@ int main() {
 						float t = (j + randomFloat()) / (imageHeight - 1);
 
 						ray r = cam.getRay(s, t);
-                        if(s > 0.5 && t > 0.5) {
-                            int z = 1;
-                        }
 						pixelColor += rayColor(r, world, maxDepth);
 					}
 
