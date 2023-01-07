@@ -1,4 +1,5 @@
 #include "hittable.h"
+#include "moving_sphere.h"
 #include "raytracer.h"
 #include "hittable_list.h"
 #include "scene.h"
@@ -44,7 +45,13 @@ void randomSpheres(scene& sceneDesc) {
 					// Diffuse
 					color albedo = color::random() * color::random();
 					sphereMaterial = make_shared<lambertian>(albedo);
-					world.add(make_shared<sphere>(center, 0.2, sphereMaterial));
+
+					// Stationary sphere
+					/* world.add(make_shared<sphere>(center, 0.2, sphereMaterial)); */
+
+					// Moving sphere
+					vec3 center2 = center + vec3(0, randomFloat(0, 0.5), 0);
+					world.add(make_shared<moving_sphere>(center, center2, 0.2, sphereMaterial));
 				} else if (chooseMat < 0.95) {
 					// Metal
 					color albedo = color::random(0.5, 1);
@@ -79,9 +86,9 @@ int main() {
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
 
 	sceneDesc.initFramebuffer();
-	while(!WindowShouldClose()) {
-		sceneDesc.render();
-	}
+	sceneDesc.render();
+
+	sceneDesc.writeImage("./moving_spheres.ppm");
 
 	CloseWindow();
 }

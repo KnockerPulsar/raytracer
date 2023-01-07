@@ -41,10 +41,12 @@ class camera {
 
 			vec3 rd = lensRadius * randomInUnitDisk();
 			vec3 offset = u * rd.x() + v * rd.y();
+			const float rayTime = randomFloat(0, 1);
 
 			return ray(
 					origin + offset, 
-					lowerLeftCorner + s * horizontal + (1-t) * vertical - origin - offset
+					lowerLeftCorner + s * horizontal + (1-t) * vertical - origin - offset,
+					rayTime
 			);
 		}
 

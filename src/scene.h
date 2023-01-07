@@ -1,10 +1,11 @@
 #pragma once
 
+#include <raylib.h>
 #include "raytracer.h"
 #include "camera.h"
 #include "hittable_list.h"
 #include "material.h"
-#include <raylib.h>
+#include <fstream>
 
 class scene {
 	public:
@@ -67,6 +68,31 @@ class scene {
 				);
 			}
 			std::clog << "\rDone.                \n" << std::flush;
+		}
+		void writeImage(std::string path) const {
+
+			std::ofstream output(path);
+		
+			output << "P3\n";
+			output << imageWidth << ' ' << imageHeight << '\n';
+			output << 255 << '\n';
+
+			for (int j = 0; j < imageHeight; j++) {
+				for (int i = 0; i < imageWidth; i++) {
+
+					const int stride = 4;
+					int index = (imageWidth * j + i) * stride;
+
+					int r = pixels[index + 0];
+					int g = pixels[index + 1];
+					int b = pixels[index + 2];
+
+					output << r << ' ' << g << ' ' << b << '\n';
+				}
+			}
+
+			output.close();
+			TraceLog(LOG_INFO, "Framebuffer saved to %s", path.c_str());
 		}
 
 	private:
