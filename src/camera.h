@@ -1,19 +1,33 @@
 #pragma once
 
 #include "raytracer.h"
+#include "vec3.h"
 
 class camera {
 	public:
+		// Vertical camera FOV in degrees
+		float vFov = 40;
+		point3 lookfrom = point3(0, 0, -1);
+		point3 lookat   = point3(0, 0, 0);
+		vec3 	 vup			= vec3(0, 1, 0);
+
+
 		void initialize(float aspectRatio = 1.0f) {
-			float viewportHeight = 2.0f;
+			float theta = degreesToRadians(vFov);
+			float h = tan(theta / 2.0);
+
+			float viewportHeight = 2 * h;
 			float viewportWidth = aspectRatio * viewportHeight;
-			float focalLength = 1.0f;
+
+			vec3 w = unitVector(lookfrom - lookat);
+			vec3 u = unitVector(cross(vup, w));
+			vec3 v = cross(w, u);
 
 
-			origin 					= point3(0., 0., 0.);
-			horizontal 			= vec3(viewportWidth, 0, 0);
-			vertical 				= vec3(0, viewportHeight, 0);
-			lowerLeftCorner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focalLength);
+			origin 					= lookfrom;
+			horizontal 			= viewportWidth * u;
+			vertical 				= viewportHeight * v;
+			lowerLeftCorner = origin - horizontal/2 - vertical/2 - w;
 		}
 
 		ray getRay(float s, float t) const {
