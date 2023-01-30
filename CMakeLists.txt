@@ -30,15 +30,6 @@ set(SOURCES
 # Define the directories in which to search for the included headers
 include_directories(
   src/
-
-  vendor/rlImGui/
-  vendor/imguizmo/
-  vendor/rlImGui/imgui/  
-  vendor/nlohmann-json/
-  vendor/ImGuiFileDialog
-  vendor/argumentum/include/
-  vendor/ImGuiFileDialog/stb/
-  vendor/stb_image
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR})
