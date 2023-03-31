@@ -43,6 +43,7 @@ class camera {
 			vec3 offset = u * rd.x() + v * rd.y();
 			const float rayTime = randomFloat(0, 1);
 
+			// (1 - t) instead of t to flip the image vertically
 			return ray(
 					origin + offset, 
 					lowerLeftCorner + s * horizontal + (1-t) * vertical - origin - offset,

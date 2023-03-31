@@ -8,13 +8,17 @@
 class hittable_list : public hittable {
 	public:
 		std::vector<sPtr<hittable>> objects;
+		aabb bbox;
 
 
 		hittable_list() = default;
 		hittable_list(sPtr<hittable> object) { add(object); }
 
 		void clear() { objects.clear(); }
-		void add(sPtr<hittable> object) { objects.push_back(object); }
+		void add(sPtr<hittable> object) {
+			objects.push_back(object); 
+			bbox = aabb(bbox, object->bounding_box());
+		}
 
 		virtual bool hit(const ray& r, interval rayT, hit_record& rec) const override {
 			hit_record tempRec;
@@ -31,4 +35,6 @@ class hittable_list : public hittable {
 
 			return hitAnything;
 		}
+
+		virtual aabb bounding_box() const override { return bbox; }
 };

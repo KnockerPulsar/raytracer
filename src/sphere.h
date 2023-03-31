@@ -1,17 +1,16 @@
 #pragma once
+#include "aabb.h"
 #include "hittable.h"
 #include "vec3.h"
 #include <cmath>
 
 class sphere: public hittable {
 	public:
-		point3 center;
-		float radius;
-		sPtr<material> mat;
-
-
 		sphere() {}
-		sphere(point3 ctr, float r, sPtr<material> m): center(ctr), radius(r), mat(m) {};
+		sphere(point3 ctr, float r, sPtr<material> m): center(ctr), radius(r), mat(m) {
+			const auto rvec = vec3(radius, radius, radius);
+			bbox = aabb(center-rvec, center+rvec);
+		};
 
 		
 		virtual bool hit(const ray& r, interval rayT, hit_record& rec) const override {
@@ -39,4 +38,12 @@ class sphere: public hittable {
 
 			return true;
 		}
+
+		virtual aabb bounding_box() const override { return bbox; }
+
+	public:
+		point3 center;
+		float radius;
+		sPtr<material> mat;
+		aabb bbox;
 };

@@ -6,15 +6,16 @@
 
 class moving_sphere : public hittable {
 	public:
-		point3 center0, center1;
-		vec3 centerVec;
-		float radius;
-		sPtr<material> mat;
-
-
 		moving_sphere() = default;
 		moving_sphere(point3 c0, point3 c1, float r, sPtr<material> m):
-			center0(c0), center1(c1), centerVec(c1 - c0), radius(r), mat(m) {}
+			center0(c0), center1(c1), centerVec(c1 - c0), radius(r), mat(m) 
+		{
+			const auto rvec = vec3(radius, radius, radius);
+			const aabb box0 = aabb(center0 - rvec, center0 + rvec);
+			const aabb box1 = aabb(center1 - rvec, center1 + rvec);
+
+			bbox = aabb(box0, box1);
+		}
 
 		bool hit(const ray& r, interval rayT, hit_record& rec) const override {
 			vec3 oc = r.origin() - center(r.time());
@@ -46,4 +47,13 @@ class moving_sphere : public hittable {
 			// Lineraly interpolate between center0 and center1 using centerVec;
 			return center0 + time * centerVec;
 		}
+
+		virtual aabb bounding_box() const override { return bbox; }
+
+	public:
+		point3 center0, center1;
+		vec3 centerVec;
+		float radius;
+		sPtr<material> mat;
+		aabb bbox;
 };
