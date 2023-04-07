@@ -12,3 +12,6 @@ inline float randomFloat(float min, float max) {
 	return min + (max-min)  * randomFloat();
 }
 
+inline int randomInt(int min, int max) {
+		return static_cast<int>(randomFloat(min, max+1));
+}

@@ -33,8 +33,8 @@ class aabb {
 			for (int a = 0; a < 3; a++) {
 				float invD = 1.0f / r.direction()[a];
 
-				float t0 = axis(a).min - r.origin()[a] * invD;
-				float t1 = axis(a).max - r.origin()[a] * invD;
+				float t0 = (axis(a).min - r.origin()[a]) * invD;
+				float t1 = (axis(a).max - r.origin()[a]) * invD;
 
 				if (invD < 0.0f) 
 					std::swap(t0, t1);

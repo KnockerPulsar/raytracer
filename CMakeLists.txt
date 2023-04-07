@@ -19,7 +19,7 @@ CMAKE_POLICY(SET CMP0074 NEW)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 # SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 # SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
-add_subdirectory(vendor/glm)
+# add_subdirectory(vendor/glm)
 
 # find_package(raylib REQUIRED) # Requires at least version 3.0
 

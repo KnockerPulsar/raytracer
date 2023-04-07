@@ -17,6 +17,7 @@ class scene {
 		int maxDepth = 50;
 
 		RenderTexture2D renderTexture;
+
 		u8* pixels = nullptr;
 		int windowWidth = 1280;
 		int windowHeight = 720;
@@ -69,8 +70,8 @@ class scene {
 			}
 			std::clog << "\rDone.                \n" << std::flush;
 		}
-		void writeImage(std::string path) const {
 
+		void writeImage(std::string path) const {
 			std::ofstream output(path);
 		
 			output << "P3\n";
