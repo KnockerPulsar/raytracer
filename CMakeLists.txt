@@ -30,6 +30,7 @@ set(SOURCES
 # Define the directories in which to search for the included headers
 include_directories(
   src/
+  external/
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR})

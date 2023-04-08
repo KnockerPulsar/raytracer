@@ -1,6 +1,9 @@
 #pragma once
 
+#include "interval.h"
 #include "raytracer.h"
+#include "rtw_stb_image.h"
+#include "vec3.h"
 
 class texture {
 	public:
@@ -48,4 +51,26 @@ class checker_texture: public texture {
 
 			return is_even? even->value(u, v, p) : odd->value(u, v, p);
 		}
+};
+
+class image_texture: public texture {
+	public:
+		image_texture() {}
+		image_texture(const char* filename): image(filename) {}
+
+		color value(float u, float v, const point3& p) const override {
+			if (image.height() <= 0) return color(0, 1, 1);
+
+			u = interval(0, 1).clamp(u);	
+			v = 1.0f - interval(0, 1).clamp(v);	
+
+			auto i = static_cast<int>(u * image.width());
+			auto j = static_cast<int>(v * image.height());
+			auto pixel = image.pixel_data(i, j);
+
+			const auto color_scale = 1.0f / 255.0f;
+			return color(color_scale*pixel[0], color_scale*pixel[1], color_scale*pixel[2]);
+		}
+	private:
+		rtw_image image;
 };

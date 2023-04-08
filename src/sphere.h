@@ -34,10 +34,10 @@ class sphere: public hittable {
 
 			rec.t = root;
 			rec.p = r.at(rec.t);
-			get_sphere_uv(rec.p, rec.u, rec.v);
-
 			vec3 outwardNormal = (rec.p - center) / radius;
 			rec.setFaceNormal(r, outwardNormal);
+
+			get_sphere_uv(outwardNormal, rec.u, rec.v);
 			rec.mat = mat;
 
 			return true;
@@ -60,7 +60,7 @@ class sphere: public hittable {
 			//     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
 			//     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
 
-			auto phi = std::atan2(p.z(), -p.x()) + pi;
+			auto phi = std::atan2(-p.z(), p.x()) + pi;
 			auto theta = std::acos(-p.y());
 
 			u = phi / (2*pi);

@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include "rtw_stb_image.h"
 
 void randomSpheres(scene& sceneDesc) {
 	sceneDesc.windowWidth = 1280;
@@ -103,18 +104,34 @@ void two_spheres(scene& scene_desc) {
 	world.add(make_shared<sphere>(point3(0,  10, 0), 10, checker));
 }
 
+void earth(scene& scene_desc) {
+	scene_desc.windowWidth = 1280;
+	scene_desc.windowHeight = 720;
+	scene_desc.samplesPerPixel = 100;
+
+	scene_desc.cam.aperture = 0;
+	scene_desc.cam.vFov = 20;
+	scene_desc.cam.lookfrom = point3(0, 0, 12);
+	scene_desc.cam.lookat = point3(0, 0, 0);
+
+	auto earth_texture = make_shared<image_texture>("earthmap.png");
+	auto earth_surface = make_shared<lambertian>(earth_texture);
+	auto globe = make_shared<sphere>(point3(0,0,0), 2, earth_surface);
+
+	scene_desc.world = hittable_list(globe);
+}
+
 int main() {
 	scene sceneDesc;
 	sceneDesc.cam.vup = vec3(0, 1, 0);
 	sceneDesc.cam.focusDist = 10;
 
 	switch (0) {
-		case 1: 
-			randomSpheres(sceneDesc); break;
-
-		case2:
+		case 1: randomSpheres(sceneDesc); break;
+		case 2: two_spheres(sceneDesc); break;
 		default:
-						two_spheres(sceneDesc); break;
+		case 3:
+						earth(sceneDesc); break;
 	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
