@@ -1,4 +1,5 @@
 #include "bvh.h"
+#include "constant_medium.h"
 #include "hittable.h"
 #include "moving_sphere.h"
 #include "raytracer.h"
@@ -199,11 +200,11 @@ void cornell_box(scene& scene_desc) {
     scene_desc.windowHeight = 720;
 		scene_desc.renderScale = 0.5;
     scene_desc.samplesPerPixel = 1000;
-    scene_desc.background        = color(0,0,0);
+    scene_desc.background = color(0,0,0);
 
     scene_desc.cam.lookfrom = point3(278, 278, -800);
-    scene_desc.cam.lookat   = point3(278, 278, 0);
-    scene_desc.cam.vFov     = 40.0;
+    scene_desc.cam.lookat = point3(278, 278, 0);
+    scene_desc.cam.vFov = 40.0;
     scene_desc.cam.aperture = 0.0;
 
     hittable_list& world = scene_desc.world;
@@ -231,6 +232,45 @@ void cornell_box(scene& scene_desc) {
 		world.add(box2);
 }
 
+void cornell_smoke(scene& scene_desc) {
+    scene_desc.windowWidth = 600;
+    scene_desc.windowHeight = 600;
+		scene_desc.renderScale = 1;
+    scene_desc.samplesPerPixel = 1000;
+    scene_desc.background  = color(0,0,0);
+
+    scene_desc.cam.lookfrom = point3(278, 278, -800);
+    scene_desc.cam.lookat = point3(278, 278, 0);
+    scene_desc.cam.vFov = 40.0;
+    scene_desc.cam.aperture = 0.0;
+
+    hittable_list& world = scene_desc.world;
+
+    auto red   = make_shared<lambertian>(color(.65, .05, .05));
+    auto white = make_shared<lambertian>(color(.73, .73, .73));
+    auto green = make_shared<lambertian>(color(.12, .45, .15));
+    auto light = make_shared<diffuse_light>(color(7, 7, 7));
+
+    world.add(make_shared<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    world.add(make_shared<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    world.add(make_shared<quad>(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light));
+    world.add(make_shared<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    world.add(make_shared<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    world.add(make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+
+		std::shared_ptr<hittable> box1 = box(point3(0, 0, 0), point3(165, 330, 165), white);
+		box1 = make_shared<rotate_y>(box1, 15);
+		box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+
+		std::shared_ptr<hittable> box2 = box(point3(0, 0, 0), point3(165, 165, 165), white);
+		box2 = make_shared<rotate_y>(box2, -18);
+		box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+		
+		world.add(make_shared<constant_medium>(box1, 0.01, color(0, 0, 0)));
+		world.add(make_shared<constant_medium>(box2, 0.01, color(1, 1, 1)));
+
+		scene_desc.world = hittable_list(make_shared<bvh_node>(world));
+}
 int main() {
 	scene sceneDesc;
 	sceneDesc.background = color(.7, .8, 1.);
@@ -245,8 +285,9 @@ int main() {
 		case 4: two_perlin_spheres(sceneDesc); break;
 		case 5: quads(sceneDesc);              break;
 		case 6: simple_light(sceneDesc); 			 break;
-		default:
 		case 7: cornell_box(sceneDesc); 			 break;
+		default:
+		case 8: cornell_smoke(sceneDesc); break;
 	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
