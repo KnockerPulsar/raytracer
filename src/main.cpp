@@ -172,8 +172,58 @@ void quads(scene& scene_desc) {
 	world.add(make_shared<quad>(point3(-2,-3,5), vec3(4,0,0), vec3(0,0,-4), lower_teal));
 }
 
+void simple_light(scene& scene_desc) {
+    scene_desc.windowWidth = 1280;
+    scene_desc.windowHeight = 720;
+		scene_desc.renderScale = 0.5f;
+    scene_desc.samplesPerPixel = 1000;
+    scene_desc.background = color(0,0,0);
+
+    scene_desc.cam.aperture = 0.0;
+    scene_desc.cam.vFov = 20.0;
+    scene_desc.cam.lookfrom = point3(26,3,6);
+    scene_desc.cam.lookat = point3(0,2,0);
+
+    hittable_list& world = scene_desc.world;
+
+    auto pertext = make_shared<noise_texture>(4);
+    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(pertext)));
+    world.add(make_shared<sphere>(point3(0,2,0), 2, make_shared<lambertian>(pertext)));
+
+    auto difflight = make_shared<diffuse_light>(color(4,4,4));
+    world.add(make_shared<quad>(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), difflight));
+}
+
+void cornell_box(scene& scene_desc) {
+    scene_desc.windowWidth = 720;
+    scene_desc.windowHeight = 720;
+		scene_desc.renderScale = 0.5f;
+    scene_desc.samplesPerPixel = 1000;
+    scene_desc.background        = color(0,0,0);
+
+    scene_desc.cam.lookfrom = point3(278, 278, -800);
+    scene_desc.cam.lookat   = point3(278, 278, 0);
+    scene_desc.cam.vFov     = 40.0;
+    scene_desc.cam.aperture = 0.0;
+
+    hittable_list& world = scene_desc.world;
+
+    auto red   = make_shared<lambertian>(color(.65, .05, .05));
+    auto white = make_shared<lambertian>(color(.73, .73, .73));
+    auto green = make_shared<lambertian>(color(.12, .45, .15));
+    auto light = make_shared<diffuse_light>(color(15, 15, 15));
+
+    world.add(make_shared<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    world.add(make_shared<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    world.add(make_shared<quad>(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light));
+    world.add(make_shared<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    world.add(make_shared<quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    world.add(make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+}
+
 int main() {
 	scene sceneDesc;
+	sceneDesc.background = color(.7, .8, 1.);
 	sceneDesc.cam.vup = vec3(0, 1, 0);
 	sceneDesc.cam.focusDist = 10;
 	sceneDesc.renderScale = 1.0f;
@@ -183,8 +233,10 @@ int main() {
 		case 2: two_spheres(sceneDesc);        break;
 		case 3: earth(sceneDesc);              break;
 		case 4: two_perlin_spheres(sceneDesc); break;
-		default:
 		case 5: quads(sceneDesc);              break;
+		case 6: simple_light(sceneDesc); 			 break;
+		default:
+		case 7: cornell_box(sceneDesc); 			 break;
 	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");

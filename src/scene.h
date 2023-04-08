@@ -11,11 +11,12 @@ class scene {
 	public:
 		hittable_list world;
 		camera cam;
+
 		int samplesPerPixel = 10;
 		int maxDepth = 50;
+		color background = color(0, 0, 0);
 
 		RenderTexture2D renderTexture;
-
 		u8* pixels = nullptr;
 		int windowWidth = 1280;
 		int windowHeight = 720;
@@ -110,21 +111,19 @@ class scene {
 
 			if(depth <= 0) return color(0, 0, 0);
 
-			if(world.hit(r, interval(0.001, infinity), rec)) {
-				ray scattered;
-				color attenutaion;
+			if(!world.hit(r, interval(0.001, infinity), rec))
+				return background;
+			
+			ray scattered;
+			color attenutaion;
+			color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
 
-				if(rec.mat->scatter(r, rec, attenutaion, scattered)) {
-					return attenutaion * rayColor(scattered, world, depth - 1);
-				}
-
-				return color(0, 0, 0);
+			if(!rec.mat->scatter(r, rec, attenutaion, scattered)) {
+				return color_from_emission;
 			}
 
-			vec3 unitDirection = unitVector(r.direction());
-
-			float a = 0.5 * (unitDirection.y() + 1.0f);
-			return (1.f - a) * color(1.f, 1.f, 1.f) + a * color(0.5f, 0.7f, 1.f);
+			color color_from_scatter = attenutaion * rayColor(scattered, world, depth - 1);
+			return color_from_emission + color_from_scatter;
 		}
 
 		// Functions to draw to raylib's window.

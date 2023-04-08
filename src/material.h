@@ -4,6 +4,7 @@
 #include "raytracer.h"
 #include "texture.h"
 #include "vec3.h"
+#include <algorithm>
 #include <cmath>
 #include <ctime>
 #include <functional>
@@ -16,12 +17,17 @@ class material {
 	public:
 		virtual ~material() = default;
 
+		virtual color emitted(float u, float v, const point3& p) const { 
+			return color(0, 0, 0); 
+		}
+
 		virtual bool scatter(
 			const ray& rIn,
 			const hit_record& rec,
 			color& attenuation,
 			ray& scattered
 		) const = 0;
+
 };
 
 class lambertian : public material {
@@ -121,4 +127,27 @@ class dielectric : public material {
 			r0 = r0 * r0;
 			return r0 + (1-r0)*pow(1-cosine, 5);
 		}
+};
+
+class diffuse_light : public material {
+	public:
+		std::shared_ptr<texture> emit;
+
+	public:
+		diffuse_light(std::shared_ptr<texture> a): emit(a) {}
+		diffuse_light(color c): emit(make_shared<solid_color>(c)) {}
+
+		virtual bool scatter(
+			const ray& rIn,
+			const hit_record& rec,
+			color& attenuation,
+			ray& scattered
+		) const override {
+			return false;
+		}
+
+		virtual color emitted(float u, float v, const point3& p) const override {
+			return emit->value(u, v, p);
+		}
+
 };
