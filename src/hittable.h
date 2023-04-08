@@ -5,14 +5,13 @@
 #include "raytracer.h"
 #include "aabb.h"
 
-
 class material;
 
 struct hit_record {
 	point3 p;
 	vec3 normal;
 	sPtr<material> mat;
-	float t;
+	float t, u, v;
 	bool frontFace;
 
 	void setFaceNormal(const ray& r, const vec3& outwardNormal) {

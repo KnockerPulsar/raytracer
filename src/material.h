@@ -2,10 +2,12 @@
 
 #include "hittable.h"
 #include "raytracer.h"
+#include "texture.h"
 #include "vec3.h"
 #include <cmath>
 #include <ctime>
 #include <functional>
+#include <memory>
 #include <raylib.h>
 
 struct hit_record;
@@ -24,10 +26,12 @@ class material {
 
 class lambertian : public material {
 	 public:
-			color albedo; 
+		 std::shared_ptr<texture> albedo; 
 
+	 public:
+			lambertian(const color& a) : albedo(make_shared<solid_color>(a)) {}
+			lambertian(std::shared_ptr<texture> a) : albedo(a) {}
 
-			lambertian(const color& a) : albedo(a) {}
 			virtual bool scatter(
 				const ray& rIn,
 				const hit_record& rec,
@@ -43,7 +47,7 @@ class lambertian : public material {
 				}
 
 				scattered = ray(rec.p, scatterDirection, rIn.time());
-				attenuation = albedo;
+				attenuation = albedo->value(rec.u, rec.v, rec.p);
 				return true;
 			}
 };

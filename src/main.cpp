@@ -8,6 +8,7 @@
 #include "camera.h"
 
 #include "raylib.h"
+#include "texture.h"
 #include "vec3.h"
 #include "material.h"
 #include <cstdint>
@@ -17,8 +18,8 @@
 void randomSpheres(scene& sceneDesc) {
 	sceneDesc.windowWidth = 1280;
 	sceneDesc.windowHeight = 720;
-	sceneDesc.renderScale = 0.5f;
-	sceneDesc.samplesPerPixel = 10;
+	sceneDesc.renderScale = 0.25f;
+	sceneDesc.samplesPerPixel = 100;
 
 	sceneDesc.cam.lookfrom = point3(13, 2, 3);
 	sceneDesc.cam.lookat 	 = point3(0, 0, 0);
@@ -29,8 +30,9 @@ void randomSpheres(scene& sceneDesc) {
 
 	hittable_list& world = sceneDesc.world;
 
-	auto groundMaterial = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-	world.add(make_shared<sphere>(point3( 0.0, -1000, -1.0), 1000, groundMaterial));
+	auto checker = make_shared<checker_texture>(0.66, color(.2, .3, .1), color(.9, .9, .9));
+	auto groundMaterial = make_shared<lambertian>(checker);
+	world.add(make_shared<sphere>(point3(0.0, -1000, -1.0), 1000, groundMaterial));
 
 	const int width = 22;
 	const int height = 22;
@@ -82,12 +84,51 @@ void randomSpheres(scene& sceneDesc) {
 	sceneDesc.world = hittable_list(make_shared<bvh_node>(world));
 } 
 
+void two_spheres(scene& scene_desc) {
+	scene_desc.windowWidth = 400;
+	scene_desc.windowHeight = 225;
+
+	scene_desc.samplesPerPixel = 100;
+
+	scene_desc.cam.aperture = 0.0f;
+	scene_desc.cam.vFov = 20.0f;
+
+	scene_desc.cam.lookfrom = point3(13, 2, 3);
+	scene_desc.cam.lookat = point3(0, 0, 0);
+
+	hittable_list& world = scene_desc.world;
+	auto checker = make_shared<lambertian>(make_shared<checker_texture>(0.8, color(.2, .3, .1), color(.9, .9, .9)));
+
+	world.add(make_shared<sphere>(point3(0, -10, 0), 10, checker));
+	world.add(make_shared<sphere>(point3(0,  10, 0), 10, checker));
+}
+
 int main() {
 	scene sceneDesc;
-	randomSpheres(sceneDesc);
+	sceneDesc.cam.vup = vec3(0, 1, 0);
+	sceneDesc.cam.focusDist = 10;
+
+	switch (0) {
+		case 1: 
+			randomSpheres(sceneDesc); break;
+
+		case2:
+		default:
+						two_spheres(sceneDesc); break;
+	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
 
+
+	auto finalScale = sceneDesc.renderScale;
+
+	// Render once at quarter res
+	// sceneDesc.renderScale = finalScale / 4.0f;
+	// sceneDesc.initFramebuffer();
+	// sceneDesc.render();
+
+	// Render again at full res
+	sceneDesc.renderScale = finalScale;
 	sceneDesc.initFramebuffer();
 	sceneDesc.render();
 

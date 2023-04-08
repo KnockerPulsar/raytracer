@@ -11,8 +11,6 @@ class scene {
 	public:
 		hittable_list world;
 		camera cam;
-		int imageWidth;
-		int imageHeight;
 		int samplesPerPixel = 10;
 		int maxDepth = 50;
 
@@ -34,6 +32,12 @@ class scene {
 					"Image width and height must be greater than zero. Current width %d, current height %d",
 					imageWidth, imageHeight
 				);
+			}
+
+			// Already initialized before
+			if (pixels != nullptr) {
+				UnloadRenderTexture(renderTexture);
+				delete[] pixels;
 			}
 
 			renderTexture = LoadRenderTexture(imageWidth, imageHeight);
@@ -95,6 +99,10 @@ class scene {
 			output.close();
 			TraceLog(LOG_INFO, "Framebuffer saved to %s", path.c_str());
 		}
+
+	private:
+		int imageWidth;
+		int imageHeight;
 
 	private:
 		color rayColor(const ray& r, const hittable_list& world, int depth) {
