@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interval.h"
+#include "perlin.h"
 #include "raytracer.h"
 #include "rtw_stb_image.h"
 #include "vec3.h"
@@ -73,4 +74,19 @@ class image_texture: public texture {
 		}
 	private:
 		rtw_image image;
+};
+
+class noise_texture: public texture {
+	public:
+		perlin noise;
+		float scale;
+
+	public:
+		noise_texture() {}
+		noise_texture(float sc): scale(sc) {}
+
+		color value(float u, float v, const point3& p) const override {
+			auto s  = scale * p;
+			return color(1, 1, 1) * 0.5 * (1 + sinf(s.z() + 10 * noise.turb(s)));
+		}
 };

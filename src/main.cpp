@@ -121,17 +121,40 @@ void earth(scene& scene_desc) {
 	scene_desc.world = hittable_list(globe);
 }
 
+
+void two_perlin_spheres(scene& scene_desc) {
+	scene_desc.windowWidth = 1280;
+	scene_desc.windowHeight = 720;
+
+	scene_desc.samplesPerPixel = 100;
+
+	scene_desc.cam.aperture = 0.0f;
+	scene_desc.cam.vFov = 20.0f;
+
+	scene_desc.cam.lookfrom = point3(13, 2, 3);
+	scene_desc.cam.lookat = point3(0, 0, 0);
+
+	hittable_list& world = scene_desc.world;
+	auto pertext = make_shared<noise_texture>(4);
+	auto permat = make_shared<lambertian>(pertext);
+
+	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, permat));
+	world.add(make_shared<sphere>(point3(0,  2, 0), 2, permat));
+}
+
 int main() {
 	scene sceneDesc;
 	sceneDesc.cam.vup = vec3(0, 1, 0);
 	sceneDesc.cam.focusDist = 10;
+	sceneDesc.renderScale = 1.0f;
 
 	switch (0) {
 		case 1: randomSpheres(sceneDesc); break;
 		case 2: two_spheres(sceneDesc); break;
+		case 3: earth(sceneDesc); break;
 		default:
-		case 3:
-						earth(sceneDesc); break;
+		case 4:
+						two_perlin_spheres(sceneDesc);
 	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
