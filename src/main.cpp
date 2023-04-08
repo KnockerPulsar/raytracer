@@ -6,15 +6,17 @@
 #include "scene.h"
 #include "sphere.h"
 #include "camera.h"
-
-#include "raylib.h"
 #include "texture.h"
 #include "vec3.h"
 #include "material.h"
+#include "rtw_stb_image.h"
+#include "quad.h"
+
+#include "raylib.h"
+
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include "rtw_stb_image.h"
 
 void randomSpheres(scene& sceneDesc) {
 	sceneDesc.windowWidth = 1280;
@@ -142,6 +144,34 @@ void two_perlin_spheres(scene& scene_desc) {
 	world.add(make_shared<sphere>(point3(0,  2, 0), 2, permat));
 }
 
+void quads(scene& scene_desc) {
+	scene_desc.windowWidth = 1280;
+	scene_desc.windowHeight = 720;
+	scene_desc.samplesPerPixel = 100;
+
+
+	scene_desc.cam.aperture = 0.0;
+	scene_desc.cam.vFov = 80.0;
+	scene_desc.cam.lookfrom = point3(0,0,9);
+	scene_desc.cam.lookat = point3(0,0,0);
+
+	hittable_list& world = scene_desc.world;
+
+	// Materials
+	auto left_red = make_shared<lambertian>(color(1,.2,.2));
+	auto back_green = make_shared<lambertian>(color(.2,1,.2));
+	auto right_blue = make_shared<lambertian>(color(.2,.2,1));
+	auto upper_orange = make_shared<lambertian>(color(1,.5,0));
+	auto lower_teal = make_shared<lambertian>(color(.2,.8,.8));
+
+	// Quads
+	world.add(make_shared<quad>(point3(-3,-2,5), vec3(0,0,-4), vec3(0,4,0), left_red));
+	world.add(make_shared<quad>(point3(-2,-2,0), vec3(4,0,0), vec3(0,4,0), back_green));
+	world.add(make_shared<quad>(point3(3,-2,1), vec3(0,0,4), vec3(0,4,0), right_blue));
+	world.add(make_shared<quad>(point3(-2,3,1), vec3(4,0,0), vec3(0,0,4), upper_orange));
+	world.add(make_shared<quad>(point3(-2,-3,5), vec3(4,0,0), vec3(0,0,-4), lower_teal));
+}
+
 int main() {
 	scene sceneDesc;
 	sceneDesc.cam.vup = vec3(0, 1, 0);
@@ -149,12 +179,12 @@ int main() {
 	sceneDesc.renderScale = 1.0f;
 
 	switch (0) {
-		case 1: randomSpheres(sceneDesc); break;
-		case 2: two_spheres(sceneDesc); break;
-		case 3: earth(sceneDesc); break;
+		case 1: randomSpheres(sceneDesc);      break;
+		case 2: two_spheres(sceneDesc);        break;
+		case 3: earth(sceneDesc);              break;
+		case 4: two_perlin_spheres(sceneDesc); break;
 		default:
-		case 4:
-						two_perlin_spheres(sceneDesc);
+		case 5: quads(sceneDesc);              break;
 	}
  
 	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
