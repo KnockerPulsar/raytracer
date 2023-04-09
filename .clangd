@@ -20,6 +20,6 @@ Diagnostics:
         readability-redundant-access-specifiers,
         performance-unnecessary-value-param,
       ]
-    CheckOptions:
-      readability-identifier-naming.VariableCase: camelBack
+    # CheckOptions:
+    #   readability-identifier-naming.VariableCase: camelBack
 
