@@ -4,12 +4,8 @@
 #include "raytracer.h"
 #include "texture.h"
 #include "vec3.h"
-#include <algorithm>
 #include <cmath>
-#include <ctime>
-#include <functional>
 #include <memory>
-#include <raylib.h>
 
 struct hit_record;
 
@@ -66,7 +62,7 @@ class metal : public material {
 		
 		metal(const color& a, float f): albedo(a) {
 			if(f > 1) {
-				TraceLog(LOG_WARNING, "Fuzz greater than 1 (%.2f), clipping to 1", f);
+				std::cout << "Fuzz grater than 1 (" << f << "), clipping to 1";
 				fuzz = 1;
 			} else {
 				fuzz = f;

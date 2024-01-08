@@ -15,14 +15,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -Wall")
 
 CMAKE_POLICY(SET CMP0074 NEW)
 
-# Profiling stuff
-# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-# SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
-# SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
-# add_subdirectory(vendor/glm)
-
-# find_package(raylib REQUIRED) # Requires at least version 3.0
-
 # A variable with all our source files that are common between executable targets (examples)
 set(SOURCES 
 )
@@ -45,11 +37,5 @@ add_executable(${PROJECT_NAME} src/main.cpp ${SOURCES})
 
 target_link_libraries(
   ${PROJECT_NAME} 
-  -lraylib 
-  -lpthread 
-  -lGL 
-  -lm 
-  -lrt 
-  -lX11 
-  -ldl
+  -ltbb
 )

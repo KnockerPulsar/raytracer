@@ -11,20 +11,16 @@
 #include "texture.h"
 #include "vec3.h"
 #include "material.h"
-#include "rtw_stb_image.h"
 #include "quad.h"
 
-#include "raylib.h"
-
-#include <cstdint>
-#include <iostream>
 #include <memory>
 
 void randomSpheres(scene& sceneDesc) {
-	sceneDesc.windowWidth = 1280;
-	sceneDesc.windowHeight = 720;
-	sceneDesc.renderScale = 0.25f;
+	sceneDesc.windowWidth = 1920;
+	sceneDesc.windowHeight = 1080;
+	sceneDesc.renderScale = 1;
 	sceneDesc.samplesPerPixel = 100;
+	sceneDesc.maxDepth = 50;
 
 	sceneDesc.cam.lookfrom = point3(13, 2, 3);
 	sceneDesc.cam.lookat 	 = point3(0, 0, 0);
@@ -348,8 +344,8 @@ void default_scene(scene& scene_desc) {
 	final_scene(scene_desc);
 	scene_desc.windowWidth = 400;
 	scene_desc.windowHeight = 400;
-	scene_desc.samplesPerPixel = 200;
-	scene_desc.renderScale = 0.75;
+	scene_desc.samplesPerPixel = 100;
+	scene_desc.renderScale = 0.5;
 	scene_desc.maxDepth = 4;
 }
 
@@ -360,7 +356,7 @@ int main() {
 	sceneDesc.cam.focusDist = 10;
 	sceneDesc.renderScale = 1.0f;
 
-	switch (0) {
+	switch (1) {
 		case 1: randomSpheres(sceneDesc);      break;
 		case 2: two_spheres(sceneDesc);        break;
 		case 3: earth(sceneDesc);              break;
@@ -373,15 +369,8 @@ int main() {
 		default: default_scene(sceneDesc);     break;
 	}
  
-	InitWindow(sceneDesc.windowWidth, sceneDesc.windowHeight, "Rayborn");
-
 
 	auto finalScale = sceneDesc.renderScale;
-
-	// Render once at quarter res
-	// sceneDesc.renderScale = finalScale / 4.0f;
-	// sceneDesc.initFramebuffer();
-	// sceneDesc.render();
 
 	// Render again at full res
 	sceneDesc.renderScale = finalScale;
@@ -389,6 +378,4 @@ int main() {
 	sceneDesc.render();
 
 	sceneDesc.writeImage("./moving_spheres.ppm");
-
-	CloseWindow();
 }

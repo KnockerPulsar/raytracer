@@ -1,11 +1,11 @@
 #pragma once
 
-#include <raylib.h>
 #include "raytracer.h"
 #include "camera.h"
 #include "hittable_list.h"
 #include "material.h"
 #include <fstream>
+#include <execution>
 
 class scene {
 	public:
@@ -16,7 +16,6 @@ class scene {
 		int maxDepth = 50;
 		color background = color(0, 0, 0);
 
-		RenderTexture2D renderTexture;
 		u8* pixels = nullptr;
 		int windowWidth = 1280;
 		int windowHeight = 720;
@@ -28,49 +27,41 @@ class scene {
 			imageHeight = int(windowHeight * renderScale);
 
 			if(imageWidth <= 0 || imageHeight <= 0) {
-				TraceLog(
-					LOG_ERROR, 
-					"Image width and height must be greater than zero. Current width %d, current height %d",
-					imageWidth, imageHeight
-				);
+				std::cerr << "Image width and height must be greater than zero. Current width "  
+					<< imageWidth << ", current height " << imageHeight << '\n';
 			}
 
-			// Already initialized before
-			if (pixels != nullptr) {
-				UnloadRenderTexture(renderTexture);
-				delete[] pixels;
-			}
+			delete[] pixels;
 
-			renderTexture = LoadRenderTexture(imageWidth, imageHeight);
 			pixels = new uint8_t[imageWidth * imageHeight * 4];
 		}
 
 		void render() {
 			cam.initialize(float(imageWidth) / imageHeight);
+			std::vector<int> xs(imageWidth);
+			std::iota(xs.begin(), xs.end(), 0);
 
 			for (int j = 0; j < imageHeight; j++) {
 
 				std::clog << "\rScanlines remaining " << imageHeight - j << ' ' << std::flush;
 
-				for (int i = 0; i < imageWidth; i++) {
-					color pixelColor(0, 0, 0);
+				std::for_each(
+					std::execution::par,
+					xs.begin(),
+					xs.end(),
+					[this, j](int i) {
+						color pixelColor(0, 0, 0);
 
-					for (int sample = 0; sample < samplesPerPixel; sample++) {
-						float s = (i + randomFloat()) / (imageWidth - 1);
-						float t = (j + randomFloat()) / (imageHeight - 1);
+						for (int sample = 0; sample < samplesPerPixel; sample++) {
+							float s = (i + randomFloat()) / (imageWidth - 1);
+							float t = (j + randomFloat()) / (imageHeight - 1);
 
-						ray r = cam.getRay(s, t);
-						pixelColor += rayColor(r, world, maxDepth);
+							ray r = cam.getRay(s, t);
+							pixelColor += rayColor(r, world, maxDepth);
+
+							drawPixel(pixels, imageWidth, imageHeight, samplesPerPixel, i, j, pixelColor);
+						}
 					}
-
-					drawPixel(pixels, imageWidth, imageHeight, samplesPerPixel, i, j, pixelColor);
-				}
-
-				updateFramebuffer(
-					renderTexture.texture,
-					pixels,
-					(Rectangle){0, 0, float(imageWidth), float(imageHeight)},
-					(Rectangle){0, 0, float(windowWidth), float(windowHeight)}
 				);
 			}
 			std::clog << "\rDone.                \n" << std::flush;
@@ -98,7 +89,7 @@ class scene {
 			}
 
 			output.close();
-			TraceLog(LOG_INFO, "Framebuffer saved to %s", path.c_str());
+			std::cout << "Framebuffer saved to" << path << '\n';
 		}
 
 	private:
@@ -124,25 +115,6 @@ class scene {
 
 			color color_from_scatter = attenutaion * rayColor(scattered, world, depth - 1);
 			return color_from_emission + color_from_scatter;
-		}
-
-		// Functions to draw to raylib's window.
-
-		static void updateFramebuffer(Texture tex, u8* pixels, Rectangle sourceRect, Rectangle targetRect) {
-			BeginDrawing();
-
-			UpdateTexture(tex, pixels);
-
-			DrawTexturePro(
-				tex, 
-				sourceRect,
-				targetRect,
-				Vector2 {0, 0}, 
-				0, 
-				WHITE
-			);
-
-			EndDrawing();
 		}
 
 		static inline tuple<u8, u8, u8> toRGB8(const vec3& v, int samplesPerPixel = 1) {
@@ -172,10 +144,8 @@ class scene {
 		{
 
 			if(x < 0 || x >= bufferWidth || y < 0 || y >= bufferHeight) {
-				TraceLog(
-					LOG_ERROR, "X or Y outside of buffer bounds. Buffer width: %d, buffer height: %d, x: %d, y: %d",
-					bufferWidth, bufferHeight, x, y
-				);
+				std::cerr  << "X or Y outside of buffer bounds. Buffer width: " << bufferWidth << 
+					", buffer height: "<< bufferHeight << ", x: " << x << ", y: " << y << '\n';
 			}
 
 			// Assuming a R8G8B8A8 buffer.

@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 set -xe
 
 mkdir -p ./release

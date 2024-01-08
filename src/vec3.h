@@ -1,11 +1,9 @@
 #pragma once
 
 #include <cmath>
-#include <cstdlib>
 #include <iostream>
 #include <tuple>
 
-#include <raylib.h>
 #include "random.h"
 
 using std::sqrt, std::min, std::max, std::tuple;
