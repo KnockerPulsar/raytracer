@@ -6,10 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_definitions(FAST_EXIT)
-add_compile_definitions(GAMMA_CORRECTION)
-
-
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -funroll-loops -Wall -flto -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -Wall")
 
@@ -22,20 +18,13 @@ set(SOURCES
 # Define the directories in which to search for the included headers
 include_directories(
   src/
-  external/
 )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG    ${PROJECT_SOURCE_DIR}/debug)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR}/release)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR}/build)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
-# For each example, we add an executable target
-# Each target compiles one example source file and the common & vendor source files
-# Then we link GLFW with each target
-add_executable(${PROJECT_NAME} src/main.cpp ${SOURCES})
+add_executable(${PROJECT_NAME} src/main.cc ${SOURCES})
 
 target_link_libraries(
   ${PROJECT_NAME} 
-  -ltbb
 )
