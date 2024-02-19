@@ -18,6 +18,7 @@ Diagnostics:
         readability-simplify-boolean-expr,
         readability-identifier-length,
         readability-redundant-access-specifiers,
+        readability-else-after-return,
         performance-unnecessary-value-param,
       ]
     # CheckOptions:
