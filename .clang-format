@@ -1,5 +1,6 @@
 BasedOnStyle: LLVM
 AllowShortFunctionsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 TabWidth: 4
