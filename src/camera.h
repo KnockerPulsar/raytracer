@@ -1,9 +1,10 @@
 #pragma once
 
+#include "rtweekend.h"
+
 #include "color.h"
 #include "hittable.h"
-#include "rtweekend.h"
-#include "vec3.h"
+#include "material.h"
 
 class camera {
   public:
@@ -85,12 +86,18 @@ class camera {
     color ray_color(const ray& r, int depth, const hittable& world) const {
         hit_record rec;
 
-	// No more light is generated
+        // No more light is generated
         if (depth <= 0) return color(0, 0, 0);
 
         if (world.hit(r, interval(0.001, infinity), rec)) {
-            vec3 direction = rec.normal + random_unit_vector();
-            return 0.5 * ray_color(ray(rec.p, direction), depth - 1, world);
+            ray   scattered;
+            color attenuation;
+
+            if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+                return attenuation * ray_color(scattered, depth - 1, world);
+            }
+
+            return color(0, 0, 0);
         }
 
         vec3 unit_direction = unit_vector(r.direction());
