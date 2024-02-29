@@ -17,3 +17,5 @@ compile_commands.json
 
 *.bmp
 *.log
+
+*_1080p.ppm
