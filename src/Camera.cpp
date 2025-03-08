@@ -172,8 +172,8 @@ namespace rt {
 
     auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt * speedMultiplier);
 
-    if (IsMouseButtonDown(1)) {
-      DisableCursor();
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+      HideCursor();
 
       if (IsKeyDown(KEY_SPACE)) {
         lookFrom += upChange;
@@ -201,8 +201,10 @@ namespace rt {
       }
 
       MouseLook(GetMouseDelta());
-    } else {
-      EnableCursor();
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
+      ShowCursor();
     }
   }
 
