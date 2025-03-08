@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)   # Selects the minimum version of CMake required to run this file
+cmake_minimum_required(VERSION 3.5.0)   # Selects the minimum version of CMake required to run this file
 project(Raytracer VERSION 0.1.0)          # Here we select the project name and version
 
 # Here we select C++17 with all the standards required and all compiler-specific extensions disabled
@@ -10,7 +10,7 @@ add_compile_definitions(FAST_EXIT)
 add_compile_definitions(GAMMA_CORRECTION)
 
 
-set(CMAKE_CXX_FLAGS_RELEASE "-flto -ffast-math -O3 -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE "-flto=auto -ffast-math -O3 -Ofast -ffloat-store -march=native -frename-registers -funroll-loops -fopenmp")
 
 # set(CMAKE_BUILD_TYPE Debug)
 CMAKE_POLICY(SET CMP0074 NEW)
@@ -20,8 +20,6 @@ CMAKE_POLICY(SET CMP0074 NEW)
 # SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 # SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 add_subdirectory(vendor/glm)
-
-# find_package(raylib REQUIRED) # Requires at least version 3.0
 
 # A variable with all our source files that are common between executable targets (examples)
 set(SOURCES 
