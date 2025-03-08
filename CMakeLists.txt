@@ -71,10 +71,12 @@ include_directories(
   vendor/stb_image
 )
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY          ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG    ${PROJECT_SOURCE_DIR}/bin/debug)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR}/bin/release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+file(CREATE_LINK
+  "${CMAKE_BINARY_DIR}/compile_commands.json"
+  "${CMAKE_SOURCE_DIR}/compile_commands.json"
+  SYMBOLIC
+)
 
 # For each example, we add an executable target
 # Each target compiles one example source file and the common & vendor source files
