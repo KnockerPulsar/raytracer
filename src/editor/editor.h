@@ -1,5 +1,6 @@
 #pragma once
-#include "../../vendor/imguizmo/ImGuizmo.h"
+#include "imgui.h"
+#include "ImGuizmo.h"
 #include "../Defs.h"
 #include "../IState.h"
 #include "../Scene.h"

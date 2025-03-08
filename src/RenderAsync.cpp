@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "../vendor/rlImGui/imgui/imgui.h"
+#include "imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "AsyncRenderData.h"
 #include "Defs.h"

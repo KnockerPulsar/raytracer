@@ -70,7 +70,7 @@ namespace rt {
         float imageWidth  = (contentMax.x - contentMin.x) * 0.99;
         float imageHeight = imageWidth * aspectRatio;
 
-        ImGui::Image(&previewTexture.id, {imageWidth, imageHeight});
+        ImGui::Image(previewTexture.id, {imageWidth, imageHeight});
 
         Texture::previewSettingsImgui();
         

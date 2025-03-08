@@ -48,13 +48,13 @@ set(SOURCES
 
   vendor/rlImGui/rlImGui.cpp
 
-  vendor/rlImGui/imgui/imgui.cpp
-  vendor/rlImGui/imgui/imgui_widgets.cpp
-  vendor/rlImGui/imgui/imgui_draw.cpp
-  vendor/rlImGui/imgui/imgui_tables.cpp
-  vendor/rlImGui/imgui/backends/imgui_impl_opengl3.cpp
+  vendor/imgui/imgui.cpp
+  vendor/imgui/imgui_widgets.cpp
+  vendor/imgui/imgui_draw.cpp
+  vendor/imgui/imgui_tables.cpp
+  vendor/imgui/backends/imgui_impl_opengl3.cpp
 
-  vendor/imguizmo/ImGuizmo.cpp
+  vendor/ImGuizmo/ImGuizmo.cpp
 )
 
 # Define the directories in which to search for the included headers
@@ -62,8 +62,8 @@ include_directories(
   src/
 
   vendor/rlImGui/
-  vendor/imguizmo/
-  vendor/rlImGui/imgui/  
+  vendor/ImGuizmo/
+  vendor/imgui/  
   vendor/nlohmann-json/
   vendor/ImGuiFileDialog
   vendor/argumentum/include/

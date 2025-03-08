@@ -1,5 +1,5 @@
 #pragma once
-#include "../../vendor/rlImGui/imgui/imgui.h"
+#include "imgui.h"
 #include "../Perlin.h"
 #include "Texture.h"
 #include <iostream>

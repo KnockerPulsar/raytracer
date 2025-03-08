@@ -1,7 +1,7 @@
 #pragma once
 #include "Transformation.h"
 #include <rlgl.h>
-#include "../vendor/rlImGui/imgui/imgui.h"
+#include "imgui.h"
 
 /**
  * @brief Interface that rasterizable objects should inherit from.

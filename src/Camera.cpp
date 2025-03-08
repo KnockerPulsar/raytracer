@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "../vendor/rlImGui/imgui/imgui.h"
+#include "imgui.h"
 #include "../vendor/rlImGui/rlImGui.h"
 #include "Defs.h"
 #include "Hittable.h"

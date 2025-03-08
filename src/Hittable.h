@@ -18,7 +18,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "../vendor/glm/glm/gtx/string_cast.hpp"
-#include "../vendor/rlImGui/imgui/imgui.h"
+#include "imgui.h"
 #include "materials/Material.h"
 #include <vector>
 

@@ -8,7 +8,7 @@
 #include "../../vendor/glm/glm/glm.hpp"
 #include "../../vendor/glm/glm/gtc/type_ptr.hpp"
 #include "../../vendor/glm/glm/gtx/transform.hpp"
-#include "../../vendor/imguizmo/ImGuizmo.h"
+#include "ImGuizmo.h"
 #include "../../vendor/rlImGui/rlImGui.h"
 #include "../BVHNode.h"
 #include "../Camera.h"
@@ -416,11 +416,15 @@ namespace rt {
 
       if (ImGui::BeginMenu("Scene")) {
         if (ImGui::MenuItem("Open scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog("OpenScene", "Open scene", ".json", "scenes/");
+          ImGuiFileDialog::Instance()->OpenDialog(
+              "OpenScene", "Open scene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
+          );
         }
 
         if (ImGui::MenuItem("Save current scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog("SaveScene", "SaveScene", ".json", "scenes/");
+          ImGuiFileDialog::Instance()->OpenDialog(
+              "SaveScene", "SaveScene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
+          );
         }
 
         ImGui::EndMenu();
