@@ -1,9 +1,6 @@
 [submodule "vendor/rlImGui"]
 	path = vendor/rlImGui
 	url = https://github.com/raylib-extras/rlImGui.git
-[submodule "src/editor"]
-	path = src/editor
-	url = https://github.com/KnockerPulsar/raytracer-editor.git
 [submodule "vendor/argumentum"]
 	path = vendor/argumentum
 	url = https://github.com/mmahnic/argumentum.git
