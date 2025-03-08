@@ -162,9 +162,6 @@ namespace rt {
   void Camera::Update(float dt) {
     GenerateData();
 
-    bool keyPressed = IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S) ||
-                      IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
-
     float speedMultiplier = 1.0f;
 
     if (IsKeyDown(KEY_LEFT_SHIFT))
