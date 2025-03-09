@@ -3,6 +3,16 @@
 #include "Scene.h"
 #include <string>
 
+struct CliConfig 
+{
+  int         imageWidth  = -1;
+  int         imageHeight = -1;
+  int         editorWidth = 1280;
+  int         editorHeight = 720;
+  int         numThreads  = 6;
+  std::string pathToScene;
+};
+
 namespace rt {
   class Editor;
   class Raytracer;
@@ -16,7 +26,7 @@ namespace rt {
     sPtr<Editor>    editor;
     sPtr<Raytracer> rt;
 
-    int imageWidth, imageHeight, numThreads;
+    int  numThreads;
 
     bool fullscreen = false;
 
@@ -24,16 +34,13 @@ namespace rt {
 
   public:
     bool saveOnRender = true;
-    void setup(int imageWidth, int imageHeight, int numThreads);
+    void setup();
 
-    App(int imageWidth, int imageHeight, int numThreads);
-    App(int imageWidth, int imageHeight, std::string pathToScene, int numThreads);
-    App(int imageWidth, int imageHeight, Scene scene, int numThreads);
+    App(CliConfig);
 
     void run();
     void onFrameRender();
     void checkInput();
-    void changeScene(std::string pathToScene);
     void changeScene(Scene scene);
 
     ~App();

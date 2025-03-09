@@ -1,6 +1,6 @@
 #include "app.h"
+
 #include "AsyncRenderData.h"
-#include "Camera.h"
 #include "Defs.h"
 #include "Hittable.h"
 #include "Ray.h"
@@ -8,38 +8,26 @@
 #include "Scene.h"
 #include "Transformation.h"
 #include "data_structures/JobQueue.h"
-#include "data_structures/Pixel.h"
 #include "editor/editor.h"
 #include "raytracer.h"
-#include "rlImGui.h"
 #include "rt.h"
-#include <algorithm>
+
+#include <raylib.h>
+#include <rlImGui.h>
+
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <ostream>
-#include <raylib.h>
 #include <string>
-#include <vector>
 
 namespace rt {
-  void App::setup(int imageWidth, int imageHeight, int numThreads) {
-    this->imageWidth  = imageWidth;
-    this->imageHeight = imageHeight;
-
-    ard = AsyncRenderData(imageWidth, imageHeight, numThreads);
-
-    editor = std::make_shared<Editor>(ard);
-
-    rt = std::make_shared<Raytracer>(ard);
-
+  void App::setup() {
     editor->nextState = rt;
     rt->nextState     = editor;
 
     editor->app = this;
     rt->app     = this;
-
-    currentState = editor;
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
@@ -51,22 +39,23 @@ namespace rt {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   }
 
-  App::App(int imageWidth, int imageHeight, int numThreads) : numThreads(numThreads) {
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight, numThreads);
-    changeScene(Scene::CornellBox(imageWidth, imageHeight));
-  }
+  App::App(CliConfig config)
+      : numThreads(config.numThreads), ard([&] {
+          // AsyncRenderData tries to create a RenderTexture which requires a
+          // window to be created
+          InitWindow(config.editorWidth, config.editorHeight, title.c_str());
+          return AsyncRenderData(config.imageWidth, config.imageHeight,
+                                 config.editorWidth, config.editorHeight,
+                                 config.numThreads);
+        }()),
+        scene(config.pathToScene.empty()
+                  ? Scene::Earth(config.imageWidth, config.imageHeight)
+                  : Scene::Load(config.imageWidth, config.imageHeight,
+                                config.pathToScene)),
 
-  App::App(int imageWidth, int imageHeight, std::string pathToScene, int numThreads) : numThreads(numThreads) {
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight, numThreads);
-    changeScene(Scene::Load(imageWidth, imageHeight, pathToScene));
-  }
-
-  App::App(int imageWidth, int imageHeight, Scene scene, int numThreads) : numThreads(numThreads) {
-
-    InitWindow(imageWidth, imageHeight, title.c_str());
-    setup(imageWidth, imageHeight, numThreads);
+        editor(std::make_shared<Editor>(ard)),
+        rt(std::make_shared<Raytracer>(ard)), currentState(editor) {
+    setup();
     changeScene(scene);
   }
 
@@ -118,8 +107,6 @@ namespace rt {
     editor->changeScene(&this->scene);
     rt->changeScene(&this->scene);
   }
-
-  void App::changeScene(std::string pathToScene) { changeScene(Scene::Load(imageWidth, imageHeight, pathToScene)); }
 
   App::~App() {
     // Note that if you kill the application in fullscreen, the resolution won't

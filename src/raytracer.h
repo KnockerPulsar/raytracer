@@ -121,7 +121,7 @@ namespace rt {
       DrawTextureRec(
           ard.raytraceRT.texture,
           (Rectangle){0, 0, (float)getScene()->imageWidth, (float)getScene()->imageHeight},
-          (Vector2){0, 0},
+          (Vector2){0, 0}, // TODO center the raytraced image (or maybe ditch the whole state and just display it via imgui)
           WHITE
       );
 

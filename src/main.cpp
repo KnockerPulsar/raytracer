@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "app.h"
+
 #include <argumentum/argparse.h>
+
 #include <cstdlib>
 #include <ostream>
 #include <string>
@@ -57,38 +59,47 @@
 
 using namespace argumentum;
 
-std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
+CliConfig setupArguments(int argc, char **argv) {
   const int imageWidthDefault = 900;
   const int numThreadsDefault = 6;
 
-  int         imageWidth  = -1;
-  int         imageHeight = -1;
-  int         numThreads  = 6;
-  std::string pathToScene;
+  CliConfig config;
 
   argument_parser parser = argument_parser{};
   auto            params = parser.params();
 
   parser.config().program(argv[0]).description("Raytracer");
-  parser.add_argument(imageWidth, "--image_width")
+  parser.add_argument(config.imageWidth, "--image_width")
       .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(imageWidthDefault)
-      .help("Window and rendering resolution width in pixels");
+      .help("rendering resolution width in pixels");
 
-  parser.add_argument(imageHeight, "--image_height")
+  parser.add_argument(config.imageHeight, "--image_height")
       .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(-1)
-      .help("Window and rendering resolution width in pixels");
+      .help("rendering resolution width in pixels");
 
-  parser.add_argument(pathToScene, "--scene")
+  parser.add_argument(config.editorWidth, "--editor_width")
+      .maxargs(1)
+      .metavar("UNSIGNED INT")
+      .absent(config.editorWidth)
+      .help("Window resolution width in pixels");
+
+  parser.add_argument(config.editorHeight, "--editor_height")
+      .maxargs(1)
+      .metavar("UNSIGNED INT")
+      .absent(config.editorHeight)
+      .help("Window resolution width in pixels");
+
+  parser.add_argument(config.pathToScene, "--scene")
       .maxargs(1)
       .metavar("STRING PATH")
-      .absent("default")
+      .absent("")
       .help("Path to scene json");
 
-  parser.add_argument(numThreads, "--threads")
+  parser.add_argument(config.numThreads, "--threads")
       .maxargs(1)
       .metavar("UNSIGNED INT")
       .absent(numThreadsDefault)
@@ -109,25 +120,21 @@ std::tuple<int, int, std::string, int> setupArguments(int argc, char **argv) {
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
 
-  return std::make_tuple(imageWidth, imageHeight, pathToScene, numThreads);
+
+  // Image width is set but image height is not
+  if (config.imageHeight == -1) {
+    config.imageHeight = config.imageWidth;
+  }
+
+  return config;
 }
 
 int main(int argc, char **argv) {
 
-  auto [imageWidth, imageHeight, pathToScene, numThreads] = setupArguments(argc, argv);
+  auto cliConfig = setupArguments(argc, argv);
 
-  // Image width is set but image height is not
-  if (imageHeight == -1) {
-    imageHeight = imageWidth;
-  }
-
-  if (pathToScene != "default") {
-    rt::App app(imageWidth, imageHeight, pathToScene, numThreads);
-    app.run();
-  } else {
-    rt::App app(imageWidth, imageHeight, rt::Scene::Earth(imageWidth, imageHeight), numThreads);
-    app.run();
-  }
+  rt::App app(cliConfig);
+  app.run();
 
   return 0;
 }
