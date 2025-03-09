@@ -91,10 +91,6 @@ namespace rt {
 
     TopMenuImgui();
 
-    // TODO: Use correct parameters when viewport is figured out
-    // Currently parameters are not used inside the function.
-    UpdateViewportRect(-1, -1);
-
     RenderViewport();
 
     ImGui::Begin("Objects");
@@ -135,12 +131,6 @@ namespace rt {
       // Tell ImGuizmo to draw in the foreground
       // ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
-      // Set viewport for ImGuizmo for proper Gizmo placement
-      ImGuizmo::SetRect(viewportMin.x, viewportMin.y, viewportSize.x, viewportSize.y);
-
-      // Tell ImGui to not draw outside the viewport
-      ImGui::PushClipRect(viewportMin, viewportMax, false);
-
       // clang-format off
         ImGuizmo::Manipulate(
           glm::value_ptr(getCamera()->getViewMatrix()),
@@ -150,6 +140,7 @@ namespace rt {
         model
         );
       // clang-format on
+
       if (ImGuizmo::IsUsing()) {
 
         vec3 translation;
@@ -171,21 +162,9 @@ namespace rt {
 
   void Editor::CheckInput() {
     ImGuiIO &io = ImGui::GetIO();
-    // std::cout << io.WantCaptureMouse << std::endl;
-    if (IsMouseButtonPressed(0) && !io.WantCaptureMouse
-        /*&& mouseInsideEditorViewport*/) {
-      // Trial-and-error'd my way through figuring out these
-
-      float mouseX = GetMouseX() - viewportMin.x;
-      float mouseY = GetMouseY() - viewportMin.y;
-
-      float mouseU = mouseX / (viewportMax.x - viewportMin.x);
-      float mouseV = mouseY / (viewportMax.y - viewportMin.y);
-
-      mouseX = mouseU * (GetScreenWidth());
-      mouseY = mouseV * (GetScreenHeight());
-
-      // std::cout << mouseU << "," << mouseV << "\n";
+    if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
+      float mouseX = GetMouseX();
+      float mouseY = GetMouseY();
 
       selectedObject = CastRay({mouseX, mouseY});
     }
@@ -296,29 +275,8 @@ namespace rt {
   // Regenerate BVH on exit / before entering the raytracer
   void Editor::onExit() {}
 
-  void Editor::UpdateViewportRect(float imguiWidth, float height) {
-
-    viewportMin = {0, 0};
-    viewportMax = ImVec2(GetScreenWidth(), GetScreenHeight());
-
-    // TODO: Uncomment this for proper viewport raycasting when you figure viewports out.
-    // viewportMin = {0, 0};
-    // viewportMax = {imguiWidth, height};
-    // viewportMin.x += ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMin().x;
-    // viewportMin.y += ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMin().y;
-    // viewportMax.x += ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMin().x;
-    // viewportMax.y += ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMin().y;
-
-    viewportSize = {viewportMax.x - viewportMin.x, viewportMax.y - viewportMin.y};
-
-    mouseInsideEditorViewport = ImGui::IsMouseHoveringRect(viewportMin, viewportMax);
-  }
 
   void Editor::RenderViewport() {
-    // TODO: Figure out a way to render to an ImGui image AND register gizmo hits
-    // ImGui::Image(&screenRT.texture.id, {float(viewportSize.x), float(viewportSize.y)}, {0, 1}, {1, 0});
-    // ImGui::GetForegroundDrawList()->AddRect(viewportMin, viewportMax, IM_COL32(255, 255, 0, 255));
-
     // Flip on Y axis since ImGui and opengl/raylib use different axis
     DrawTextureRec(
         app->getARD()->rasterRT.texture,

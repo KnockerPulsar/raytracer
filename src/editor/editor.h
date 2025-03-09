@@ -22,9 +22,6 @@ namespace rt {
   public:
     Hittable *selectedObject = nullptr;
 
-    bool   mouseInsideEditorViewport = false;
-    ImVec2 viewportMin, viewportMax, viewportSize;
-
     enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
     inline static const char *addableObjectTypes[] = {
         "Box",
@@ -72,8 +69,6 @@ namespace rt {
     virtual void onEnter() override {}
 
     virtual void onExit() override;
-
-    void UpdateViewportRect(float imguiWidth, float height);
 
     void RenderViewport();
 
