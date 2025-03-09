@@ -1,8 +1,7 @@
 #pragma once
 
 #include "AsyncRenderData.h"
-// #include "data_structures/JobQueue.h"
-// #include "data_structures/vec3.h"
+#include "data_structures/vec3.h"
 
 // clang-format off
 
