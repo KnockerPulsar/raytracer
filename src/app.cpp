@@ -53,7 +53,7 @@ namespace rt {
                   : Scene::Load(config.imageWidth, config.imageHeight,
                                 config.pathToScene)),
 
-        editor(std::make_shared<Editor>(ard)),
+        editor(std::make_shared<Editor>(config)),
         rt(std::make_shared<Raytracer>(ard)), currentState(editor) {
     setup();
     changeScene(scene);
@@ -117,7 +117,6 @@ namespace rt {
 
     rlImGuiShutdown();
 
-    UnloadRenderTexture(ard.rasterRT);
     UnloadRenderTexture(ard.raytraceRT);
 
     rlImGuiShutdown();

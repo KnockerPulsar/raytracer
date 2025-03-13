@@ -15,7 +15,6 @@ AsyncRenderData::AsyncRenderData(int imageWidth, int imageHeight,
   pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight,
                                                 queueChunkSize);
 
-  rasterRT = LoadRenderTexture(editorWidth, editorHeight);
   raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
 
   // Prepare pixel jobs

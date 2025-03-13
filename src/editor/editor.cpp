@@ -43,7 +43,7 @@ namespace rt {
 
   void Editor::Rasterize() {
 
-    BeginTextureMode(app->getARD()->rasterRT);
+    BeginTextureMode(rasterRT);
     ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
 
     BeginMode3D(getCamera()->toRaylibCamera3D());
@@ -279,8 +279,8 @@ namespace rt {
   void Editor::RenderViewport() {
     // Flip on Y axis since ImGui and opengl/raylib use different axis
     DrawTextureRec(
-        app->getARD()->rasterRT.texture,
-        {0, 0, float(app->getARD()->rasterRT.texture.width), -float(app->getARD()->rasterRT.texture.height)},
+        rasterRT.texture,
+        {0, 0, float(rasterRT.texture.width), -float(rasterRT.texture.height)},
         {0, 0},
         WHITE
     );

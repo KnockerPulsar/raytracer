@@ -41,7 +41,13 @@ namespace rt {
 
     static const int numColors = sizeof(colors) / sizeof(colors[0]);
 
-    Editor(AsyncRenderData &asyncRenderData) {}
+    RenderTexture2D rasterRT;
+
+    Editor(CliConfig const &config)
+        : rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {
+    }
+
+    ~Editor() { UnloadRenderTexture(rasterRT); }
 
     // Calls overloaded `Rasterize()` function for each object
     void Rasterize();
