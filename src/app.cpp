@@ -115,8 +115,6 @@ namespace rt {
     if (fullscreen)
       ToggleFullscreen();
 
-    rlImGuiShutdown();
-
     UnloadRenderTexture(ard.raytraceRT);
 
     rlImGuiShutdown();
