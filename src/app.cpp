@@ -52,8 +52,7 @@ namespace rt {
                   ? Scene::Earth(config.imageWidth, config.imageHeight)
                   : Scene::Load(config.imageWidth, config.imageHeight,
                                 config.pathToScene)),
-
-        editor(std::make_shared<Editor>(config)),
+        editor(std::make_shared<Editor>(config, scene)),
         rt(std::make_shared<Raytracer>(ard)), currentState(editor) {
     setup();
     changeScene(scene);
@@ -101,6 +100,7 @@ namespace rt {
     }
     }
   }
+
   void App::changeScene(Scene scene) {
     this->scene = scene;
 

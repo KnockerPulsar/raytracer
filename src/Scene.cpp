@@ -92,7 +92,7 @@ namespace rt {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto mat   = make_shared<Lambertian>(vec3(0.6, 0.6, 0.6));
     auto light = make_shared<DiffuseLight>(vec3(3, 3, 3));
@@ -124,7 +124,7 @@ namespace rt {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
@@ -176,7 +176,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.1f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto materialLeft  = make_shared<Lambertian>(vec3(0, 0, 1));
     auto materialRight = make_shared<Lambertian>(vec3(1, 0, 0));
@@ -210,7 +210,7 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -277,7 +277,7 @@ namespace rt {
     vec3  moveDir     = vec3(1.0f, 0, 0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
@@ -346,7 +346,7 @@ namespace rt {
     vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
     Camera cam(
-        vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), vec3::Zero(), 20.0, (float)imageWidth / imageHeight, 0.0, 10, 0, 0
+        vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), 20.0, (float)imageWidth / imageHeight, 0.0, 10, 0, 0
     );
 
     Scene s;
@@ -386,7 +386,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto earthTexture = make_shared<ImageTexture>("assets/textures/earthmap.png");
     auto earthSurface = make_shared<Lambertian>(earthTexture);
@@ -413,7 +413,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0.0);
     int   fov         = 20.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus, 0.0, 1.0);
 
     auto perText   = make_shared<NoiseTexture>(4.0f);
     auto diffLight = make_shared<DiffuseLight>(vec3(4, 4, 4));
@@ -449,9 +449,8 @@ namespace rt {
     int   fov         = 40.0;
 
     Camera cam(
-        lookFrom, lookAt, vUp, moveDir, fov, float(imageWidth) / float(imageHeight), aperature, distToFocus, 0.0, 1.0
+        lookFrom, lookAt, vUp, fov, float(imageWidth) / float(imageHeight), aperature, distToFocus, 0.0, 1.0
     );
-    cam.angle.y = 3.14; // Rotate towards the scene
 
     auto red           = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
     auto white         = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
@@ -573,7 +572,7 @@ namespace rt {
     vec3  moveDir     = vec3(0.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     // auto materialGround = make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
     // auto materialCenter = make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
@@ -612,7 +611,7 @@ namespace rt {
     vec3  moveDir     = vec3(0, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
     auto magenta =
@@ -652,7 +651,7 @@ namespace rt {
     vec3  moveDir     = vec3(0, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, vUp, moveDir, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
     auto red = make_shared<DiffuseLight>(vec3(3, 0, 0));
 

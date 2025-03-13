@@ -1,14 +1,20 @@
 #pragma once
-#include "imgui.h"
-#include "ImGuizmo.h"
+
 #include "../Defs.h"
 #include "../IState.h"
 #include "../Scene.h"
 #include "../materials/Material.h"
 #include "RenderAsync.h"
-#include <optional>
+#include "app.h"
+
+#include <imgui.h>
+#include <ImGuizmo.h>
 #include <raylib.h>
-#include <vector>
+
+#include <../vendor/glm/glm/glm.hpp>
+#include <../vendor/glm/glm/gtx/fast_trigonometry.hpp>
+
+#include <optional>
 
 class Vector2;
 
@@ -41,11 +47,80 @@ namespace rt {
 
     static const int numColors = sizeof(colors) / sizeof(colors[0]);
 
-    RenderTexture2D rasterRT;
+    // TODO split out all editor specific camera state here
+    class Camera
+    {
+    public:
+      enum ControlType { flyCam, lookAtPoint, controlTypesCount };
 
-    Editor(CliConfig const &config)
-        : rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {
-    }
+      inline static vec3 lineStart, lineEnd;
+
+      Camera(int editorWidth, int editorHeight, int imageWidth, int imageHeight,
+             Scene const &initialScene);
+
+      void updateFromRtCamera(rt::Camera const &sceneCamera);
+
+      void UpdateRtCamera();
+
+      void Fwd(float deltaTime);
+
+      void Bck(float deltaTime);
+
+      void MouseLook(Vector2 mousePositionDelta);
+
+      void DrawFrameOutline() const;
+
+      void RenderImgui();
+
+      void Update(float dt);
+
+      Camera3D toRaylibCamera3D() const;
+
+      vec3 getLookFrom() const { return lookFrom; }
+
+      vec3 localForward() const { return (lookAt - lookFrom).Normalize(); }
+
+      float focusDist() const { return rtCamera.focusDist; }
+
+      glm::mat4 getViewMatrix() const;
+
+      glm::mat4 getProjectionMatrix() const;
+
+      rt::Camera getRtCamera() const { return rtCamera; }
+
+      int imageWidth() const { return _imageWidth; }
+      int imageHeight() const { return _imageHeight; }
+
+    private:
+      rt::Camera rtCamera;
+
+      int const editorWidth, editorHeight;
+      int _imageWidth, _imageHeight;
+
+      vec3 lookFrom, lookAt, moveDir;
+      float vFov;
+
+      constexpr static const float xAngleClampMin = -89.0f;
+      constexpr static const float xAngleClampMax = 89.0f;
+      float                        panningDivider = 51.0f;
+      float                        movScale       = 10.0f;
+      float                        movMultiplier  = 5.0f;
+      vec3                         angle          = {0, -3.14, 0}; // Used to rotate the camera using the mouse
+      Vector2                      rotSensitity   = {0.003f, 0.003f};
+
+      ControlType               controlType         = ControlType::flyCam;
+      inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};
+    };
+
+    Camera camera;
+    RenderTexture2D rasterRT;
+    int const editorWidth, editorHeight;
+
+    Editor(CliConfig const &config, Scene const &initialScene)
+        : camera(config.editorWidth, config.editorHeight, config.imageWidth,
+                 config.imageHeight, initialScene),
+          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)),
+          editorWidth(config.editorWidth), editorHeight(config.editorHeight) {}
 
     ~Editor() { UnloadRenderTexture(rasterRT); }
 
@@ -72,7 +147,7 @@ namespace rt {
     */
     virtual void onUpdate() override;
 
-    virtual void onEnter() override {}
+    virtual void onEnter() override;
 
     virtual void onExit() override;
 

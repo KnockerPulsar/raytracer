@@ -18,7 +18,6 @@ namespace rt {
     };
 
     virtual void changeScene(Scene *scene) {}
-    Scene       *getScene() { return app->getScene(); }
-    Camera      *getCamera() { return &getScene()->cam; }
+    Scene       *getScene() const { return app->getScene(); }
   };
 } // namespace rt

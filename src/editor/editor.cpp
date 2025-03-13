@@ -1,26 +1,26 @@
 #include "editor.h"
 
-// Whines about imgui.h
-// It's included in premake's includedirs
-// Things build fine
-#include "ImGuiFileDialog.h"
-
-#include "../../vendor/glm/glm/glm.hpp"
-#include "../../vendor/glm/glm/gtc/type_ptr.hpp"
-#include "../../vendor/glm/glm/gtx/transform.hpp"
-#include "ImGuizmo.h"
-#include "../../vendor/rlImGui/rlImGui.h"
 #include "../BVHNode.h"
 #include "../Camera.h"
 #include "../Hittable.h"
-#include "../HittableList.h"
+#include "../HittableBuilder.h"
 #include "../materials/DiffuseLight.h"
 #include "../objects/Box.h"
 #include "../objects/Plane.h"
 #include "../objects/Sphere.h"
+#include "Constants.h"
 #include "Utils.h"
-#include <algorithm>
-#include <cstddef>
+
+#include <ImGuiFileDialog.h>
+#include <ImGuizmo.h>
+#include <imgui.h>
+#include <raylib.h>
+#include <rlImGui.h>
+#include <rlgl.h>
+
+// TODO fix this ugly include
+#include <../../vendor/glm/glm/gtc/type_ptr.hpp>
+
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -30,14 +30,9 @@
 #include <memory>
 #include <optional>
 #include <ostream>
-#include <raylib.h>
-#include <rlgl.h>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "../HittableBuilder.h"
-#include "imgui.h"
 
 namespace rt {
 
@@ -46,12 +41,12 @@ namespace rt {
     BeginTextureMode(rasterRT);
     ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
 
-    BeginMode3D(getCamera()->toRaylibCamera3D());
+    BeginMode3D(camera.toRaylibCamera3D());
     {
       DrawGrid(10, 10);
 
       if (!getScene()->skysphereTexture.empty()) {
-        getScene()->skysphere->transformation.translate = getCamera()->lookFrom;
+        getScene()->skysphere->transformation.translate = camera.getLookFrom();
         getScene()->drawSkysphere();
       }
 
@@ -71,11 +66,18 @@ namespace rt {
         DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
       }
 
-      DrawSphere(getCamera()->lookFrom + getCamera()->localForward * getCamera()->focusDist, 0.05f, LIME);
+      DrawSphere(camera.getLookFrom() +
+                     camera.localForward() * camera.focusDist(),
+                 0.05f, LIME);
 
-      DrawLine3D(rt::Camera::lineStart, rt::Camera::lineEnd, BLUE);
+      DrawLine3D(Editor::Camera::lineStart, Editor::Camera::lineEnd, BLUE);
     }
     EndMode3D();
+
+    BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
+    camera.DrawFrameOutline();
+    EndMode2D();
+
     EndTextureMode();
   }
 
@@ -112,6 +114,8 @@ namespace rt {
     RaytraceSettingsImgui();
 
     SelectedObjectGizmo();
+
+    camera.RenderImgui();
   }
 
   void Editor::SelectedObjectGizmo() {
@@ -131,15 +135,9 @@ namespace rt {
       // Tell ImGuizmo to draw in the foreground
       // ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
-      // clang-format off
-        ImGuizmo::Manipulate(
-          glm::value_ptr(getCamera()->getViewMatrix()),
-    glm::value_ptr(getCamera()->getProjectionMatrix()),
-     imguizmoOp,
-          imguizmoMode,
-        model
-        );
-      // clang-format on
+      ImGuizmo::Manipulate(glm::value_ptr(camera.getViewMatrix()),
+                           glm::value_ptr(camera.getProjectionMatrix()),
+                           imguizmoOp, imguizmoMode, model);
 
       if (ImGuizmo::IsUsing()) {
 
@@ -188,11 +186,11 @@ namespace rt {
 
   Hittable *Editor::CastRay(Vector2 mousePos) {
 
-    ::Ray raylibRay = GetMouseRay(mousePos, getCamera()->toRaylibCamera3D());
+    ::Ray raylibRay = GetMouseRay(mousePos, camera.toRaylibCamera3D());
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
 
-    rt::Camera::lineStart = r.origin.toGlm();
-    rt::Camera::lineEnd   = r.At(1000).toGlm();
+    Editor::Camera::lineStart = r.origin.toGlm();
+    Editor::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
     getScene()->worldRoot->Hit(r, 0, infinity, rec);
@@ -204,14 +202,16 @@ namespace rt {
 
     CheckInput();
 
-    getCamera()->Update(GetFrameTime());
+    camera.Update(GetFrameTime());
+
+    // Renders into the render texture below ImGui
     Rasterize();
 
+    // Render ImGui on top
     BeginDrawing();
     rlImGuiBegin();
 
     RenderImgui();
-    getCamera()->RenderImgui();
 
     rlImGuiEnd();
     EndDrawing();
@@ -272,9 +272,20 @@ namespace rt {
     }
   }
 
-  // Regenerate BVH on exit / before entering the raytracer
-  void Editor::onExit() {}
+  void Editor::onEnter() { camera.updateFromRtCamera(getScene()->cam); }
 
+  // Regenerate BVH on exit / before entering the raytracer
+  void Editor::onExit() {
+    auto *scene = getScene();
+    scene->cam = camera.getRtCamera();
+
+    scene->imageWidth = camera.imageWidth();
+    scene->imageHeight = camera.imageHeight();
+
+    *app->getARD() =
+        AsyncRenderData(camera.imageWidth(), camera.imageHeight(), editorWidth,
+                        editorHeight, app->getNumThreads());
+  }
 
   void Editor::RenderViewport() {
     // Flip on Y axis since ImGui and opengl/raylib use different axis
@@ -441,5 +452,175 @@ namespace rt {
     }
   }
 
-  void Editor::changeScene(Scene *scene) {}
-} // namespace rt
+  void Editor::changeScene(Scene *scene) {
+    camera.updateFromRtCamera(scene->cam);
+  }
+
+  void Editor::Camera::DrawFrameOutline() const {
+    auto rectX = (editorWidth - _imageWidth) / 2;
+    auto rectY = (editorHeight - _imageHeight) / 2;
+    DrawRectangleLines(rectX, rectY, _imageWidth, _imageHeight, MAGENTA);
+  }
+
+  void Editor::Camera::RenderImgui() {
+    if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
+      vec3 deltaPos = lookFrom;
+
+      ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
+
+      ImGui::Combo(
+          "Camera type", (int *)&controlType, controlTypeLabels, Editor::Camera::ControlType::controlTypesCount, 0
+      );
+
+      if (controlType == ControlType::lookAtPoint)
+        ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
+      else {
+        deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
+	lookAt += (deltaPos);
+
+        ImGui::DragFloat2("rotation", &angle.x, 0.05f);
+
+	MouseLook({0, 0});
+      }
+
+      ImGui::DragFloat("Camera speed multiplier", &movScale, 0.1, 1, 100);
+
+      ImGui::DragFloat("Camera boost multiplier", &movMultiplier, 0.1, 1, 10);
+
+      ImGui::DragInt2("frame size", &_imageWidth);
+
+      // Manual clamping since we want different limits for the width an height
+      _imageWidth = std::min(_imageWidth, editorWidth);
+      _imageHeight = std::min(_imageHeight, editorHeight);
+    }
+
+    ImGui::End();
+  }
+
+  Editor::Camera::Camera(int editorWidth, int editorHeight, int imageWidth,
+                         int imageHeight, Scene const &initialScene)
+      : editorWidth(editorWidth), editorHeight(editorHeight),
+        _imageWidth(imageWidth), _imageHeight(imageHeight),
+        rtCamera(initialScene.cam) {
+    updateFromRtCamera(rtCamera);
+    auto const fwd = localForward();
+
+    angle.x = fwd.y;
+
+    auto xzFwdProj = fwd.projectOntoPlane(vec3(0, 1, 0)).Normalize();
+    auto cosAngley = vec3::DotProd(xzFwdProj, {0, 0, -1});
+    auto signY = fwd.x < 0 ? 1 : -1;
+    angle.y = signY * acos(cosAngley);
+  }
+
+  void Editor::Camera::updateFromRtCamera(rt::Camera const &sceneCamera) {
+    rtCamera = sceneCamera;
+    lookFrom = sceneCamera.lookFrom;
+    lookAt = sceneCamera.lookAt;
+    vFov = sceneCamera.vFov;
+  }
+
+  void Editor::Camera::UpdateRtCamera() {
+    rtCamera = rt::Camera(lookFrom, lookAt, {0, 1, 0}, vFov,
+                          static_cast<float>(_imageWidth) / _imageHeight, 0.1f,
+                          80.0f, 0.0, 1.0);
+  }
+
+  void Editor::Camera::Fwd(float deltaTime) {
+    lookFrom += moveDir * deltaTime;
+    UpdateRtCamera();
+  }
+  void Editor::Camera::Bck(float deltaTime) {
+    lookFrom += -moveDir * deltaTime;
+    UpdateRtCamera();
+  }
+
+  void Editor::Camera::MouseLook(Vector2 mousePositionDelta) {
+    angle.x += (mousePositionDelta.y * -rotSensitity.y);
+    angle.y += (mousePositionDelta.x * -rotSensitity.x);
+
+    angle.x =
+        glm::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
+    angle.y = glm::wrapAngle(angle.y);
+
+    glm::mat4 rotMat = glm::eulerAngleYX(angle.y, angle.x);
+    glm::vec4 defaultFwd = glm::vec4(0, 0, -1, 0);
+
+    glm::vec3 rotatedFwd = rotMat * defaultFwd;
+
+    lookAt = lookFrom + rotatedFwd;
+
+    UpdateRtCamera();
+  }
+
+  void Editor::Camera::Update(float dt) {
+    float speedMultiplier = 1.0f;
+
+    if (IsKeyDown(KEY_LEFT_SHIFT))
+      speedMultiplier *= movMultiplier;
+
+    auto [upChange, fwdChange, rgtChange] =
+        rtCamera.getScaledDirectionVectors(dt * speedMultiplier);
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+      HideCursor();
+
+      if (IsKeyDown(KEY_SPACE)) {
+        lookFrom += upChange;
+        lookAt += upChange;
+      }
+      if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        lookFrom -= upChange;
+        lookAt -= upChange;
+      }
+      if (IsKeyDown(KEY_W)) {
+        lookFrom += fwdChange;
+        lookAt += fwdChange;
+      }
+      if (IsKeyDown(KEY_S)) {
+        lookFrom -= fwdChange;
+        lookAt -= fwdChange;
+      }
+      if (IsKeyDown(KEY_A)) {
+        lookFrom -= rgtChange;
+        lookAt -= rgtChange;
+      }
+      if (IsKeyDown(KEY_D)) {
+        lookFrom += rgtChange;
+        lookAt += rgtChange;
+      }
+
+      MouseLook(GetMouseDelta());
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
+      ShowCursor();
+    }
+  }
+
+  Camera3D Editor::Camera::toRaylibCamera3D() const {
+    return Camera3D{.position = lookFrom,
+                    .target = lookAt,
+                    .up = {0, 1, 0},
+                    .fovy = vFov,
+                    .projection = CAMERA_PERSPECTIVE};
+  }
+
+  glm::mat4 Editor::Camera::getViewMatrix() const {
+    // glm::mat4 M = glm::mat4(1);
+    // M           = glm::translate(M, lookFrom.toGlm());
+    // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
+
+    // glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
+    // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
+    // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
+
+    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), vec3(0, 1, 0).toGlm());
+  }
+
+  glm::mat4 Editor::Camera::getProjectionMatrix() const {
+    return glm::perspective(glm::radians(vFov),
+                            static_cast<float>(_imageWidth) / _imageHeight,
+                            0.01f, 1000.0f);
+  }
+  } // namespace rt
