@@ -12,4 +12,4 @@ BraceWrapping:
   AfterStruct: true
 
 AlignAfterOpenBracket: BlockIndent
-InsertNewLineAtEOF: false
+InsertNewlineAtEOF: false

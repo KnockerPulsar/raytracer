@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5.0)   # Selects the minimum version of CMake required to run this file
 project(Raytracer VERSION 0.1.0)          # Here we select the project name and version
 
-# Here we select C++17 with all the standards required and all compiler-specific extensions disabled
-set(CMAKE_CXX_STANDARD 17)
+# Here we select C++23 with all the standards required and all compiler-specific extensions disabled
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
