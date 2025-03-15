@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <raylib.h>
 
 namespace rt {
@@ -43,8 +44,10 @@ namespace rt {
     // Main issue: result depends on the given point and not the uv coords
     // uvs give 2 degrees of freedom while points have 3 degrees of freedom
     // Can't use RNG since, well, it's random
-    void generatePreview() override {
-      Texture::generatePreviewUtil([](float u, float v) { return v * u; });
+    ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) override {
+      return Texture::SamplePreview(
+          [](float u, float v) { return v * u; }, std::nullopt, std::nullopt, availableWidth, availableHeight, scale
+      );
     }
 
     virtual void OnImgui() override {

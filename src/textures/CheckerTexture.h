@@ -40,10 +40,6 @@ namespace rt {
       return even->Value(u, v, p) * multiplier;
     }
 
-    void generatePreview() override {
-      Texture::generatePreviewUtil([&](float u, float v) { return vec3(u, v , 1); });
-    }
-
     virtual void OnImgui() override {
       even->OnImgui();
       odd->OnImgui();

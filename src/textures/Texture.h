@@ -1,104 +1,101 @@
 #pragma once
+
 #include "../IImguiDrawable.h"
 #include "../data_structures/vec3.h"
-#include "editor/Utils.h"
-#include "imgui.h"
-#include <cstddef>
-#include <functional>
-#include <limits>
+#include "GroupPanel.h"
+#include "editor/PreviewTexture.h"
+
 #include <optional>
 #include <raylib.h>
+#include <imgui.h>
 
-#define PREVIEW_WIDTH 100
-#define PREVIEW_HEIGHT 100
-
-#include "GroupPanel.h"
+#include <functional>
 
 namespace rt {
   class Texture : public IImguiDrawable {
   protected:
     float multiplier = 1.0f;
 
-    Texture2D previewTexture = Texture2D{
-        .id      = std::numeric_limits<unsigned int>::max(),
-        .width   = -1,
-        .height  = -1,
-        .mipmaps = -1,
-        .format  = -1,
-    };
-
-    int   previewWidth = PREVIEW_WIDTH, previewHeight = PREVIEW_HEIGHT;
-    float previewScale = 1;
+    std::optional<editor::PreviewTexture> previewTexture;
 
   public:
+    Texture &operator=(Texture const &other) {
+      previewTexture = std::nullopt;
+      multiplier     = other.multiplier;
+
+      return *this;
+    }
+
     virtual vec3 Value(float u, float v, const vec3 &p) const = 0;
     virtual json toJson() const                               = 0;
     virtual void GetTexture(const json &j)                    = 0;
     virtual void setIntensity(float i) { multiplier = i; }
 
-    virtual ~Texture() { UnloadTexture(previewTexture); }
+    virtual ~Texture() = default;
 
-    virtual void generatePreview() {}
+    virtual ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) {
+      // Infinite textures can pass nullopt as the source width an height to indicate infinite size
+      return Texture::SamplePreview(
+          [](float u, float v) { return vec3(u, v, 0); },
+          std::nullopt,
+          std::nullopt,
+          availableWidth,
+          availableHeight,
+          scale
+      );
+    }
 
   protected:
-    void generatePreviewUtil(std::function<vec3(float, float)> pointSampler) {
-      vec3 *previewData = new vec3[previewWidth * previewHeight];
-      for (int y = 0; y < previewHeight; ++y) {
-        for (int x = 0; x < previewWidth; ++x) {
-          float u = float(x) / (previewWidth * previewScale);
-          float v = float(y) / (previewHeight * previewScale);
+    ::Texture SamplePreview(
+        std::function<vec3(float, float)> pointSampler,
+        std::optional<int> sourceWidth, std::optional<int> sourceHeight,
+        int destinationWidth, int destinationHeight,
+        float scale
+    ) const {
+      auto const width = static_cast<int>(sourceWidth.value_or(destinationWidth) * scale);
+      auto const height = static_cast<int>(sourceHeight.value_or(destinationHeight) * scale);
 
-          previewData[x + y * previewWidth] = Value(u, v, pointSampler(u, v));
+      auto *previewData = new vec3[width * height];
+      for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+          float u = float(x) / width;
+          float v = float(y) / height;
+
+          previewData[x + (y * width)] = Value(u, v, pointSampler(u, v));
         }
       }
 
-      generatePreviewTexture(previewData, previewWidth, previewHeight);
+      Image previewImage = {
+          .data    = previewData,
+          .width   = width,
+          .height  = height,
+          .mipmaps = 1,
+          .format  = PIXELFORMAT_UNCOMPRESSED_R32G32B32
+      };
+
+      auto const texture = LoadTextureFromImage(previewImage);
+      UnloadImage(previewImage);
+
+      return texture;
     }
 
     void previewOrGenerate() {
-      if (previewTexture.width != -1 && previewTexture.height != -1) {
-        ImGui::BeginGroupPanel("Texture preview");
-
+      ImGui::BeginGroupPanel("Texture preview");
+      {
         ImGui::Dummy({-1, 10});
 
-        float aspectRatio = float(previewTexture.width) / previewTexture.height;
+        auto regionMax     = ImGui::GetWindowContentRegionMax();
+        auto regionMin     = ImGui::GetWindowContentRegionMin();
+        auto availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
 
-        ImVec2 contentMax = ImGui::GetWindowContentRegionMax();
-        ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
+        if (!previewTexture || previewTexture->ShouldResize(availableArea))
+          previewTexture.emplace(generatePreview(availableArea.x, availableArea.y, 0.1f), availableArea.x, availableArea.y);
 
-        // Being exactly the available content width causes some twitching in the UI
-        float imageWidth  = (contentMax.x - contentMin.x) * 0.99;
-        float imageHeight = imageWidth * aspectRatio;
-
-        ImGui::Image(reinterpret_cast<ImTextureID>(&previewTexture.id), {imageWidth, imageHeight});
-
-        Texture::previewSettingsImgui();
-        
-        ImGui::EndGroupPanel();
-      } else
-        generatePreview();
-    }
-
-    void previewSettingsImgui() {
-
-      ImGui::DragInt2("Preview resolution", &previewWidth);
-      ImGui::DragFloat("Preview scale", &previewScale);
-
-      if (ImGui::Button("Regen preview"))
-        generatePreview();
-    }
-
-    virtual void generatePreviewTexture(vec3 *data, int previewWidth, int previewHeight) {
-      Image previewImage = {
-          .data    = data,
-          .width   = previewWidth,
-          .height  = previewHeight,
-          .mipmaps = 1,
-          .format  = PIXELFORMAT_UNCOMPRESSED_R32G32B32};
-
-      previewTexture = LoadTextureFromImage(previewImage);
-
-      UnloadImage(previewImage);
+        ImGui::Image(
+            previewTexture->GetImTextureID(), ImVec2(previewTexture->previewWidth, previewTexture->previewHeight)
+        );
+      }
+      ImGui::EndGroupPanel();
     }
   };
 } // namespace rt

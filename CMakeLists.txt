@@ -41,6 +41,7 @@ set(SOURCES
   
   src/editor/editor.cpp
   src/editor/Utils.cpp
+  src/editor/PreviewTexture.cpp
 
   vendor/argumentum/src/argparser.cpp
 

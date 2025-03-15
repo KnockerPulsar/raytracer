@@ -1,11 +1,12 @@
 #pragma once
-#include "imgui.h"
 #include "../data_structures/vec3.h"
 #include "Texture.h"
 #include "editor/Utils.h"
-#include "json.hpp"
 #include "textures/ImageTexture.h"
+
+#include <json.hpp>
 #include <raylib.h>
+
 #include <string>
 
 namespace rt {
@@ -28,10 +29,6 @@ namespace rt {
       ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x);
 
       Texture::previewOrGenerate();
-    }
-
-    void generatePreview() override {
-      Texture::generatePreviewUtil([](float u, float v) { return vec3(u, v, 0); });
     }
   };
 

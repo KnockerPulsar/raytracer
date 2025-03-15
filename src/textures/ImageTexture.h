@@ -81,8 +81,15 @@ namespace rt {
     virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
     virtual void GetTexture(const json &j) override { ImageFromPath(j["path"].get<string>().c_str()); }
 
-    void generatePreview() override {
-      Texture::generatePreviewUtil([](float u, float v) { return vec3(u, v, 0); });
+    ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
+      return Texture::SamplePreview(
+          [](float u, float v) { return vec3(u, v, 0); },
+          img.width,
+          img.height,
+          availableWidth,
+          availableHeight,
+          scale
+      );
     }
 
     virtual void OnImgui() override { Texture::previewOrGenerate(); }
