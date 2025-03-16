@@ -1,28 +1,22 @@
 #pragma once
-#include "imgui.h"
 #include "../Perlin.h"
 #include "../data_structures/vec3.h"
-
 #include "Texture.h"
-#include "Util.h"
-#include <algorithm>
+
+#include <imgui.h>
+#include <raylib.h>
+
 #include <cmath>
 #include <memory>
 #include <optional>
-#include <raylib.h>
 
 namespace rt {
   class NoiseTexture : public rt::Texture {
   public:
-    sPtr<Perlin> noise;
-    float        scale;
-    float        turbScale;
-    vec3         baseColor;
+    NoiseTexture() : noise{std::make_shared<Perlin>()} {}
+    NoiseTexture(float scl, float tScl = 10, vec3 baseCol = vec3(1))
+        : noise(std::make_shared<Perlin>()), scale(scl), turbScale(tScl), baseColor(baseCol) {}
 
-    NoiseTexture() { noise = std::make_shared<Perlin>(); };
-    NoiseTexture(float scl, float tScl = 10, vec3 baseCol = vec3(1)) : scale(scl), turbScale(tScl), baseColor(baseCol) {
-      noise = std::make_shared<Perlin>();
-    }
     NoiseTexture(const json &json)
         : scale(json["scale"].get<float>()), turbScale(json["turb_scale"].get<float>()),
           baseColor(json["base_color"].get<vec3>()) {}
@@ -58,6 +52,12 @@ namespace rt {
 
       Texture::previewOrGenerate();
     }
+
+  private:
+    sPtr<Perlin> const noise;
+    float        scale;
+    float        turbScale;
+    vec3         baseColor;
   };
 
   inline void to_json(json &j, const NoiseTexture &nt) { j = json{{"type", "noise"}, nt.toJson()}; }

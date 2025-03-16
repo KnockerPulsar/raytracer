@@ -1,10 +1,12 @@
 #pragma once
-#include "imgui.h"
 #include "../Perlin.h"
 #include "Texture.h"
-#include <iostream>
+
+#include <imgui.h>
 #include <raylib.h>
+
 #include <sys/types.h>
+#include <iostream>
 
 // Note: raylib doesn't support JPG files by default
 // If you want JPG support, you'll have to build raylib with JPG support.
@@ -20,11 +22,7 @@ namespace rt {
   class Texture;
 
   class ImageTexture : public Texture {
-  private:
   public:
-    const static int bytesPerPixel = 3;
-    bool             flipH = false, flipV = false;
-
     ImageTexture() : img{} {}
 
     ImageTexture(const char *filename, bool fv = false, bool fh = false) : path(filename), flipH(fh), flipV(fv) {
@@ -96,9 +94,11 @@ namespace rt {
     virtual void OnImgui() override { Texture::previewOrGenerate(); }
 
   private:
-    int         bytesPerScanline;
-    std::string path;
-    Image       img;
+    int              bytesPerScanline;
+    std::string      path;
+    Image            img;
+    bool             flipH = false, flipV = false;
+    const static int bytesPerPixel = 3;
   };
 
   inline void to_json(json &j, const ImageTexture &it) { j = it.toJson(); }

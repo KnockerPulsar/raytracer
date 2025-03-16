@@ -2,16 +2,17 @@
 #include "../data_structures/vec3.h"
 #include "SolidColor.h"
 #include "Texture.h"
-#include "imgui.h"
-#include <future>
-#include <memory>
+
+#include <imgui.h>
 #include <raylib.h>
+
+#include <memory>
 
 namespace rt {
   class CheckerTexture : public Texture {
   private:
-    std::shared_ptr<Texture> even;
-    std::shared_ptr<Texture> odd;
+    std::shared_ptr<Texture> const even;
+    std::shared_ptr<Texture> const odd;
     float                    scale;
 
   public:

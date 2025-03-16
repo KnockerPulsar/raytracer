@@ -1,13 +1,14 @@
 #pragma once
 #include "../Defs.h"
-#include "../data_structures/vec3.h"
 #include "CheckerTexture.h"
 #include "ImageTexture.h"
 #include "NoiseTexture.h"
 #include "SolidColor.h"
 #include "Texture.h"
-#include <memory>
+
 #include <raylib.h>
+
+#include <memory>
 
 namespace rt {
   class TextureFactory {
