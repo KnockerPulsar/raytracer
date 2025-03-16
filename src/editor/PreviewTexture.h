@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <raylib.h>
 
-namespace rt::editor {
+namespace rt {
   class PreviewTexture {
   public:
     // Image is wider than it is tall, use the available width as a

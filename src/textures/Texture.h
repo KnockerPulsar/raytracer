@@ -16,7 +16,7 @@ namespace rt {
   protected:
     float multiplier = 1.0f;
 
-    std::optional<editor::PreviewTexture> previewTexture;
+    std::optional<PreviewTexture> previewTexture;
 
   public:
     Texture &operator=(Texture const &other) {
