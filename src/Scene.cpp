@@ -519,7 +519,7 @@ namespace rt {
 
   Scene Scene::Load(int imageWidth, int imageHeight, std::string path) {
     std::ifstream jsonFile(path);
-    std::cout << "Loading scene from file " << path << std::endl;
+    std::cout << "Loading scene from file " << path << '\n';
 
     json readScene;
     jsonFile >> readScene;
@@ -538,7 +538,7 @@ namespace rt {
 
     auto world = HittableList();
 
-    std::cout << std::setw(4) << readScene["objects"] << std::endl;
+    std::cout << std::setw(4) << readScene["objects"] << '\n';
     for (const auto &obj : readScene["objects"]) {
 
       auto objPtr = ObjectFactory::FromJson(obj);
@@ -547,8 +547,8 @@ namespace rt {
     }
 
     std::cout << "Loaded scene with\n"
-              << "\tsettings " << settings << std::endl
-              << "\t#objects " << world.objects.size() << std::endl;
+              << "\tsettings " << settings << '\n'
+              << "\t#objects " << world.objects.size() << '\n';
 
     s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
 
@@ -665,7 +665,7 @@ namespace rt {
 
     for (const auto &obj : objectList) {
       json temp = obj->toJson();
-      std::cout << temp << std::endl;
+      std::cout << temp << '\n';
       objJsons.push_back(temp);
     }
 
