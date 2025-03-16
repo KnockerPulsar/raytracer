@@ -90,11 +90,6 @@ namespace rt {
       break;
     }
 
-    case KEY_SPACE: {
-      rt->showProg = !rt->showProg;
-      break;
-    }
-
     case KEY_E: {
       currentState = currentState->toNextState();
       break;

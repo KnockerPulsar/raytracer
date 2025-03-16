@@ -22,7 +22,7 @@ CMAKE_POLICY(SET CMP0074 NEW)
 add_subdirectory(vendor/glm)
 
 # A variable with all our source files that are common between executable targets (examples)
-set(SOURCES 
+set(SOURCES
   src/Scene.cpp
   src/app.cpp
   src/AABB.cpp
@@ -38,8 +38,9 @@ set(SOURCES
   src/objects/Box.cpp
   src/objects/Sphere.cpp
   src/objects/AARect.cpp
-  
+
   src/editor/editor.cpp
+  src/raytracer.cpp
   src/editor/Utils.cpp
   src/editor/PreviewTexture.cpp
 
@@ -64,7 +65,7 @@ include_directories(
 
   vendor/rlImGui/
   vendor/ImGuizmo/
-  vendor/imgui/  
+  vendor/imgui/
   vendor/nlohmann-json/
   vendor/ImGuiFileDialog
   vendor/argumentum/include/
@@ -85,12 +86,12 @@ file(CREATE_LINK
 add_executable(${PROJECT_NAME} src/main.cpp ${SOURCES})
 
 target_link_libraries(
-  ${PROJECT_NAME} 
-  -lraylib 
-  -lpthread 
-  -lGL 
-  -lm 
-  -lrt 
-  -lX11 
+  ${PROJECT_NAME}
+  -lraylib
+  -lpthread
+  -lGL
+  -lm
+  -lrt
+  -lX11
   -ldl
 )
