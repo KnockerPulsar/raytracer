@@ -163,8 +163,8 @@ namespace rt {
 
             ImGui::EndTable();
           }
-          ImGui::End();
         }
+        ImGui::End();
       }
 
       rlImGuiEnd();
