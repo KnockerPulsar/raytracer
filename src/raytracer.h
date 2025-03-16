@@ -1,18 +1,17 @@
 #include "AsyncRenderData.h"
-#include "Constants.h"
 #include "IState.h"
 #include "Ray.h"
 #include "RenderAsync.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 #include "editor/Utils.h"
-#include "stb_image_write.h"
-#include <algorithm>
-#include <functional>
-#include <iostream>
-#include <iterator>
+
 #include <raylib.h>
 #include <rlImGui.h>
+#include <stb_image_write.h>
+
+#include <functional>
+#include <iostream>
 #include <sstream>
 
 using std::ref;
@@ -73,8 +72,8 @@ namespace rt {
 
     void BlitToBuffer() {
 
-      auto* pixelData = new Color[getScene()->imageWidth * getScene()->imageHeight];
-      auto jobs      = ard.pixelJobs->getJobsVector();
+      auto *pixelData = new Color[getScene()->imageWidth * getScene()->imageHeight];
+      auto  jobs      = ard.pixelJobs->getJobsVector();
 
       // Copy over only the color data
       for (int i = 0; i < jobs.size(); ++i) {
@@ -85,12 +84,11 @@ namespace rt {
       UnloadTexture(ard.raytraceRT.texture);
 
       // Create texture from image containing the color data
-      Image raytraced = {
-          .data    = pixelData,
-          .width   = getScene()->imageWidth,
-          .height  = getScene()->imageHeight,
-          .mipmaps = 1,
-          .format  = RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+      Image raytraced = {.data    = pixelData,
+                         .width   = getScene()->imageWidth,
+                         .height  = getScene()->imageHeight,
+                         .mipmaps = 1,
+                         .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
       // Deletes pixelData afte copying it to another buffer
       ImageFlipVertical(&raytraced);
@@ -119,13 +117,11 @@ namespace rt {
           Autosave();
       }
 
-
-
       auto const fitSize =
           EditorUtils::FitIntoArea(ImVec2(app->editorWidth, app->editorHeight),
                                    ImVec2(ard.raytraceRT.texture.width, ard.raytraceRT.texture.height));
 
-      float const dWidth = app->editorWidth - fitSize.x;
+      float const dWidth  = app->editorWidth - fitSize.x;
       float const dHeight = app->editorHeight - fitSize.y;
 
       DrawTexturePro(ard.raytraceRT.texture,
@@ -179,7 +175,7 @@ namespace rt {
          << getScene()->imageHeight << "_" << getScene()->settings.samplesPerPixel << "_"
          << getScene()->settings.maxDepth << ".bmp";
 
-      std::cout << "Finished render: " << ss.str() << std::endl;
+      std::cout << "Finished render: " << ss.str() << '\n';
 
       Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);
 
