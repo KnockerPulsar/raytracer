@@ -113,7 +113,6 @@ namespace rt {
 
     Camera camera;
     RenderTexture2D rasterRT;
-    int const editorWidth, editorHeight;
 
     struct ViewState {
       bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
@@ -123,8 +122,8 @@ namespace rt {
     Editor(CliConfig const &config, Scene const &initialScene)
         : camera(config.editorWidth, config.editorHeight, config.imageWidth,
                  config.imageHeight, initialScene),
-          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)),
-          editorWidth(config.editorWidth), editorHeight(config.editorHeight) {}
+          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight))
+    {}
 
     ~Editor() { UnloadRenderTexture(rasterRT); }
 

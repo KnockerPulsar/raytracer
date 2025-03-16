@@ -289,9 +289,9 @@ namespace rt {
     scene->imageWidth = camera.imageWidth();
     scene->imageHeight = camera.imageHeight();
 
-    *app->getARD() =
-        AsyncRenderData(camera.imageWidth(), camera.imageHeight(), editorWidth,
-                        editorHeight, app->getNumThreads());
+    *app->getARD() = AsyncRenderData(camera.imageWidth(), camera.imageHeight(),
+                                     app->editorWidth, app->editorHeight,
+                                     app->getNumThreads());
   }
 
   void Editor::RenderViewport() {
@@ -524,10 +524,6 @@ namespace rt {
       ImGui::DragFloat("Camera boost multiplier", &movMultiplier, 0.1, 1, 10);
 
       ImGui::DragInt2("frame size", &_imageWidth);
-
-      // Manual clamping since we want different limits for the width an height
-      _imageWidth = std::min(_imageWidth, editorWidth);
-      _imageHeight = std::min(_imageHeight, editorHeight);
     }
 
     ImGui::End();

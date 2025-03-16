@@ -48,6 +48,7 @@ namespace rt {
                                  config.editorWidth, config.editorHeight,
                                  config.numThreads);
         }()),
+        editorWidth(config.editorWidth), editorHeight(config.editorHeight),
         scene(config.pathToScene.empty()
                   ? Scene::Earth(config.imageWidth, config.imageHeight)
                   : Scene::Load(config.imageWidth, config.imageHeight,

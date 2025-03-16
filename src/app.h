@@ -27,12 +27,13 @@ namespace rt {
     sPtr<Raytracer> rt;
 
     int  numThreads;
-
     bool fullscreen = false;
 
     sPtr<IState> currentState;
 
   public:
+    int const editorWidth, editorHeight;
+
     bool saveOnRender = true;
     void setup();
 
