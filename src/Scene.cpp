@@ -1,41 +1,37 @@
 #include "Scene.h"
-#include "AABB.h"
 #include "BVHNode.h"
-#include "Defs.h"
-#include "Transformation.h"
-#include "materials/DiffuseLight.h"
-
 #include "Camera.h"
+#include "Defs.h"
 #include "Hittable.h"
+#include "HittableBuilder.h"
 #include "HittableList.h"
 #include "Ray.h"
+#include "Transformation.h"
 #include "Util.h"
 #include "data_structures/vec3.h"
-#include "materials/ConstantMedium.h"
+
 #include "materials/Dielectric.h"
+#include "materials/DiffuseLight.h"
 #include "materials/Lambertian.h"
 #include "materials/Material.h"
-
 #include "materials/Metal.h"
+
 #include "objects/MovingSphere.h"
 #include "objects/ObjectFactory.h"
 #include "objects/Plane.h"
 #include "objects/Sphere.h"
 #include "objects/Triangle.h"
+
 #include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
 #include "textures/NoiseTexture.h"
-#include "textures/SolidColor.h"
-#include "textures/Texture.h"
-#include <bits/types/FILE.h>
+
+#include <raylib.h>
+
 #include <fstream>
 #include <memory>
 #include <ostream>
-#include <raylib.h>
-#include <tuple>
 #include <vector>
-
-#include "HittableBuilder.h"
 
 using nlohmann::json;
 
