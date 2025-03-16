@@ -15,8 +15,6 @@ namespace rt {
 
     auto GetImTextureID() const -> ImTextureID;
 
-    static auto FitIntoArea(ImVec2 availableArea, ImVec2 textureSize) -> ImVec2;
-
     auto ShouldResize(ImVec2 availableArea) const -> bool;
 
     int const previewWidth, previewHeight;

@@ -85,4 +85,9 @@ namespace EditorUtils {
     return mesh;
   }
 
+  auto FitIntoArea(ImVec2 availableArea, ImVec2 textureSize) -> ImVec2 {
+    auto const scale = std::min(availableArea.x / textureSize.x, availableArea.y / textureSize.y);
+    return {textureSize.x * scale, textureSize.y * scale};
+  }
+
 } // namespace EditorUtils
