@@ -23,11 +23,8 @@
 
 namespace rt {
   void App::setup() {
-    editor->nextState = rt;
-    rt->nextState     = editor;
-
-    editor->app = this;
-    rt->app     = this;
+    editor->setNextState(rt);
+    rt->setNextState(editor);
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
@@ -44,17 +41,14 @@ namespace rt {
           // AsyncRenderData tries to create a RenderTexture which requires a
           // window to be created
           InitWindow(config.editorWidth, config.editorHeight, title.c_str());
-          return AsyncRenderData(config.imageWidth, config.imageHeight,
-                                 config.editorWidth, config.editorHeight,
+          return AsyncRenderData(config.imageWidth, config.imageHeight, config.editorWidth, config.editorHeight,
                                  config.numThreads);
         }()),
         editorWidth(config.editorWidth), editorHeight(config.editorHeight),
-        scene(config.pathToScene.empty()
-                  ? Scene::Earth(config.imageWidth, config.imageHeight)
-                  : Scene::Load(config.imageWidth, config.imageHeight,
-                                config.pathToScene)),
-        editor(std::make_shared<Editor>(config, scene)),
-        rt(std::make_shared<Raytracer>(ard)), currentState(editor) {
+        scene(config.pathToScene.empty() ? Scene::Earth(config.imageWidth, config.imageHeight)
+                                         : Scene::Load(config.imageWidth, config.imageHeight, config.pathToScene)),
+        editor(std::make_shared<Editor>(this, config, scene)), rt(std::make_shared<Raytracer>(this, ard)),
+        currentState(editor) {
     setup();
     changeScene(scene);
   }

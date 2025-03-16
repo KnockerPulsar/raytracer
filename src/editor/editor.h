@@ -124,11 +124,10 @@ namespace rt {
     } viewState;
 
   public:
-    Editor(CliConfig const &config, Scene const &initialScene)
-        : camera(config.editorWidth, config.editorHeight, config.imageWidth,
-                 config.imageHeight, initialScene),
-          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight))
-    {}
+    Editor(App *const app, CliConfig const &config, Scene const &initialScene)
+        : IState(app),
+          camera(config.editorWidth, config.editorHeight, config.imageWidth, config.imageHeight, initialScene),
+          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {}
 
     ~Editor() { UnloadRenderTexture(rasterRT); }
 

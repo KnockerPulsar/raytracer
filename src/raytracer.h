@@ -14,7 +14,7 @@ using std::ref;
 namespace rt {
   class Raytracer : public IState {
   public:
-    Raytracer(AsyncRenderData &ard);
+    Raytracer(App *app, AsyncRenderData &ard);
 
     virtual void onEnter() override;
     virtual void onExit() override;

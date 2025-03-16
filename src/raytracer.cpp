@@ -1,10 +1,11 @@
 #include "raytracer.h"
+#include "IState.h"
 #include "data_structures/Pixel.h"
 
 #include "imgui.h"
 #include <raylib.h>
 
-rt::Raytracer::Raytracer(AsyncRenderData &ard) : ard(ard) {}
+rt::Raytracer::Raytracer(App *const app, AsyncRenderData &ard) : IState(app), ard(ard) {}
 
 void rt::Raytracer::onEnter() { startRaytracing(); }
 
