@@ -75,9 +75,9 @@ namespace rt {
 
       Camera3D toRaylibCamera3D() const;
 
-      vec3 getLookFrom() const { return lookFrom; }
+      vec3 getLookFrom() const { return rtCamera.lookFrom; }
 
-      vec3 localForward() const { return (lookAt - lookFrom).Normalize(); }
+      vec3 localForward() const { return (rtCamera.lookAt - rtCamera.lookFrom).Normalize(); }
 
       float focusDist() const { return rtCamera.focusDist; }
 
@@ -96,8 +96,7 @@ namespace rt {
       int const editorWidth, editorHeight;
       int _imageWidth, _imageHeight;
 
-      vec3 lookFrom, lookAt, moveDir;
-      float vFov;
+      vec3 moveDir;
 
       Vector2 preHideCursorLocation;
 

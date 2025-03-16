@@ -500,24 +500,28 @@ namespace rt {
 
   void Editor::Camera::RenderImgui() {
     if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
-      vec3 deltaPos = lookFrom;
+      vec3 deltaPos = rtCamera.lookFrom;
 
-      ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05);
+      ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05);
 
       ImGui::Combo(
           "Camera type", (int *)&controlType, controlTypeLabels, Editor::Camera::ControlType::controlTypesCount, 0
       );
 
       if (controlType == ControlType::lookAtPoint)
-        ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
+        ImGui::DragFloat3("rtCamera.lookAt", &rtCamera.lookAt.x, 0.05);
       else {
-        deltaPos -= lookFrom; // lookFrom = oldLookFrom + delta
-	lookAt += (deltaPos);
+        deltaPos -= rtCamera.lookFrom; // lookFrom = oldLookFrom + delta
+        rtCamera.lookAt += (deltaPos);
 
         ImGui::DragFloat2("rotation", &angle.x, 0.05f);
 
-	MouseLook({0, 0});
+        MouseLook({0, 0});
       }
+
+      ImGui::DragFloat("Vertical FOV", &rtCamera.vFov, 1.0, 5.0, 179.0f);
+
+      ImGui::Separator();
 
       ImGui::DragFloat("Camera speed multiplier", &movScale, 0.1, 1, 100);
 
@@ -547,23 +551,20 @@ namespace rt {
 
   void Editor::Camera::updateFromRtCamera(rt::Camera const &sceneCamera) {
     rtCamera = sceneCamera;
-    lookFrom = sceneCamera.lookFrom;
-    lookAt = sceneCamera.lookAt;
-    vFov = sceneCamera.vFov;
   }
 
   void Editor::Camera::UpdateRtCamera() {
-    rtCamera = rt::Camera(lookFrom, lookAt, {0, 1, 0}, vFov,
-                          static_cast<float>(_imageWidth) / _imageHeight, 0.1f,
-                          80.0f, 0.0, 1.0);
+    rtCamera.lookFrom    = rtCamera.lookFrom;
+    rtCamera.lookAt      = rtCamera.lookAt;
+    rtCamera.aspectRatio = static_cast<float>(_imageWidth) / _imageHeight;
   }
 
   void Editor::Camera::Fwd(float deltaTime) {
-    lookFrom += moveDir * deltaTime;
+    rtCamera.lookFrom += moveDir * deltaTime;
     UpdateRtCamera();
   }
   void Editor::Camera::Bck(float deltaTime) {
-    lookFrom += -moveDir * deltaTime;
+    rtCamera.lookFrom += -moveDir * deltaTime;
     UpdateRtCamera();
   }
 
@@ -580,7 +581,7 @@ namespace rt {
 
     glm::vec3 rotatedFwd = rotMat * defaultFwd;
 
-    lookAt = lookFrom + rotatedFwd;
+    rtCamera.lookAt = rtCamera.lookFrom + rotatedFwd;
 
     UpdateRtCamera();
   }
@@ -601,28 +602,28 @@ namespace rt {
 
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
       if (IsKeyDown(KEY_SPACE)) {
-        lookFrom += upChange;
-        lookAt += upChange;
+        rtCamera.lookFrom += upChange;
+        rtCamera.lookAt += upChange;
       }
       if (IsKeyDown(KEY_LEFT_CONTROL)) {
-        lookFrom -= upChange;
-        lookAt -= upChange;
+        rtCamera.lookFrom -= upChange;
+        rtCamera.lookAt -= upChange;
       }
       if (IsKeyDown(KEY_W)) {
-        lookFrom += fwdChange;
-        lookAt += fwdChange;
+        rtCamera.lookFrom += fwdChange;
+        rtCamera.lookAt += fwdChange;
       }
       if (IsKeyDown(KEY_S)) {
-        lookFrom -= fwdChange;
-        lookAt -= fwdChange;
+        rtCamera.lookFrom -= fwdChange;
+        rtCamera.lookAt -= fwdChange;
       }
       if (IsKeyDown(KEY_A)) {
-        lookFrom -= rgtChange;
-        lookAt -= rgtChange;
+        rtCamera.lookFrom -= rgtChange;
+        rtCamera.lookAt -= rgtChange;
       }
       if (IsKeyDown(KEY_D)) {
-        lookFrom += rgtChange;
-        lookAt += rgtChange;
+        rtCamera.lookFrom += rgtChange;
+        rtCamera.lookAt += rgtChange;
       }
 
       MouseLook(GetMouseDelta());
@@ -636,27 +637,27 @@ namespace rt {
   }
 
   Camera3D Editor::Camera::toRaylibCamera3D() const {
-    return Camera3D{.position = lookFrom,
-                    .target = lookAt,
+    return Camera3D{.position = rtCamera.lookFrom,
+                    .target = rtCamera.lookAt,
                     .up = {0, 1, 0},
-                    .fovy = vFov,
+                    .fovy = rtCamera.vFov,
                     .projection = CAMERA_PERSPECTIVE};
   }
 
   glm::mat4 Editor::Camera::getViewMatrix() const {
     // glm::mat4 M = glm::mat4(1);
-    // M           = glm::translate(M, lookFrom.toGlm());
+    // M           = glm::translate(M, rtCamera.lookFrom.toGlm());
     // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
 
     // glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
     // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
     // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
 
-    return glm::lookAt(lookFrom.toGlm(), lookAt.toGlm(), vec3(0, 1, 0).toGlm());
+    return glm::lookAt(rtCamera.lookFrom.toGlm(), rtCamera.lookAt.toGlm(), vec3(0, 1, 0).toGlm());
   }
 
   glm::mat4 Editor::Camera::getProjectionMatrix() const {
-    return glm::perspective(glm::radians(vFov),
+    return glm::perspective(glm::radians(rtCamera.vFov),
                             static_cast<float>(_imageWidth) / _imageHeight,
                             0.01f, 1000.0f);
   }
