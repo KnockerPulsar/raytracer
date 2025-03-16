@@ -5,11 +5,11 @@ AlignConsecutiveDeclarations: true
 TabWidth: 2
 IndentWidth: 2
 NamespaceIndentation: All
-BinPackArguments: false
-BinPackParameters: false
+BinPackArguments: true
+BinPackParameters: true
 ColumnLimit: 120
 BraceWrapping:
   AfterStruct: true
 
-AlignAfterOpenBracket: BlockIndent
+AlignAfterOpenBracket: Align
 InsertNewlineAtEOF: false
