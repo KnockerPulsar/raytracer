@@ -31,6 +31,8 @@ namespace rt {
       ImageFromPath(filename);
     }
 
+    ImageTexture(const json &json) { ImageFromPath(json["path"].get<string>().c_str()); }
+
     void ImageFromPath(const char *filename) {
       int compsPerPixel = bytesPerPixel;
       path              = filename;
@@ -79,7 +81,6 @@ namespace rt {
     }
 
     virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
-    virtual void GetTexture(const json &j) override { ImageFromPath(j["path"].get<string>().c_str()); }
 
     ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
       return Texture::SamplePreview(
@@ -99,8 +100,6 @@ namespace rt {
     std::string path;
     Image       img;
   };
-
-  inline void from_json(const json &j, ImageTexture &it) { it.GetTexture(j); }
 
   inline void to_json(json &j, const ImageTexture &it) { j = it.toJson(); }
 } // namespace rt

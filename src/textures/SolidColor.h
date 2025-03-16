@@ -18,9 +18,9 @@ namespace rt {
     SolidColor(vec3 c) : color(c) {}
 
     SolidColor(float r, float g, float b) : color(r, g, b) {}
+    SolidColor(const json& j) : color(j["color"].get<vec3>()) {}
 
     virtual json toJson() const override { return json{{"type", "solid_color"}, {"color", color}}; }
-    virtual void GetTexture(const json &j) override { color = j["color"].get<vec3>(); }
 
     virtual vec3 Value(float u, float v, const vec3 &p) const override { return color * multiplier; }
 

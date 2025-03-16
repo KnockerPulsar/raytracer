@@ -17,20 +17,19 @@ namespace rt {
       string texType = textureJson["type"].get<std::string>();
 
       if (texType == "solid_color") {
-        return std::make_shared<SolidColor>(textureJson.get<SolidColor>());
+        return std::make_shared<SolidColor>(textureJson);
       }
 
       if (texType == "checker") {
-        return std::make_shared<CheckerTexture>(
-            textureJson.get<CheckerTexture>());
+        return std::make_shared<CheckerTexture>(textureJson);
       }
 
       if (texType == "image") {
-        return std::make_shared<ImageTexture>(textureJson.get<ImageTexture>());
+        return std::make_shared<ImageTexture>(textureJson);
       }
 
       if (texType == "noise") {
-        return std::make_shared<NoiseTexture>(textureJson.get<NoiseTexture>());
+        return std::make_shared<NoiseTexture>(textureJson);
       }
 
       return nullptr;

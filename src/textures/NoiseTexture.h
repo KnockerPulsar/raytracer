@@ -23,6 +23,9 @@ namespace rt {
     NoiseTexture(float scl, float tScl = 10, vec3 baseCol = vec3(1)) : scale(scl), turbScale(tScl), baseColor(baseCol) {
       noise = std::make_shared<Perlin>();
     }
+    NoiseTexture(const json &json)
+        : scale(json["scale"].get<float>()), turbScale(json["turb_scale"].get<float>()),
+          baseColor(json["base_color"].get<vec3>()) {}
 
     virtual vec3 Value(float u, float v, const vec3 &p) const override {
       // The noise fn can return negative values
@@ -34,11 +37,6 @@ namespace rt {
       return json{{"type", "noise"}, {"scale", scale}, {"turb_scale", turbScale}, {"base_color", baseColor}};
     }
 
-    virtual void GetTexture(const json &j) override {
-      scale     = j["scale"].get<float>();
-      turbScale = j["turb_scale"].get<float>();
-      baseColor = j["base_color"].get<vec3>();
-    }
 
     // TODO: Better perlin preview
     // Main issue: result depends on the given point and not the uv coords
@@ -62,6 +60,5 @@ namespace rt {
     }
   };
 
-  inline void from_json(const json &j, NoiseTexture &nt) { nt.GetTexture(j); }
   inline void to_json(json &j, const NoiseTexture &nt) { j = json{{"type", "noise"}, nt.toJson()}; }
 } // namespace rt
