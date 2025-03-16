@@ -49,7 +49,6 @@ namespace rt {
         editor(std::make_shared<Editor>(this, config, scene)), rt(std::make_shared<Raytracer>(this, ard)),
         currentState(editor) {
     setup();
-    changeScene(scene);
   }
 
   void App::run() {
