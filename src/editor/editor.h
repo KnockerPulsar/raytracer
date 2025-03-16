@@ -87,11 +87,12 @@ namespace rt {
 
       rt::Camera getRtCamera() const { return rtCamera; }
 
-      float GetCorrectedCropFov() const;
-
       int imageWidth() const { return _imageWidth; }
       int imageHeight() const { return _imageHeight; }
 
+      float GetCorrectedCropFov() const;
+
+      rt::Camera toSceneCamera() const;
     private:
       rt::Camera rtCamera;
 
@@ -101,6 +102,7 @@ namespace rt {
       vec3 moveDir;
 
       Vector2 preHideCursorLocation;
+      bool frameSizeAffectsCrop{false};
 
       constexpr static const float xAngleClampMin = -89.0f;
       constexpr static const float xAngleClampMax = 89.0f;

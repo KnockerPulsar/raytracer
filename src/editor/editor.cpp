@@ -287,9 +287,7 @@ namespace rt {
     auto *scene = getScene();
     auto rtCam = camera.getRtCamera();
 
-    auto const aspectRatio = static_cast<float>(camera.imageWidth()) / camera.imageHeight();
-    scene->cam = rt::Camera(rtCam.lookFrom, rtCam.lookAt, rtCam.worldUp, camera.GetCorrectedCropFov(), aspectRatio,
-                            rtCam.aperature, rtCam.focusDist, rtCam.time0, rtCam.time1);
+    scene->cam = camera.toSceneCamera();
 
     scene->imageWidth = camera.imageWidth();
     scene->imageHeight = camera.imageHeight();
@@ -498,9 +496,17 @@ namespace rt {
   }
 
   void Editor::Camera::DrawFrameOutline() const {
-    auto rectX = (editorWidth - _imageWidth) / 2;
-    auto rectY = (editorHeight - _imageHeight) / 2;
-    DrawRectangleLines(rectX, rectY, _imageWidth, _imageHeight, MAGENTA);
+    if(!frameSizeAffectsCrop)
+      return;
+
+    auto constexpr thickness = 5.0;
+    // Account for titlebar
+    auto constexpr titlebarClearence = 4;
+    auto rectX     = (editorWidth - _imageWidth) / 2;
+    auto rectY     = (editorHeight - _imageHeight) / 2;
+    DrawRectangleLinesEx(::Rectangle(rectX, rectY + (thickness * titlebarClearence), _imageWidth - thickness,
+                                     _imageHeight - (thickness * titlebarClearence)),
+                         thickness, MAGENTA);
   }
 
   void Editor::Camera::RenderImgui() {
@@ -525,6 +531,15 @@ namespace rt {
       }
 
       ImGui::DragFloat("Vertical FOV", &rtCamera.vFov, 1.0, 5.0, 179.0f);
+
+      {
+        ImGui::Checkbox("Frame size affects crop?", &frameSizeAffectsCrop);
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+          ImGui::SetTooltip(
+              "Whether setting a smaller/bigger frame size crops/expands the rendered image or just renders what you "
+              "see at a lower/higher resolution.");
+        }
+      }
 
       ImGui::Separator();
 
@@ -672,4 +687,16 @@ namespace rt {
     auto const scale = std::min(static_cast<float>(_imageHeight) / editorHeight, 1.0f);
     return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(rtCamera.vFov) / 2)));
   }
-  } // namespace rt
+
+  rt::Camera Editor::Camera::toSceneCamera() const {
+    auto const aspectRatio = static_cast<float>(_imageWidth) / _imageHeight;
+    auto       vFov        = rtCamera.vFov;
+
+    if (frameSizeAffectsCrop) {
+      vFov = GetCorrectedCropFov();
+    }
+
+    return rt::Camera(rtCamera.lookFrom, rtCamera.lookAt, rtCamera.worldUp, vFov, aspectRatio, rtCamera.aperature,
+                      rtCamera.focusDist, rtCamera.time0, rtCamera.time1);
+  }
+} // namespace rt
