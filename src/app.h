@@ -1,9 +1,10 @@
 #pragma once
 #include "AsyncRenderData.h"
 #include "Scene.h"
+
 #include <string>
 
-struct CliConfig 
+struct CliConfig
 {
   int         imageWidth  = -1;
   int         imageHeight = -1;
@@ -40,7 +41,7 @@ namespace rt {
     App(CliConfig);
 
     void run();
-    void onFrameRender();
+    void onFrameRender() const;
     void checkInput();
     void changeScene(Scene scene);
 

@@ -16,7 +16,6 @@
 #include <rlImGui.h>
 
 #include <fstream>
-#include <iostream>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -60,7 +59,7 @@ namespace rt {
     }
   }
 
-  void App::onFrameRender() {
+  void App::onFrameRender() const {
     auto objects = scene.worldRoot->getChildrenAsList();
     for (auto &&obj : objects) {
       auto t = obj->transformation.translate;
@@ -117,7 +116,7 @@ namespace rt {
     rt::Scene     scene = rt::Scene::CornellBox(600, 600);
     json          json  = scene.toJson();
     std::ofstream output("scenes/cornell.json");
-    output << std::setw(4) << json << std::endl;
+    output << std::setw(4) << json << '\n';
     output.close();
   }
 } // namespace rt
