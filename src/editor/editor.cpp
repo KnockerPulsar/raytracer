@@ -9,14 +9,12 @@
 #include "../objects/Plane.h"
 #include "../objects/Sphere.h"
 #include "Constants.h"
+#include "Util.h"
 #include "Utils.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
-#include <algorithm>
-#include <format>
 #include <imgui.h>
-#include <ranges>
 #include <raylib.h>
 #include <rlImGui.h>
 #include <rlgl.h>
@@ -24,8 +22,10 @@
 // TODO fix this ugly include
 #include <../../vendor/glm/glm/gtc/type_ptr.hpp>
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <format>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -33,6 +33,7 @@
 #include <memory>
 #include <optional>
 #include <ostream>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -279,12 +280,16 @@ namespace rt {
     }
   }
 
-  void Editor::onEnter() { camera.updateFromRtCamera(getScene()->cam); }
+  void Editor::onEnter() {}
 
   // Regenerate BVH on exit / before entering the raytracer
   void Editor::onExit() {
     auto *scene = getScene();
-    scene->cam = camera.getRtCamera();
+    auto rtCam = camera.getRtCamera();
+
+    auto const aspectRatio = static_cast<float>(camera.imageWidth()) / camera.imageHeight();
+    scene->cam = rt::Camera(rtCam.lookFrom, rtCam.lookAt, rtCam.worldUp, camera.GetCorrectedCropFov(), aspectRatio,
+                            rtCam.aperature, rtCam.focusDist, rtCam.time0, rtCam.time1);
 
     scene->imageWidth = camera.imageWidth();
     scene->imageHeight = camera.imageHeight();
@@ -660,5 +665,11 @@ namespace rt {
     return glm::perspective(glm::radians(rtCamera.vFov),
                             static_cast<float>(_imageWidth) / _imageHeight,
                             0.01f, 1000.0f);
+  }
+
+  float Editor::Camera::GetCorrectedCropFov() const {
+    // Clamp the scale in case the image is larger than the editor window.
+    auto const scale = std::min(static_cast<float>(_imageHeight) / editorHeight, 1.0f);
+    return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(rtCamera.vFov) / 2)));
   }
   } // namespace rt

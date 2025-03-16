@@ -87,6 +87,8 @@ namespace rt {
 
       rt::Camera getRtCamera() const { return rtCamera; }
 
+      float GetCorrectedCropFov() const;
+
       int imageWidth() const { return _imageWidth; }
       int imageHeight() const { return _imageHeight; }
 
