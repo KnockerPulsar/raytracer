@@ -99,6 +99,8 @@ namespace rt {
       vec3 lookFrom, lookAt, moveDir;
       float vFov;
 
+      Vector2 preHideCursorLocation;
+
       constexpr static const float xAngleClampMin = -89.0f;
       constexpr static const float xAngleClampMax = 89.0f;
       float                        panningDivider = 51.0f;

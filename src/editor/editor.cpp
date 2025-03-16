@@ -594,9 +594,12 @@ namespace rt {
     auto [upChange, fwdChange, rgtChange] =
         rtCamera.getScaledDirectionVectors(dt * speedMultiplier);
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
       HideCursor();
+      preHideCursorLocation = GetMousePosition();
+    }
 
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
       if (IsKeyDown(KEY_SPACE)) {
         lookFrom += upChange;
         lookAt += upChange;
@@ -623,9 +626,11 @@ namespace rt {
       }
 
       MouseLook(GetMouseDelta());
+      SetMousePosition(GetScreenWidth() / 2, GetScreenHeight() / 2);
     }
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) {
+      SetMousePosition(preHideCursorLocation.x, preHideCursorLocation.y);
       ShowCursor();
     }
   }
