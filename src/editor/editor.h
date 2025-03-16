@@ -25,7 +25,6 @@ namespace rt {
   class Scene;
 
   class Editor : public IState {
-  public:
     Hittable *selectedObject = nullptr;
 
     enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
@@ -116,6 +115,11 @@ namespace rt {
     RenderTexture2D rasterRT;
     int const editorWidth, editorHeight;
 
+    struct ViewState {
+      bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
+    } viewState;
+
+  public:
     Editor(CliConfig const &config, Scene const &initialScene)
         : camera(config.editorWidth, config.editorHeight, config.imageWidth,
                  config.imageHeight, initialScene),

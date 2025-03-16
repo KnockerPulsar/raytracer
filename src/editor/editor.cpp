@@ -13,7 +13,10 @@
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
+#include <algorithm>
+#include <format>
 #include <imgui.h>
+#include <ranges>
 #include <raylib.h>
 #include <rlImGui.h>
 #include <rlgl.h>
@@ -95,27 +98,31 @@ namespace rt {
 
     RenderViewport();
 
-    ImGui::Begin("Objects");
-    {
-      if (dynamic_cast<BVHNode *>(getScene()->worldRoot) != nullptr) {
-        if (ImGui::Button("Regenerate BVH", {-1, 0})) {
+    if (viewState.objectList) {
+      ImGui::Begin("Objects");
+      {
+        if (dynamic_cast<BVHNode *>(getScene()->worldRoot) != nullptr) {
+          if (ImGui::Button("Regenerate BVH", {-1, 0})) {
 
-          // Regenerate tree
-          getScene()->worldRoot = getScene()->worldRoot->addChild(nullptr);
+            // Regenerate tree
+            getScene()->worldRoot = getScene()->worldRoot->addChild(nullptr);
+          }
         }
+
+        AddObjectImgui();
+
+        ObjectListImgui();
       }
-
-      AddObjectImgui();
-
-      ObjectListImgui();
+      ImGui::End();
     }
-    ImGui::End();
 
-    RaytraceSettingsImgui();
+    if(viewState.raytracingSettings)
+      RaytraceSettingsImgui();
+
+    if(viewState.cameraSettings)
+      camera.RenderImgui();
 
     SelectedObjectGizmo();
-
-    camera.RenderImgui();
   }
 
   void Editor::SelectedObjectGizmo() {
@@ -299,7 +306,7 @@ namespace rt {
 
   void Editor::RaytraceSettingsImgui() {
     getScene()->settings.OnImgui();
-    
+
     ImGui::Begin("Other settings");
     ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
     ImGui::Checkbox("Save on render?", &app->saveOnRender);
@@ -308,7 +315,7 @@ namespace rt {
     if(ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
       app->changeNumThreads(numThreads);
     }
-    
+
     ImGui::End();
   }
 
@@ -399,6 +406,35 @@ namespace rt {
         ImGui::EndMenu();
       }
 
+      if (ImGui::BeginMenu("View")) {
+        auto const menuItems = {
+            std::pair{"raytracing settings", &viewState.raytracingSettings},
+            {"camera settings", &viewState.cameraSettings},
+            {"object list", &viewState.objectList}
+        };
+
+        for (auto const& [text, statePtr] : menuItems) {
+          using namespace std::string_literals;
+          if (ImGui::MenuItem(std::format("Toggle {}", text).c_str())) {
+            *statePtr = !*statePtr;
+          }
+        }
+
+        if(ImGui::MenuItem("Hide all"))
+        {
+          for(auto const& [_, statePtr]: menuItems)
+            *statePtr = false;
+        }
+
+        if(ImGui::MenuItem("Show all"))
+        {
+          for(auto const& [_, statePtr]: menuItems)
+            *statePtr = true;
+        }
+
+        ImGui::EndMenu();
+      }
+
       if (ImGui::BeginMenu("Built in")) {
         for (auto &[name, loader] : Scene::builtInScenes) {
           if (ImGui::MenuItem(name.c_str())) {
@@ -443,7 +479,7 @@ namespace rt {
 
         json          json = getScene()->toJson();
         std::ofstream outputFile(sceneNamePlusTime.str());
-        outputFile << std::setw(4) << json << std::endl;
+        outputFile << std::setw(4) << json << '\n';
         outputFile.close();
       }
 
