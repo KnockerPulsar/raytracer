@@ -5,6 +5,7 @@
 #include "RenderAsync.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
+#include "editor/Utils.h"
 #include "stb_image_write.h"
 #include <algorithm>
 #include <functional>
@@ -118,14 +119,18 @@ namespace rt {
           Autosave();
       }
 
-      DrawTextureRec(
-          ard.raytraceRT.texture,
-          (Rectangle){0, 0, (float)getScene()->imageWidth, (float)getScene()->imageHeight},
-          (Vector2){0, 0}, // TODO center the raytraced image (or maybe ditch the whole state and just display it via imgui)
-          WHITE
-      );
 
-      // printf("%s\n", allFinished ? "all done" : "not yet");
+
+      auto const fitSize =
+          EditorUtils::FitIntoArea(ImVec2(app->editorWidth, app->editorHeight),
+                                   ImVec2(ard.raytraceRT.texture.width, ard.raytraceRT.texture.height));
+
+      float const dWidth = app->editorWidth - fitSize.x;
+      float const dHeight = app->editorHeight - fitSize.y;
+
+      DrawTexturePro(ard.raytraceRT.texture,
+                     (Rectangle){0, 0, (float)getScene()->imageWidth, (float)getScene()->imageHeight},
+                     (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
       return allFinished;
     }
 
