@@ -23,9 +23,6 @@ Camera::Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov,
   float theta = DegressToRadians(vFov);
 
   // https://raytracing.github.io/images/fig-1.14-cam-view-geom.jpg
-  // TODO fix fov when using a frame size different from the editor size
-  // the output image should only show the part inside the frame preview
-  // rectangle
   float h = tan(theta / 2);
   auto const frameHeight = 2.0 * h;
   auto const frameWidth = aspectRatio * frameHeight;
