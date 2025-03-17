@@ -18,8 +18,7 @@ Camera::Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov,
                float time1)
     : lookFrom(lookFrom), lookAt(lookAt), worldUp(vUp), vFov(vFov),
       aspectRatio(aspectRatio), aperature(aperature), focusDist(focusDist),
-      time0(time0), time1(time1) {
-
+      time0(time0), time1(time1), lensRadius(aperature / 2) {
   // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
   float theta = DegressToRadians(vFov);
 
@@ -30,20 +29,12 @@ Camera::Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov,
   float h = tan(theta / 2);
   auto const frameHeight = 2.0 * h;
   auto const frameWidth = aspectRatio * frameHeight;
-  lensRadius = aperature / 2;
 
   // https://raytracing.github.io/images/fig-1.16-cam-view-up.jpg
-  localForward = (lookAt - lookFrom).Normalize(); // back vector
-  localRight =
-      -vec3::CrsProd(worldUp, localForward).Normalize(); // Right vector
-  localUp = -vec3::CrsProd(
-      localForward, localRight); // Local up vector, vUp is the world up vector
-  horizontal = focusDist * frameWidth * localRight;
-  vertical = focusDist * frameHeight * localUp;
-  lowerLeftCorner =
-      this->lookFrom - horizontal / 2 - vertical / 2 + focusDist * localForward;
-
-  lensRadius = aperature / 2;
+  RecomputeLocalBases();
+  horizontal      = focusDist * frameWidth * localRight;
+  vertical        = focusDist * frameHeight * localUp;
+  lowerLeftCorner = this->lookFrom - horizontal / 2 - vertical / 2 + focusDist * localForward;
 }
 
   // Should probably be moved to from_json()?
@@ -94,4 +85,9 @@ Camera::Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov,
     return std::make_tuple(upChange, fwdChange, rgtChange);
   }
 
+  void Camera::RecomputeLocalBases() {
+    localForward = (lookAt - lookFrom).Normalize();                   // back vector
+    localRight   = -vec3::CrsProd(worldUp, localForward).Normalize(); // Right vector
+    localUp      = -vec3::CrsProd(localForward, localRight);          // Local up vector, vUp is the world up vector
+  }
 } // namespace rt

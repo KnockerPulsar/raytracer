@@ -577,6 +577,7 @@ namespace rt {
     rtCamera.lookFrom    = rtCamera.lookFrom;
     rtCamera.lookAt      = rtCamera.lookAt;
     rtCamera.aspectRatio = static_cast<float>(_imageWidth) / _imageHeight;
+    rtCamera.RecomputeLocalBases();
   }
 
   void Editor::Camera::Fwd(float deltaTime) {

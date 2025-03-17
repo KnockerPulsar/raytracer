@@ -43,6 +43,8 @@ namespace rt {
 
     void                         RenderImgui();
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
+
+    void RecomputeLocalBases();
   };
 
   inline void to_json(json &j, const Camera &c) {
