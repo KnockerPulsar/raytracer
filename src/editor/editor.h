@@ -50,7 +50,7 @@ namespace rt {
     class Camera
     {
     public:
-      enum ControlType { flyCam, lookAtPoint, controlTypesCount };
+      enum class ControlType { flyCam, lookAtPoint, controlTypesCount };
 
       inline static vec3 lineStart, lineEnd;
 
@@ -64,6 +64,10 @@ namespace rt {
       void Fwd(float deltaTime);
 
       void Bck(float deltaTime);
+
+      void lookAtAngle(vec3 angle);
+
+      void forwardToAngle(vec3 fwd);
 
       void MouseLook(Vector2 mousePositionDelta);
 
@@ -109,8 +113,8 @@ namespace rt {
       float                        panningDivider = 51.0f;
       float                        movScale       = 10.0f;
       float                        movMultiplier  = 5.0f;
-      vec3                         angle          = {0, -3.14, 0}; // Used to rotate the camera using the mouse
       Vector2                      rotSensitity   = {0.003f, 0.003f};
+      vec3                         angle; // Used to rotate the camera using the mouse
 
       ControlType               controlType         = ControlType::flyCam;
       inline static const char *controlTypeLabels[] = {"flyCam", "lookAt"};

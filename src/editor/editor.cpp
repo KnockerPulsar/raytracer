@@ -14,6 +14,7 @@
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
+#include <algorithm>
 #include <imgui.h>
 #include <raylib.h>
 #include <rlImGui.h>
@@ -511,23 +512,19 @@ namespace rt {
 
   void Editor::Camera::RenderImgui() {
     if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
-      vec3 deltaPos = rtCamera.lookFrom;
+      if(ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05))
+      {
+        rtCamera.lookAt = rtCamera.lookFrom + rtCamera.localForward;
+      }
 
-      ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05);
+      ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels,
+                   static_cast<int>(Editor::Camera::ControlType::controlTypesCount), 0);
 
-      ImGui::Combo(
-          "Camera type", (int *)&controlType, controlTypeLabels, Editor::Camera::ControlType::controlTypesCount, 0
-      );
-
-      if (controlType == ControlType::lookAtPoint)
+      if (controlType == ControlType::lookAtPoint) {
         ImGui::DragFloat3("rtCamera.lookAt", &rtCamera.lookAt.x, 0.05);
-      else {
-        deltaPos -= rtCamera.lookFrom; // lookFrom = oldLookFrom + delta
-        rtCamera.lookAt += (deltaPos);
-
-        ImGui::DragFloat2("rotation", &angle.x, 0.05f);
-
-        MouseLook({0, 0});
+      } else {
+        if(ImGui::DragFloat2("rotation", &angle.x, 0.05f))
+          lookAtAngle(angle);
       }
 
       ImGui::DragFloat("Vertical FOV", &rtCamera.vFov, 1.0, 5.0, 179.0f);
@@ -553,29 +550,20 @@ namespace rt {
     ImGui::End();
   }
 
-  Editor::Camera::Camera(int editorWidth, int editorHeight, int imageWidth,
-                         int imageHeight, Scene const &initialScene)
-      : editorWidth(editorWidth), editorHeight(editorHeight),
-        _imageWidth(imageWidth), _imageHeight(imageHeight),
-        rtCamera(initialScene.cam) {
+  Editor::Camera::Camera(int editorWidth, int editorHeight, int imageWidth, int imageHeight, Scene const &initialScene)
+      : editorWidth(editorWidth), editorHeight(editorHeight), _imageWidth(imageWidth), _imageHeight(imageHeight),
+        rtCamera(initialScene.cam), controlType(ControlType::flyCam) {
     updateFromRtCamera(rtCamera);
-    auto const fwd = localForward();
-
-    angle.x = fwd.y;
-
-    auto xzFwdProj = fwd.projectOntoPlane(vec3(0, 1, 0)).Normalize();
-    auto cosAngley = vec3::DotProd(xzFwdProj, {0, 0, -1});
-    auto signY = fwd.x < 0 ? 1 : -1;
-    angle.y = signY * acos(cosAngley);
   }
 
   void Editor::Camera::updateFromRtCamera(rt::Camera const &sceneCamera) {
     rtCamera = sceneCamera;
+    rtCamera.RecomputeLocalBases();
+
+    forwardToAngle(localForward());
   }
 
   void Editor::Camera::UpdateRtCamera() {
-    rtCamera.lookFrom    = rtCamera.lookFrom;
-    rtCamera.lookAt      = rtCamera.lookAt;
     rtCamera.aspectRatio = static_cast<float>(_imageWidth) / _imageHeight;
     rtCamera.RecomputeLocalBases();
   }
@@ -584,27 +572,47 @@ namespace rt {
     rtCamera.lookFrom += moveDir * deltaTime;
     UpdateRtCamera();
   }
+
   void Editor::Camera::Bck(float deltaTime) {
     rtCamera.lookFrom += -moveDir * deltaTime;
     UpdateRtCamera();
+  }
+
+  void Editor::Camera::lookAtAngle(vec3 angle) {
+    // x = r * cos(90 - angle.y) * sin(90 - angle.x)
+    // y = r * cos(90 - angle.x)
+    // z = r * sin(90 - angle.y) * sin(90 - angle.x)
+    auto const dir =
+        vec3{
+            cos(pi / 2 - angle.y) * sin(pi / 2 - angle.x),
+            cos(angle.x - pi / 2),
+            sin(pi / 2 - angle.y) * sin(pi / 2 - angle.x),
+        };
+
+
+    rtCamera.lookAt = rtCamera.lookFrom + dir;
+    UpdateRtCamera();
+  }
+
+  void Editor::Camera::forwardToAngle(vec3 fwd) {
+    assert(fwd.SqrLen() > 0);
+
+    // https://stackoverflow.com/a/50086913
+    angle.x = pi / 2 - std::acos(fwd.z);
+    angle.y = pi / 2 - std::atan2(fwd.z, fwd.x);
+
+    angle.y = glm::wrapAngle(angle.y);
+    angle.x = std::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
   }
 
   void Editor::Camera::MouseLook(Vector2 mousePositionDelta) {
     angle.x += (mousePositionDelta.y * -rotSensitity.y);
     angle.y += (mousePositionDelta.x * -rotSensitity.x);
 
-    angle.x =
-        glm::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
     angle.y = glm::wrapAngle(angle.y);
+    angle.x = std::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
 
-    glm::mat4 rotMat = glm::eulerAngleYX(angle.y, angle.x);
-    glm::vec4 defaultFwd = glm::vec4(0, 0, -1, 0);
-
-    glm::vec3 rotatedFwd = rotMat * defaultFwd;
-
-    rtCamera.lookAt = rtCamera.lookFrom + rotatedFwd;
-
-    UpdateRtCamera();
+    lookAtAngle(angle);
   }
 
   void Editor::Camera::Update(float dt) {
