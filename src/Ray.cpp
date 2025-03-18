@@ -45,8 +45,8 @@ namespace rt {
 
   void Ray::Trace(AsyncRenderData &ard, const Scene* scene, int threadIndex) {
 
-    auto start = high_resolution_clock::now();
     while (true) {
+      auto start = high_resolution_clock::now();
       auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk(ard, threadIndex);
 
       for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
