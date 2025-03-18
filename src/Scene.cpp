@@ -70,7 +70,7 @@ namespace rt {
   void Scene::drawSkysphere() {
     rlDisableBackfaceCulling();
     rlDisableDepthMask();
-    DrawModel(skysphereModel, skysphere->transformation.translate, 1.0f, WHITE);
+    DrawModel(skysphereModel, skysphere->transformation.getTranslation(), 1.0f, WHITE);
     rlEnableDepthMask();
     rlEnableBackfaceCulling();
   }
@@ -128,21 +128,21 @@ namespace rt {
     auto materialRight  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 0.1);
 
     auto groundSphere                     = Sphere(100.0, materialGround);
-    groundSphere.transformation.translate = vec3(0, -100.5, -1);
+    groundSphere.transformation.setTranslation(vec3(0, -100.5, -1));
     groundSphere.name                     = "Ground Sphere";
 
     auto centerSphere                     = Sphere(0.5, materialCenter);
-    centerSphere.transformation.translate = vec3(0, 0, -1.0);
+    centerSphere.transformation.setTranslation(vec3(0, 0, -1.0));
     centerSphere.name                     = "Center Sphere";
 
     auto leftSphereOuter                     = Sphere(0.5, materialLeft);
-    leftSphereOuter.transformation.translate = vec3(-1, 0, -1);
+    leftSphereOuter.transformation.setTranslation(vec3(-1, 0, -1));
     leftSphereOuter.name                     = "Left Sphere Outer";
     auto leftSphereInner                     = Sphere(-0.45, materialLeft);
-    leftSphereInner.transformation.translate = vec3(-1, 0, -1);
+    leftSphereInner.transformation.setTranslation(vec3(-1, 0, -1));
     leftSphereInner.name                     = "Left Sphere Inner";
     auto rightSphere                         = Sphere(0.5, materialRight);
-    rightSphere.transformation.translate     = vec3(1, 0, -1);
+    rightSphere.transformation.setTranslation(vec3(1, 0, -1));
     rightSphere.name                         = "Right Sphere";
 
     world //
@@ -178,10 +178,10 @@ namespace rt {
     auto materialRight = make_shared<Lambertian>(vec3(1, 0, 0));
 
     auto leftSphere                      = make_shared<Sphere>(Sphere(r, materialLeft));
-    leftSphere->transformation.translate = vec3(-r, 0, -1);
+    leftSphere->transformation.setTranslation(vec3(-r, 0, -1));
 
     auto rightSphere                      = make_shared<Sphere>(Sphere(r, materialRight));
-    rightSphere->transformation.translate = vec3(r, 0, -1);
+    rightSphere->transformation.setTranslation(vec3(r, 0, -1));
 
     world // Scene::Scene
         .Add(leftSphere)
@@ -229,29 +229,29 @@ namespace rt {
           }
 
           auto sphere                     = Sphere(0.2, sphereMaterial);
-          sphere.transformation.translate = center;
+          sphere.transformation.setTranslation(center);
           world.Add(make_shared<Sphere>(sphere));
         }
       }
     }
     auto mat1                        = make_shared<Dielectric>(1.5);
     auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.translate = vec3(0, 1, 0);
+    sphere1.transformation.setTranslation(vec3(0, 1, 0));
     world.Add(make_shared<Sphere>(sphere1));
 
     auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
     auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.translate = vec3(-4, 1, 0);
+    sphere2.transformation.setTranslation(vec3(-4, 1, 0));
     world.Add(make_shared<Sphere>(sphere2));
 
     auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
     auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.translate = vec3(4, 1, 0);
+    sphere3.transformation.setTranslation(vec3(4, 1, 0));
     world.Add(make_shared<Sphere>(sphere3));
 
     auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
     auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(groundMaterial));
-    groundSphere.transformation.translate = vec3(0, -1000, 0);
+    groundSphere.transformation.setTranslation(vec3(0, -1000, 0));
     world.Add(make_shared<Sphere>(groundSphere));
 
     s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
@@ -279,7 +279,7 @@ namespace rt {
 
     auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
     auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(checker));
-    groundSphere.transformation.translate = vec3(0, -1000, 0);
+    groundSphere.transformation.setTranslation(vec3(0, -1000, 0));
     world.Add(make_shared<Sphere>(groundSphere));
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
@@ -302,13 +302,13 @@ namespace rt {
             sphereMaterial = make_shared<Metal>(albedo, fuzz);
 
             auto sphere                     = Sphere(0.2, sphereMaterial);
-            sphere.transformation.translate = center;
+            sphere.transformation.setTranslation(center);
             world.Add(make_shared<Sphere>(sphere));
 
           } else {
             sphereMaterial                  = make_shared<Dielectric>(1.5);
             auto sphere                     = Sphere(0.2, sphereMaterial);
-            sphere.transformation.translate = center;
+            sphere.transformation.setTranslation(center);
             world.Add(make_shared<Sphere>(sphere));
           }
         }
@@ -317,19 +317,19 @@ namespace rt {
 
     auto mat1                        = make_shared<Dielectric>(1.5);
     auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.translate = vec3(0, 1, 0);
+    sphere1.transformation.setTranslation(vec3(0, 1, 0));
 
     world.Add(make_shared<Sphere>(sphere1));
 
     auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
     auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.translate = vec3(-4, 1, 0);
+    sphere2.transformation.setTranslation(vec3(-4, 1, 0));
 
     world.Add(make_shared<Sphere>(sphere2));
 
     auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
     auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.translate = vec3(4, 1, 0);
+    sphere3.transformation.setTranslation(vec3(4, 1, 0));
 
     world.Add(make_shared<Sphere>(sphere3));
 
@@ -415,11 +415,11 @@ namespace rt {
     auto diffLight = make_shared<DiffuseLight>(vec3(4, 4, 4));
 
     auto sphere1                     = Sphere(1000, make_shared<Lambertian>(perText));
-    sphere1.transformation.translate = vec3(0, -1000, 0);
+    sphere1.transformation.setTranslation(vec3(0, -1000, 0));
     world.Add(make_shared<Sphere>(sphere1));
 
     auto sphere2                     = Sphere(2, make_shared<Lambertian>(perText));
-    sphere2.transformation.translate = vec3(0, 2, 0);
+    sphere2.transformation.setTranslation(vec3(0, 2, 0));
     world.Add(make_shared<Sphere>(sphere2));
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));

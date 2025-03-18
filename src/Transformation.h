@@ -12,12 +12,38 @@
 
 namespace rt {
   class Transformation : public IImguiDrawable {
-  public:
+  private:
     vec3 translate;
     vec3 rotate;
 
+    glm::mat4 modelMatrix, inverseModelMatrix;
+    glm::mat3 rotationMatrix, inverseRotationMatrix;
+
+    friend void from_json(const json &objectJson, Transformation &transformation);
+    friend void to_json(json &j, const Transformation &t);
+
+    // Should actually never be called while raytracing.
+    void recomputeCaches() {
+      // Order matters. The model matrix depends on the rotation matrix.
+      rotationMatrix = glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z));
+      inverseRotationMatrix = glm::inverse(rotationMatrix);
+
+      modelMatrix = [&] {
+        auto const translationMat = glm::translate(glm::mat4(1.0f), translate.toGlm());
+        auto const rotMatrix      = glm::mat4(rotationMatrix);
+
+        assert(rotMatrix[3][3] == 1.0f);
+
+        return translationMat * rotMatrix;
+      }();
+      inverseModelMatrix = glm::inverse(modelMatrix);
+    }
+
+  public:
     Transformation(vec3 translation = vec3::Zero(), vec3 rotation = vec3::Zero())
-        : translate(translation), rotate(rotation) {}
+        : translate(translation), rotate(rotation) {
+      recomputeCaches();
+    }
 
     static vec3 applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat) {
       auto glmVec     = glm::vec4(vec.x, vec.y, vec.z, 1);
@@ -26,9 +52,9 @@ namespace rt {
       return vec3(rotatedVec.x, rotatedVec.y, rotatedVec.z);
     }
 
-    vec3 Apply(const vec3 &inVec) const { return applyGlmMat(inVec, getModelMatrix()); }
+    vec3 Apply(const vec3 &inVec) const { return applyGlmMat(inVec, modelMatrix); }
 
-    vec3 Inverse(const vec3 &inVec) const { return applyGlmMat(inVec, getInverseModelMatrix()); }
+    vec3 Inverse(const vec3 &inVec) const { return applyGlmMat(inVec, inverseModelMatrix); }
 
     AABB regenAABB(const AABB &aabb) const {
       // Generate all 8 vertices of the input AABB
@@ -45,9 +71,8 @@ namespace rt {
           aabb.max,                                   // 111
       };
 
-      glm::mat4 model = getModelMatrix();
       for (auto &&vert : vertices) {
-        vert = applyGlmMat(vert, model);
+        vert = applyGlmMat(vert, modelMatrix);
       }
 
       vec3 newMin = vec3(infinity);
@@ -66,26 +91,28 @@ namespace rt {
       return AABB(newMin, newMax);
     }
 
-    glm::mat4 getModelMatrix() const {
-      glm::mat4 model          = glm::mat4(1.0f);
-      glm::mat4 translationMat = glm::translate(model, translate.toGlm());
-      glm::mat4 rotationMatrix = getRotationMatrix();
+    glm::mat4 getRotationMatrix() const { return rotationMatrix; }
 
-      return translationMat * rotationMatrix;
-    }
-
-    glm::mat4 getRotationMatrix() const {
-      return glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z));
-    }
-
-    glm::mat4 getInverseModelMatrix() const { return glm::inverse(getModelMatrix()); }
-
-    glm::mat4 getInverseRotationMatrix() const { return glm::inverse(getRotationMatrix()); }
+    glm::mat4 getInverseRotationMatrix() const { return inverseRotationMatrix; }
 
     virtual void OnImgui() override {
       ImGui::DragFloat3(
           ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
+    }
+
+    vec3 getRotation() const { return rotate; }
+
+    void setRotation(vec3 eulerAngles) {
+      rotate = eulerAngles;
+      recomputeCaches();
+    }
+
+    vec3 getTranslation() const { return translate; }
+
+    void setTranslation(vec3 tranlsation) {
+      translate = tranlsation;
+      recomputeCaches();
     }
   };
 

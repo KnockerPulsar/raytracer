@@ -62,14 +62,14 @@ namespace rt {
 
     static Plane YZPlane(float w, float h) {
       Plane plane                 = Plane(w, h);
-      plane.transformation.rotate = vec3(0.0f, 0.0f, 90.0f);
+      plane.transformation.setRotation(vec3(0.0f, 0.0f, 90.0f));
 
       return plane;
     }
 
     static Plane XYPlane(float w, float h) {
       Plane plane                 = Plane(w, h);
-      plane.transformation.rotate = vec3(90.0f, 0.0f, 0.0f);
+      plane.transformation.setRotation(vec3(90.0f, 0.0f, 0.0f));
 
       return plane;
     }

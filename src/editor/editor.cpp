@@ -51,7 +51,7 @@ namespace rt {
       DrawGrid(10, 10);
 
       if (!getScene()->skysphereTexture.empty()) {
-        getScene()->skysphere->transformation.translate = camera.getLookFrom();
+        getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
         getScene()->drawSkysphere();
       }
 
@@ -134,9 +134,10 @@ namespace rt {
 
       float scaleTemp[3];
       float model[16];
-      ImGuizmo::RecomposeMatrixFromComponents(
-          &selectedObject->transformation.translate.x, &selectedObject->transformation.rotate.x, scaleTemp, model
-      );
+      auto const translation = selectedObject->transformation.getTranslation();
+      auto const rotation = selectedObject->transformation.getRotation();
+      ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model);
+
       ImGuizmo::BeginFrame();
 
       ImGui::Begin("Selected object", 0, ImGuiWindowFlags_AlwaysAutoResize);
@@ -156,8 +157,8 @@ namespace rt {
 
         ImGuizmo::DecomposeMatrixToComponents(model, &translation.x, &rotation.x, &scale.x);
 
-        selectedObject->transformation.translate = translation;
-        selectedObject->transformation.rotate    = rotation;
+        selectedObject->transformation.setTranslation(translation);
+        selectedObject->transformation.setRotation(rotation);
       }
 
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});

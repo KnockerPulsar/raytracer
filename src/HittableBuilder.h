@@ -24,17 +24,17 @@ namespace rt {
     }
 
     HittableBuilder &withTranslation(vec3 translation) {
-      hittable->transformation.translate = translation;
+      hittable->transformation.setTranslation(translation);
       return *this;
     }
 
     HittableBuilder &withRotation(vec3 rotation) {
-      hittable->transformation.rotate = rotation;
+      hittable->transformation.setRotation(rotation);
       return *this;
     }
 
     HittableBuilder &rotate(vec3 rotation) {
-      hittable->transformation.rotate += rotation;
+      hittable->transformation.setRotation(hittable->transformation.getRotation() + rotation);
       return *this;
     }
 

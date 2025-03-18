@@ -10,7 +10,7 @@ namespace rt {
   class IRasterizable {
   public:
     std::string name;
-    
+
     virtual void Rasterize(vec3 color){};
     virtual void RasterizeTransformed(Transformation t, vec3 color){
       rlPushMatrix();
@@ -19,8 +19,8 @@ namespace rt {
       rlPopMatrix();
     };
     static void  Transform(Transformation transformation) {
-       auto [rotX, rotY, rotZ] = transformation.rotate;
-       auto [x, y, z]          = transformation.translate;
+       auto [rotX, rotY, rotZ] = transformation.getRotation();
+       auto [x, y, z]          = transformation.getTranslation();
        rlTranslatef(x, y, z);
        rlRotatef(rotX, 1, 0, 0);
        rlRotatef(rotY, 0, 1, 0);
