@@ -95,20 +95,24 @@ namespace rt {
 
     glm::mat4 getInverseRotationMatrix() const { return inverseRotationMatrix; }
 
-    virtual void OnImgui() override {
-      ImGui::DragFloat3(
-          ("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
-      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
-    }
-
     vec3 getRotation() const { return rotate; }
+
+    vec3 getTranslation() const { return translate; }
+
+    virtual void OnImgui() override {
+      auto const translationChanged =
+          ImGui::DragFloat3(("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
+      auto const rotationChanged =
+          ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
+
+      if(translationChanged || rotationChanged)
+        recomputeCaches();
+    }
 
     void setRotation(vec3 eulerAngles) {
       rotate = eulerAngles;
       recomputeCaches();
     }
-
-    vec3 getTranslation() const { return translate; }
 
     void setTranslation(vec3 tranlsation) {
       translate = tranlsation;
@@ -120,6 +124,7 @@ namespace rt {
   inline void from_json(const json &objectJson, Transformation &transformation) {
     transformation.translate = objectJson["translation"].get<vec3>();
     transformation.rotate = objectJson["rotation"].get<vec3>();
+    transformation.recomputeCaches();
   }
 
   inline void to_json(json &j, const Transformation &t) {
