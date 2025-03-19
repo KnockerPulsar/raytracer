@@ -67,11 +67,30 @@ vec3 rt::Transformation::getRotation() const {
 
 vec3 rt::Transformation::getTranslation() const { return translate; }
 
+namespace
+{
+  Quaternion fromEuler(vec3 euler) {
+    auto const xQuat = QuaternionFromEuler(glm::radians(euler.x), 0, 0);
+    auto const yQuat = QuaternionFromEuler(0, glm::radians(euler.y), 0);
+    auto const zQuat = QuaternionFromEuler(0, 0, glm::radians(euler.z));
+
+    return QuaternionMultiply(QuaternionMultiply(xQuat, yQuat), zQuat);
+  }
+}
+
 void rt::Transformation::OnImgui() {
   auto const translationChanged =
       ImGui::DragFloat3(("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
+
+  auto euler = toEulerRotation();
+  auto const originalEuler = euler;
   auto const rotationChanged =
-      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &rotate.x, 0.05f);
+      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &euler.x, 0.05f);
+
+  if (rotationChanged) {
+    auto deltaQuaternion = fromEuler(euler - originalEuler);
+    rotate               = QuaternionMultiply(deltaQuaternion, rotate);
+  }
 
   if (translationChanged || rotationChanged)
     recomputeCaches();
@@ -104,7 +123,7 @@ vec3 rt::Transformation::toEulerRotation() const {
 }
 
 void rt::Transformation::fromEulerRotation(vec3 euler) {
-  rotate = QuaternionFromEuler(glm::radians(euler.x), glm::radians(euler.y), glm::radians(euler.z));
+  rotate = fromEuler(euler);
 }
 
 vec3 rt::Transformation::ApplyRotation(const vec3 &inVec) const {
