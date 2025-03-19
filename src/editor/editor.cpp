@@ -541,9 +541,9 @@ namespace rt {
 
       ImGui::Separator();
 
-      ImGui::DragFloat("Camera speed multiplier", &movScale, 0.1, 1, 100);
+      ImGui::DragFloat("Camera speed multiplier", &movementSpeedMultiplier, 0.1, 1, 100);
 
-      ImGui::DragFloat("Camera boost multiplier", &movMultiplier, 0.1, 1, 10);
+      ImGui::DragFloat("Camera boost multiplier", &boostMultiplier, 0.1, 1, 10);
 
       ImGui::DragInt2("frame size", &_imageWidth);
     }
@@ -617,10 +617,10 @@ namespace rt {
   }
 
   void Editor::Camera::Update(float dt) {
-    float speedMultiplier = 1.0f;
+    float speedMultiplier = movementSpeedMultiplier;
 
     if (IsKeyDown(KEY_LEFT_SHIFT))
-      speedMultiplier *= movMultiplier;
+      speedMultiplier *= boostMultiplier;
 
     auto [upChange, fwdChange, rgtChange] =
         rtCamera.getScaledDirectionVectors(dt * speedMultiplier);

@@ -111,8 +111,8 @@ namespace rt {
       constexpr static const float xAngleClampMin = -89.0f;
       constexpr static const float xAngleClampMax = 89.0f;
       float                        panningDivider = 51.0f;
-      float                        movScale       = 10.0f;
-      float                        movMultiplier  = 5.0f;
+      float                        movementSpeedMultiplier = 10.0f;
+      float                        boostMultiplier         = 5.0f;
       Vector2                      rotSensitity   = {0.003f, 0.003f};
       vec3                         angle; // Used to rotate the camera using the mouse
 
