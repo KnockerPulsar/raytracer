@@ -11,6 +11,7 @@ namespace rt {
   private:
     vec3 translate;
     Quaternion rotate;
+    Quaternion invertedRotate;
 
     friend void from_json(const json &objectJson, Transformation &transformation);
     friend void to_json(json &j, const Transformation &t);

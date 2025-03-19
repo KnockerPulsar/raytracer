@@ -11,22 +11,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
-
-void rt::Transformation::recomputeCaches() {
-  /* // Order matters. The model matrix depends on the rotation matrix. */
-  /* rotationMatrix        = glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z)); */
-  /* inverseRotationMatrix = glm::inverse(rotationMatrix); */
-  /*  */
-  /* modelMatrix = [&] { */
-  /*   auto const translationMat = glm::translate(glm::mat4(1.0f), translate.toGlm()); */
-  /*   auto const rotMatrix      = glm::mat4(rotationMatrix); */
-  /*  */
-  /*   assert(rotMatrix[3][3] == 1.0f); */
-  /*  */
-  /*   return translationMat * rotMatrix; */
-  /* }(); */
-  /* inverseModelMatrix = glm::inverse(modelMatrix); */
-}
+void rt::Transformation::recomputeCaches() { invertedRotate = QuaternionInvert(rotate); }
 
 rt::Transformation::Transformation(vec3 translation, vec3 rotation)
     : translate(translation), rotate(QuaternionFromEuler(rotation.x, rotation.y, rotation.z)) {
@@ -127,5 +112,5 @@ vec3 rt::Transformation::ApplyRotation(const vec3 &inVec) const {
 }
 
 vec3 rt::Transformation::ApplyInverseRotation(const vec3 &inVec) const {
-  return Vector3RotateByQuaternion(inVec, QuaternionInvert(rotate));
+  return Vector3RotateByQuaternion(inVec, invertedRotate);
 }
