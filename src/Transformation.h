@@ -34,7 +34,9 @@ namespace rt {
 
     AABB regenAABB(const AABB &aabb) const;
 
+    // Angles in degrees
     vec3 getRotationEuler() const;
+    glm::vec4 getRotationAxisAngle() const;
     vec3 getTranslation() const;
 
     virtual void OnImgui() override;

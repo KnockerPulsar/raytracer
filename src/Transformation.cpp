@@ -65,6 +65,13 @@ vec3 rt::Transformation::getRotationEuler() const {
   return toEulerRotation();
 }
 
+glm::vec4 rt::Transformation::getRotationAxisAngle() const {
+  Vector3 outAxis;
+  float outAngle;
+  QuaternionToAxisAngle(rotate, &outAxis, &outAngle);
+  return glm::vec4(outAxis.x, outAxis.y, outAxis.z, glm::degrees(outAngle));
+}
+
 vec3 rt::Transformation::getTranslation() const { return translate; }
 
 namespace
