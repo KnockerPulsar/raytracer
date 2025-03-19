@@ -20,12 +20,10 @@ namespace rt {
     };
 
     static void  Transform(Transformation transformation) {
-       auto [rotX, rotY, rotZ] = transformation.getRotationEuler();
+       auto rotationAxisAngle = transformation.getRotationAxisAngle();
        auto [x, y, z]          = transformation.getTranslation();
        rlTranslatef(x, y, z);
-       rlRotatef(rotX, 1, 0, 0);
-       rlRotatef(rotY, 0, 1, 0);
-       rlRotatef(rotZ, 0, 0, 1);
+       rlRotatef(rotationAxisAngle.w, rotationAxisAngle.x, rotationAxisAngle.y, rotationAxisAngle.z);
     }
   };
 } // namespace rt
