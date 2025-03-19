@@ -34,7 +34,7 @@ namespace rt {
 
     AABB regenAABB(const AABB &aabb) const;
 
-    vec3 getRotation() const;
+    vec3 getRotationEuler() const;
     vec3 getTranslation() const;
 
     virtual void OnImgui() override;

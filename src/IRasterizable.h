@@ -18,8 +18,9 @@ namespace rt {
       Rasterize(color);
       rlPopMatrix();
     };
+
     static void  Transform(Transformation transformation) {
-       auto [rotX, rotY, rotZ] = transformation.getRotation();
+       auto [rotX, rotY, rotZ] = transformation.getRotationEuler();
        auto [x, y, z]          = transformation.getTranslation();
        rlTranslatef(x, y, z);
        rlRotatef(rotX, 1, 0, 0);

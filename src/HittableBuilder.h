@@ -34,7 +34,7 @@ namespace rt {
     }
 
     HittableBuilder &rotate(vec3 rotation) {
-      hittable->transformation.setRotation(hittable->transformation.getRotation() + rotation);
+      hittable->transformation.setRotation(hittable->transformation.getRotationEuler() + rotation);
       return *this;
     }
 

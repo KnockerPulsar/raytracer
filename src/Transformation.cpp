@@ -61,7 +61,7 @@ rt::AABB rt::Transformation::regenAABB(const AABB &aabb) const {
   return AABB(newMin, newMax);
 }
 
-vec3 rt::Transformation::getRotation() const {
+vec3 rt::Transformation::getRotationEuler() const {
   return toEulerRotation();
 }
 

@@ -135,7 +135,7 @@ namespace rt {
       float scaleTemp[3];
       float model[16];
       auto const translation = selectedObject->transformation.getTranslation();
-      auto const rotation = selectedObject->transformation.getRotation();
+      auto const rotation = selectedObject->transformation.getRotationEuler();
       ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model);
 
       ImGuizmo::BeginFrame();
