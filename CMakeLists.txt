@@ -32,6 +32,7 @@ set(SOURCES
   src/Ray.cpp
   src/AsyncRenderData.cpp
   src/GroupPanel.cpp
+  src/Transformation.cpp
 
   src/data_structures/vec3.cpp
 
