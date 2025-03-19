@@ -8,38 +8,38 @@
 #include "../vendor/glm/glm/gtx/euler_angles.hpp"
 
 #include <cmath>
+#include <raylib.h>
+#include <raymath.h>
 
 
 void rt::Transformation::recomputeCaches() {
-  // Order matters. The model matrix depends on the rotation matrix.
-  rotationMatrix        = glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z));
-  inverseRotationMatrix = glm::inverse(rotationMatrix);
-
-  modelMatrix = [&] {
-    auto const translationMat = glm::translate(glm::mat4(1.0f), translate.toGlm());
-    auto const rotMatrix      = glm::mat4(rotationMatrix);
-
-    assert(rotMatrix[3][3] == 1.0f);
-
-    return translationMat * rotMatrix;
-  }();
-  inverseModelMatrix = glm::inverse(modelMatrix);
+  /* // Order matters. The model matrix depends on the rotation matrix. */
+  /* rotationMatrix        = glm::eulerAngleXYZ(glm::radians(rotate.x), glm::radians(rotate.y), glm::radians(rotate.z)); */
+  /* inverseRotationMatrix = glm::inverse(rotationMatrix); */
+  /*  */
+  /* modelMatrix = [&] { */
+  /*   auto const translationMat = glm::translate(glm::mat4(1.0f), translate.toGlm()); */
+  /*   auto const rotMatrix      = glm::mat4(rotationMatrix); */
+  /*  */
+  /*   assert(rotMatrix[3][3] == 1.0f); */
+  /*  */
+  /*   return translationMat * rotMatrix; */
+  /* }(); */
+  /* inverseModelMatrix = glm::inverse(modelMatrix); */
 }
 
-rt::Transformation::Transformation(vec3 translation, vec3 rotation) : translate(translation), rotate(rotation) {
+rt::Transformation::Transformation(vec3 translation, vec3 rotation)
+    : translate(translation), rotate(QuaternionFromEuler(rotation.x, rotation.y, rotation.z)) {
   recomputeCaches();
 }
 
-vec3 rt::Transformation::applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat) {
-  auto glmVec     = glm::vec4(vec.x, vec.y, vec.z, 1);
-  auto rotatedVec = mat * glmVec;
-
-  return vec3(rotatedVec.x, rotatedVec.y, rotatedVec.z);
+vec3 rt::Transformation::Apply(const vec3 &inVec) const {
+  return translate + ApplyRotation(inVec);
 }
 
-vec3 rt::Transformation::Apply(const vec3 &inVec) const { return applyGlmMat(inVec, modelMatrix); }
-
-vec3 rt::Transformation::Inverse(const vec3 &inVec) const { return applyGlmMat(inVec, inverseModelMatrix); }
+vec3 rt::Transformation::Inverse(const vec3 &inVec) const {
+  return ApplyInverseRotation(inVec - translate);
+}
 
 rt::AABB rt::Transformation::regenAABB(const AABB &aabb) const {
   // Generate all 8 vertices of the input AABB
@@ -57,7 +57,7 @@ rt::AABB rt::Transformation::regenAABB(const AABB &aabb) const {
   };
 
   for (auto &&vert : vertices) {
-    vert = applyGlmMat(vert, modelMatrix);
+    vert = Apply(vert);
   }
 
   vec3 newMin = vec3(infinity);
@@ -76,11 +76,9 @@ rt::AABB rt::Transformation::regenAABB(const AABB &aabb) const {
   return AABB(newMin, newMax);
 }
 
-glm::mat4 rt::Transformation::getRotationMatrix() const { return rotationMatrix; }
-
-glm::mat4 rt::Transformation::getInverseRotationMatrix() const { return inverseRotationMatrix; }
-
-vec3 rt::Transformation::getRotation() const { return rotate; }
+vec3 rt::Transformation::getRotation() const {
+  return toEulerRotation();
+}
 
 vec3 rt::Transformation::getTranslation() const { return translate; }
 
@@ -95,7 +93,7 @@ void rt::Transformation::OnImgui() {
 }
 
 void rt::Transformation::setRotation(vec3 eulerAngles) {
-  rotate = eulerAngles;
+  fromEulerRotation(eulerAngles);
   recomputeCaches();
 }
 
@@ -106,10 +104,28 @@ void rt::Transformation::setTranslation(vec3 tranlsation) {
 
 void rt::from_json(const json &objectJson, Transformation &transformation) {
   transformation.translate = objectJson["translation"].get<vec3>();
-  transformation.rotate    = objectJson["rotation"].get<vec3>();
+  transformation.fromEulerRotation(objectJson["rotation"].get<vec3>());
   transformation.recomputeCaches();
 }
 
 void rt::to_json(json &j, const Transformation &t) {
-  j = {{"transform", {{"translation", t.translate}, {"rotation", t.rotate}}}};
+  j = {{"transform", {{"translation", t.translate}, {"rotation", t.toEulerRotation()}}}};
+}
+
+vec3 rt::Transformation::toEulerRotation() const {
+  auto const rollPitchYawRadians = QuaternionToEuler(rotate);
+  return vec3(glm::degrees(rollPitchYawRadians.x), glm::degrees(rollPitchYawRadians.y),
+              glm::degrees(rollPitchYawRadians.z));
+}
+
+void rt::Transformation::fromEulerRotation(vec3 euler) {
+  rotate = QuaternionFromEuler(glm::radians(euler.x), glm::radians(euler.y), glm::radians(euler.z));
+}
+
+vec3 rt::Transformation::ApplyRotation(const vec3 &inVec) const {
+  return Vector3RotateByQuaternion(inVec, rotate);
+}
+
+vec3 rt::Transformation::ApplyInverseRotation(const vec3 &inVec) const {
+  return Vector3RotateByQuaternion(inVec, QuaternionInvert(rotate));
 }

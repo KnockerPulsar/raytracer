@@ -3,15 +3,14 @@
 #include "AABB.h"
 #include "IImguiDrawable.h"
 #include "data_structures/vec3.h"
+#include <raylib.h>
+#include <raymath.h>
 
 namespace rt {
   class Transformation : public IImguiDrawable {
   private:
     vec3 translate;
-    vec3 rotate;
-
-    glm::mat4 modelMatrix, inverseModelMatrix;
-    glm::mat3 rotationMatrix, inverseRotationMatrix;
+    Quaternion rotate;
 
     friend void from_json(const json &objectJson, Transformation &transformation);
     friend void to_json(json &j, const Transformation &t);
@@ -19,29 +18,26 @@ namespace rt {
     // Should actually never be called while raytracing.
     void recomputeCaches();
 
+    vec3 toEulerRotation() const;
+    void fromEulerRotation(vec3);
   public:
     Transformation(vec3 translation = vec3::Zero(), vec3 rotation = vec3::Zero());
 
     static vec3 applyGlmMat(const vec3 &vec, glm::mat<4, 4, float> mat);
 
     vec3 Apply(const vec3 &inVec) const;
-
     vec3 Inverse(const vec3 &inVec) const;
+
+    vec3 ApplyRotation(const vec3 &inVec) const;
+    vec3 ApplyInverseRotation(const vec3 &inVec) const;
 
     AABB regenAABB(const AABB &aabb) const;
 
-    glm::mat4 getRotationMatrix() const;
-
-    glm::mat4 getInverseRotationMatrix() const;
-
     vec3 getRotation() const;
-
     vec3 getTranslation() const;
 
     virtual void OnImgui() override;
-
     void setRotation(vec3 eulerAngles);
-
     void setTranslation(vec3 tranlsation);
   };
 
