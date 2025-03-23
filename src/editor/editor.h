@@ -85,8 +85,6 @@ namespace rt {
 
       float focusDist() const { return rtCamera.focusDist; }
 
-      glm::mat4 getViewMatrix() const;
-
       glm::mat4 getProjectionMatrix() const;
 
       rt::Camera getRtCamera() const { return rtCamera; }

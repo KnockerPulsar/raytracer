@@ -129,25 +129,30 @@ namespace rt {
 
   void Editor::SelectedObjectGizmo() {
     if (selectedObject != nullptr) {
+      ImGui::Begin("Selected object", 0);
 
-      const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
-
-      float scaleTemp[3];
-      float model[16];
-      auto const translation = selectedObject->transformation.getTranslation();
-      auto const rotation = selectedObject->transformation.getRotationEuler();
-      ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model);
-
+      // ImGuizmo seems to have some issues with ImGui's docking branch. Should
+      // apply the patch mentioned in this thread:
+      // https://github.com/CedricGuillemet/ImGuizmo/issues/327
       ImGuizmo::BeginFrame();
 
-      ImGui::Begin("Selected object", 0, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGuiIO& io = ImGui::GetIO();
+      ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-      // Tell ImGuizmo to draw in the foreground
-      // ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+      auto model = [this] {
+        float                 scaleTemp[] = {1.0, 1.0, 1.0};
+        std::array<float, 16> model;
+        auto const            translation = selectedObject->transformation.getTranslation();
+        auto const            rotation    = selectedObject->transformation.getRotationEuler();
+        ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
+        return model;
+      }();
 
-      ImGuizmo::Manipulate(glm::value_ptr(camera.getViewMatrix()),
-                           glm::value_ptr(camera.getProjectionMatrix()),
-                           imguizmoOp, imguizmoMode, model);
+      auto const viewMatrix = glm::lookAt(
+          camera.getLookFrom().toGlm(), (camera.getLookFrom() + camera.localForward()).toGlm(), vec3(0, 1, 0).toGlm());
+
+      ImGuizmo::Manipulate(glm::value_ptr(viewMatrix),
+                           glm::value_ptr(camera.getProjectionMatrix()), imguizmoOp, imguizmoMode, model.data());
 
       if (ImGuizmo::IsUsing()) {
 
@@ -155,12 +160,13 @@ namespace rt {
         vec3 rotation;
         vec3 scale;
 
-        ImGuizmo::DecomposeMatrixToComponents(model, &translation.x, &rotation.x, &scale.x);
+        ImGuizmo::DecomposeMatrixToComponents(model.data(), &translation.x, &rotation.x, &scale.x);
 
         selectedObject->transformation.setTranslation(translation);
         selectedObject->transformation.setRotation(rotation);
       }
 
+      const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
       selectedObject->OnImgui();
 
@@ -674,22 +680,10 @@ namespace rt {
                     .projection = CAMERA_PERSPECTIVE};
   }
 
-  glm::mat4 Editor::Camera::getViewMatrix() const {
-    // glm::mat4 M = glm::mat4(1);
-    // M           = glm::translate(M, rtCamera.lookFrom.toGlm());
-    // M           = M * glm::eulerAngleXYZ(angle.x, angle.y, angle.z) ;
-
-    // glm::vec3 eye    = M * glm::vec4(0, 0, 0, 1);
-    // glm::vec3 center = M * glm::vec4(0, 0, -1, 1);
-    // glm::vec3 up     = M * glm::vec4(0, 1, 0, 0);
-
-    return glm::lookAt(rtCamera.lookFrom.toGlm(), rtCamera.lookAt.toGlm(), vec3(0, 1, 0).toGlm());
-  }
-
   glm::mat4 Editor::Camera::getProjectionMatrix() const {
     return glm::perspective(glm::radians(rtCamera.vFov),
-                            static_cast<float>(_imageWidth) / _imageHeight,
-                            0.01f, 1000.0f);
+                            static_cast<float>(editorWidth) / editorHeight,
+                            0.01f, 100.0f);
   }
 
   float Editor::Camera::GetCorrectedCropFov() const {
