@@ -124,53 +124,59 @@ namespace rt {
     if(viewState.cameraSettings)
       camera.RenderImgui();
 
-    SelectedObjectGizmo();
+    SelectedObjectImGui();
   }
 
-  void Editor::SelectedObjectGizmo() {
+  void Editor::SelectedObjectImGui()
+  {
     if (selectedObject != nullptr) {
       ImGui::Begin("Selected object", 0);
 
-      // ImGuizmo seems to have some issues with ImGui's docking branch. Should
-      // apply the patch mentioned in this thread:
-      // https://github.com/CedricGuillemet/ImGuizmo/issues/327
-      ImGuizmo::BeginFrame();
-
-      ImGuiIO& io = ImGui::GetIO();
-      ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-      auto model = [this] {
-        float                 scaleTemp[] = {1.0, 1.0, 1.0};
-        std::array<float, 16> model;
-        auto const            translation = selectedObject->transformation.getTranslation();
-        auto const            rotation    = selectedObject->transformation.getRotationEuler();
-        ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
-        return model;
-      }();
-
-      auto const viewMatrix = glm::lookAt(
-          camera.getLookFrom().toGlm(), (camera.getLookFrom() + camera.localForward()).toGlm(), vec3(0, 1, 0).toGlm());
-
-      ImGuizmo::Manipulate(glm::value_ptr(viewMatrix),
-                           glm::value_ptr(camera.getProjectionMatrix()), imguizmoOp, imguizmoMode, model.data());
-
-      if (ImGuizmo::IsUsing()) {
-
-        vec3 translation;
-        vec3 rotation;
-        vec3 scale;
-
-        ImGuizmo::DecomposeMatrixToComponents(model.data(), &translation.x, &rotation.x, &scale.x);
-
-        selectedObject->transformation.setTranslation(translation);
-        selectedObject->transformation.setRotation(rotation);
-      }
+      SelectedObjectGizmo();
 
       const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
       selectedObject->OnImgui();
 
       ImGui::End();
+    }
+  }
+
+  void Editor::SelectedObjectGizmo() {
+    assert(selectedObject != nullptr);
+
+    // ImGuizmo seems to have some issues with ImGui's docking branch. Should
+    // apply the patch mentioned in this thread:
+    // https://github.com/CedricGuillemet/ImGuizmo/issues/327
+    ImGuizmo::BeginFrame();
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+    auto model = [this] {
+      float                 scaleTemp[] = {1.0, 1.0, 1.0};
+      std::array<float, 16> model;
+      auto const            translation = selectedObject->transformation.getTranslation();
+      auto const            rotation    = selectedObject->transformation.getRotationEuler();
+      ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
+      return model;
+    }();
+
+    auto const viewMatrix = glm::lookAt(camera.getLookFrom().toGlm(),
+                                        (camera.getLookFrom() + camera.localForward()).toGlm(), vec3(0, 1, 0).toGlm());
+
+    ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(camera.getProjectionMatrix()), imguizmoOp,
+                         imguizmoMode, model.data());
+
+    if (ImGuizmo::IsUsing()) {
+      vec3 translation;
+      vec3 rotation;
+      vec3 scale;
+
+      ImGuizmo::DecomposeMatrixToComponents(model.data(), &translation.x, &rotation.x, &scale.x);
+
+      selectedObject->transformation.setTranslation(translation);
+      selectedObject->transformation.setRotation(rotation);
     }
   }
 

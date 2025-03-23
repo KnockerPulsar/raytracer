@@ -139,8 +139,9 @@ namespace rt {
     // Renders editor specific GUI
     void RenderImgui();
 
-    // If a selected object is available, renders a gizmo on it
     void SelectedObjectGizmo();
+
+    void SelectedObjectImGui();
 
     // Checks for editor related inputs (mouse clicks for picking, gizmo modes)
     void CheckInput();
