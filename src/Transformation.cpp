@@ -95,8 +95,7 @@ void rt::Transformation::OnImgui() {
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &euler.x, 0.05f);
 
   if (rotationChanged) {
-    auto deltaQuaternion = fromEuler(euler - originalEuler);
-    rotate               = QuaternionMultiply(deltaQuaternion, rotate);
+    rotateDelta(euler - originalEuler);
   }
 
   if (translationChanged || rotationChanged)
@@ -110,6 +109,13 @@ void rt::Transformation::setRotation(vec3 eulerAngles) {
 
 void rt::Transformation::setTranslation(vec3 tranlsation) {
   translate = tranlsation;
+  recomputeCaches();
+}
+
+void rt::Transformation::rotateDelta(vec3 eulerDelta) {
+  auto deltaQuaternion = fromEuler(eulerDelta);
+  rotate               = QuaternionMultiply(deltaQuaternion, rotate);
+
   recomputeCaches();
 }
 

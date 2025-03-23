@@ -42,6 +42,7 @@ namespace rt {
     virtual void OnImgui() override;
     void setRotation(vec3 eulerAngles);
     void setTranslation(vec3 tranlsation);
+    void rotateDelta(vec3 eulerDelta);
   };
 
   // This is how you use `json.get<Box>()`

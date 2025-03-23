@@ -153,11 +153,12 @@ namespace rt {
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    auto model = [this] {
+    auto const            rotation    = selectedObject->transformation.getRotationEuler();
+
+    auto model = [this, rotation] {
       float                 scaleTemp[] = {1.0, 1.0, 1.0};
       std::array<float, 16> model;
       auto const            translation = selectedObject->transformation.getTranslation();
-      auto const            rotation    = selectedObject->transformation.getRotationEuler();
       ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
       return model;
     }();
@@ -165,18 +166,20 @@ namespace rt {
     auto const viewMatrix = glm::lookAt(camera.getLookFrom().toGlm(),
                                         (camera.getLookFrom() + camera.localForward()).toGlm(), vec3(0, 1, 0).toGlm());
 
-    ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(camera.getProjectionMatrix()), imguizmoOp,
-                         imguizmoMode, model.data());
+    auto const changed = ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(camera.getProjectionMatrix()),
+                                              imguizmoOp, imguizmoMode, model.data());
 
-    if (ImGuizmo::IsUsing()) {
+    if (changed) {
       vec3 translation;
-      vec3 rotation;
+      vec3 newRotation;
       vec3 scale;
 
-      ImGuizmo::DecomposeMatrixToComponents(model.data(), &translation.x, &rotation.x, &scale.x);
+      ImGuizmo::DecomposeMatrixToComponents(model.data(), &translation.x, &newRotation.x, &scale.x);
+
+      auto rotationDelta = newRotation - rotation;
 
       selectedObject->transformation.setTranslation(translation);
-      selectedObject->transformation.setRotation(rotation);
+      selectedObject->transformation.rotateDelta(rotationDelta);
     }
   }
 
