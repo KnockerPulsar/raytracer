@@ -562,6 +562,7 @@ namespace rt {
     rtCamera.RecomputeLocalBases();
 
     forwardToAngle(localForward());
+    lookAtAngle(angle);
   }
 
   void Editor::Camera::UpdateRtCamera() {
@@ -583,13 +584,11 @@ namespace rt {
     // x = r * cos(90 - angle.y) * sin(90 - angle.x)
     // y = r * cos(90 - angle.x)
     // z = r * sin(90 - angle.y) * sin(90 - angle.x)
-    auto const dir =
-        vec3{
-            cos(pi / 2 - angle.y) * sin(pi / 2 - angle.x),
-            cos(angle.x - pi / 2),
-            sin(pi / 2 - angle.y) * sin(pi / 2 - angle.x),
-        };
-
+    auto const dir = vec3{
+        cos(pi / 2 - angle.y),
+        cos(angle.x - pi / 2),
+        sin(pi / 2 - angle.y),
+    };
 
     rtCamera.lookAt = rtCamera.lookFrom + dir;
     UpdateRtCamera();
@@ -598,20 +597,21 @@ namespace rt {
   void Editor::Camera::forwardToAngle(vec3 fwd) {
     assert(fwd.SqrLen() > 0);
 
-    // https://stackoverflow.com/a/50086913
-    angle.x = pi / 2 - std::acos(fwd.z);
-    angle.y = pi / 2 - std::atan2(fwd.z, fwd.x);
+    angle.x = pi / 2 + std::acos(fwd.y);
+    angle.y = std::atan2(fwd.x, fwd.z);
 
+    if (angle.x >= pi) {
+      angle.x = pi - angle.x;
+    }
     angle.y = glm::wrapAngle(angle.y);
-    angle.x = std::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
   }
 
   void Editor::Camera::MouseLook(Vector2 mousePositionDelta) {
     angle.x += (mousePositionDelta.y * -rotSensitity.y);
     angle.y += (mousePositionDelta.x * -rotSensitity.x);
 
-    angle.y = glm::wrapAngle(angle.y);
     angle.x = std::clamp(angle.x, xAngleClampMin * DEG2RAD, xAngleClampMax * DEG2RAD);
+    angle.y = glm::wrapAngle(angle.y);
 
     lookAtAngle(angle);
   }
