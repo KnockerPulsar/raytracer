@@ -325,6 +325,13 @@ namespace rt {
     FileMenuCheckInputs();
     ViewMenuCheckInputs();
     BuiltInMenuCheckInputs();
+
+    {
+      auto const ctrlDown = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
+      auto const qDown    = IsKeyPressed(KEY_Q);
+      if (ctrlDown && qDown)
+        app->quit();
+    }
   }
 
   void Editor::FileMenuCheckInputs() {
