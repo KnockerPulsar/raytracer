@@ -44,6 +44,7 @@ set(SOURCES
   src/raytracer.cpp
   src/editor/Utils.cpp
   src/editor/PreviewTexture.cpp
+  src/editor/camera.cpp
 
   vendor/argumentum/src/argparser.cpp
 
