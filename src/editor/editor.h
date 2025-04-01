@@ -25,6 +25,55 @@ namespace rt {
   class Scene;
 
   class Editor : public IState {
+  public:
+    Editor(App *const app, CliConfig const &config, Scene const &initialScene)
+        : IState(app),
+          camera(config.editorWidth, config.editorHeight, config.imageWidth, config.imageHeight, initialScene),
+          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {}
+
+    ~Editor() { UnloadRenderTexture(rasterRT); }
+
+    // Calls overloaded `Rasterize()` function for each object
+    void Rasterize();
+
+    // Renders editor specific GUI
+    void RenderImgui();
+
+    void SelectedObjectGizmo();
+
+    void SelectedObjectImGui();
+
+    // Checks for editor related inputs (mouse clicks for picking, gizmo modes)
+    void CheckInput();
+
+    // Tests a ray against the world and returns whatever it hits (can be null)
+    Hittable *CastRay(Vector2 mousePos);
+
+    void AddObjectImgui();
+
+    /*
+      Checks for inputs, updates the editor camera and its GUI,
+      rasterizes object, renders editor GUI.
+    */
+    virtual void onUpdate() override;
+
+    virtual void onEnter() override;
+
+    virtual void onExit() override;
+
+    void RenderViewport();
+
+    void RaytraceSettingsImgui();
+
+    void ObjectListImgui();
+
+    static std::optional<sPtr<Material>> MaterialChanger();
+
+    void TopMenuImgui();
+
+    virtual void changeScene(Scene *scene) override;
+
+  private:
     Hittable *selectedObject = nullptr;
 
     enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
@@ -46,7 +95,6 @@ namespace rt {
 
     static const int numColors = sizeof(colors) / sizeof(colors[0]);
 
-    // TODO split out all editor specific camera state here
     class Camera
     {
     public:
@@ -125,53 +173,6 @@ namespace rt {
       bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
     } viewState;
 
-  public:
-    Editor(App *const app, CliConfig const &config, Scene const &initialScene)
-        : IState(app),
-          camera(config.editorWidth, config.editorHeight, config.imageWidth, config.imageHeight, initialScene),
-          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {}
-
-    ~Editor() { UnloadRenderTexture(rasterRT); }
-
-    // Calls overloaded `Rasterize()` function for each object
-    void Rasterize();
-
-    // Renders editor specific GUI
-    void RenderImgui();
-
-    void SelectedObjectGizmo();
-
-    void SelectedObjectImGui();
-
-    // Checks for editor related inputs (mouse clicks for picking, gizmo modes)
-    void CheckInput();
-
-    // Tests a ray against the world and returns whatever it hits (can be null)
-    Hittable *CastRay(Vector2 mousePos);
-
-    void AddObjectImgui();
-
-    /*
-      Checks for inputs, updates the editor camera and its GUI,
-      rasterizes object, renders editor GUI.
-    */
-    virtual void onUpdate() override;
-
-    virtual void onEnter() override;
-
-    virtual void onExit() override;
-
-    void RenderViewport();
-
-    void RaytraceSettingsImgui();
-
-    void ObjectListImgui();
-
-    static std::optional<sPtr<Material>> MaterialChanger();
-
-    void TopMenuImgui();
-
-    virtual void changeScene(Scene *scene) override;
 
   }; // namespace Editor
 } // namespace rt
