@@ -40,6 +40,12 @@
 #include <vector>
 
 namespace rt {
+  bool keyCombination(unsigned int key, std::initializer_list<unsigned int> modifiers) {
+    auto const modifiersDown = std::ranges::any_of(modifiers, [](auto mod) { return IsKeyDown(mod); });
+    auto const keyDown       = IsKeyPressed(key);
+    return modifiersDown && keyDown;
+  }
+
     struct ViewMenuEntry {
       std::string name;
       std::function<void(Editor::ViewState&)> onPress;
@@ -326,47 +332,29 @@ namespace rt {
     ViewMenuCheckInputs();
     BuiltInMenuCheckInputs();
 
-    {
-      auto const ctrlDown = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
-      auto const qDown    = IsKeyPressed(KEY_Q);
-      if (ctrlDown && qDown)
-        app->quit();
+    if (keyCombination(KEY_Q, {KEY_LEFT_CONTROL, KEY_RIGHT_CONTROL})) {
+      app->quit();
     }
   }
 
   void Editor::FileMenuCheckInputs() {
-    auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
-    auto const fDown   = IsKeyPressed(KEY_F);
-
-    if (altDown && fDown)
+    if (keyCombination(KEY_F, {KEY_LEFT_ALT, KEY_RIGHT_ALT}))
       viewState.fileMenu.shouldOpen = true;
   }
 
   void Editor::ViewMenuCheckInputs() {
-    {
-      auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
-      auto const vDown = IsKeyPressed(KEY_V);
-
-      if(altDown && vDown)
-        viewState.viewMenu.shouldOpen = !viewState.viewMenu.shouldOpen;
-    }
+    if (keyCombination(KEY_V, {KEY_LEFT_ALT, KEY_RIGHT_ALT}))
+      viewState.viewMenu.shouldOpen = !viewState.viewMenu.shouldOpen;
 
     for (auto const &menuItem : viewMenuItems) {
-      auto const anyModifierDown =
-          std::ranges::any_of(menuItem.modifiers, [](auto modifier) { return IsKeyDown(modifier); });
-      auto const buttonPressed = IsKeyPressed(menuItem.key);
-
-      if (anyModifierDown && buttonPressed) {
+      if (keyCombination(menuItem.key, menuItem.modifiers)) {
         menuItem.onPress(viewState);
       }
     }
   }
 
   void Editor::BuiltInMenuCheckInputs() {
-    auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
-    auto const bDown   = IsKeyPressed(KEY_B);
-
-    if (altDown && bDown)
+    if (keyCombination(KEY_B, {KEY_LEFT_ALT, KEY_RIGHT_ALT}))
       viewState.builtInMenu.shouldOpen = true;
   }
 
