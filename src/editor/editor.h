@@ -26,6 +26,16 @@ namespace rt {
 
   class Editor : public IState {
   public:
+
+    struct ViewState {
+      struct ViewMenu {
+        bool shouldOpen{false};
+        bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
+      };
+
+      ViewMenu viewMenu;
+    };
+
     Editor(App *const app, CliConfig const &config, Scene const &initialScene)
         : IState(app),
           camera(config.editorWidth, config.editorHeight, config.imageWidth, config.imageHeight, initialScene),
@@ -36,15 +46,18 @@ namespace rt {
     // Calls overloaded `Rasterize()` function for each object
     void Rasterize();
 
-    // Renders editor specific GUI
-    void RenderImgui();
-
     void SelectedObjectGizmo();
-
-    void SelectedObjectImGui();
 
     // Checks for editor related inputs (mouse clicks for picking, gizmo modes)
     void CheckInput();
+
+    // Renders editor specific GUI
+    void RenderImgui();
+
+    void ViewMenuCheckInputs();
+    void ViewMenuImGui();
+
+    void SelectedObjectImGui();
 
     // Tests a ray against the world and returns whatever it hits (can be null)
     Hittable *CastRay(Vector2 mousePos);
@@ -169,10 +182,7 @@ namespace rt {
     Camera camera;
     RenderTexture2D rasterRT;
 
-    struct ViewState {
-      bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
-    } viewState;
-
+    ViewState viewState;
 
   }; // namespace Editor
 } // namespace rt

@@ -14,7 +14,6 @@
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
-#include <algorithm>
 #include <imgui.h>
 #include <raylib.h>
 #include <rlImGui.h>
@@ -23,6 +22,7 @@
 // TODO fix this ugly include
 #include <../../vendor/glm/glm/gtc/type_ptr.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -40,51 +40,84 @@
 #include <vector>
 
 namespace rt {
+    struct ViewMenuEntry {
+      std::string name;
+      std::function<void(Editor::ViewState&)> onPress;
+      std::string shortcutStr;
+      std::initializer_list<unsigned int> modifiers;
+      unsigned int key;
+    };
 
-  void Editor::Rasterize() {
+    std::initializer_list<ViewMenuEntry> const viewMenuItems = {
+        {"Raytracing settings",
+         [](auto &viewState) { viewState.viewMenu.raytracingSettings = !viewState.viewMenu.raytracingSettings; },
+         "ALT+R",
+         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+         KEY_R},
+        {"Camera settings",
+         [](auto &viewState) { viewState.viewMenu.cameraSettings = !viewState.viewMenu.cameraSettings; },
+         "ALT+C",
+         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+         KEY_C},
+        {"Object list",
+         [](auto &viewState) { viewState.viewMenu.objectList = !viewState.viewMenu.objectList; },
+         "ALT+O",
+         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+         KEY_O},
+        {"Hide all",
+         [](auto &viewState) { viewState.viewMenu = {false, false, false}; },
+         "ALT+H",
+         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+         KEY_H},
+        {"Show all",
+         [](auto &viewState) { viewState.viewMenu = {true, true, true}; },
+         "ALT+S",
+         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+         KEY_S},
+    };
 
-    BeginTextureMode(rasterRT);
-    ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
+    void Editor::Rasterize() {
 
-    BeginMode3D(camera.toRaylibCamera3D());
-    {
-      DrawGrid(10, 10);
+      BeginTextureMode(rasterRT);
+      ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
 
-      if (!getScene()->skysphereTexture.empty()) {
-        getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
-        getScene()->drawSkysphere();
+      BeginMode3D(camera.toRaylibCamera3D());
+      {
+        DrawGrid(10, 10);
+
+        if (!getScene()->skysphereTexture.empty()) {
+          getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
+          getScene()->drawSkysphere();
+        }
+
+        auto rasterizables = getScene()->worldRoot->getChildrenAsList();
+
+        for (int i = 0; i < rasterizables.size(); i++) {
+          rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
+        }
+
+        auto aabBs = getScene()->worldRoot->getChildrenAABBs();
+
+        AABB rootAABB;
+        getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
+        aabBs.push_back(rootAABB);
+
+        for (auto &&bb : aabBs) {
+          DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
+        }
+
+        DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
+
+        DrawLine3D(Editor::Camera::lineStart, Editor::Camera::lineEnd, BLUE);
       }
+      EndMode3D();
 
-      auto rasterizables = getScene()->worldRoot->getChildrenAsList();
+      BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
+      camera.DrawFrameOutline();
+      EndMode2D();
 
-      for (int i = 0; i < rasterizables.size(); i++) {
-        rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
-      }
-
-      auto aabBs = getScene()->worldRoot->getChildrenAABBs();
-
-      AABB rootAABB;
-      getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
-      aabBs.push_back(rootAABB);
-
-      for (auto &&bb : aabBs) {
-        DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
-      }
-
-      DrawSphere(camera.getLookFrom() +
-                     camera.localForward() * camera.focusDist(),
-                 0.05f, LIME);
-
-      DrawLine3D(Editor::Camera::lineStart, Editor::Camera::lineEnd, BLUE);
+      EndTextureMode();
     }
-    EndMode3D();
-
-    BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
-    camera.DrawFrameOutline();
-    EndMode2D();
-
-    EndTextureMode();
-  }
 
   void Editor::RenderImgui() {
 
@@ -100,7 +133,7 @@ namespace rt {
 
     RenderViewport();
 
-    if (viewState.objectList) {
+    if (viewState.viewMenu.objectList) {
       ImGui::Begin("Objects");
       {
         if (dynamic_cast<BVHNode *>(getScene()->worldRoot) != nullptr) {
@@ -118,10 +151,10 @@ namespace rt {
       ImGui::End();
     }
 
-    if(viewState.raytracingSettings)
+    if(viewState.viewMenu.raytracingSettings)
       RaytraceSettingsImgui();
 
-    if(viewState.cameraSettings)
+    if(viewState.viewMenu.cameraSettings)
       camera.RenderImgui();
 
     SelectedObjectImGui();
@@ -207,6 +240,47 @@ namespace rt {
         imguizmoMode = imguizmoMode == ImGuizmo::MODE::LOCAL ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
       }
     }
+
+    ViewMenuCheckInputs();
+  }
+
+  void Editor::ViewMenuCheckInputs() {
+    {
+      auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+      auto const vDown = IsKeyPressed(KEY_V);
+
+      if(altDown && vDown)
+        viewState.viewMenu.shouldOpen = !viewState.viewMenu.shouldOpen;
+    }
+
+    for (auto const &menuItem : viewMenuItems) {
+      auto const anyModifierDown =
+          std::ranges::any_of(menuItem.modifiers, [](auto modifier) { return IsKeyDown(modifier); });
+      auto const buttonPressed = IsKeyPressed(menuItem.key);
+
+      if (anyModifierDown && buttonPressed) {
+        menuItem.onPress(viewState);
+      }
+    }
+  }
+
+  void Editor::ViewMenuImGui()
+  {
+      constexpr auto *viewMenuTitle = "View";
+      if (viewState.viewMenu.shouldOpen)
+      {
+        ImGui::OpenPopup(viewMenuTitle);
+        viewState.viewMenu.shouldOpen = false;
+      }
+
+      if (ImGui::BeginMenu(viewMenuTitle)) {
+        for (auto const &[text, onPress, strShortcut, _, __] : viewMenuItems) {
+          if (ImGui::MenuItem(std::format("Toggle {}", text).c_str(), strShortcut.c_str())) {
+            onPress(viewState);
+          }
+        }
+        ImGui::EndMenu();
+      }
   }
 
   Hittable *Editor::CastRay(Vector2 mousePos) {
@@ -426,34 +500,7 @@ namespace rt {
         ImGui::EndMenu();
       }
 
-      if (ImGui::BeginMenu("View")) {
-        auto const menuItems = {
-            std::pair{"raytracing settings", &viewState.raytracingSettings},
-            {"camera settings", &viewState.cameraSettings},
-            {"object list", &viewState.objectList}
-        };
-
-        for (auto const& [text, statePtr] : menuItems) {
-          using namespace std::string_literals;
-          if (ImGui::MenuItem(std::format("Toggle {}", text).c_str())) {
-            *statePtr = !*statePtr;
-          }
-        }
-
-        if(ImGui::MenuItem("Hide all"))
-        {
-          for(auto const& [_, statePtr]: menuItems)
-            *statePtr = false;
-        }
-
-        if(ImGui::MenuItem("Show all"))
-        {
-          for(auto const& [_, statePtr]: menuItems)
-            *statePtr = true;
-        }
-
-        ImGui::EndMenu();
-      }
+      ViewMenuImGui();
 
       if (ImGui::BeginMenu("Built in")) {
         for (auto &[name, loader] : Scene::builtInScenes) {
