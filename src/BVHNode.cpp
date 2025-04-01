@@ -178,5 +178,3 @@ rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
 
   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
 }
-
-bool rt::BVHNode::isLeaf() const { return left == nullptr && right == nullptr; }

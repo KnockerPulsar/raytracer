@@ -34,8 +34,6 @@ namespace rt {
     Hittable *addChild(sPtr<Hittable> newChild) override;
 
     Hittable *removeChild(sPtr<Hittable> childToRemove) override;
-
-    bool isLeaf() const;
   };
 
 } // namespace rt
