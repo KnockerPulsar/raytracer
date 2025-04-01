@@ -177,15 +177,8 @@ rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
 rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
   auto children = getChildrenAsList();
 
-  // TODO: figure out a cleaner way
-  vector<sPtr<Hittable>>::iterator toRemove = children.end();
-  for (auto it = children.begin(); it != children.end(); it++) {
-    if (*it == childToRemove)
-      toRemove = it;
-  }
-
-  if (toRemove != children.end())
-    children.erase(toRemove);
+  auto const [eraseStart, _] = std::ranges::remove(children, childToRemove);
+  children.erase(eraseStart);
 
   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
 }
