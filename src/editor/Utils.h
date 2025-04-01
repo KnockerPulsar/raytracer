@@ -2,17 +2,9 @@
 
 #include <raylib.h>
 #include "../../vendor/glm/glm/glm.hpp"
-#include "../../vendor/glm/glm/gtc/constants.hpp"
 #include <imgui.h>
 
-#include <stdexcept>
 #include <string>
-#include <memory>
-#include <sys/types.h>
-#include <tuple>
-#include <vector>
-
-using std::vector, std::tuple;
 
 class Vector3;
 class Vector2;

@@ -1,10 +1,12 @@
 #include "Utils.h"
+#include "../../vendor/glm/glm/gtc/constants.hpp"
 
 #include <format>
 #include <raylib.h>
 
 #include <algorithm>
 #include <cstdlib>
+#include <vector>
 
 namespace EditorUtils {
   std::string Vector3ToStr(Vector3 vec) {
