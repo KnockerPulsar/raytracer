@@ -4,7 +4,6 @@
 #include "../IState.h"
 #include "../Scene.h"
 #include "../materials/Material.h"
-#include "RenderAsync.h"
 #include "app.h"
 #include "camera.h"
 

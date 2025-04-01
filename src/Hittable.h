@@ -1,23 +1,17 @@
 #pragma once
 
 #include "AABB.h"
-#include "Constants.h"
 #include "Defs.h"
 #include "IRasterizable.h"
 #include "Ray.h"
 #include "Transformation.h"
-#include "Util.h"
-#include "app.h"
 #include "data_structures/vec3.h"
 #include "editor/Utils.h"
 #include <cmath>
-#include <iostream>
-#include <iterator>
 #include <memory>
 #include <optional>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include "../vendor/glm/glm/gtx/string_cast.hpp"
 #include "imgui.h"
 #include "materials/Material.h"
 #include <vector>

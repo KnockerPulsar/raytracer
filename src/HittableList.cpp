@@ -1,7 +1,8 @@
 #include "HittableList.h"
+
 #include "AABB.h"
 #include "Defs.h"
-#include <optional>
+
 #include <vector>
 
 namespace rt {
@@ -57,10 +58,7 @@ namespace rt {
 
   vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
 
-    vector<sPtr<Hittable>> vec;
-    for (auto &&e : objects) {
-      vec.push_back(e);
-    }
+    vector<sPtr<Hittable>> vec = objects;
     return vec;
   }
 

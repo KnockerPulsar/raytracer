@@ -3,7 +3,6 @@
 #include "Defs.h"
 #include "Hittable.h"
 
-#include <algorithm>
 #include <memory>
 #include <optional>
 #include <vector>

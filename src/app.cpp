@@ -4,7 +4,6 @@
 #include "Defs.h"
 #include "Hittable.h"
 #include "Ray.h"
-#include "RenderAsync.h"
 #include "Scene.h"
 #include "Transformation.h"
 #include "data_structures/JobQueue.h"

@@ -1,25 +1,24 @@
 #pragma once
 #include "Defs.h"
-#include "RenderAsync.h"
+#include "data_structures/Pixel.h"
 
 #include <raylib.h>
 
+#include <thread>
 #include <vector>
-
-using std::vector, std::thread;
 
 namespace rt {
 
   template<typename JobData> class JobQueue;
 
   struct AsyncRenderData {
-    vector<sPtr<thread>> threads;
+    std::vector<sPtr<std::thread>> threads;
 
     sPtr<JobQueue<Pixel>> pixelJobs;
 
-    vector<long> threadTimes;
-    vector<int>  threadProgress;
-    vector<bool> finishedThreads;
+    std::vector<long> threadTimes;
+    std::vector<int>  threadProgress;
+    std::vector<bool> finishedThreads;
 
     bool exit = false; // To make threads exit their loops
 
@@ -31,7 +30,7 @@ namespace rt {
     AsyncRenderData(int imageWidth, int imageHeight, int editorWidth,
                     int editorHeight, int numThreads);
 
-    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, vector<long> tt, vector<int> tp, vector<bool> ft)
+    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, std::vector<long> tt, std::vector<int> tp, std::vector<bool> ft)
         : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
 
     void KillThreads();

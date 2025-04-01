@@ -1,6 +1,5 @@
 #include "AsyncRenderData.h"
 #include "IState.h"
-#include "RenderAsync.h"
 #include "data_structures/JobQueue.h"
 
 #include <raylib.h>

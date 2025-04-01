@@ -28,7 +28,6 @@ set(SOURCES
   src/AABB.cpp
   src/Camera.cpp
   src/HittableList.cpp
-  src/RenderAsync.cpp
   src/Ray.cpp
   src/AsyncRenderData.cpp
   src/GroupPanel.cpp
