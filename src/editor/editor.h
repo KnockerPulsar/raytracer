@@ -37,8 +37,13 @@ namespace rt {
         bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
       };
 
+      struct BuiltInMenu {
+        bool shouldOpen{false};
+      };
+
       FileMenu fileMenu;
       ViewMenu viewMenu;
+      BuiltInMenu builtInMenu;
     };
 
     Editor(App *const app, CliConfig const &config, Scene const &initialScene)
@@ -66,6 +71,7 @@ namespace rt {
     void ViewMenuImGui();
 
     void BuiltInMenuImGui();
+    void BuiltInMenuCheckInputs();
 
     void SelectedObjectImGui();
 

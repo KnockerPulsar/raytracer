@@ -223,7 +223,14 @@ namespace rt {
 
   void Editor::BuiltInMenuImGui()
   {
-      if (ImGui::BeginMenu("Built in")) {
+      constexpr auto* builtInMenuTitle = "Built in";
+      if(viewState.builtInMenu.shouldOpen)
+      {
+        ImGui::OpenPopup(builtInMenuTitle);
+        viewState.builtInMenu.shouldOpen = false;
+      }
+
+      if (ImGui::BeginMenu(builtInMenuTitle)) {
         for (auto &[name, loader] : Scene::builtInScenes) {
           if (ImGui::MenuItem(name.c_str())) {
             app->changeScene(loader(getScene()->imageWidth, getScene()->imageHeight));
@@ -317,6 +324,7 @@ namespace rt {
 
     FileMenuCheckInputs();
     ViewMenuCheckInputs();
+    BuiltInMenuCheckInputs();
   }
 
   void Editor::FileMenuCheckInputs() {
@@ -345,6 +353,14 @@ namespace rt {
         menuItem.onPress(viewState);
       }
     }
+  }
+
+  void Editor::BuiltInMenuCheckInputs() {
+    auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+    auto const bDown   = IsKeyPressed(KEY_B);
+
+    if (altDown && bDown)
+      viewState.builtInMenu.shouldOpen = true;
   }
 
   void Editor::ViewMenuImGui()
