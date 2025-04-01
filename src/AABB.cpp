@@ -11,7 +11,7 @@ namespace rt {
   }
 
   AABB::AABB(std::vector<vec3> points) {
-    min = vec3(infinity, infinity, infinity);
+    min = vec3(rt::constants::infinity, rt::constants::infinity, rt::constants::infinity);
 
     max = -min;
     for (auto &&point : points) {

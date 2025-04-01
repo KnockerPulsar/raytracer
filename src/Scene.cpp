@@ -160,7 +160,7 @@ namespace rt {
 
   Scene Scene::Scene2(int imageWidth, int imageHeight) {
     Scene        s;
-    float        r = cos(pi / 4);
+    float        r = cos(rt::constants::pi / 4);
     HittableList world;
     vec3         lookFrom        = vec3(13, 2, 3);
     vec3         lookAt          = vec3(0, 0, 0);

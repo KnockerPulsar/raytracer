@@ -40,7 +40,7 @@ namespace rt {
       : numThreads(config.numThreads), ard([&] {
           // AsyncRenderData tries to create a RenderTexture which requires a
           // window to be created
-          InitWindow(config.editorWidth, config.editorHeight, title.c_str());
+          InitWindow(config.editorWidth, config.editorHeight, rt::constants::title);
           return AsyncRenderData(config.imageWidth, config.imageHeight, config.editorWidth, config.editorHeight,
                                  config.numThreads);
         }()),

@@ -45,7 +45,7 @@ rt::AABB rt::Transformation::regenAABB(const AABB &aabb) const {
     vert = Apply(vert);
   }
 
-  vec3 newMin = vec3(infinity);
+  vec3 newMin = vec3(rt::constants::infinity);
   vec3 newMax = -newMin;
 
   for (auto &&vert : vertices) {

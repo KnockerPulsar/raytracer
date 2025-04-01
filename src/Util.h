@@ -4,7 +4,7 @@
 #include <random>
 #include <raylib.h>
 
-inline float DegressToRadians(float degress) { return degress * pi / 180; }
+inline float DegressToRadians(float degress) { return degress * rt::constants::pi / 180; }
 
 inline float RandomFloat() {
   // Returns a random float in [0,1)

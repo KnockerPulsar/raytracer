@@ -26,9 +26,9 @@ namespace rt {
       return vec3::Zero();
     }
 
-    if (!scene->worldRoot->Hit(r, 0.001f, infinity, rec)) {
+    if (!scene->worldRoot->Hit(r, 0.001f, rt::constants::infinity, rec)) {
       if (scene->skysphere)
-        scene->skysphere->Hit(r, -infinity, infinity, rec);
+        scene->skysphere->Hit(r, -rt::constants::infinity, rt::constants::infinity, rec);
       else
         return scene->backgroundColor;
     }

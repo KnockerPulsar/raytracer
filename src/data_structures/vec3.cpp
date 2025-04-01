@@ -16,7 +16,9 @@ vec3::vec3(const glm::vec3 &glmVec) : vec3(glmVec.x, glmVec.y, glmVec.z) {}
 
 vec3::vec3(const Color &color) : vec3(float(color.r) / 255, float(color.g) / 255, float(color.b) / 255) {}
 
-bool vec3::NearZero() const { return fabs(x) < epsilon && fabs(y) < epsilon && fabs(z) < epsilon; }
+bool vec3::NearZero() const {
+  return fabs(x) < rt::constants::epsilon && fabs(y) < rt::constants::epsilon && fabs(z) < rt::constants::epsilon;
+}
 
 glm::vec3 vec3::toGlm() const { return glm::vec3(x, y, z); }
 

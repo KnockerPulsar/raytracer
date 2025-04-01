@@ -39,6 +39,8 @@
 #include <string>
 #include <vector>
 
+using namespace rt::constants;
+
 namespace rt {
   bool keyCombination(unsigned int key, std::initializer_list<unsigned int> modifiers) {
     auto const modifiersDown = std::ranges::any_of(modifiers, [](auto mod) { return IsKeyDown(mod); });
@@ -377,7 +379,7 @@ namespace rt {
     Editor::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
-    getScene()->worldRoot->Hit(r, 0, infinity, rec);
+    getScene()->worldRoot->Hit(r, 0, rt::constants::infinity, rec);
 
     return rec.closestHit;
   }
