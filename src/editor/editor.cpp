@@ -160,9 +160,16 @@ namespace rt {
     SelectedObjectImGui();
   }
 
-  void Editor::SceneMenuImGui()
+  void Editor::FileMenuImGui()
   {
-      if (ImGui::BeginMenu("Scene")) {
+      constexpr auto* fileMenuTitle = "File";
+      if(viewState.fileMenu.shouldOpen)
+      {
+        ImGui::OpenPopup(fileMenuTitle);
+        viewState.fileMenu.shouldOpen = false;
+      }
+
+      if (ImGui::BeginMenu(fileMenuTitle)) {
         if (ImGui::MenuItem("Open scene")) {
           ImGuiFileDialog::Instance()->OpenDialog(
               "OpenScene", "Open scene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
@@ -174,6 +181,13 @@ namespace rt {
               "SaveScene", "SaveScene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
           );
         }
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Quit")) {
+          app->quit();
+        }
+
         ImGui::EndMenu();
       }
 
@@ -301,7 +315,16 @@ namespace rt {
       }
     }
 
+    FileMenuCheckInputs();
     ViewMenuCheckInputs();
+  }
+
+  void Editor::FileMenuCheckInputs() {
+    auto const altDown = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+    auto const fDown   = IsKeyPressed(KEY_F);
+
+    if (altDown && fDown)
+      viewState.fileMenu.shouldOpen = true;
   }
 
   void Editor::ViewMenuCheckInputs() {
@@ -544,7 +567,7 @@ namespace rt {
 
     if (ImGui::BeginMainMenuBar()) {
 
-      SceneMenuImGui();
+      FileMenuImGui();
       ViewMenuImGui();
       BuiltInMenuImGui();
 

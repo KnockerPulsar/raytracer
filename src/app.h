@@ -29,6 +29,7 @@ namespace rt {
 
     int  numThreads;
     bool fullscreen = false;
+    bool shouldQuit = false;
 
     sPtr<IState> currentState;
 
@@ -44,6 +45,7 @@ namespace rt {
     void onFrameRender() const;
     void checkInput();
     void changeScene(Scene scene);
+    void quit();
 
     ~App();
 

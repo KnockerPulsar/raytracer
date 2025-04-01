@@ -28,11 +28,16 @@ namespace rt {
   public:
 
     struct ViewState {
+      struct FileMenu {
+        bool shouldOpen{false};
+      };
+
       struct ViewMenu {
         bool shouldOpen{false};
         bool raytracingSettings{true}, cameraSettings{true}, objectList{true};
       };
 
+      FileMenu fileMenu;
       ViewMenu viewMenu;
     };
 
@@ -54,8 +59,9 @@ namespace rt {
     // Renders editor specific GUI
     void RenderImgui();
 
-    void SceneMenuImGui();
+    void FileMenuImGui();
 
+    void FileMenuCheckInputs();
     void ViewMenuCheckInputs();
     void ViewMenuImGui();
 

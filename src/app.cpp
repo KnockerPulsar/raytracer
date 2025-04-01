@@ -53,7 +53,7 @@ namespace rt {
   }
 
   void App::run() {
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && !shouldQuit) {
       checkInput();
       currentState->onUpdate();
     }
@@ -87,6 +87,11 @@ namespace rt {
 
     editor->changeScene(&this->scene);
     rt->changeScene(&this->scene);
+  }
+
+  void App::quit()
+  {
+    shouldQuit = true;
   }
 
   App::~App() {
