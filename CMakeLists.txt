@@ -33,6 +33,7 @@ set(SOURCES
   src/AsyncRenderData.cpp
   src/GroupPanel.cpp
   src/Transformation.cpp
+  src/BVHNode.cpp
 
   src/data_structures/vec3.cpp
 
