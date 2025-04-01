@@ -27,6 +27,7 @@ namespace rt {
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
+    SetExitKey(KEY_NULL);
 
     if (fullscreen)
       ToggleFullscreen();
