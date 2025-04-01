@@ -29,7 +29,7 @@ namespace rt {
       ImageFromPath(filename);
     }
 
-    ImageTexture(const json &json) { ImageFromPath(json["path"].get<string>().c_str()); }
+    ImageTexture(const json &json) { ImageFromPath(json["path"].get<std::string>().c_str()); }
 
     void ImageFromPath(const char *filename) {
       int compsPerPixel = bytesPerPixel;

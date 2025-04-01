@@ -15,7 +15,7 @@ namespace rt {
   public:
     static sPtr<Texture> FromJson(json textureJson) {
 
-      string texType = textureJson["type"].get<std::string>();
+      std::string texType = textureJson["type"].get<std::string>();
 
       if (texType == "solid_color") {
         return std::make_shared<SolidColor>(textureJson);

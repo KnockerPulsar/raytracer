@@ -16,7 +16,7 @@ namespace rt {
   public:
     static sPtr<Material> FromJson(json materialJson) {
 
-      string matType = materialJson["type"].get<string>();
+      std::string matType = materialJson["type"].get<std::string>();
 
       if (matType == "lambertian")
         return std::make_shared<Lambertian>(materialJson.get<Lambertian>());
