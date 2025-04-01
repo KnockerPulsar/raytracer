@@ -8,6 +8,36 @@
 #include <memory>
 #include <unordered_set>
 
+namespace {
+  bool BoxCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b, int axis) {
+    rt::AABB boxA;
+    rt::AABB boxB;
+
+    if (!a->BoundingBox(0, 0, boxA) || !b->BoundingBox(0, 0, boxB))
+      std::cerr << "No bounding box in BVHNode constructor.\n";
+    switch (axis) {
+    // X
+    case 0:
+      return boxA.min.x < boxB.min.x;
+    // Y
+    case 1:
+      return boxA.min.y < boxB.min.y;
+
+    // Z
+    case 2:
+      return boxA.min.z < boxB.min.z;
+
+    _:
+      return false;
+    }
+    return false;
+  }
+
+  bool boxXCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 0); }
+  bool boxYCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 1); }
+  bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
+} // namespace
+
 rt::BVHNode::BVHNode(const vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
 rt::BVHNode::BVHNode(const HittableList &list, float t0, float t1)
@@ -81,33 +111,6 @@ bool rt::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
   outputBox = box;
   return true;
 }
-bool rt::BVHNode::BoxCompare(const sPtr<Hittable> a, const sPtr<Hittable> b, int axis) {
-  AABB boxA;
-  AABB boxB;
-
-  if (!a->BoundingBox(0, 0, boxA) || !b->BoundingBox(0, 0, boxB))
-    std::cerr << "No bounding box in BVHNode constructor.\n";
-  switch (axis) {
-  // X
-  case 0:
-    return boxA.min.x < boxB.min.x;
-  // Y
-  case 1:
-    return boxA.min.y < boxB.min.y;
-
-  // Z
-  case 2:
-    return boxA.min.z < boxB.min.z;
-
-  _:
-    return false;
-  }
-  return false;
-}
-
-bool rt::BVHNode::boxXCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 0); }
-bool rt::BVHNode::boxYCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 1); }
-bool rt::BVHNode::boxZCompare(const sPtr<Hittable> a, const sPtr<Hittable> b) { return BoxCompare(a, b, 2); }
 
 std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
   std::unordered_set<sPtr<Hittable>> children;
@@ -164,10 +167,6 @@ vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
 
 rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
   vector<sPtr<Hittable>> children = getChildrenAsList();
-  // vector<sPtr<Hittable>> sPtrs    = vector<sPtr<Hittable>>();
-  // sPtrs.reserve(children.size());
-
-  // std::for_each(children.begin(), children.end(), [&](sPtr<Hittable> e) { sPtrs.push_back(sPtr<Hittable>(e)); });
 
   if (newChild != nullptr)
     children.push_back(sPtr<Hittable>(newChild));
@@ -192,4 +191,3 @@ rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
 }
 
 bool rt::BVHNode::isLeaf() const { return left == nullptr && right == nullptr; }
-

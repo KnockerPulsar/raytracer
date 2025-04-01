@@ -7,10 +7,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <optional>
-#include <vector>
-
-using std::vector, std::optional, std::make_optional;
 
 namespace rt {
   class BVHNode : public Hittable {
@@ -29,14 +25,6 @@ namespace rt {
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-
-    static bool BoxCompare(const sPtr<Hittable> a, const sPtr<Hittable> b, int axis);
-
-    static bool boxXCompare(const sPtr<Hittable> a, const sPtr<Hittable> b);
-
-    static bool boxYCompare(const sPtr<Hittable> a, const sPtr<Hittable> b);
-
-    static bool boxZCompare(const sPtr<Hittable> a, const sPtr<Hittable> b);
 
     // To use a shared pointer, you must have some reference to the shared pointer object itself
     // and not the pointer it's wrapping.
