@@ -103,8 +103,6 @@ bool rt::BVHNode::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) co
   bool leftHit  = left->HitTransformed(r, t_min, t_max, rec);
   bool rightHit = right->HitTransformed(r, t_min, leftHit ? rec.t : t_max, rec);
 
-  // if(leftHit || rightHit)
-  //   std::cout << "AAAA";
   return leftHit || rightHit;
 }
 bool rt::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
@@ -152,8 +150,6 @@ std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
 
 vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
   vector<sPtr<Hittable>> children = getChildrenAsList();
-  // This is destroyed on function return causing a double
-
   vector<AABB> childrenAABBs;
 
   for (auto &&e : children) {

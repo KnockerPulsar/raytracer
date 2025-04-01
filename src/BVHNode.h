@@ -26,8 +26,6 @@ namespace rt {
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    // To use a shared pointer, you must have some reference to the shared pointer object itself
-    // and not the pointer it's wrapping.
     vector<sPtr<Hittable>> getChildrenAsList() override;
 
     vector<AABB> getChildrenAABBs() override;
