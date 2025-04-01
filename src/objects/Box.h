@@ -1,16 +1,13 @@
 #pragma once
 
 #include "../HittableList.h"
-#include "../IRasterizable.h"
 #include "../Ray.h"
 #include "../data_structures/vec3.h"
 #include "../materials/MaterialFactory.h"
-#include <memory>
+
 #include <raylib.h>
 #include <raymath.h>
 #include <rlgl.h>
-
-using std::make_shared;
 
 namespace rt {
   class Box : public Hittable {

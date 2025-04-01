@@ -13,7 +13,7 @@ namespace rt {
   class ObjectFactory {
   public:
     static sPtr<Hittable> FromJson(nlohmann::json objectJson) {
-      string objType = objectJson["type"].get<string>();
+      std::string objType = objectJson["type"].get<std::string>();
 
       if (objType == "sphere")
         return std::make_shared<Sphere>(objectJson.get<Sphere>());

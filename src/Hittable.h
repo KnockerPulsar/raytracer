@@ -6,9 +6,7 @@
 #include "Ray.h"
 #include "Transformation.h"
 #include "data_structures/vec3.h"
-#include "editor/Utils.h"
 #include <cmath>
-#include <memory>
 #include <optional>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -18,15 +16,13 @@
 
 #include "editor/editor.h"
 
-using std::shared_ptr, std::vector, std::optional, std::nullopt, std::make_optional, std::make_shared;
-
 namespace rt {
   class Material;
 
   struct HitRecord {
     vec3                 p;
     vec3                 normal;
-    shared_ptr<Material> mat_ptr;
+    std::shared_ptr<Material> mat_ptr;
     float                t, u, v;
     bool                 front_face;
     Hittable            *closestHit = nullptr;
@@ -105,14 +101,14 @@ namespace rt {
       transformation = Transformation(translate, rotate);
     }
 
-    virtual vector<sPtr<Hittable>> getChildrenAsList() { return vector<sPtr<Hittable>>{}; }
+    virtual std::vector<sPtr<Hittable>> getChildrenAsList() { return std::vector<sPtr<Hittable>>{}; }
 
-    virtual vector<AABB> getChildrenAABBs() {
+    virtual std::vector<AABB> getChildrenAABBs() {
       AABB outputBox;
       if (this->BoundingBox(0, 1, outputBox))
-        return vector<AABB>{outputBox};
+        return std::vector<AABB>{outputBox};
 
-      return vector<AABB>();
+      return std::vector<AABB>();
     }
 
     // Only HittableLists and BVHNodes should override this.

@@ -34,8 +34,8 @@ namespace rt {
 
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    virtual vector<sPtr<Hittable>> getChildrenAsList() override;
+    virtual std::vector<sPtr<Hittable>> getChildrenAsList() override;
 
-    vector<AABB> getChildrenAABBs() override;
+    std::vector<AABB> getChildrenAABBs() override;
   };
 } // namespace rt

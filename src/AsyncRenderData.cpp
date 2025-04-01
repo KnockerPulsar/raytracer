@@ -7,9 +7,9 @@ namespace rt {
 AsyncRenderData::AsyncRenderData(int imageWidth, int imageHeight,
                                  int editorWidth, int editorHeight,
                                  int numThreads)
-    : threadProgress(vector(numThreads, 0)),
-      threadTimes(vector(numThreads, 0L)),
-      finishedThreads(vector(numThreads, false)) {
+    : threadProgress(std::vector(numThreads, 0)),
+      threadTimes(std::vector(numThreads, 0L)),
+      finishedThreads(std::vector(numThreads, false)) {
 
   int queueChunkSize = imageWidth * 4;
   pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight,

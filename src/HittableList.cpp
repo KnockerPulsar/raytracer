@@ -44,7 +44,7 @@ namespace rt {
   Hittable *HittableList::removeChild(sPtr<Hittable> childToRemove) {
 
     // TODO: figure out a cleaner way
-    vector<sPtr<Hittable>>::iterator toRemove = objects.end();
+    std::vector<sPtr<Hittable>>::iterator toRemove = objects.end();
     for (auto it = objects.begin(); it != objects.end(); it++) {
       if (*it == childToRemove)
         toRemove = it;
@@ -56,14 +56,12 @@ namespace rt {
     return this;
   }
 
-  vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
-
-    vector<sPtr<Hittable>> vec = objects;
-    return vec;
+  std::vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
+    return objects;
   }
 
-  vector<AABB> HittableList::getChildrenAABBs() {
-    vector<AABB> vec;
+  std::vector<AABB> HittableList::getChildrenAABBs() {
+    std::vector<AABB> vec;
 
     for (auto &&e : getChildrenAsList()) {
       AABB output;

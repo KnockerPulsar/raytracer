@@ -38,12 +38,12 @@ namespace {
   bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
 } // namespace
 
-rt::BVHNode::BVHNode(const vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
 rt::BVHNode::BVHNode(const HittableList &list, float t0, float t1)
     : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
 
-rt::BVHNode::BVHNode(const vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
+rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1) {
 
   if (srcObjects.empty()) {
     left  = nullptr;
@@ -52,7 +52,7 @@ rt::BVHNode::BVHNode(const vector<sPtr<Hittable>> &srcObjects, size_t start, siz
     return;
   }
 
-  vector<sPtr<Hittable>> objs;
+  std::vector<sPtr<Hittable>> objs;
   // If root node, need to filter only at root
   if (start == 0 && end == srcObjects.size()) {
     for (auto &&e : srcObjects) { // If not a bvh node, add to list
@@ -148,9 +148,9 @@ std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
   return std::vector<sPtr<rt::Hittable>>(children.begin(), children.end());
 }
 
-vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
-  vector<sPtr<Hittable>> children = getChildrenAsList();
-  vector<AABB> childrenAABBs;
+std::vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
+  std::vector<sPtr<Hittable>> children = getChildrenAsList();
+  std::vector<AABB> childrenAABBs;
 
   for (auto &&e : children) {
     AABB output;
@@ -162,7 +162,7 @@ vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
 }
 
 rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
-  vector<sPtr<Hittable>> children = getChildrenAsList();
+  std::vector<sPtr<Hittable>> children = getChildrenAsList();
 
   if (newChild != nullptr)
     children.push_back(sPtr<Hittable>(newChild));

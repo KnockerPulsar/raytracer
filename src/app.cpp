@@ -2,10 +2,8 @@
 
 #include "AsyncRenderData.h"
 #include "Defs.h"
-#include "Hittable.h"
 #include "Ray.h"
 #include "Scene.h"
-#include "Transformation.h"
 #include "data_structures/JobQueue.h"
 #include "editor/editor.h"
 #include "raytracer.h"
@@ -16,7 +14,6 @@
 
 #include <fstream>
 #include <memory>
-#include <ostream>
 #include <string>
 
 namespace rt {

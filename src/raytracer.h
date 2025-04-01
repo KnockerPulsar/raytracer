@@ -6,10 +6,6 @@
 #include <rlImGui.h>
 #include <stb_image_write.h>
 
-#include <functional>
-
-using std::ref;
-
 namespace rt {
   class Raytracer : public IState {
   public:

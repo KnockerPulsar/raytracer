@@ -1,7 +1,7 @@
 #include "AARect.h"
 
 namespace rt {
-  XYRect::XYRect(float _x0, float _x1, float _y0, float _y1, float _z, shared_ptr<Material> mat)
+  XYRect::XYRect(float _x0, float _x1, float _y0, float _y1, float _z, std::shared_ptr<Material> mat)
       : x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
 
   json XYRect::toJsonSpecific() const {
@@ -43,7 +43,7 @@ namespace rt {
 } // namespace rt
 
 namespace rt {
-  XZRect::XZRect(float _x0, float _x1, float _z0, float _z1, float _y, shared_ptr<Material> mat)
+  XZRect::XZRect(float _x0, float _x1, float _z0, float _z1, float _y, std::shared_ptr<Material> mat)
       : x0(_x0), x1(_x1), z0(_z0), z1(_z1), y(_y), mp(mat) {}
 
   json XZRect::toJsonSpecific() const {
@@ -86,7 +86,7 @@ namespace rt {
 } // namespace rt
 
 namespace rt {
-  YZRect::YZRect(float _y0, float _y1, float _z0, float _z1, float _x, shared_ptr<Material> mat)
+  YZRect::YZRect(float _y0, float _y1, float _z0, float _z1, float _x, std::shared_ptr<Material> mat)
       : y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
 
   json YZRect::toJsonSpecific() const {

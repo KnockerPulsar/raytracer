@@ -2,17 +2,10 @@
 
 #include "AsyncRenderData.h"
 #include <algorithm>
-#include <atomic>
 #include <condition_variable>
-#include <iostream>
-#include <iterator>
 #include <mutex>
-#include <ostream>
-#include <tuple>
 #include <utility>
 #include <vector>
-
-using std::vector, std::pair;
 
 namespace rt {
 
@@ -20,7 +13,7 @@ namespace rt {
 
   template <typename JobData> class JobQueue {
   private:
-    vector<JobData> jobs;
+    std::vector<JobData> jobs;
     int             currentChunkStart;
     std::mutex      queueMutex;
 
@@ -38,7 +31,7 @@ namespace rt {
     // Used to add jobs by the main thread.
     void addJobNoLock(JobData newJobData) { jobs.push_back(newJobData); }
 
-    pair<typename vector<JobData>::iterator, typename vector<JobData>::iterator>
+    std::pair<typename std::vector<JobData>::iterator, typename std::vector<JobData>::iterator>
     getChunk(AsyncRenderData &ard, int threadIndex) {
 
       // Unlocks automatically on scope end
@@ -60,7 +53,7 @@ namespace rt {
       return std::make_pair(start, end);
     }
 
-    vector<JobData> &getJobsVector() { return jobs; }
+    std::vector<JobData> &getJobsVector() { return jobs; }
 
     int getCurrentChunkStart() { return currentChunkStart; }
 

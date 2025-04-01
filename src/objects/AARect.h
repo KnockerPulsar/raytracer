@@ -17,7 +17,7 @@ namespace rt {
     float                     x0, x1, y0, y1, z;
 
     XYRect() = default;
-    XYRect(float _x0, float _x1, float _y0, float _y1, float _z, shared_ptr<Material> mat);
+    XYRect(float _x0, float _x1, float _y0, float _y1, float _z, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;
 
@@ -32,7 +32,7 @@ namespace rt {
     float                     x0, x1, z0, z1, y;
 
     XZRect() = default;
-    XZRect(float _x0, float _x1, float _z0, float _z1, float _y, shared_ptr<Material> mat);
+    XZRect(float _x0, float _x1, float _z0, float _z1, float _y, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;
 
@@ -47,7 +47,7 @@ namespace rt {
     float                     y0, y1, z0, z1, x;
 
     YZRect() = default;
-    YZRect(float _y0, float _y1, float _z0, float _z1, float _x, shared_ptr<Material> mat);
+    YZRect(float _y0, float _y1, float _z0, float _z1, float _x, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;
 
@@ -75,7 +75,7 @@ namespace rt {
 
   inline void to_json(json &j, const XZRect &xz) { j = xz.toJson(); }
   inline void from_json(const json &j, XZRect &plane) {
-    
+
     vec3 center  = j["pos"].get<vec3>();
     vec3 extents = j["extents"].get<vec3>();
     plane.mp     = MaterialFactory::FromJson(j["material"]);

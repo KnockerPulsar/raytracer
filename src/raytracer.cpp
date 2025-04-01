@@ -50,7 +50,7 @@ void rt::Raytracer::startRaytracing() {
   }
 
   for (int t = 0; t < app->getNumThreads(); t++) {
-    ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, ref(ard), getScene(), t));
+    ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, std::ref(ard), getScene(), t));
   }
 }
 

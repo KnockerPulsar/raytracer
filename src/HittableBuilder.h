@@ -3,8 +3,6 @@
 #include <memory>
 #include <string>
 
-using std::string;
-
 namespace rt {
   template <typename T = Hittable> class HittableBuilder {
     T *hittable;
@@ -18,7 +16,7 @@ namespace rt {
       return HittableBuilder(args...);
     }
 
-    HittableBuilder &withName(string name) {
+    HittableBuilder &withName(std::string name) {
       hittable->name = name;
       return *this;
     }
