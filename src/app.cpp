@@ -32,7 +32,7 @@ namespace rt {
       ToggleFullscreen();
 
     ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
   }
 
   App::App(CliConfig config)
