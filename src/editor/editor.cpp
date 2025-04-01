@@ -160,6 +160,66 @@ namespace rt {
     SelectedObjectImGui();
   }
 
+  void Editor::SceneMenuImGui()
+  {
+      if (ImGui::BeginMenu("Scene")) {
+        if (ImGui::MenuItem("Open scene")) {
+          ImGuiFileDialog::Instance()->OpenDialog(
+              "OpenScene", "Open scene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
+          );
+        }
+
+        if (ImGui::MenuItem("Save current scene")) {
+          ImGuiFileDialog::Instance()->OpenDialog(
+              "SaveScene", "SaveScene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
+          );
+        }
+        ImGui::EndMenu();
+      }
+
+      if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
+
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+          std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+          app->changeScene(Scene::Load(getScene()->imageWidth, getScene()->imageHeight, filePathName));
+        }
+
+        ImGuiFileDialog::Instance()->Close();
+      }
+
+      if (ImGuiFileDialog::Instance()->Display("SaveScene")) {
+
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+
+          std::string fileDir  = ImGuiFileDialog::Instance()->GetCurrentPath();
+          std::string fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+          std::stringstream sceneNamePlusTime;
+          sceneNamePlusTime << fileDir << "/" << fileName;
+
+          json          json = getScene()->toJson();
+          std::ofstream outputFile(sceneNamePlusTime.str());
+          outputFile << std::setw(4) << json << '\n';
+          outputFile.close();
+        }
+
+        ImGuiFileDialog::Instance()->Close();
+      }
+  }
+
+  void Editor::BuiltInMenuImGui()
+  {
+      if (ImGui::BeginMenu("Built in")) {
+        for (auto &[name, loader] : Scene::builtInScenes) {
+          if (ImGui::MenuItem(name.c_str())) {
+            app->changeScene(loader(getScene()->imageWidth, getScene()->imageHeight));
+          }
+        }
+
+        ImGui::EndMenu();
+      }
+  }
+
   void Editor::SelectedObjectImGui()
   {
     if (selectedObject != nullptr) {
@@ -484,74 +544,11 @@ namespace rt {
 
     if (ImGui::BeginMainMenuBar()) {
 
-      if (ImGui::BeginMenu("Scene")) {
-        if (ImGui::MenuItem("Open scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog(
-              "OpenScene", "Open scene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
-          );
-        }
-
-        if (ImGui::MenuItem("Save current scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog(
-              "SaveScene", "SaveScene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
-          );
-        }
-
-        ImGui::EndMenu();
-      }
-
+      SceneMenuImGui();
       ViewMenuImGui();
-
-      if (ImGui::BeginMenu("Built in")) {
-        for (auto &[name, loader] : Scene::builtInScenes) {
-          if (ImGui::MenuItem(name.c_str())) {
-            app->changeScene(loader(imageWidth, imageHeight));
-          }
-        }
-
-        ImGui::EndMenu();
-      }
+      BuiltInMenuImGui();
 
       ImGui::EndMainMenuBar();
-    }
-
-    // display
-    if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
-
-      // action if OK
-      if (ImGuiFileDialog::Instance()->IsOk()) {
-        std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-        // std::string filePath     = ImGuiFileDialog::Instance()->GetCurrentPath();
-
-        // action
-        app->changeScene(Scene::Load(imageWidth, imageHeight, filePathName));
-      }
-
-      // close
-      ImGuiFileDialog::Instance()->Close();
-    }
-
-    if (ImGuiFileDialog::Instance()->Display("SaveScene")) {
-
-      // action if OK
-      if (ImGuiFileDialog::Instance()->IsOk()) {
-
-        std::string fileDir  = ImGuiFileDialog::Instance()->GetCurrentPath();
-        std::string fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-
-        // action
-
-        std::stringstream sceneNamePlusTime;
-        sceneNamePlusTime << fileDir << "/" << fileName;
-
-        json          json = getScene()->toJson();
-        std::ofstream outputFile(sceneNamePlusTime.str());
-        outputFile << std::setw(4) << json << '\n';
-        outputFile.close();
-      }
-
-      // close
-      ImGuiFileDialog::Instance()->Close();
     }
   }
 

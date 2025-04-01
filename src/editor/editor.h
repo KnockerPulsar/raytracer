@@ -54,8 +54,12 @@ namespace rt {
     // Renders editor specific GUI
     void RenderImgui();
 
+    void SceneMenuImGui();
+
     void ViewMenuCheckInputs();
     void ViewMenuImGui();
+
+    void BuiltInMenuImGui();
 
     void SelectedObjectImGui();
 
