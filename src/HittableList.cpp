@@ -42,17 +42,8 @@ namespace rt {
   Hittable *HittableList::addChild(sPtr<Hittable> newChild) { return &Add(newChild); }
 
   Hittable *HittableList::removeChild(sPtr<Hittable> childToRemove) {
-
-    // TODO: figure out a cleaner way
-    std::vector<sPtr<Hittable>>::iterator toRemove = objects.end();
-    for (auto it = objects.begin(); it != objects.end(); it++) {
-      if (*it == childToRemove)
-        toRemove = it;
-    }
-
-    if (toRemove != objects.end())
-      objects.erase(toRemove);
-
+    auto [eraseStart, _] = std::ranges::remove(objects, childToRemove);
+    objects.erase(eraseStart);
     return this;
   }
 
