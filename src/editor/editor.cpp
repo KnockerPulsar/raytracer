@@ -46,84 +46,84 @@ namespace rt {
     return modifiersDown && keyDown;
   }
 
-    struct ViewMenuEntry {
-      std::string name;
-      std::function<void(Editor::ViewState&)> onPress;
-      std::string shortcutStr;
-      std::initializer_list<unsigned int> modifiers;
-      unsigned int key;
-    };
+  struct ViewMenuEntry {
+    std::string                              name;
+    std::function<void(Editor::ViewState &)> onPress;
+    std::string                              shortcutStr;
+    std::initializer_list<unsigned int>      modifiers;
+    unsigned int                             key;
+  };
 
-    std::initializer_list<ViewMenuEntry> const viewMenuItems = {
-        {"Raytracing settings",
-         [](auto &viewState) { viewState.viewMenu.raytracingSettings = !viewState.viewMenu.raytracingSettings; },
-         "ALT+R",
-         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
-         KEY_R},
-        {"Camera settings",
-         [](auto &viewState) { viewState.viewMenu.cameraSettings = !viewState.viewMenu.cameraSettings; },
-         "ALT+C",
-         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
-         KEY_C},
-        {"Object list",
-         [](auto &viewState) { viewState.viewMenu.objectList = !viewState.viewMenu.objectList; },
-         "ALT+O",
-         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
-         KEY_O},
-        {"Hide all",
-         [](auto &viewState) { viewState.viewMenu = {false, false, false}; },
-         "ALT+H",
-         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
-         KEY_H},
-        {"Show all",
-         [](auto &viewState) { viewState.viewMenu = {true, true, true}; },
-         "ALT+S",
-         {KEY_LEFT_ALT, KEY_RIGHT_ALT},
-         KEY_S},
-    };
+  std::initializer_list<ViewMenuEntry> const viewMenuItems = {
+      {"Raytracing settings",
+       [](auto &viewState) { viewState.viewMenu.raytracingSettings = !viewState.viewMenu.raytracingSettings; },
+       "ALT+R",
+       {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+       KEY_R},
+      {"Camera settings",
+       [](auto &viewState) { viewState.viewMenu.cameraSettings = !viewState.viewMenu.cameraSettings; },
+       "ALT+C",
+       {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+       KEY_C},
+      {"Object list",
+       [](auto &viewState) { viewState.viewMenu.objectList = !viewState.viewMenu.objectList; },
+       "ALT+O",
+       {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+       KEY_O},
+      {"Hide all",
+       [](auto &viewState) { viewState.viewMenu = {false, false, false}; },
+       "ALT+H",
+       {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+       KEY_H},
+      {"Show all",
+       [](auto &viewState) { viewState.viewMenu = {true, true, true}; },
+       "ALT+S",
+       {KEY_LEFT_ALT, KEY_RIGHT_ALT},
+       KEY_S},
+  };
 
-    void Editor::Rasterize() {
+  void Editor::Rasterize() {
 
-      BeginTextureMode(rasterRT);
-      ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
+    BeginTextureMode(rasterRT);
+    ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
 
-      BeginMode3D(camera.toRaylibCamera3D());
-      {
-        DrawGrid(10, 10);
+    BeginMode3D(camera.toRaylibCamera3D());
+    {
+      DrawGrid(10, 10);
 
-        if (!getScene()->skysphereTexture.empty()) {
-          getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
-          getScene()->drawSkysphere();
-        }
-
-        auto rasterizables = getScene()->worldRoot->getChildrenAsList();
-
-        for (int i = 0; i < rasterizables.size(); i++) {
-          rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
-        }
-
-        auto aabBs = getScene()->worldRoot->getChildrenAABBs();
-
-        AABB rootAABB;
-        getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
-        aabBs.push_back(rootAABB);
-
-        for (auto &&bb : aabBs) {
-          DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
-        }
-
-        DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
-
-        DrawLine3D(Editor::Camera::lineStart, Editor::Camera::lineEnd, BLUE);
+      if (!getScene()->skysphereTexture.empty()) {
+        getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
+        getScene()->drawSkysphere();
       }
-      EndMode3D();
 
-      BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
-      camera.DrawFrameOutline();
-      EndMode2D();
+      auto rasterizables = getScene()->worldRoot->getChildrenAsList();
 
-      EndTextureMode();
+      for (int i = 0; i < rasterizables.size(); i++) {
+        rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
+      }
+
+      auto aabBs = getScene()->worldRoot->getChildrenAABBs();
+
+      AABB rootAABB;
+      getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
+      aabBs.push_back(rootAABB);
+
+      for (auto &&bb : aabBs) {
+        DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
+      }
+
+      DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
+
+      DrawLine3D(Editor::Camera::lineStart, Editor::Camera::lineEnd, BLUE);
     }
+    EndMode3D();
+
+    BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
+    camera.DrawFrameOutline();
+    EndMode2D();
+
+    EndTextureMode();
+  }
 
   void Editor::RenderImgui() {
 
@@ -157,98 +157,91 @@ namespace rt {
       ImGui::End();
     }
 
-    if(viewState.viewMenu.raytracingSettings)
+    if (viewState.viewMenu.raytracingSettings)
       RaytraceSettingsImgui();
 
-    if(viewState.viewMenu.cameraSettings)
+    if (viewState.viewMenu.cameraSettings)
       camera.RenderImgui();
 
     SelectedObjectImGui();
   }
 
-  void Editor::FileMenuImGui()
-  {
-      constexpr auto* fileMenuTitle = "File";
-      if(viewState.fileMenu.shouldOpen)
-      {
-        ImGui::OpenPopup(fileMenuTitle);
-        viewState.fileMenu.shouldOpen = false;
+  void Editor::FileMenuImGui() {
+    constexpr auto *fileMenuTitle = "File";
+    if (viewState.fileMenu.shouldOpen) {
+      ImGui::OpenPopup(fileMenuTitle);
+      viewState.fileMenu.shouldOpen = false;
+    }
+
+    if (ImGui::BeginMenu(fileMenuTitle)) {
+      if (ImGui::MenuItem("Open scene")) {
+        ImGuiFileDialog::Instance()->OpenDialog("OpenScene", "Open scene", ".json",
+                                                IGFD::FileDialogConfig{.path = "scenes/"});
       }
 
-      if (ImGui::BeginMenu(fileMenuTitle)) {
-        if (ImGui::MenuItem("Open scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog(
-              "OpenScene", "Open scene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
-          );
-        }
-
-        if (ImGui::MenuItem("Save current scene")) {
-          ImGuiFileDialog::Instance()->OpenDialog(
-              "SaveScene", "SaveScene", ".json", IGFD::FileDialogConfig{.path = "scenes/"}
-          );
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Quit")) {
-          app->quit();
-        }
-
-        ImGui::EndMenu();
+      if (ImGui::MenuItem("Save current scene")) {
+        ImGuiFileDialog::Instance()->OpenDialog("SaveScene", "SaveScene", ".json",
+                                                IGFD::FileDialogConfig{.path = "scenes/"});
       }
 
-      if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
+      ImGui::Separator();
 
-        if (ImGuiFileDialog::Instance()->IsOk()) {
-          std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-          app->changeScene(Scene::Load(getScene()->imageWidth, getScene()->imageHeight, filePathName));
-        }
-
-        ImGuiFileDialog::Instance()->Close();
+      if (ImGui::MenuItem("Quit")) {
+        app->quit();
       }
 
-      if (ImGuiFileDialog::Instance()->Display("SaveScene")) {
+      ImGui::EndMenu();
+    }
 
-        if (ImGuiFileDialog::Instance()->IsOk()) {
+    if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
 
-          std::string fileDir  = ImGuiFileDialog::Instance()->GetCurrentPath();
-          std::string fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-
-          std::stringstream sceneNamePlusTime;
-          sceneNamePlusTime << fileDir << "/" << fileName;
-
-          json          json = getScene()->toJson();
-          std::ofstream outputFile(sceneNamePlusTime.str());
-          outputFile << std::setw(4) << json << '\n';
-          outputFile.close();
-        }
-
-        ImGuiFileDialog::Instance()->Close();
+      if (ImGuiFileDialog::Instance()->IsOk()) {
+        std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+        app->changeScene(Scene::Load(getScene()->imageWidth, getScene()->imageHeight, filePathName));
       }
+
+      ImGuiFileDialog::Instance()->Close();
+    }
+
+    if (ImGuiFileDialog::Instance()->Display("SaveScene")) {
+
+      if (ImGuiFileDialog::Instance()->IsOk()) {
+
+        std::string fileDir  = ImGuiFileDialog::Instance()->GetCurrentPath();
+        std::string fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+        std::stringstream sceneNamePlusTime;
+        sceneNamePlusTime << fileDir << "/" << fileName;
+
+        json          json = getScene()->toJson();
+        std::ofstream outputFile(sceneNamePlusTime.str());
+        outputFile << std::setw(4) << json << '\n';
+        outputFile.close();
+      }
+
+      ImGuiFileDialog::Instance()->Close();
+    }
   }
 
-  void Editor::BuiltInMenuImGui()
-  {
-      constexpr auto* builtInMenuTitle = "Built in";
-      if(viewState.builtInMenu.shouldOpen)
-      {
-        ImGui::OpenPopup(builtInMenuTitle);
-        viewState.builtInMenu.shouldOpen = false;
-      }
+  void Editor::BuiltInMenuImGui() {
+    constexpr auto *builtInMenuTitle = "Built in";
+    if (viewState.builtInMenu.shouldOpen) {
+      ImGui::OpenPopup(builtInMenuTitle);
+      viewState.builtInMenu.shouldOpen = false;
+    }
 
-      if (ImGui::BeginMenu(builtInMenuTitle)) {
-        for (auto &[name, loader] : Scene::builtInScenes) {
-          if (ImGui::MenuItem(name.c_str())) {
-            app->changeScene(loader(getScene()->imageWidth, getScene()->imageHeight));
-          }
+    if (ImGui::BeginMenu(builtInMenuTitle)) {
+      for (auto &[name, loader] : Scene::builtInScenes) {
+        if (ImGui::MenuItem(name.c_str())) {
+          app->changeScene(loader(getScene()->imageWidth, getScene()->imageHeight));
         }
-
-        ImGui::EndMenu();
       }
+
+      ImGui::EndMenu();
+    }
   }
 
-  void Editor::SelectedObjectImGui()
-  {
+  void Editor::SelectedObjectImGui() {
     if (selectedObject != nullptr) {
       ImGui::Begin("Selected object", 0);
 
@@ -273,7 +266,7 @@ namespace rt {
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    auto const            rotation    = selectedObject->transformation.getRotationEuler();
+    auto const rotation = selectedObject->transformation.getRotationEuler();
 
     auto model = [this, rotation] {
       float                 scaleTemp[] = {1.0, 1.0, 1.0};
@@ -358,23 +351,21 @@ namespace rt {
       viewState.builtInMenu.shouldOpen = true;
   }
 
-  void Editor::ViewMenuImGui()
-  {
-      constexpr auto *viewMenuTitle = "View";
-      if (viewState.viewMenu.shouldOpen)
-      {
-        ImGui::OpenPopup(viewMenuTitle);
-        viewState.viewMenu.shouldOpen = false;
-      }
+  void Editor::ViewMenuImGui() {
+    constexpr auto *viewMenuTitle = "View";
+    if (viewState.viewMenu.shouldOpen) {
+      ImGui::OpenPopup(viewMenuTitle);
+      viewState.viewMenu.shouldOpen = false;
+    }
 
-      if (ImGui::BeginMenu(viewMenuTitle)) {
-        for (auto const &[text, onPress, strShortcut, _, __] : viewMenuItems) {
-          if (ImGui::MenuItem(std::format("Toggle {}", text).c_str(), strShortcut.c_str())) {
-            onPress(viewState);
-          }
+    if (ImGui::BeginMenu(viewMenuTitle)) {
+      for (auto const &[text, onPress, strShortcut, _, __] : viewMenuItems) {
+        if (ImGui::MenuItem(std::format("Toggle {}", text).c_str(), strShortcut.c_str())) {
+          onPress(viewState);
         }
-        ImGui::EndMenu();
       }
+      ImGui::EndMenu();
+    }
   }
 
   Hittable *Editor::CastRay(Vector2 mousePos) {
@@ -411,13 +402,8 @@ namespace rt {
   }
 
   void Editor::AddObjectImgui() {
-    ImGui::Combo(
-        ("##" + EditorUtils::GetIDFromPointer(this)).c_str(),
-        (int *)&selectedAddableObject,
-        addableObjectTypes,
-        AddableObjectsTypesCount,
-        -1
-    );
+    ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(), (int *)&selectedAddableObject,
+                 addableObjectTypes, AddableObjectsTypesCount, -1);
     ImGui::SameLine();
     if (ImGui::Button("+", {-1, 0})) {
 
@@ -470,26 +456,21 @@ namespace rt {
   // Regenerate BVH on exit / before entering the raytracer
   void Editor::onExit() {
     auto *scene = getScene();
-    auto rtCam = camera.getRtCamera();
+    auto  rtCam = camera.getRtCamera();
 
     scene->cam = camera.toSceneCamera();
 
-    scene->imageWidth = camera.imageWidth();
+    scene->imageWidth  = camera.imageWidth();
     scene->imageHeight = camera.imageHeight();
 
-    *app->getARD() = AsyncRenderData(camera.imageWidth(), camera.imageHeight(),
-                                     app->editorWidth, app->editorHeight,
+    *app->getARD() = AsyncRenderData(camera.imageWidth(), camera.imageHeight(), app->editorWidth, app->editorHeight,
                                      app->getNumThreads());
   }
 
   void Editor::RenderViewport() {
     // Flip on Y axis since ImGui and opengl/raylib use different axis
-    DrawTextureRec(
-        rasterRT.texture,
-        {0, 0, float(rasterRT.texture.width), -float(rasterRT.texture.height)},
-        {0, 0},
-        WHITE
-    );
+    DrawTextureRec(rasterRT.texture, {0, 0, float(rasterRT.texture.width), -float(rasterRT.texture.height)}, {0, 0},
+                   WHITE);
   }
 
   void Editor::RaytraceSettingsImgui() {
@@ -500,7 +481,7 @@ namespace rt {
     ImGui::Checkbox("Save on render?", &app->saveOnRender);
 
     int numThreads = app->getNumThreads();
-    if(ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
+    if (ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
       app->changeNumThreads(numThreads);
     }
 
@@ -533,12 +514,8 @@ namespace rt {
     static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
     static MaterialTypes selectedMaterialType = Emissive;
 
-    ImGui::Combo(
-        ("##" + EditorUtils::GetIDFromPointer(materialTypes)).c_str(),
-        (int *)&selectedMaterialType,
-        materialTypes,
-        MaterialTypes::MaterialTypesCount
-    );
+    ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(materialTypes)).c_str(), (int *)&selectedMaterialType,
+                 materialTypes, MaterialTypes::MaterialTypesCount);
 
     ImGui::SameLine();
     if (ImGui::Button("Change")) {
@@ -586,19 +563,17 @@ namespace rt {
     }
   }
 
-  void Editor::changeScene(Scene *scene) {
-    camera.updateFromRtCamera(scene->cam);
-  }
+  void Editor::changeScene(Scene *scene) { camera.updateFromRtCamera(scene->cam); }
 
   void Editor::Camera::DrawFrameOutline() const {
-    if(!frameSizeAffectsCrop)
+    if (!frameSizeAffectsCrop)
       return;
 
     auto constexpr thickness = 5.0;
     // Account for titlebar
     auto constexpr titlebarClearence = 4;
-    auto rectX     = (editorWidth - _imageWidth) / 2;
-    auto rectY     = (editorHeight - _imageHeight) / 2;
+    auto rectX                       = (editorWidth - _imageWidth) / 2;
+    auto rectY                       = (editorHeight - _imageHeight) / 2;
     DrawRectangleLinesEx(::Rectangle(rectX, rectY + (thickness * titlebarClearence), _imageWidth - thickness,
                                      _imageHeight - (thickness * titlebarClearence)),
                          thickness, MAGENTA);
@@ -606,8 +581,7 @@ namespace rt {
 
   void Editor::Camera::RenderImgui() {
     if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
-      if(ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05))
-      {
+      if (ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05)) {
         rtCamera.lookAt = rtCamera.lookFrom + rtCamera.localForward;
       }
 
@@ -617,7 +591,7 @@ namespace rt {
       if (controlType == ControlType::lookAtPoint) {
         ImGui::DragFloat3("rtCamera.lookAt", &rtCamera.lookAt.x, 0.05);
       } else {
-        if(ImGui::DragFloat2("rotation", &angle.x, 0.05f))
+        if (ImGui::DragFloat2("rotation", &angle.x, 0.05f))
           lookAtAngle(angle);
       }
 
@@ -715,8 +689,7 @@ namespace rt {
     if (IsKeyDown(KEY_LEFT_SHIFT))
       speedMultiplier *= boostMultiplier;
 
-    auto [upChange, fwdChange, rgtChange] =
-        rtCamera.getScaledDirectionVectors(dt * speedMultiplier);
+    auto [upChange, fwdChange, rgtChange] = rtCamera.getScaledDirectionVectors(dt * speedMultiplier);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
       HideCursor();
@@ -760,17 +733,15 @@ namespace rt {
   }
 
   Camera3D Editor::Camera::toRaylibCamera3D() const {
-    return Camera3D{.position = rtCamera.lookFrom,
-                    .target = rtCamera.lookAt,
-                    .up = {0, 1, 0},
-                    .fovy = rtCamera.vFov,
+    return Camera3D{.position   = rtCamera.lookFrom,
+                    .target     = rtCamera.lookAt,
+                    .up         = {0, 1, 0},
+                    .fovy       = rtCamera.vFov,
                     .projection = CAMERA_PERSPECTIVE};
   }
 
   glm::mat4 Editor::Camera::getProjectionMatrix() const {
-    return glm::perspective(glm::radians(rtCamera.vFov),
-                            static_cast<float>(editorWidth) / editorHeight,
-                            0.01f, 100.0f);
+    return glm::perspective(glm::radians(rtCamera.vFov), static_cast<float>(editorWidth) / editorHeight, 0.01f, 100.0f);
   }
 
   float Editor::Camera::GetCorrectedCropFov() const {
