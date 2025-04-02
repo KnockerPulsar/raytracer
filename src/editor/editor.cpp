@@ -499,7 +499,10 @@ namespace rt {
         selectedObject = o.get();
       }
 
-      ImGui::SameLine();
+      auto const checkboxWidth = ImGui::CalcTextSize("x").x;
+      auto const totalWidth    = ImGui::GetContentRegionAvail().x;
+      ImGui::SameLine(totalWidth - checkboxWidth);
+      ImGui::SetNextItemWidth(totalWidth - checkboxWidth);
 
       // Remove current object from world and rebuild
       if (ImGui::Button(("x##" + EditorUtils::GetIDFromPointer(o.get())).c_str())) {
