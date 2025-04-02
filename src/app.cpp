@@ -57,7 +57,9 @@ namespace rt {
   void App::checkInput() {
     int keyPressed = GetKeyPressed();
 
-    if (ImGui::GetIO().WantCaptureKeyboard)
+    // FIXME: After focusing an imgui widget, switching between the editor and
+    // raytracer state automatically selects an imgui widget
+    if (ImGui::GetIO().WantCaptureKeyboard && ImGui::GetIO().NavVisible && ImGui::GetIO().NavActive)
       return;
 
     switch (keyPressed) {
