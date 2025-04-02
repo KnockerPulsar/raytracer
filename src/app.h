@@ -28,7 +28,6 @@ namespace rt {
     sPtr<Raytracer> rt;
 
     int  numThreads;
-    bool fullscreen = false;
     bool shouldQuit = false;
 
     sPtr<IState> currentState;

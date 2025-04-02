@@ -25,9 +25,6 @@ namespace rt {
     SetTargetFPS(60); // Not like we're gonna hit it...
     SetExitKey(KEY_NULL);
 
-    if (fullscreen)
-      ToggleFullscreen();
-
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
   }
@@ -64,13 +61,6 @@ namespace rt {
       return;
 
     switch (keyPressed) {
-
-    case KEY_F: {
-      fullscreen = !fullscreen;
-      ToggleFullscreen();
-      break;
-    }
-
     case KEY_E: {
       currentState = currentState->toNextState();
       break;
@@ -93,9 +83,6 @@ namespace rt {
   App::~App() {
     // Note that if you kill the application in fullscreen, the resolution won't
     // reset to native.
-
-    if (fullscreen)
-      ToggleFullscreen();
 
     UnloadRenderTexture(ard.raytraceRT);
 
