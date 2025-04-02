@@ -65,6 +65,11 @@ namespace rt {
       currentState = currentState->toNextState();
       break;
     }
+    case KEY_Q: {
+      if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+        quit();
+      break;
+    }
     }
   }
 

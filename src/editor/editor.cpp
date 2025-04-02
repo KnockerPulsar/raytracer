@@ -325,10 +325,6 @@ namespace rt {
     FileMenuCheckInputs();
     ViewMenuCheckInputs();
     BuiltInMenuCheckInputs();
-
-    if (keyCombination(KEY_Q, {KEY_LEFT_CONTROL, KEY_RIGHT_CONTROL})) {
-      app->quit();
-    }
   }
 
   void Editor::FileMenuCheckInputs() {
