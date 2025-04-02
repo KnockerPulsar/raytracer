@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include "Hittable.h"
 #include "Scene.h"
+#include "Util.h"
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 #include "materials/Material.h"

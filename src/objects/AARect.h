@@ -1,10 +1,12 @@
 #pragma once
 
-#include "../../vendor/nlohmann-json/json.hpp"
 #include "../Defs.h"
 #include "../Hittable.h"
 #include "../data_structures/vec3.h"
 #include "../materials/MaterialFactory.h"
+
+#include <nlohmann-json/json.hpp>
+
 #include <memory>
 
 namespace rt {

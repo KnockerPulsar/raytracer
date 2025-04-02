@@ -19,7 +19,8 @@ CMAKE_POLICY(SET CMP0074 NEW)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 # SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 # SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
-add_subdirectory(vendor/glm)
+
+add_subdirectory(vendor/glm/glm)
 
 # A variable with all our source files that are common between executable targets (examples)
 set(SOURCES
@@ -65,14 +66,14 @@ set(SOURCES
 include_directories(
   src/
 
+  vendor/
   vendor/rlImGui/
   vendor/ImGuizmo/
   vendor/imgui/
-  vendor/nlohmann-json/
   vendor/ImGuiFileDialog
   vendor/argumentum/include/
-  vendor/ImGuiFileDialog/stb/
-  vendor/stb_image
+  vendor/stb_image/
+  vendor/glm
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -96,4 +97,5 @@ target_link_libraries(
   -lrt
   -lX11
   -ldl
+  glm
 )

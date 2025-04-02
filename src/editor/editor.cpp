@@ -13,13 +13,11 @@
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
 #include <raylib.h>
 #include <rlImGui.h>
 #include <rlgl.h>
-
-// TODO fix this ugly include
-#include <../../vendor/glm/glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
 #include <cmath>

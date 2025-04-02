@@ -1,8 +1,10 @@
 #include "camera.h"
+#include "Constants.h"
 #include "Scene.h"
+#include "Util.h"
 
-#include <../../vendor/glm/glm/gtc/matrix_transform.hpp>  // for perspective
-#include <../../vendor/glm/glm/gtx/fast_trigonometry.hpp> // for wrapAngle
+#include <glm/gtc/matrix_transform.hpp>  // for perspective
+#include <glm/gtx/fast_trigonometry.hpp> // for wrapAngle
 #include <imgui.h>
 
 using namespace rt::constants;

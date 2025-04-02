@@ -11,8 +11,8 @@
 #include <ImGuizmo.h>
 #include <raylib.h>
 
-#include <../vendor/glm/glm/glm.hpp>
-#include <../vendor/glm/glm/gtx/fast_trigonometry.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/fast_trigonometry.hpp>
 
 #include <optional>
 

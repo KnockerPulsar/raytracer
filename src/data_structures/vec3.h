@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../../vendor/glm/glm/glm.hpp"
-#include "../../vendor/nlohmann-json/json.hpp"
 #include "../Defs.h"
-#include "../Util.h"
+
+#include <glm/glm.hpp>
+#include <nlohmann-json/json.hpp>
 #include <raylib.h>
 #include <raymath.h>
+
 #include <sys/types.h>
 
 /**

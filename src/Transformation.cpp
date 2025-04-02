@@ -4,12 +4,12 @@
 #include "Defs.h"
 #include "editor/Utils.h"
 
+#include <glm/gtx/euler_angles.hpp>
 #include <imgui.h>
-#include "../vendor/glm/glm/gtx/euler_angles.hpp"
-
-#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
+
+#include <cmath>
 
 void rt::Transformation::recomputeCaches() { invertedRotate = QuaternionInvert(rotate); }
 

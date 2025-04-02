@@ -1,11 +1,11 @@
 #include "Utils.h"
-#include "../../vendor/glm/glm/gtc/constants.hpp"
 
-#include <format>
+#include <glm/gtc/constants.hpp>
 #include <raylib.h>
 
 #include <algorithm>
 #include <cstdlib>
+#include <format>
 #include <vector>
 
 namespace EditorUtils {

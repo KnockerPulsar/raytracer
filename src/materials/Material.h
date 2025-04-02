@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../textures/SolidColor.h"
-#include "../textures/Texture.h"
-#include <memory>
+#include "IImguiDrawable.h"
+#include "data_structures/vec3.h"
 
 namespace rt {
 

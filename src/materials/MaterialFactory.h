@@ -1,10 +1,12 @@
 #pragma once
-#include "../../vendor/nlohmann-json/json.hpp"
 #include "Dielectric.h"
 #include "DiffuseLight.h"
 #include "Lambertian.h"
 #include "Material.h"
 #include "Metal.h"
+
+#include <nlohmann-json/json.hpp>
+
 #include <memory>
 #include <string>
 

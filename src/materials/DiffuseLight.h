@@ -1,11 +1,11 @@
 #pragma once
+#include "Material.h"
+
 #include "../Defs.h"
 #include "../Hittable.h"
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
 #include "../textures/TextureFactory.h"
-#include "Material.h"
-#include <iostream>
 
 namespace rt {
   /**

@@ -3,11 +3,11 @@
 #include "rt.h"
 #include "Util.h"
 
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <imgui.h>
 #include <raylib.h>
 #include <raymath.h>
-#include <../vendor/glm/glm/ext/matrix_clip_space.hpp>
-#include <../vendor/glm/glm/ext/matrix_transform.hpp>
 
 #include <cmath>
 

@@ -1,14 +1,13 @@
 #pragma once
-#include "../vendor/nlohmann-json/json.hpp"
 #include "Camera.h"
 #include "Defs.h"
 #include "IImguiDrawable.h"
-#include "Transformation.h"
-#include "editor/Utils.h"
-#include "textures/ImageTexture.h"
-#include <memory>
+
+#include <nlohmann-json/json.hpp>
 #include <raylib.h>
 #include <raymath.h>
+#include <imgui.h>
+
 #include <vector>
 
 struct RaytraceSettings : public rt::IImguiDrawable {

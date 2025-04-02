@@ -1,8 +1,8 @@
 #pragma once
 
-#include <raylib.h>
-#include "../../vendor/glm/glm/glm.hpp"
+#include <glm/glm.hpp>
 #include <imgui.h>
+#include <raylib.h>
 
 #include <string>
 

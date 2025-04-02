@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include "AsyncRenderData.h"
+#include "Constants.h"
 #include "Defs.h"
 #include "Ray.h"
 #include "Scene.h"
