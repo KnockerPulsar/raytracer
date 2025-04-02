@@ -492,11 +492,20 @@ namespace rt {
   void Editor::ObjectListImgui() {
     auto objects = getScene()->worldRoot->getChildrenAsList();
     for (auto &&o : objects) {
-      std::string idPlusName = o->name + "##" + EditorUtils::GetIDFromPointer(o.get());
+      auto const selected = selectedObject == o.get();
 
-      // Size of {-1,0} to use full width
+      if(selected) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertFloat4ToU32({0.6, 0.4, 0.3, 1.0}));
+        ImGui::SetScrollHereY();
+      }
+
+      std::string idPlusName = o->name + "##" + EditorUtils::GetIDFromPointer(o.get());
       if (ImGui::Button(idPlusName.c_str())) {
         selectedObject = o.get();
+      }
+
+      if (selected) {
+        ImGui::PopStyleColor();
       }
 
       auto const checkboxWidth = ImGui::CalcTextSize("x").x;
