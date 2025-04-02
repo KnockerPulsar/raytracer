@@ -11,8 +11,6 @@ namespace rt {
     Triangle t0, t1;
     float    w, h;
 
-    Plane() = default;
-
     //  _______
     // |      /|
     // | t0  / |
@@ -20,7 +18,8 @@ namespace rt {
     // |  / t1 |
     // |/______|
 
-    Plane(float w, float h) { Create(w, h); }
+    Plane() : Hittable("Plane") {}
+    Plane(float w, float h) : Hittable("Plane") { Create(w, h); }
 
     void Create(float w, float h) {
       this->w = w;

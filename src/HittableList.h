@@ -15,8 +15,8 @@ namespace rt {
   public:
     std::vector<sPtr<Hittable>> objects;
 
-    HittableList() {}
-    HittableList(sPtr<Hittable> object) { Add(object); }
+    HittableList() : Hittable("Hittable List") {}
+    HittableList(sPtr<Hittable> object) : HittableList() { Add(object); }
 
     void Clear() { objects.clear(); }
 

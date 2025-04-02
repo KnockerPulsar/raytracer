@@ -11,7 +11,7 @@ namespace rt {
   public:
     float radius;
 
-    Sphere() = default;
+    Sphere();
     Sphere(float r);
     Sphere(float r, sPtr<Material> m);
 

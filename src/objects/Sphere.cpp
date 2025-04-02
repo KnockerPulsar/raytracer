@@ -8,7 +8,10 @@
 #include <raymath.h>
 
 namespace rt {
-  Sphere::Sphere(float r) : radius(r) {}
+  Sphere::Sphere() : Hittable("Sphere") {}
+
+  Sphere::Sphere(float r) : Hittable("Sphere"), radius(r) {}
+
   Sphere::Sphere(float r, std::shared_ptr<Material> m) : Sphere(r) { material = m; }
 
   bool Sphere::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {

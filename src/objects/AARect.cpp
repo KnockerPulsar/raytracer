@@ -2,7 +2,7 @@
 
 namespace rt {
   XYRect::XYRect(float _x0, float _x1, float _y0, float _y1, float _z, std::shared_ptr<Material> mat)
-      : x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
+      : Hittable("XY Rect"), x0(_x0), x1(_x1), y0(_y0), y1(_y1), z(_z), mp(mat) {}
 
   json XYRect::toJsonSpecific() const {
     vec3 extents = vec3((x1 - x0), (y1 - y0), 0);
@@ -44,7 +44,7 @@ namespace rt {
 
 namespace rt {
   XZRect::XZRect(float _x0, float _x1, float _z0, float _z1, float _y, std::shared_ptr<Material> mat)
-      : x0(_x0), x1(_x1), z0(_z0), z1(_z1), y(_y), mp(mat) {}
+      : Hittable("XZ Rect"), x0(_x0), x1(_x1), z0(_z0), z1(_z1), y(_y), mp(mat) {}
 
   json XZRect::toJsonSpecific() const {
     vec3 extents = vec3((x1 - x0), 0, (z1 - z0));
@@ -87,7 +87,7 @@ namespace rt {
 
 namespace rt {
   YZRect::YZRect(float _y0, float _y1, float _z0, float _z1, float _x, std::shared_ptr<Material> mat)
-      : y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
+      : Hittable("YZ Rect"), y0(_y0), y1(_y1), z0(_z0), z1(_z1), x(_x), mp(mat) {}
 
   json YZRect::toJsonSpecific() const {
     vec3 extents = vec3(0, (y1 - y0), (z1 - z0));

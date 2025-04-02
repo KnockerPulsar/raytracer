@@ -39,6 +39,8 @@ namespace rt {
     Transformation transformation;
     sPtr<Material> material = nullptr; // Should only exist for raytracable objects
 
+    Hittable(std::string_view initialName) : name(initialName) {}
+
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const            = 0;
 

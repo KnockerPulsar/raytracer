@@ -16,7 +16,7 @@ namespace rt {
     std::shared_ptr<Material> mp;
     float                     x0, x1, y0, y1, z;
 
-    XYRect() = default;
+    XYRect() : Hittable("XY Rect") {}
     XYRect(float _x0, float _x1, float _y0, float _y1, float _z, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;
@@ -31,7 +31,7 @@ namespace rt {
     std::shared_ptr<Material> mp;
     float                     x0, x1, z0, z1, y;
 
-    XZRect() = default;
+    XZRect() : Hittable("XY Rect") {}
     XZRect(float _x0, float _x1, float _z0, float _z1, float _y, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;
@@ -46,7 +46,7 @@ namespace rt {
     std::shared_ptr<Material> mp;
     float                     y0, y1, z0, z1, x;
 
-    YZRect() = default;
+    YZRect() : Hittable("YZ Rect") {}
     YZRect(float _y0, float _y1, float _z0, float _z1, float _x, std::shared_ptr<Material> mat);
 
     json toJsonSpecific() const override;

@@ -5,11 +5,10 @@
 #include "../HittableBuilder.h"
 
 namespace rt {
-  Box::Box(const vec3 &p0, const vec3 &p1) { Create(p0, p1); }
-  
-  Box::Box(float edgeLength) : Box(vec3(edgeLength)) {}
-  Box::Box(const vec3 &extents) { Create(-extents / 2, extents / 2); }
+  Box::Box(const vec3 &p0, const vec3 &p1) : Hittable("Box") { Create(p0, p1); }
 
+  Box::Box(float edgeLength) : Box(vec3(edgeLength)) {}
+  Box::Box(const vec3 &extents) : Hittable("Box") { Create(-extents / 2, extents / 2); }
 
   void Box::Create(const vec3 &p0, const vec3 &p1) {
     boxMin = p0;

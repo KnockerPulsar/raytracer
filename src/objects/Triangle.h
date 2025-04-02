@@ -20,14 +20,16 @@ namespace rt {
     vert v0, v1, v2;
     vec3 normal;
 
-    Triangle() = default;
-    Triangle(vert _v0, vert _v1, vert _v2) : v0(_v0), v1(_v1), v2(_v2) {
+    Triangle() : Hittable("Triangle") {}
+
+    Triangle(vert _v0, vert _v1, vert _v2) : Hittable("Triangle"), v0(_v0), v1(_v1), v2(_v2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
       normal = vec3::CrsProd(v01, v02).Normalize();
     }
-    Triangle(vec3 p0, vec3 p1, vec3 p2) : v0(p0), v1(p1), v2(p2) {
+
+    Triangle(vec3 p0, vec3 p1, vec3 p2) : Hittable("Triangle"), v0(p0), v1(p1), v2(p2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 

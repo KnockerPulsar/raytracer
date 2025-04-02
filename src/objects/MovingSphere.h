@@ -6,16 +6,16 @@
 #include <memory>
 
 namespace rt {
-  class MovingSphere : public rt::Hittable {
+  class MovingSphere : public Hittable {
 
   public:
     vec3  center0, center1;
     float time0, time1;
     float radius;
 
-    MovingSphere() = default;
-    MovingSphere(vec3 c0, vec3 c1, float t0, float t1, float r, shared_ptr<Material> m)
-        : center0(c0), center1(c1), time0(t0), time1(t1), radius(r) {
+    MovingSphere() : Hittable("Moving Sphere") {}
+    MovingSphere(vec3 c0, vec3 c1, float t0, float t1, float r, std::shared_ptr<Material> m)
+        : Hittable("Moving Sphere"), center0(c0), center1(c1), time0(t0), time1(t1), radius(r) {
       this->material = m;
     }
 
