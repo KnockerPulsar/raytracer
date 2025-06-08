@@ -54,10 +54,22 @@ namespace rt {
         int destinationWidth, int destinationHeight,
         float scale
     ) const {
-      auto const width =
-          std::max(static_cast<int>(sourceWidth.value_or(destinationWidth) * scale), PreviewTexture::minDimensionSize);
-      auto const height = std::max(static_cast<int>(sourceHeight.value_or(destinationHeight) * scale),
-                                   PreviewTexture::minDimensionSize);
+      auto const [width, height] = [&] -> std::pair<int, int> {
+        auto const initialWidth  = sourceWidth.value_or(destinationWidth) * scale;
+        auto const initialHeight = sourceHeight.value_or(destinationHeight) * scale;
+
+        if (initialWidth > PreviewTexture::minDimensionSize && initialHeight > PreviewTexture::minDimensionSize)
+          return {initialWidth, initialHeight};
+
+        auto const aspectRatio = initialWidth / initialHeight;
+
+        // Wide image, set height to minimum size and width is guaranteed to be larger
+        if (aspectRatio > 1.0f)
+          return {aspectRatio * PreviewTexture::minDimensionSize, PreviewTexture::minDimensionSize};
+
+        // Tall image
+        return {PreviewTexture::minDimensionSize, PreviewTexture::minDimensionSize / aspectRatio};
+      }();
 
       auto *previewData = new vec3[width * height];
       for (int y = 0; y < height; ++y) {
