@@ -9,16 +9,14 @@
 #include <tuple>
 /*
  TODO:
-    Can add a prepass before raytracing where triangles and AABBs  are transformed  
-        Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
-          - For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
-          - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
+    Update CLI flags for image and editor width and height with new flags that accept "widthxheight"
+      - Why are we using "foo_bar" and not "foo-bar"?
 
-        Cache AABB instead of calculating it every iteration
+    Regenerate BVH tree automatically on object transform with ImGuizmo?
+      - At least after letting go
+      - Need a regeneration method instead of using addChild(nullptr)
 
-        Modify all hittables so that they're centered at the world origin to use scaling matrices.
-          - Box, plane, sphere all done
-          - Not sure about the rest
+    Add the ability to change material textures
 
     Finish up scene (de)serialization
       - Saving and loading done
@@ -27,30 +25,37 @@
       - Need to filter out common field saving and loading into the base Hittable class.
       - Hittables don't load their name
 
-    Regenerate BVH tree automatically on object transform with ImGuizmo?
-      - At least after letting go
-      - Need a regeneration method instead of using addChild(nullptr)
-
-    Add the ability to change material textures
-
     For previewing procedural textures, could sample a small (50x50) preview from the texture
       - Compute shader might be able to make things faster at the cost of more complexity
-      - Caching results is a must, can't calculate a preview each frame (I think)
-      - Need to setup a way to rebuild previews on parameter change -> Done manually
-      - Perlin noise is difficult to preview since it's 3D 
+        - Another approach would be to make the raytracer more "functional"
+          - `frame = raytracer.render(scene, parameters)`
+          - Need to set up a scene with the selected object and the material, with the object fully inside the camera
+            frustum
+      - Caching results is a must, can't calculate a preview each frame
+      - Need to setup a way to rebuild previews on parameter change
+      - Perlin noise is difficult to preview since it's 3D
 
-    Cleanup call heirarchy. i.e. Each call to boundingBox currently requires us to call
-    transformation.regenAABB() in case the object was moved. Perhaps something akin to
-    IRasterizable.RasterizeTransformed()?
+    Can add a prepass before raytracing where triangles and AABBs are transformed
+        Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
+          - For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
+          - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
+            - For example for spheres, on hit, we'd get the point and rotate it (or the normal?) based on the rotation component of the transformation
+
+        Modify all hittables so that they're centered at the world origin to use scaling matrices.
+          - Box, plane, sphere all done
+          - Not sure about the rest
+
 
     Re-implement incremental rendering with job queue chunks
       - Would require blitting whenever a thread finishes a chunk
-      - Might require a lock for proper operation
 
     Configure clangd to format in a better way
 
-    Clean up code and naming 
+    Clean up code and naming
       - Method naming convention jumps between PascalCase and camelCase
+
+    Implement meshes properly
+      - Obj loading?
 */
 
 // X is the right axis
@@ -110,7 +115,7 @@ CliConfig setupArguments(int argc, char **argv) {
         if (parsedValue <= 0) {
           std::cout << "WARNING: Invalid number of threads entered (" << value << "), using default number of threads ("
                     << numThreadsDefault << ")" << std::endl;
-                    
+
           target = numThreadsDefault;
         } else {
           target = parsedValue;
