@@ -41,11 +41,10 @@ namespace rt {
     virtual void OnImgui() override {
       even->OnImgui();
       odd->OnImgui();
+
       ImGui::DragFloat("Checker scale", &scale);
 
       ImGui::Spacing();
-
-      Texture::OnImgui();
     }
   };
 
