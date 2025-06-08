@@ -45,7 +45,7 @@ namespace rt {
 
       ImGui::Spacing();
 
-      Texture::previewOrGenerate();
+      Texture::OnImgui();
     }
   };
 

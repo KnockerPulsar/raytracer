@@ -28,7 +28,7 @@ namespace rt {
       std::string id = EditorUtils::GetIDFromPointer(this);
       ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x);
 
-      Texture::previewOrGenerate();
+      Texture::OnImgui();
     }
   };
 

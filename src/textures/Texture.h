@@ -15,12 +15,10 @@ namespace rt {
   class Texture : public IImguiDrawable {
   protected:
     float multiplier = 1.0f;
-
-    std::optional<PreviewTexture> previewTexture;
+    PreviewTexture previewTexture;
 
   public:
     Texture &operator=(Texture const &other) {
-      previewTexture = std::nullopt;
       multiplier     = other.multiplier;
 
       return *this;
@@ -31,6 +29,11 @@ namespace rt {
     virtual void setIntensity(float i) { multiplier = i; }
 
     virtual ~Texture() = default;
+
+    void OnImgui() override {
+      previewTexture.possiblyGeneratePreview(*this);
+      previewTexture.OnImgui();
+    }
 
     virtual ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) {
       // Infinite textures can pass nullopt as the source width an height to indicate infinite size
@@ -78,25 +81,6 @@ namespace rt {
       UnloadImage(previewImage);
 
       return texture;
-    }
-
-    void previewOrGenerate() {
-      ImGui::BeginGroupPanel("Texture preview");
-      {
-        ImGui::Dummy({-1, 10});
-
-        auto const regionMax     = ImGui::GetWindowContentRegionMax();
-        auto const regionMin     = ImGui::GetWindowContentRegionMin();
-        auto const availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
-
-        if (!previewTexture) {
-          auto const preview = generatePreview(availableArea.x, availableArea.y, 0.1f);
-          previewTexture.emplace(preview, availableArea.x, availableArea.y);
-        }
-
-        ImGui::Image(previewTexture->GetImTextureID(), previewTexture->FitDisplayArea());
-      }
-      ImGui::EndGroupPanel();
     }
   };
 } // namespace rt

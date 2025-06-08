@@ -1,26 +1,27 @@
 #pragma once
 
+#include "GroupPanel.h"
+#include "IImguiDrawable.h"
 #include <imgui.h>
+#include <optional>
 #include <raylib.h>
 
 namespace rt {
-  class PreviewTexture {
+  class Texture;
+  class PreviewTexture: public IImguiDrawable {
   public:
-    // Image is wider than it is tall, use the available width as a
-    // baseline and scale the height accordingly
-    // Otherwise, use the height as the baseline
-    PreviewTexture(::Texture texture, int availableWidth, int availableHeight);
-
     ~PreviewTexture();
 
-    auto GetImTextureID() const -> ImTextureID;
-    auto ShouldResize(ImVec2 availableArea) const -> bool;
-    auto FitDisplayArea() const -> ImVec2  { return fitArea; }
+    void possiblyGeneratePreview(rt::Texture &tex);
+    void OnImgui() override;
 
     auto const inline static minDimensionSize = 32;
 
   private:
-    Texture2D const texture;
-    ImVec2 const fitArea;
+    auto GetImTextureID() const -> ImTextureID;
+    auto FitDisplayArea(ImVec2 availableArea) const -> ImVec2;
+
+    std::optional<Texture2D> texture;
+    float scale{0.1};
   };
-} // namespace rt::Editor
+} // namespace rt

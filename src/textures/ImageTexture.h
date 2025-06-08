@@ -91,8 +91,6 @@ namespace rt {
       );
     }
 
-    virtual void OnImgui() override { Texture::previewOrGenerate(); }
-
   private:
     int              bytesPerScanline;
     std::string      path;
