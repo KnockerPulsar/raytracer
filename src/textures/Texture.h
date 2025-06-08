@@ -51,8 +51,10 @@ namespace rt {
         int destinationWidth, int destinationHeight,
         float scale
     ) const {
-      auto const width = static_cast<int>(sourceWidth.value_or(destinationWidth) * scale);
-      auto const height = static_cast<int>(sourceHeight.value_or(destinationHeight) * scale);
+      auto const width =
+          std::max(static_cast<int>(sourceWidth.value_or(destinationWidth) * scale), PreviewTexture::minDimensionSize);
+      auto const height = std::max(static_cast<int>(sourceHeight.value_or(destinationHeight) * scale),
+                                   PreviewTexture::minDimensionSize);
 
       auto *previewData = new vec3[width * height];
       for (int y = 0; y < height; ++y) {
@@ -83,16 +85,16 @@ namespace rt {
       {
         ImGui::Dummy({-1, 10});
 
-        auto regionMax     = ImGui::GetWindowContentRegionMax();
-        auto regionMin     = ImGui::GetWindowContentRegionMin();
-        auto availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
+        auto const regionMax     = ImGui::GetWindowContentRegionMax();
+        auto const regionMin     = ImGui::GetWindowContentRegionMin();
+        auto const availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
 
-        if (!previewTexture || previewTexture->ShouldResize(availableArea))
-          previewTexture.emplace(generatePreview(availableArea.x, availableArea.y, 0.1f), availableArea.x, availableArea.y);
+        if (!previewTexture) {
+          auto const preview = generatePreview(availableArea.x, availableArea.y, 0.1f);
+          previewTexture.emplace(preview, availableArea.x, availableArea.y);
+        }
 
-        ImGui::Image(
-            previewTexture->GetImTextureID(), ImVec2(previewTexture->previewWidth, previewTexture->previewHeight)
-        );
+        ImGui::Image(previewTexture->GetImTextureID(), previewTexture->FitDisplayArea());
       }
       ImGui::EndGroupPanel();
     }

@@ -14,12 +14,13 @@ namespace rt {
     ~PreviewTexture();
 
     auto GetImTextureID() const -> ImTextureID;
-
     auto ShouldResize(ImVec2 availableArea) const -> bool;
+    auto FitDisplayArea() const -> ImVec2  { return fitArea; }
 
-    int const previewWidth, previewHeight;
+    auto const inline static minDimensionSize = 32;
 
   private:
     Texture2D const texture;
+    ImVec2 const fitArea;
   };
 } // namespace rt::Editor
