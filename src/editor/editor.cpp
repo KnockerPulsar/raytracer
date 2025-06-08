@@ -570,5 +570,8 @@ namespace rt {
     }
   }
 
-  void Editor::changeScene(Scene *scene) { camera.updateFromRtCamera(scene->cam); }
+  void Editor::changeScene(Scene *scene) {
+    camera.updateFromRtCamera(scene->cam);
+    selectedObject = nullptr;
+  }
 } // namespace rt
