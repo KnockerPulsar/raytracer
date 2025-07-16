@@ -1,4 +1,3 @@
-#include "Scene.h"
 #include "app.h"
 
 #include <argumentum/argparse.h>
@@ -6,7 +5,6 @@
 #include <cstdlib>
 #include <ostream>
 #include <string>
-#include <tuple>
 /*
  TODO:
     Update CLI flags for image and editor width and height with new flags that accept "widthxheight"
