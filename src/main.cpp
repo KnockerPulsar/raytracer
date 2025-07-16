@@ -112,7 +112,7 @@ CliConfig setupArguments(int argc, char **argv) {
 
         if (parsedValue <= 0) {
           std::cout << "WARNING: Invalid number of threads entered (" << value << "), using default number of threads ("
-                    << numThreadsDefault << ")" << std::endl;
+                    << numThreadsDefault << ")" << '\n';
 
           target = numThreadsDefault;
         } else {
