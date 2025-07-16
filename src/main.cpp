@@ -2,14 +2,13 @@
 
 #include <argumentum/argparse.h>
 
+#include <charconv>
 #include <cstdlib>
+#include <format>
 #include <ostream>
 #include <string>
 /*
  TODO:
-    Update CLI flags for image and editor width and height with new flags that accept "widthxheight"
-      - Why are we using "foo_bar" and not "foo-bar"?
-
     Regenerate BVH tree automatically on object transform with ImGuizmo?
       - At least after letting go
       - Need a regeneration method instead of using addChild(nullptr)
@@ -63,37 +62,58 @@
 using namespace argumentum;
 
 CliConfig setupArguments(int argc, char **argv) {
-  const int imageWidthDefault = 900;
+  const glm::ivec2 imageSizeDefault = {900, 900};
+  const glm::ivec2 editorSizeDefault = {1280, 720};
   const int numThreadsDefault = 6;
 
   CliConfig config;
 
   argument_parser parser = argument_parser{};
-  auto            params = parser.params();
+
+  auto const parseSize = [](const std::string& passed, std::string_view optionName)
+  {
+        auto const xPosition = passed.find('x');
+        if (xPosition == std::string::npos)
+          throw std::runtime_error(std::format(
+              "Error while parsing `--{}`: Invalid format. Correct format is <width>x<height>.",
+              optionName));
+
+        auto const parse = [&](auto start, int end, std::string_view paramName) {
+          int               intValue;
+          const auto *const parseStart       = passed.data() + start;
+          const auto *const parseEnd         = passed.data() + end;
+
+          if(parseStart == parseEnd || (parseStart == parseEnd && parseStart == passed.data()))
+            throw std::runtime_error(std::format(
+                "Error while parsing `--{}`: Failed to parse {}. Value does not exist.", optionName, paramName));
+
+          auto widthParseResult = std::from_chars(parseStart, parseEnd, intValue);
+
+          if (widthParseResult.ptr != parseEnd)
+            throw std::runtime_error(std::format("Error while parsing `--{}`: Failed to parse {}", optionName, paramName));
+
+          return intValue;
+        };
+
+        auto width  = parse(0, xPosition, "width");
+        auto height = parse(xPosition + 1, passed.length(), "height");
+
+        return glm::ivec2{width, height};
+  };
 
   parser.config().program(argv[0]).description("Raytracer");
-  parser.add_argument(config.imageWidth, "--image_width")
+  parser.add_argument(config.imageSize, "--image-size")
       .maxargs(1)
-      .metavar("UNSIGNED INT")
-      .absent(imageWidthDefault)
+      .metavar("<width>x<height>")
+      .absent(imageSizeDefault)
+      .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "image-size"); })
       .help("rendering resolution width in pixels");
 
-  parser.add_argument(config.imageHeight, "--image_height")
+  parser.add_argument(config.editorSize, "--editor-size")
       .maxargs(1)
-      .metavar("UNSIGNED INT")
-      .absent(-1)
-      .help("rendering resolution width in pixels");
-
-  parser.add_argument(config.editorWidth, "--editor_width")
-      .maxargs(1)
-      .metavar("UNSIGNED INT")
-      .absent(config.editorWidth)
-      .help("Window resolution width in pixels");
-
-  parser.add_argument(config.editorHeight, "--editor_height")
-      .maxargs(1)
-      .metavar("UNSIGNED INT")
-      .absent(config.editorHeight)
+      .metavar("<width>x<height>")
+      .absent(editorSizeDefault)
+      .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "editor-size"); })
       .help("Window resolution width in pixels");
 
   parser.add_argument(config.pathToScene, "--scene")
@@ -130,16 +150,11 @@ CliConfig setupArguments(int argc, char **argv) {
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
 
-  // Image width is set but image height is not
-  if (config.imageHeight == -1) {
-    config.imageHeight = config.imageWidth;
-  }
-
-  if(config.potato_mode)
-  {
-    config.imageWidth *= 0.25;
-    config.imageHeight *= 0.25;
-  }
+  if (config.potato_mode)
+    // glm's ivec2 multiply-assign operator first converts the scalar to an
+    // int. So 0.25f becomes zero. To get around this, let's cast it up to a
+    // float vec, multiply, then assign.
+    config.imageSize = glm::vec2(config.imageSize) * 0.25f;
 
   return config;
 }

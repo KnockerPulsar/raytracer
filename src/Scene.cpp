@@ -102,7 +102,7 @@ namespace rt {
                  .withMaterial(light)
                  .build());
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -153,7 +153,7 @@ namespace rt {
         .Add(make_shared<Sphere>(leftSphereInner))
         .Add(make_shared<Sphere>(rightSphere));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   } // namespace rt
@@ -187,7 +187,7 @@ namespace rt {
         .Add(leftSphere)
         .Add(rightSphere);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -254,7 +254,7 @@ namespace rt {
     groundSphere.transformation.setTranslation(vec3(0, -1000, 0));
     world.Add(make_shared<Sphere>(groundSphere));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -333,7 +333,7 @@ namespace rt {
 
     world.Add(make_shared<Sphere>(sphere3));
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -363,7 +363,7 @@ namespace rt {
     world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin).build());
     world.Add(HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker).build());
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -390,7 +390,7 @@ namespace rt {
     auto globe = make_shared<Sphere>(2, earthSurface);
     world.Add(globe);
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -424,7 +424,7 @@ namespace rt {
 
     world.Add(make_shared<XYRect>(3, 5, 1, 3, -2, diffLight));
 
-    s = Scene(new HittableList(world), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(world), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
@@ -512,12 +512,12 @@ namespace rt {
                    .withName("Box 2")
                    .build());
 
-    s = Scene(new BVHNode(world->objects, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world->objects, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }
 
-  Scene Scene::Load(int imageWidth, int imageHeight, std::string path) {
+  Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
     std::ifstream jsonFile(path);
     std::cout << "Loading scene from file " << path << '\n';
 
@@ -525,13 +525,12 @@ namespace rt {
     jsonFile >> readScene;
 
     json  settings    = readScene["settings"];
-    float aspectRatio = (float)imageWidth / imageHeight;
+    float aspectRatio = static_cast<float>(imageSize.x) / imageSize.y;
     Scene s           = Scene(
         nullptr,
         Camera(readScene["camera"], aspectRatio),
         settings["max_depth"].get<int>(),
-        imageWidth,
-        imageHeight,
+        imageSize,
         settings["num_samples"].get<int>(),
         settings["background_color"].get<vec3>()
     );
@@ -588,7 +587,7 @@ namespace rt {
 
     std::vector<sPtr<Hittable>> world = {box, sphere};
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
     s.addSkysphere(skyspherePath);
 
     return s;
@@ -628,7 +627,7 @@ namespace rt {
         .Add(plane)
         .Add(xzplane);
 
-    s = Scene(new BVHNode(world, 0, 1), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
     // s.objects.objects = obj;
 
     return s;
@@ -653,7 +652,7 @@ namespace rt {
 
     auto box = HittableBuilder<Box>(vec3(1, 1, 1), vec3(2, 2, 2)).withMaterial(red).build();
 
-    s = Scene(new HittableList(box), cam, imageWidth, imageHeight, backgroundColor);
+    s = Scene(new HittableList(box), cam, {imageWidth, imageHeight}, backgroundColor);
 
     return s;
   }

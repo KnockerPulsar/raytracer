@@ -4,15 +4,12 @@
 
 #include <string>
 
-struct CliConfig
-{
-  int         imageWidth  = -1;
-  int         imageHeight = -1;
-  int         editorWidth = 1280;
-  int         editorHeight = 720;
-  int         numThreads  = 6;
+struct CliConfig {
+  glm::ivec2     imageSize;
+  glm::ivec2     editorSize;
+  int         numThreads = 6;
   std::string pathToScene;
-  bool potato_mode = false;
+  bool        potato_mode = false;
 };
 
 namespace rt {
@@ -34,7 +31,7 @@ namespace rt {
     sPtr<IState> currentState;
 
   public:
-    int const editorWidth, editorHeight;
+    glm::ivec2 const editorSize;
 
     bool saveOnRender = true;
     void setup();

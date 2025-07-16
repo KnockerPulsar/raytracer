@@ -4,26 +4,22 @@
 
 
 namespace rt {
-AsyncRenderData::AsyncRenderData(int imageWidth, int imageHeight,
-                                 int editorWidth, int editorHeight,
-                                 int numThreads)
-    : threadProgress(std::vector(numThreads, 0)),
-      threadTimes(std::vector(numThreads, 0L)),
-      finishedThreads(std::vector(numThreads, false)) {
+  AsyncRenderData::AsyncRenderData(glm::ivec2 imageSize, glm::ivec2 editorSize, int numThreads)
+      : threadProgress(std::vector(numThreads, 0)), threadTimes(std::vector(numThreads, 0L)),
+        finishedThreads(std::vector(numThreads, false)) {
 
-  int queueChunkSize = imageWidth * 4;
-  pixelJobs = std::make_shared<JobQueue<Pixel>>(imageWidth * imageHeight,
-                                                queueChunkSize);
+    int queueChunkSize = imageSize.x * 4;
+    pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageSize.x * imageSize.y, queueChunkSize);
 
-  raytraceRT = LoadRenderTexture(imageWidth, imageHeight);
+    raytraceRT = LoadRenderTexture(imageSize.x, imageSize.y);
 
-  // Prepare pixel jobs
-  for (int y = 0; y < imageHeight; y++) {
-    for (int x = 0; x < imageWidth; x++) {
-      pixelJobs->addJobNoLock(Pixel{x, y, vec3::Zero()});
+    // Prepare pixel jobs
+    for (int y = 0; y < imageSize.y; y++) {
+      for (int x = 0; x < imageSize.x; x++) {
+        pixelJobs->addJobNoLock(Pixel{x, y, vec3::Zero()});
+      }
     }
   }
-}
 
   void AsyncRenderData::KillThreads() {
     this->pixelJobs->awakeAllWorkers();

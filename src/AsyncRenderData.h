@@ -27,8 +27,7 @@ namespace rt {
   public:
     AsyncRenderData() = default;
 
-    AsyncRenderData(int imageWidth, int imageHeight, int editorWidth,
-                    int editorHeight, int numThreads);
+    AsyncRenderData(glm::ivec2 imageSize, glm::ivec2 editorSize, int numThreads);
 
     AsyncRenderData(sPtr<JobQueue<Pixel>> pj, std::vector<long> tt, std::vector<int> tp, std::vector<bool> ft)
         : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}

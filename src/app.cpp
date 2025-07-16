@@ -34,13 +34,13 @@ namespace rt {
       : numThreads(config.numThreads), ard([&] {
           // AsyncRenderData tries to create a RenderTexture which requires a
           // window to be created
-          InitWindow(config.editorWidth, config.editorHeight, rt::constants::title);
-          return AsyncRenderData(config.imageWidth, config.imageHeight, config.editorWidth, config.editorHeight,
-                                 config.numThreads);
+          InitWindow(config.editorSize.x, config.editorSize.y, rt::constants::title);
+          return AsyncRenderData(config.imageSize, config.editorSize, config.numThreads);
         }()),
-        editorWidth(config.editorWidth), editorHeight(config.editorHeight),
-        scene(config.pathToScene.empty() ? Scene::Earth(config.imageWidth, config.imageHeight)
-                                         : Scene::Load(config.imageWidth, config.imageHeight, config.pathToScene)),
+        editorSize(config.editorSize),
+        // TODO: should be just `config.imageSize` but I'm too lazy to update all scene constructors
+        scene(config.pathToScene.empty() ? Scene::Earth(config.imageSize.x, config.imageSize.y)
+                                         : Scene::Load(config.imageSize, config.pathToScene)),
         editor(std::make_shared<Editor>(this, config, scene)), rt(std::make_shared<Raytracer>(this, ard)),
         currentState(editor) {
     setup();

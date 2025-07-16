@@ -47,8 +47,8 @@ namespace rt {
 
     Editor(App *const app, CliConfig const &config, Scene const &initialScene)
         : IState(app),
-          camera(config.editorWidth, config.editorHeight, config.imageWidth, config.imageHeight, initialScene),
-          rasterRT(LoadRenderTexture(config.editorWidth, config.editorHeight)) {}
+          camera(config.editorSize, config.imageSize, initialScene),
+          rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)) {}
 
     ~Editor() { UnloadRenderTexture(rasterRT); }
 

@@ -196,7 +196,7 @@ namespace rt {
 
       if (ImGuiFileDialog::Instance()->IsOk()) {
         std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-        app->changeScene(Scene::Load(getScene()->imageWidth, getScene()->imageHeight, filePathName));
+        app->changeScene(Scene::Load(getScene()->imageSize, filePathName));
       }
 
       ImGuiFileDialog::Instance()->Close();
@@ -232,7 +232,7 @@ namespace rt {
     if (ImGui::BeginMenu(builtInMenuTitle)) {
       for (auto &[name, loader] : Scene::builtInScenes) {
         if (ImGui::MenuItem(name.c_str())) {
-          app->changeScene(loader(getScene()->imageWidth, getScene()->imageHeight));
+          app->changeScene(loader(getScene()->imageSize.x, getScene()->imageSize.y));
         }
       }
 
@@ -455,11 +455,9 @@ namespace rt {
 
     scene->cam = camera.toSceneCamera();
 
-    scene->imageWidth  = camera.imageWidth();
-    scene->imageHeight = camera.imageHeight();
+    scene->imageSize  = camera.imageSize();
 
-    *app->getARD() = AsyncRenderData(camera.imageWidth(), camera.imageHeight(), app->editorWidth, app->editorHeight,
-                                     app->getNumThreads());
+    *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
   }
 
   void Editor::RenderViewport() {
@@ -556,9 +554,6 @@ namespace rt {
   }
 
   void Editor::TopMenuImgui() {
-
-    auto imageWidth  = getScene()->imageWidth;
-    auto imageHeight = getScene()->imageHeight;
 
     if (ImGui::BeginMainMenuBar()) {
 

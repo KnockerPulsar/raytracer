@@ -9,7 +9,7 @@ namespace rt::editor {
 
     inline static vec3 lineStart, lineEnd;
 
-    Camera(int editorWidth, int editorHeight, int imageWidth, int imageHeight, Scene const &initialScene);
+    Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene const &initialScene);
 
     void updateFromRtCamera(rt::Camera const &sceneCamera);
 
@@ -43,8 +43,7 @@ namespace rt::editor {
 
     rt::Camera getRtCamera() const { return rtCamera; }
 
-    int imageWidth() const { return _imageWidth; }
-    int imageHeight() const { return _imageHeight; }
+    glm::ivec2 imageSize() const { return _imageSize; }
 
     float GetCorrectedCropFov() const;
 
@@ -53,8 +52,8 @@ namespace rt::editor {
   private:
     rt::Camera rtCamera;
 
-    int const editorWidth, editorHeight;
-    int       _imageWidth, _imageHeight;
+    glm::ivec2 const editorSize;
+    glm::ivec2 _imageSize;
 
     vec3 moveDir;
 

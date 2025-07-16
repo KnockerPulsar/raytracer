@@ -60,7 +60,7 @@ void rt::Raytracer::startRaytracing() {
 
 void rt::Raytracer::BlitToBuffer() {
 
-  auto *pixelData = new Color[getScene()->imageWidth * getScene()->imageHeight];
+  auto *pixelData = new Color[static_cast<int>(getScene()->imageSize.x * getScene()->imageSize.y)];
   auto  jobs      = ard.pixelJobs->getJobsVector();
 
   // Copy over only the color data
@@ -73,8 +73,8 @@ void rt::Raytracer::BlitToBuffer() {
 
   // Create texture from image containing the color data
   Image raytraced = {.data    = pixelData,
-                     .width   = getScene()->imageWidth,
-                     .height  = getScene()->imageHeight,
+                     .width   = getScene()->imageSize.x,
+                     .height  = getScene()->imageSize.y,
                      .mipmaps = 1,
                      .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
 
@@ -105,14 +105,16 @@ bool rt::Raytracer::onFinished() {
       Autosave();
   }
 
-  auto const fitSize = EditorUtils::FitIntoArea(ImVec2(app->editorWidth, app->editorHeight),
+  // TODO: figure out how to enable imgui's operator overloading
+  auto const editorSize = ImVec2(app->editorSize.x, app->editorSize.y);
+  auto const fitSize = EditorUtils::FitIntoArea(editorSize,
                                                 ImVec2(ard.raytraceRT.texture.width, ard.raytraceRT.texture.height));
 
-  float const dWidth  = app->editorWidth - fitSize.x;
-  float const dHeight = app->editorHeight - fitSize.y;
+  float const dWidth  = editorSize.x - fitSize.x;
+  float const dHeight = editorSize.y - fitSize.y;
 
   DrawTexturePro(ard.raytraceRT.texture,
-                 (Rectangle){0, 0, (float)getScene()->imageWidth, (float)getScene()->imageHeight},
+                 (Rectangle){0, 0, static_cast<float>(getScene()->imageSize.x), static_cast<float>(getScene()->imageSize.y)},
                  (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
   return allFinished;
 }
@@ -166,8 +168,8 @@ void rt::Raytracer::Autosave() {
 
   auto t  = std::time(nullptr);
   auto tm = *std::localtime(&t);
-  ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageWidth << "x"
-     << getScene()->imageHeight << "_" << getScene()->settings.samplesPerPixel << "_" << getScene()->settings.maxDepth
+  ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageSize.x << "x"
+     << getScene()->imageSize.y << "_" << getScene()->settings.samplesPerPixel << "_" << getScene()->settings.maxDepth
      << ".bmp";
 
   std::cout << "Finished render: " << ss.str() << '\n';

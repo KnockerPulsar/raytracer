@@ -50,8 +50,8 @@ namespace rt {
     ::Model     skysphereModel;
 
     Camera cam;
-    int    imageWidth, imageHeight;
-    vec3   backgroundColor;
+    glm::ivec2 imageSize;
+    vec3      backgroundColor;
 
     RaytraceSettings settings;
 
@@ -59,16 +59,16 @@ namespace rt {
     static std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes;
 
     Scene() = default;
-    Scene(Hittable *wr, Camera c, int md, int iw, int ih, int spp, vec3 bc)
-        : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), settings{spp, md}, backgroundColor(bc) {}
+    Scene(Hittable *wr, Camera c, int md, glm::ivec2 is, int spp, vec3 bc)
+        : worldRoot(wr), cam(c), imageSize(is), settings{spp, md}, backgroundColor(bc) {}
 
-    Scene(Hittable *wr, Camera c, int iw, int ih, vec3 bc)
-        : worldRoot(wr), cam(c), imageWidth(iw), imageHeight(ih), backgroundColor(bc) {}
+    Scene(Hittable *wr, Camera c, glm::ivec2 is, vec3 bc) : worldRoot(wr), cam(c), imageSize(is), backgroundColor(bc) {}
 
     void addSkysphere(std::string ssTex);
 
     void drawSkysphere();
 
+    // TODO: update these to accept glm::vec2
     static Scene Default(int imageWidth, int imageHeight);
 
     static Scene Scene1(int imageWidth, int imageHeight);
@@ -87,7 +87,7 @@ namespace rt {
 
     static Scene CornellBox(int imageWidth, int imageHeight);
 
-    static Scene Load(int imageWidth, int imageHeight, std::string path);
+    static Scene Load(glm::ivec2 imageSize, std::string path);
 
     static Scene TransformationTest(int imageWidth, int imageHeight);
 
