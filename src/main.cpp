@@ -120,13 +120,25 @@ CliConfig setupArguments(int argc, char **argv) {
         }
       });
 
+  parser.add_argument(config.potato_mode, "--potato")
+      .maxargs(1)
+      .metavar("BOOL")
+      .absent(false)
+      .help(
+          "Potato mode renders scenes at a quarter of the resolution. Useful for debugging and developing on battery.");
+
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
-
 
   // Image width is set but image height is not
   if (config.imageHeight == -1) {
     config.imageHeight = config.imageWidth;
+  }
+
+  if(config.potato_mode)
+  {
+    config.imageWidth *= 0.25;
+    config.imageHeight *= 0.25;
   }
 
   return config;

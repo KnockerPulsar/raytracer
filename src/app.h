@@ -12,6 +12,7 @@ struct CliConfig
   int         editorHeight = 720;
   int         numThreads  = 6;
   std::string pathToScene;
+  bool potato_mode = false;
 };
 
 namespace rt {
