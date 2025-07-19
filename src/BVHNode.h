@@ -10,12 +10,11 @@
 
 namespace rt {
   class BVHNode : public Hittable {
-  public:
+  private:
     sPtr<Hittable> left = nullptr, right = nullptr;
     AABB           box;
 
-    BVHNode() = default;
-
+  public:
     BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1);
 
     BVHNode(const HittableList &list, float t0, float t1);
