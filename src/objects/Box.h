@@ -21,9 +21,6 @@ namespace rt {
     Box(float edgeLength);
     Box(const vec3& extents);
 
-    // To work around not being able to use constructors with references
-    void Create(const vec3 &p0, const vec3 &p1);
-
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
     virtual json toJsonSpecific() const override;
@@ -49,7 +46,7 @@ namespace rt {
 
     b.name = objectJson["name"].get<std::string>();
 
-    b.Create(min, max);
+    b = Box(min, max);
     b.changeMaterial(mat);
   }
 
