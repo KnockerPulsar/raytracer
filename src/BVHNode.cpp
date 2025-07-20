@@ -40,9 +40,6 @@ namespace {
 
 rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
-rt::BVHNode::BVHNode(const HittableList &list, float t0, float t1)
-    : BVHNode(list.objects, 0, list.objects.size(), t0, t1) {}
-
 rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1)
     : Hittable("BVH Node") {
 

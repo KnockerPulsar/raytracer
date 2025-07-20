@@ -17,8 +17,6 @@ namespace rt {
   public:
     BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1);
 
-    BVHNode(const HittableList &list, float t0, float t1);
-
     BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1);
 
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;

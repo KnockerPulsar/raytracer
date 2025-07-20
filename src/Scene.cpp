@@ -77,7 +77,6 @@ namespace rt {
 
   Scene Scene::Default(int imageWidth, int imageHeight) {
     Scene        s;
-    HittableList world;
     vec3         lookFrom        = vec3(3, 3, -3);
     vec3         lookAt          = vec3(0, 0, 0);
     vec3         vUp             = vec3(0, 1, 0);
@@ -93,14 +92,15 @@ namespace rt {
     auto mat   = make_shared<Lambertian>(vec3(0.6, 0.6, 0.6));
     auto light = make_shared<DiffuseLight>(vec3(3, 3, 3));
 
-    world //
-        .Add(HittableBuilder<Box>(1).withMaterial(mat).build())
-        .Add(HittableBuilder<Plane>::CreateHittable(2.0, 2.0)
-                 .withTranslation(vec3(2, 0, 2))
-                 .withRotation(vec3(0, -45, 90))
-                 .withName("light plane")
-                 .withMaterial(light)
-                 .build());
+    const std::vector<std::shared_ptr<Hittable>> world = {
+        HittableBuilder<Box>(1).withMaterial(mat).build(),
+        HittableBuilder<Plane>::CreateHittable(2.0, 2.0)
+            .withTranslation(vec3(2, 0, 2))
+            .withRotation(vec3(0, -45, 90))
+            .withName("light plane")
+            .withMaterial(light)
+            .build(),
+    };
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
@@ -109,7 +109,6 @@ namespace rt {
 
   Scene Scene::Scene1(int imageWidth, int imageHeight) {
     Scene        s;
-    HittableList world;
     vec3         lookFrom        = vec3(-1, 1, 1);
     vec3         lookAt          = vec3(0, 0, 0);
     vec3         vUp             = vec3(0, 1, 0);
@@ -145,13 +144,14 @@ namespace rt {
     rightSphere.transformation.setTranslation(vec3(1, 0, -1));
     rightSphere.name                         = "Right Sphere";
 
-    world //
-        .Add(make_shared<Sphere>(groundSphere))
-        .Add(make_shared<Sphere>(centerSphere))
+    const std::vector<std::shared_ptr<Hittable>> world = {
+        make_shared<Sphere>(groundSphere),
+        make_shared<Sphere>(centerSphere),
         // These 2 spheres make a "hollow sphere"
-        .Add(make_shared<Sphere>(leftSphereOuter))
-        .Add(make_shared<Sphere>(leftSphereInner))
-        .Add(make_shared<Sphere>(rightSphere));
+        make_shared<Sphere>(leftSphereOuter),
+        make_shared<Sphere>(leftSphereInner),
+        make_shared<Sphere>(rightSphere),
+    };
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
@@ -161,7 +161,6 @@ namespace rt {
   Scene Scene::Scene2(int imageWidth, int imageHeight) {
     Scene        s;
     float        r = cos(rt::constants::pi / 4);
-    HittableList world;
     vec3         lookFrom        = vec3(13, 2, 3);
     vec3         lookAt          = vec3(0, 0, 0);
     vec3         vUp             = vec3(0, 1, 0);
@@ -183,9 +182,7 @@ namespace rt {
     auto rightSphere                      = make_shared<Sphere>(Sphere(r, materialRight));
     rightSphere->transformation.setTranslation(vec3(r, 0, -1));
 
-    world // Scene::Scene
-        .Add(leftSphere)
-        .Add(rightSphere);
+    const std::vector<std::shared_ptr<Hittable>> world = {leftSphere, rightSphere};
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
@@ -194,7 +191,6 @@ namespace rt {
 
   Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
-    HittableList world;
 
     vec3 lookFrom        = vec3(13, 2, 5);
     vec3 lookAt          = vec3(0, 0, 0);
@@ -207,6 +203,17 @@ namespace rt {
     int   fov         = 20.0;
 
     Camera cam(lookFrom, lookAt, vUp, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+
+    std::vector<std::shared_ptr<Hittable>> world = {
+        HittableBuilder<Sphere>(1.0, make_shared<Dielectric>(1.5)).withTranslation(vec3(0, 1, 0)).build(),
+        HittableBuilder<Sphere>(1.0, make_shared<Lambertian>(vec3(0.4, 0.2, 0.1)))
+            .withTranslation(vec3(-4, 1, 0))
+            .build(),
+        HittableBuilder<Sphere>(1.0, make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0))
+            .withTranslation(vec3(4, 1, 0))
+            .build(),
+        HittableBuilder<Sphere>(1000, make_shared<Lambertian>(vec3(0.5f))).withTranslation(vec3(0, -1000, 0)).build(),
+    };
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -230,29 +237,10 @@ namespace rt {
 
           auto sphere                     = Sphere(0.2, sphereMaterial);
           sphere.transformation.setTranslation(center);
-          world.Add(make_shared<Sphere>(sphere));
+          world.push_back(make_shared<Sphere>(sphere));
         }
       }
     }
-    auto mat1                        = make_shared<Dielectric>(1.5);
-    auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.setTranslation(vec3(0, 1, 0));
-    world.Add(make_shared<Sphere>(sphere1));
-
-    auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
-    auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.setTranslation(vec3(-4, 1, 0));
-    world.Add(make_shared<Sphere>(sphere2));
-
-    auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
-    auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.setTranslation(vec3(4, 1, 0));
-    world.Add(make_shared<Sphere>(sphere3));
-
-    auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
-    auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(groundMaterial));
-    groundSphere.transformation.setTranslation(vec3(0, -1000, 0));
-    world.Add(make_shared<Sphere>(groundSphere));
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
@@ -261,7 +249,6 @@ namespace rt {
 
   Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
     Scene        s;
-    HittableList world;
 
     vec3 lookFrom        = vec3(13, 2, 3);
     vec3 lookAt          = vec3(0, 0, 0);
@@ -278,9 +265,19 @@ namespace rt {
     auto checker = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(0.9, 0.9, 0.9));
 
     auto groundMaterial                   = make_shared<Lambertian>(vec3(0.5f));
-    auto groundSphere                     = Sphere(1000, make_shared<Lambertian>(checker));
-    groundSphere.transformation.setTranslation(vec3(0, -1000, 0));
-    world.Add(make_shared<Sphere>(groundSphere));
+
+    std::vector<std::shared_ptr<Hittable>> world = {
+        HittableBuilder<Sphere>(Sphere(1000, make_shared<Lambertian>(checker)))
+            .withTranslation(vec3(0, -1000, 0))
+            .build(),
+        HittableBuilder<Sphere>(1.0, make_shared<Dielectric>(1.5)).withTranslation(vec3(0, 1, 0)).build(),
+        HittableBuilder<Sphere>(1.0, make_shared<Lambertian>(vec3(0.4, 0.2, 0.1)))
+            .withTranslation(vec3(-4, 1, 0))
+            .build(),
+        HittableBuilder<Sphere>(1.0, make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0))
+            .withTranslation(vec3(4, 1, 0))
+            .build(),
+    };
 
     for (int a = -ballGridWidth; a < ballGridWidth; a++) {
       for (int b = -ballGridHeight; b < ballGridHeight; b++) {
@@ -294,7 +291,7 @@ namespace rt {
             auto albedo    = vec3::Random() * vec3::Random();
             sphereMaterial = make_shared<Lambertian>(albedo);
             vec3 center2   = center + vec3(0, RandomFloat(0, .5), 0);
-            world.Add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+            world.push_back(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           } else if (chooseMat < 0.95) {
             // Metal
             auto  albedo   = vec3::Random(0.5, 1);
@@ -303,35 +300,17 @@ namespace rt {
 
             auto sphere                     = Sphere(0.2, sphereMaterial);
             sphere.transformation.setTranslation(center);
-            world.Add(make_shared<Sphere>(sphere));
+            world.push_back(make_shared<Sphere>(sphere));
 
           } else {
             sphereMaterial                  = make_shared<Dielectric>(1.5);
             auto sphere                     = Sphere(0.2, sphereMaterial);
             sphere.transformation.setTranslation(center);
-            world.Add(make_shared<Sphere>(sphere));
+            world.push_back(make_shared<Sphere>(sphere));
           }
         }
       }
     }
-
-    auto mat1                        = make_shared<Dielectric>(1.5);
-    auto sphere1                     = Sphere(1.0, mat1);
-    sphere1.transformation.setTranslation(vec3(0, 1, 0));
-
-    world.Add(make_shared<Sphere>(sphere1));
-
-    auto mat2                        = make_shared<Lambertian>(vec3(0.4, 0.2, 0.1));
-    auto sphere2                     = Sphere(1.0, mat2);
-    sphere2.transformation.setTranslation(vec3(-4, 1, 0));
-
-    world.Add(make_shared<Sphere>(sphere2));
-
-    auto mat3                        = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
-    auto sphere3                     = Sphere(1.0, mat3);
-    sphere3.transformation.setTranslation(vec3(4, 1, 0));
-
-    world.Add(make_shared<Sphere>(sphere3));
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
 
@@ -535,19 +514,17 @@ namespace rt {
         settings["background_color"].get<vec3>()
     );
 
-    auto world = HittableList();
+    auto world = std::vector<std::shared_ptr<Hittable>>(readScene["objects"].size());
 
-    std::cout << std::setw(4) << readScene["objects"] << '\n';
     for (const auto &obj : readScene["objects"]) {
-
       auto objPtr = ObjectFactory::FromJson(obj);
       if (objPtr)
-        world.Add(objPtr);
+        world.push_back(objPtr);
     }
 
     std::cout << "Loaded scene with\n"
               << "\tsettings " << settings << '\n'
-              << "\t#objects " << world.objects.size() << '\n';
+              << "\t#objects " << world.size() << '\n';
 
     s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
 
@@ -595,7 +572,6 @@ namespace rt {
 
   Scene Scene::PlaneTest(int imageWidth, int imageHeight) {
     Scene        s;
-    HittableList world;
     vec3         lookFrom        = vec3(0, 3, 0);
     vec3         lookAt          = vec3(0, 0, 0);
     vec3         vUp             = vec3(0, 1, 0.1);
@@ -622,10 +598,7 @@ namespace rt {
 
     std::vector<sPtr<Hittable>> obj = {plane, xzplane, tri};
 
-    world //
-        .Add(tri)
-        .Add(plane)
-        .Add(xzplane);
+    const std::vector<std::shared_ptr<Hittable>> world = {tri, plane, xzplane};
 
     s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
     // s.objects.objects = obj;
