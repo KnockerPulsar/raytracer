@@ -402,45 +402,33 @@ namespace rt {
     ImGui::SameLine();
     if (ImGui::Button("+", {-1, 0})) {
 
-      sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
-      Hittable      *newRoot;
+      sPtr<Hittable> added = [this] -> std::shared_ptr<Hittable> {
+        const sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
+        // TODO: This assumes that the root changes when we add new children, which might not be the case.
+        const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot);
 
-      switch (selectedAddableObject) {
-      case Box: {
-        auto added = HittableBuilder<rt::Box>(1)
-                         .withMaterial(defaultMaterial)
-                         .withName("Added Box##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
-        break;
-      }
+        switch (selectedAddableObject) {
+        case Box:
+          return HittableBuilder<rt::Box>(1).withMaterial(defaultMaterial).withName("Added Box##" + rootID);
 
-      case Sphere: {
-        auto added = HittableBuilder<rt::Sphere>(1, defaultMaterial)
-                         .withMaterial(defaultMaterial)
-                         .withName("Added Sphere##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
+        case Sphere:
+          return HittableBuilder<rt::Sphere>(1, defaultMaterial)
+              .withMaterial(defaultMaterial)
+              .withName("Added Sphere##" + rootID);
 
-        break;
-      }
+        case Plane:
+          return HittableBuilder<rt::Plane>(1, 1).withMaterial(defaultMaterial).withName("Added Plane##" + rootID);
 
-      case Plane: {
-        auto added = HittableBuilder<rt::Plane>(1, 1)
-                         .withMaterial(defaultMaterial)
-                         .withName("Added Plane##" + EditorUtils::GetIDFromPointer(getScene()->worldRoot));
-        newRoot = getScene()->worldRoot->addChild(added.build());
+        default:
+          return nullptr;
+        }
+      }();
 
-        break;
-      }
-
-      case AddableObjectsTypesCount:
-      default: {
-      }
-      }
+      auto *const newRoot = getScene()->worldRoot->addChild(added);
 
       if (newRoot == nullptr) {
         std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
       } else {
-        // getScene()->oldWorldRoot = getScene()->worldRoot;
         getScene()->worldRoot = newRoot;
       }
     }

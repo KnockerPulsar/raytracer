@@ -5,12 +5,12 @@
 
 namespace rt {
   template <typename T = Hittable> class HittableBuilder {
-    T *hittable;
+    std::shared_ptr<T> hittable;
 
     HittableBuilder(T *newHittable) : hittable(newHittable) {}
 
   public:
-    template <typename... Args> HittableBuilder(Args... args) : hittable(new T(args...)) {}
+    template <typename... Args> HittableBuilder(Args... args) : hittable(std::make_shared<T>(args...)) {}
 
     template <typename... Args> static HittableBuilder CreateHittable(Args... args) {
       return HittableBuilder(args...);
@@ -46,6 +46,6 @@ namespace rt {
       return *this;
     }
 
-    sPtr<T> build() { return std::shared_ptr<T>(hittable); }
+    operator std::shared_ptr<Hittable>() const { return hittable; }
   };
 } // namespace rt

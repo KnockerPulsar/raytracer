@@ -17,6 +17,8 @@ namespace rt {
 
     HittableList() : Hittable("Hittable List") {}
     HittableList(sPtr<Hittable> object) : HittableList() { Add(object); }
+    HittableList(std::vector<std::shared_ptr<Hittable>> &&objects)
+        : Hittable("Hittable List"), objects{std::move(objects)} {}
 
     void Clear() { objects.clear(); }
 

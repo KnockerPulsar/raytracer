@@ -27,23 +27,19 @@ namespace rt {
 
     sides.Add(HittableBuilder<Plane>(Plane::XYPlane(extents.x, extents.y))
                   .rotate(vec3(180, 0, 0))
-                  .withTranslation(backCenter)
-                  .build());
+                  .withTranslation(backCenter));
 
-    sides.Add(HittableBuilder<Plane>(Plane::XYPlane(extents.x, extents.y)).withTranslation(frontCenter).build());
+    sides.Add(HittableBuilder<Plane>(Plane::XYPlane(extents.x, extents.y)).withTranslation(frontCenter));
 
-    sides.Add(HittableBuilder<Plane>(extents.x, extents.z).withTranslation(topCenter).build());
+    sides.Add(HittableBuilder<Plane>(extents.x, extents.z).withTranslation(topCenter));
 
-    sides.Add(
-        HittableBuilder<Plane>(extents.x, extents.z).withTranslation(bottomCenter).withRotation(vec3(180, 0, 0)).build()
-    );
+    sides.Add(HittableBuilder<Plane>(extents.x, extents.z).withTranslation(bottomCenter).withRotation(vec3(180, 0, 0)));
 
-    sides.Add(HittableBuilder<Plane>(Plane::YZPlane(extents.y, extents.z)).withTranslation(leftCenter).build());
+    sides.Add(HittableBuilder<Plane>(Plane::YZPlane(extents.y, extents.z)).withTranslation(leftCenter));
 
     sides.Add(HittableBuilder<Plane>(Plane::YZPlane(extents.y, extents.z))
                   .withTranslation(rightCenter)
-                  .rotate(vec3(0, 0, 180))
-                  .build());
+                  .rotate(vec3(0, 0, 180)));
   }
 
   bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
