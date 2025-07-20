@@ -572,23 +572,30 @@ namespace rt {
     return Scene(new HittableList{std::move(world)}, cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
-  json Scene::GetObjArray() const {
-
-    auto              objectList = worldRoot->getChildrenAsList();
-    std::vector<json> objJsons;
-
-    for (const auto &obj : objectList) {
-      json temp = obj->toJson();
-      std::cout << temp << '\n';
-      objJsons.push_back(temp);
-    }
-
-    return objJsons;
-  }
+  std::vector<std::shared_ptr<Hittable>> Scene::GetObjects() const { return worldRoot->getChildrenAsList(); }
 
   json Scene::toJson() const {
     json sceneJson;
     to_json(sceneJson, *this);
     return sceneJson;
+  }
+
+  void to_json(json &j, const Scene &s)
+  {
+    auto const        objectList = s.GetObjects();
+    std::vector<json> objJsons(objectList.size());
+
+    for (const auto &obj : objectList) {
+      objJsons.push_back(obj->toJson());
+    }
+
+    j = json{{"settings",
+              {
+                  {"background_color", s.backgroundColor},
+                  {"num_samples", s.settings.samplesPerPixel},
+                  {"max_depth", s.settings.maxDepth},
+              }},
+             s.cam,
+             {"objects", objJsons}};
   }
 } // namespace rt

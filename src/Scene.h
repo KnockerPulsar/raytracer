@@ -94,21 +94,10 @@ namespace rt {
     static Scene PlaneTest(int imageWidth, int imageHeight);
     static Scene RasterTest(int imageWidth, int imageHeight);
 
-    json GetObjArray() const;
+    std::vector<std::shared_ptr<Hittable>> GetObjects() const;
 
     json toJson() const;
   };
 
-  inline void to_json(json &j, const Scene &s) {
-    json objArr = s.GetObjArray();
-    j           = json{
-        {"settings",
-                   {
-                       {"background_color", s.backgroundColor},
-                       {"num_samples", s.settings.samplesPerPixel},
-                       {"max_depth", s.settings.maxDepth},
-         }},
-        s.cam,
-        {"objects", objArr}};
-  }
+  void to_json(json &j, const Scene &s);
 } // namespace rt
