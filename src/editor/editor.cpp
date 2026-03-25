@@ -20,9 +20,6 @@
 #include <rlgl.h>
 
 #include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <cstring>
 #include <format>
 #include <fstream>
 #include <functional>
@@ -30,7 +27,6 @@
 #include <iostream>
 #include <memory>
 #include <optional>
-#include <ostream>
 #include <ranges>
 #include <sstream>
 #include <string>
