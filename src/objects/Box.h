@@ -16,7 +16,7 @@ namespace rt {
     vec3         boxMin, boxMax;
     HittableList sides;
 
-    Box() : Hittable("Box") {}
+    Box() : Box(1.0f) {}
     Box(const vec3 &p0, const vec3 &p1);
     Box(float edgeLength);
     Box(const vec3& extents);
