@@ -10,10 +10,16 @@
 /*
  TODO:
     Regenerate BVH tree automatically on object transform with ImGuizmo?
-      - At least after letting go
-      - Need a regeneration method instead of using addChild(nullptr)
+      - Right now, we can delay util we start raytracing or picking in the editor
+      - But since I intend to impelement hover and picked object highlighting, this will have to be immediate
+      - HittableLists don't require any work
+      - BVH trees will require a full rebuild (can refit but a full rebuild works too)
+
+    Why does the BVHNode ctor take t0, t1 as inputs? Can we remove those?
 
     Add the ability to change material textures
+
+    Maybe add a big `RENDER` and `CANCEL RENDER` for the editor and raytracer states?
 
     Finish up scene (de)serialization
       - Saving and loading done
