@@ -91,17 +91,21 @@ namespace rt {
         getScene()->drawSkysphere();
       }
 
-      auto rasterizables = getScene()->worldRoot->getChildrenAsList();
+      auto rasterizables = getScene()->worldRoot->get_hittables();
 
       for (int i = 0; i < rasterizables.size(); i++) {
         rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
       }
 
-      auto aabBs = getScene()->worldRoot->getChildrenAABBs();
+      auto aabBs = getScene()->worldRoot->get_hittables() | std::ranges::views::transform([](auto const &hittable) {
+                     AABB bb;
+                     hittable->BoundingBox(0, 1, bb);
+                     return bb;
+                   });
 
-      AABB rootAABB;
-      getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
-      aabBs.push_back(rootAABB);
+      // AABB rootAABB;
+      // getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
+      // aabBs.push_back(rootAABB);
 
       for (auto &&bb : aabBs) {
         DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
@@ -137,16 +141,12 @@ namespace rt {
     if (viewState.viewMenu.objectList) {
       ImGui::Begin("Objects");
       {
-        if (dynamic_cast<BVHNode *>(getScene()->worldRoot) != nullptr) {
-          if (ImGui::Button("Regenerate BVH", {-1, 0})) {
-
-            // Regenerate tree
-            getScene()->worldRoot = getScene()->worldRoot->addChild(nullptr);
-          }
+        if (ImGui::Button("Regenerate BVH", {-1, 0})) {
+          // Regenerate tree
+          getScene()->worldRoot->regenerate();
         }
 
         AddObjectImgui();
-
         ObjectListImgui();
       }
       ImGui::End();
@@ -368,7 +368,7 @@ namespace rt {
     editor::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
-    getScene()->worldRoot->Hit(r, 0, rt::constants::infinity, rec);
+    getScene()->worldRoot->hit(r, 0, rt::constants::infinity, rec);
 
     return rec.closestHit;
   }
@@ -401,7 +401,7 @@ namespace rt {
       sPtr<Hittable> added = [this] -> std::shared_ptr<Hittable> {
         const sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
         // TODO: This assumes that the root changes when we add new children, which might not be the case.
-        const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot);
+        const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot.get());
 
         switch (selectedAddableObject) {
         case Box:
@@ -420,13 +420,13 @@ namespace rt {
         }
       }();
 
-      auto *const newRoot = getScene()->worldRoot->addChild(added);
+      /*auto *const newRoot =*/ getScene()->worldRoot->add(added);
 
-      if (newRoot == nullptr) {
-        std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
-      } else {
-        getScene()->worldRoot = newRoot;
-      }
+      // if (newRoot == nullptr) {
+      //   std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
+      // } else {
+      //   getScene()->worldRoot = newRoot;
+      // }
     }
   }
 
@@ -466,7 +466,7 @@ namespace rt {
   }
 
   void Editor::ObjectListImgui() {
-    auto objects = getScene()->worldRoot->getChildrenAsList();
+    auto objects = getScene()->worldRoot->get_hittables();
     for (auto &&o : objects) {
       auto const selected = selectedObject == o.get();
 
@@ -491,7 +491,7 @@ namespace rt {
 
       // Remove current object from world and rebuild
       if (ImGui::Button(("x##" + EditorUtils::GetIDFromPointer(o.get())).c_str())) {
-        getScene()->worldRoot = getScene()->worldRoot->removeChild(o);
+        getScene()->worldRoot->remove(o);
       }
 
       ImGui::Separator();

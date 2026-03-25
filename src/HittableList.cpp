@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace rt {
-  bool HittableList::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+  bool HittableList::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
     HitRecord temp_rec;
     bool      hit_anything   = false;
     float     closest_so_far = t_max;
@@ -21,45 +21,16 @@ namespace rt {
     return hit_anything;
   }
 
-  bool HittableList::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    if (objects.empty())
-      return false;
+  void HittableList::add(sPtr<Hittable> new_child) { objects.push_back(new_child); }
 
-    AABB tempBox;
-    bool firstBox = true;
-
-    for (const auto &obj : objects) {
-      if (!obj->BoundingBox(t0, t1, tempBox))
-        return false;
-
-      outputBox = firstBox ? tempBox : AABB::SurroundingBox(outputBox, tempBox);
-      firstBox  = false;
-    }
-
-    return true;
-  }
-
-  Hittable *HittableList::addChild(sPtr<Hittable> newChild) { return &Add(newChild); }
-
-  Hittable *HittableList::removeChild(sPtr<Hittable> childToRemove) {
-    auto [eraseStart, _] = std::ranges::remove(objects, childToRemove);
+  void HittableList::remove(sPtr<Hittable> child_to_remove) {
+    auto [eraseStart, _] = std::ranges::remove(objects, child_to_remove);
     objects.erase(eraseStart);
-    return this;
   }
 
-  std::vector<sPtr<Hittable>> HittableList::getChildrenAsList() {
-    return objects;
+  std::vector<sPtr<Hittable>> HittableList::get_hittables() const { return objects; }
+
+  void HittableList::regenerate() {
+    // Don't need to do anything
   }
-
-  std::vector<AABB> HittableList::getChildrenAABBs() {
-    std::vector<AABB> vec;
-
-    for (auto &&e : getChildrenAsList()) {
-      AABB output;
-      if (e->BoundingBox(0, 1, output))
-        vec.push_back(output);
-    }
-    return vec;
-  }
-
 } // namespace rt

@@ -77,7 +77,7 @@ namespace rt {
   }
 
   void App::changeScene(Scene scene) {
-    this->scene = scene;
+    this->scene = std::move(scene);
 
     editor->changeScene(&this->scene);
     rt->changeScene(&this->scene);

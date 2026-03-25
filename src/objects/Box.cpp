@@ -57,7 +57,7 @@ namespace rt {
   }
 
   bool Box::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
-    if (sides.HitTransformed(r, t_min, t_max, rec)) {
+    if (sides.hit(r, t_min, t_max, rec)) {
       rec.closestHit = (Hittable *)this;
       return true;
     }
@@ -66,14 +66,14 @@ namespace rt {
   }
 
   void Box::Rasterize(vec3 color) {
-    for (auto &side : sides.getChildrenAsList()) {
+    for (auto &side : sides.get_hittables()) {
       side->RasterizeTransformed(side->transformation, color);
     }
   }
 
   void Box::changeMaterial(sPtr<Material> &newMat) {
     material = newMat;
-    for (auto &side : sides.objects) {
+    for (auto &side : sides.get_hittables()) {
       side->changeMaterial(material);
     }
   }

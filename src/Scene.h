@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Defs.h"
 #include "IImguiDrawable.h"
+#include "acceleration_structure.h"
 
 #include <nlohmann-json/json.hpp>
 #include <raylib.h>
@@ -42,7 +43,7 @@ namespace rt {
 
       Can potentially cause a memory leak if it's not handled correctly.
     */
-    Hittable *worldRoot;
+    std::unique_ptr<AccelerationStructure> worldRoot;
 
     sPtr<Hittable> skysphere;
 
@@ -59,10 +60,12 @@ namespace rt {
     static std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes;
 
     Scene() = default;
-    Scene(Hittable *wr, Camera c, int md, glm::ivec2 is, int spp, vec3 bc)
-        : worldRoot(wr), cam(c), imageSize(is), settings{spp, md}, backgroundColor(bc) {}
 
-    Scene(Hittable *wr, Camera c, glm::ivec2 is, vec3 bc) : worldRoot(wr), cam(c), imageSize(is), backgroundColor(bc) {}
+    Scene(std::unique_ptr<AccelerationStructure> wr, Camera c, int md, glm::ivec2 is, int spp, vec3 bc)
+        : worldRoot(std::move(wr)), cam(c), imageSize(is), settings{spp, md}, backgroundColor(bc) {}
+
+    Scene(std::unique_ptr<AccelerationStructure> wr, Camera c, glm::ivec2 is, vec3 bc)
+        : worldRoot(std::move(wr)), cam(c), imageSize(is), backgroundColor(bc) {}
 
     void addSkysphere(std::string ssTex);
 

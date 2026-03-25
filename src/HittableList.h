@@ -2,6 +2,7 @@
 
 #include "Defs.h"
 #include "Hittable.h"
+#include "acceleration_structure.h"
 
 #include <memory>
 #include <optional>
@@ -11,33 +12,18 @@ using ::std::make_shared;
 using ::std::shared_ptr, std::optional, std::make_optional;
 
 namespace rt {
-  class HittableList : public Hittable {
+  class HittableList : public AccelerationStructure {
   public:
+    HittableList(sPtr<Hittable> object) : objects{{object}} {}
+    HittableList(std::vector<std::shared_ptr<Hittable>> &&objects) : objects{std::move(objects)} {}
+
+    bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+    void add(std::shared_ptr<Hittable> new_child) override;
+    void remove(std::shared_ptr<Hittable> child_to_remove) override;
+    auto get_hittables() const -> std::vector<std::shared_ptr<Hittable>> override;
+    void regenerate() override;
+
+  private:
     std::vector<sPtr<Hittable>> objects;
-
-    HittableList() : Hittable("Hittable List") {}
-    HittableList(sPtr<Hittable> object) : HittableList() { Add(object); }
-    HittableList(std::vector<std::shared_ptr<Hittable>> &&objects)
-        : Hittable("Hittable List"), objects{std::move(objects)} {}
-
-    void Clear() { objects.clear(); }
-
-    // Kept for compatibility with existing code.
-    HittableList &Add(sPtr<Hittable> object) {
-      objects.push_back(object);
-      return *this;
-    }
-
-    virtual Hittable *addChild(sPtr<Hittable> newChild) override;
-
-    virtual Hittable *removeChild(sPtr<Hittable> childToRemove) override;
-
-    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
-
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-
-    virtual std::vector<sPtr<Hittable>> getChildrenAsList() override;
-
-    std::vector<AABB> getChildrenAABBs() override;
   };
 } // namespace rt

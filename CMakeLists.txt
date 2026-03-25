@@ -34,6 +34,7 @@ set(SOURCES
   src/GroupPanel.cpp
   src/Transformation.cpp
   src/BVHNode.cpp
+  src/bvh_tree.cpp
 
   src/data_structures/vec3.cpp
 

@@ -8,6 +8,7 @@
 #include "Ray.h"
 #include "Transformation.h"
 #include "Util.h"
+#include "bvh_tree.h"
 #include "data_structures/vec3.h"
 
 #include "materials/Dielectric.h"
@@ -92,7 +93,7 @@ namespace rt {
     auto mat   = make_shared<Lambertian>(vec3(0.6, 0.6, 0.6));
     auto light = make_shared<DiffuseLight>(vec3(3, 3, 3));
 
-    const std::vector<std::shared_ptr<Hittable>> world = {
+    std::vector<std::shared_ptr<Hittable>> world = {
         HittableBuilder<Box>(1).withMaterial(mat),
         HittableBuilder<Plane>::CreateHittable(2.0, 2.0)
             .withTranslation(vec3(2, 0, 2))
@@ -101,9 +102,7 @@ namespace rt {
             .withMaterial(light),
     };
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
-
-    return s;
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::Scene1(int imageWidth, int imageHeight) {
@@ -143,7 +142,7 @@ namespace rt {
     rightSphere.transformation.setTranslation(vec3(1, 0, -1));
     rightSphere.name                         = "Right Sphere";
 
-    const std::vector<std::shared_ptr<Hittable>> world = {
+    std::vector<std::shared_ptr<Hittable>> world = {
         make_shared<Sphere>(groundSphere),
         make_shared<Sphere>(centerSphere),
         // These 2 spheres make a "hollow sphere"
@@ -152,9 +151,7 @@ namespace rt {
         make_shared<Sphere>(rightSphere),
     };
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
-
-    return s;
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   } // namespace rt
 
   Scene Scene::Scene2(int imageWidth, int imageHeight) {
@@ -181,11 +178,9 @@ namespace rt {
     auto rightSphere                      = make_shared<Sphere>(Sphere(r, materialRight));
     rightSphere->transformation.setTranslation(vec3(r, 0, -1));
 
-    const std::vector<std::shared_ptr<Hittable>> world = {leftSphere, rightSphere};
+    std::vector<std::shared_ptr<Hittable>> world = {leftSphere, rightSphere};
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
-
-    return s;
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
@@ -241,9 +236,7 @@ namespace rt {
       }
     }
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
-
-    return s;
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
@@ -311,9 +304,7 @@ namespace rt {
       }
     }
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
-
-    return s;
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
@@ -339,7 +330,7 @@ namespace rt {
         HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin),
         HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker)};
 
-    return Scene(new HittableList(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::make_unique<HittableList>(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::Earth(int imageWidth, int imageHeight) {
@@ -360,7 +351,7 @@ namespace rt {
 
     std::vector<std::shared_ptr<Hittable>> world = {make_shared<Sphere>(2, earthSurface)};
 
-    return Scene(new HittableList(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::make_unique<HittableList>(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::Light(int imageWidth, int imageHeight) {
@@ -385,7 +376,7 @@ namespace rt {
         HittableBuilder<XYRect>(3, 5, 1, 3, -2, diffLight),
     };
 
-    return Scene(new HittableList(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::make_unique<HittableList>(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::CornellBox(int imageWidth, int imageHeight) {
@@ -453,7 +444,7 @@ namespace rt {
             .withName("Box 2"),
     };
 
-    return Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
   Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
@@ -486,7 +477,7 @@ namespace rt {
               << "\tsettings " << settings << '\n'
               << "\t#objects " << world.size() << '\n';
 
-    s.worldRoot = new BVHNode(world, s.cam.time0, s.cam.time1);
+    s.worldRoot = std::make_unique<BVHTree>(std::move(world), s.cam.time0, s.cam.time1);
 
     return s;
   }
@@ -517,7 +508,7 @@ namespace rt {
         HittableBuilder<Sphere>(0.5f, sphereMat).withName("Sphere"),
     };
 
-    s = Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
+    s = Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
     s.addSkysphere(skyspherePath);
 
     return s;
@@ -546,9 +537,8 @@ namespace rt {
     auto xzplane = make_shared<XZRect>(-1.5, 1.5, -1.5, 1.5, 0, blue);
     auto tri     = HittableBuilder<Triangle>(vec3(0, 0, 1), vec3(-1, 0, -1), vec3(1, 0, 0)).withMaterial(red);
 
-    const std::vector<std::shared_ptr<Hittable>> world = {tri, plane, xzplane};
-
-    return Scene(new BVHNode(world, 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
+    std::vector<std::shared_ptr<Hittable>> world = {tri, plane, xzplane};
+    return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
   } // namespace rt
 
   Scene Scene::RasterTest(int imageWidth, int imageHeight) {
@@ -569,11 +559,10 @@ namespace rt {
     std::vector<std::shared_ptr<Hittable>> world = {
         HittableBuilder<Box>(vec3(1, 1, 1), vec3(2, 2, 2)).withMaterial(make_shared<DiffuseLight>(vec3(3, 0, 0)))};
 
-    return Scene(new HittableList{std::move(world)}, cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::make_unique<HittableList>(std::move(world)), cam, {imageWidth, imageHeight}, backgroundColor);
   }
 
-  std::vector<std::shared_ptr<Hittable>> Scene::GetObjects() const { return worldRoot->getChildrenAsList(); }
-
+  std::vector<std::shared_ptr<Hittable>> Scene::GetObjects() const { return worldRoot->get_hittables(); }
   json Scene::toJson() const {
     json sceneJson;
     to_json(sceneJson, *this);
