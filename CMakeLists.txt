@@ -41,6 +41,7 @@ set(SOURCES
   src/objects/Box.cpp
   src/objects/Sphere.cpp
   src/objects/AARect.cpp
+  src/objects/mesh.cpp
 
   src/editor/editor.cpp
   src/raytracer.cpp

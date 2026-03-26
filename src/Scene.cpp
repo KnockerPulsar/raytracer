@@ -23,6 +23,7 @@
 #include "objects/Sphere.h"
 #include "objects/Triangle.h"
 
+#include "objects/mesh.h"
 #include "textures/CheckerTexture.h"
 #include "textures/ImageTexture.h"
 #include "textures/NoiseTexture.h"
@@ -400,6 +401,7 @@ namespace rt {
     auto light         = make_shared<DiffuseLight>(vec3(2, 2, 2));
     auto purplishMetal = make_shared<Metal>(vec3(0.8, 0.1, 0.8), 0.7);
     auto chrome        = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.05);
+    auto gold          = make_shared<Metal>(vec3(0.831, 0.686, 0.215), 0.05);
     auto dielectric    = make_shared<Dielectric>(1.5f);
     auto noise         = make_shared<Lambertian>(make_shared<NoiseTexture>(0.1f));
     auto checker       = std::make_shared<CheckerTexture>(vec3(0.2, 0.3, 0.1), vec3(10, 3.0, 10), 0.2f);
@@ -442,6 +444,9 @@ namespace rt {
             .withRotation(vec3(0, 12, 0))
             .withMaterial(purplishMetal)
             .withName("Box 2"),
+        HittableBuilder<rt::Mesh>("assets/models/nefertiti-low-poly.obj")
+            .withMaterial(gold)
+            .withTranslation(vec3(10, 10, 10)), // On top of box 2
     };
 
     return Scene(std::make_unique<BVHTree>(std::move(world), 0, 1), cam, {imageWidth, imageHeight}, backgroundColor);
