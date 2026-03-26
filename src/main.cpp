@@ -58,7 +58,20 @@
       - Method naming convention jumps between PascalCase and camelCase
 
     Implement meshes properly
-      - Obj loading?
+      - Hacked together with raylib
+      - Problem: Editor bounding box preview expects the bounding box to be in
+      world space. If I want to use it for an early exit in `Hit()`, then it
+      has to be in local space. Hacked around it for not
+      - TODO: Add the ability to add/change/reload? models at runtime
+      - TODO: BVH acceleration
+
+    Editor and raytracer should be two separate things with their own states.
+    The editor state should be dynamic to allow for live editing. When
+    raytracing, the raytracer state should be derived from the editor state and
+    should be constant for its lifetime. Should integrate nicely with the
+    prepass idea above.
+
+    Update nlhomann-json
 */
 
 // X is the right axis
