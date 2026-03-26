@@ -25,6 +25,7 @@ namespace rt {
 
     std::vector<sPtr<Hittable>> getChildrenAsList() override;
 
+    // TODO should this be removed?
     std::vector<AABB> getChildrenAABBs() override;
 
     // Use with newChild = nullptr to regenerate the tree

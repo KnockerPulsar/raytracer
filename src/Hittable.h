@@ -114,6 +114,7 @@ namespace rt {
     }
 
     // Only HittableLists and BVHNodes should override this.
+    // TODO should this be removed after `AccelerationStructure` was added?
     virtual Hittable *addChild(sPtr<Hittable> newChild) { return nullptr; }
     virtual Hittable *removeChild(sPtr<Hittable> childToRemove) { return nullptr; }
 
