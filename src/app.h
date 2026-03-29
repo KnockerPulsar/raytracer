@@ -13,8 +13,8 @@ struct CliConfig {
 };
 
 namespace rt {
-  class Editor;
-  class Raytracer;
+  namespace editor { class Editor; }
+  namespace raytracer { class Raytracer; }
   class IState;
 
   class App {
@@ -22,8 +22,8 @@ namespace rt {
     editor::Scene           scene;
     AsyncRenderData ard;
 
-    sPtr<Editor>    editor;
-    sPtr<Raytracer> rt;
+    sPtr<editor::Editor>    editor;
+    sPtr<raytracer::Raytracer> rt;
 
     int  numThreads;
     bool shouldQuit = false;
@@ -41,7 +41,7 @@ namespace rt {
     void run();
     void onFrameRender() const;
     void checkInput();
-    void changeScene(Scene scene);
+    void changeScene(editor::Scene scene);
     void quit();
 
     ~App();

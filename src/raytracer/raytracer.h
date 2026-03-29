@@ -1,12 +1,12 @@
-#include "AsyncRenderData.h"
-#include "IState.h"
+#include "common/IState.h"
 #include "data_structures/JobQueue.h"
 
 #include <raylib.h>
 #include <rlImGui.h>
 #include <stb_image_write.h>
 
-namespace rt {
+namespace rt::raytracer {
+  class Scene;
   class Raytracer : public IState {
   public:
     Raytracer(App *app, AsyncRenderData &ard);
@@ -21,6 +21,9 @@ namespace rt {
     bool onFinished();
     void RenderImGui();
     void Autosave();
+
+    static void TraceRay(AsyncRenderData &ard, const raytracer::Scene *scene, int threadIndex);
+    static vec3 RayColor(const rt::Ray &r, const raytracer::Scene* scene, int depth);
 
     bool allFinished = false;
     AsyncRenderData &ard;

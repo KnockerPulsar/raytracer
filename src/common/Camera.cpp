@@ -34,57 +34,29 @@ Camera::Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov,
   lowerLeftCorner = this->lookFrom - horizontal / 2 - vertical / 2 + focusDist * localForward;
 }
 
-  // Should probably be moved to from_json()?
-  Camera::Camera(nlohmann::json cameraJson, float aspectRatio)
-      : Camera(
-            cameraJson["look_from"].get<vec3>(),
-            cameraJson["look_at"].get<vec3>(),
-            cameraJson["v_up"].get<vec3>(),
-            cameraJson["fov"].get<float>(),
-            aspectRatio,
-            cameraJson["aperature"].get<float>(),
-            cameraJson["focus_dist"].get<float>(),
-            cameraJson["time0"].get<float>(),
-            cameraJson["time1"].get<float>()
-        ) {
-  }
+// Used for raytracing
+rt::Ray Camera::GetRay(float s, float t) const {
+  vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
+  vec3 offset = localRight * rd.x + localUp * rd.y;
+  return rt::Ray(lookFrom + offset, (lowerLeftCorner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
+                 RandomFloat(time0, time1));
+}
 
-  // Used for raytracing
-  rt::Ray Camera::GetRay(float s, float t) const {
-    vec3 rd     = lensRadius * vec3::RandomInUnitDisc();
-    vec3 offset = localRight * rd.x + localUp * rd.y;
-    return rt::Ray(
-        lookFrom + offset,
-        (lowerLeftCorner + horizontal * s + vertical * t - lookFrom - offset).Normalize(),
-        RandomFloat(time0, time1)
-    );
-  }
+// void Camera::RenderImgui() {
+//   if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
+//
+//     ImGui::DragFloat("Vertical FOV", &vFov, 0.1f, 20, 180);
+//
+//     ImGui::DragFloat("Focus distance", &focusDist, 0.01, 0.1, 1000);
+//
+//     ImGui::DragFloat("Aperature", &aperature, 0.01, 10e-6, 10);
+//   }
+//   ImGui::End();
+// }
 
-
-  void Camera::RenderImgui() {
-    if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-      ImGui::DragFloat("Vertical FOV", &vFov, 0.1f, 20, 180);
-
-      ImGui::DragFloat("Focus distance", &focusDist, 0.01, 0.1, 1000);
-
-      ImGui::DragFloat("Aperature", &aperature, 0.01, 10e-6, 10);
-    }
-    ImGui::End();
-  }
-
-  std::tuple<vec3, vec3, vec3>
-  Camera::getScaledDirectionVectors(float dt) const {
-    vec3 upChange = worldUp * dt;
-    vec3 fwdChange = localForward * dt;
-    vec3 rgtChange = localRight * dt;
-
-    return std::make_tuple(upChange, fwdChange, rgtChange);
-  }
-
-  void Camera::RecomputeLocalBases() {
-    localForward = (lookAt - lookFrom).Normalize();                   // back vector
-    localRight   = -vec3::CrsProd(worldUp, localForward).Normalize(); // Right vector
-    localUp      = -vec3::CrsProd(localForward, localRight);          // Local up vector, vUp is the world up vector
-  }
+void Camera::RecomputeLocalBases() {
+  localForward = (lookAt - lookFrom).Normalize();                   // back vector
+  localRight   = -vec3::CrsProd(worldUp, localForward).Normalize(); // Right vector
+  localUp      = -vec3::CrsProd(localForward, localRight);          // Local up vector, vUp is the world up vector
+}
 } // namespace rt

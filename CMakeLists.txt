@@ -24,12 +24,12 @@ add_subdirectory(vendor/glm/glm)
 
 # A variable with all our source files that are common between executable targets (examples)
 set(SOURCES
-  src/Scene.cpp
   src/app.cpp
-  src/AABB.cpp
-  src/Camera.cpp
-  src/HittableList.cpp
-  src/Ray.cpp
+  src/common/Scene.cpp
+  src/common/AABB.cpp
+  src/common/Camera.cpp
+  src/common/HittableList.cpp
+  src/common/Ray.cpp
   src/AsyncRenderData.cpp
   src/GroupPanel.cpp
   src/Transformation.cpp

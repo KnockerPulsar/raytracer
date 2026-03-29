@@ -14,6 +14,7 @@ namespace rt::editor {
     void rotateDelta(vec3 rotationDelta);
     auto getRotationEuler() const -> vec3;
     auto getTranslation() const -> vec3;
+    auto getName() const -> std::string;
 
     // virtual void OnImgui() override {
     //   transformation.OnImgui();
@@ -31,5 +32,6 @@ namespace rt::editor {
   private:
     Transformation transformation;
     std::shared_ptr<Material> material;
+    std::string name;
   };
 }

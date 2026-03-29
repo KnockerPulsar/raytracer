@@ -19,15 +19,6 @@ namespace rt {
         : origin(org), direction(dir), time(time) {}
 
     vec3 At(float t) const { return Vector3Add(origin, direction * t); }
-
-    static vec3 RayColor(const rt::Ray &r, const Scene* scene, int depth);
-
-    static void Trace(
-      AsyncRenderData &ard,
-      const Scene* scene,
-      int threadIndex
-    );
-
   };
 
 } // namespace rt

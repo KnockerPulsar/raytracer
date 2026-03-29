@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IState.h"
+#include "common/IState.h"
 #include "app.h"
 #include "camera.h"
 #include "common/Defs.h"

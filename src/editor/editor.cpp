@@ -5,10 +5,13 @@
 #include "hittatable_builder.h"
 
 #include "materials/diffuse_light.h"
+#include "materials/lambertian.h"
+#include "materials/dielectric.h"
+#include "materials/metal.h"
 
-#include "objects/box.h"
-#include "objects/sphere.h"
-#include "objects/plane.h"
+// #include "objects/box.h"
+// #include "objects/sphere.h"
+// #include "objects/plane.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
@@ -358,7 +361,8 @@ namespace rt::editor {
     rt::HitRecord rec;
     // getScene()->worldRoot->hit(r, 0, rt::constants::infinity, rec);
 
-    return rec.closestHit;
+    // return rec.closestHit;
+    return nullptr;
   }
 
   void Editor::onUpdate() {
@@ -422,12 +426,12 @@ namespace rt::editor {
 
   // Regenerate BVH on exit / before entering the raytracer
   void Editor::onExit() {
-    auto *scene = getScene();
-    auto  rtCam = camera.getRtCamera();
-
-    scene->setCamera(camera);
-
-    *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
+    // auto *scene = getScene();
+    // auto  rtCam = camera.getRtCamera();
+    //
+    // scene->setCamera(camera);
+    //
+    // *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
   }
 
   void Editor::RenderViewport() {
@@ -452,7 +456,7 @@ namespace rt::editor {
   }
 
   void Editor::ObjectListImgui() {
-    for (auto &&o : world) {
+    for (auto &o : getScene()->getWorld()) {
       auto const selected = selectedObject == o.get();
 
       if(selected) {
@@ -460,7 +464,7 @@ namespace rt::editor {
         ImGui::SetScrollHereY();
       }
 
-      std::string idPlusName = o->name + "##" + EditorUtils::GetIDFromPointer(o.get());
+      std::string idPlusName = o->getName() + "##" + EditorUtils::GetIDFromPointer(o.get());
       if (ImGui::Button(idPlusName.c_str())) {
         selectedObject = o.get();
       }
@@ -486,10 +490,19 @@ namespace rt::editor {
   std::optional<sPtr<editor::Material>> Editor::MaterialChanger() {
 
     static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
+
+    enum class MaterialTypes : uint8_t {
+      Diffuse,
+      Dielectrical,
+      Metallic,
+      Emissive,
+      MaterialTypesCount,
+    };
+
     static MaterialTypes selectedMaterialType = MaterialTypes::Emissive;
 
     ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(materialTypes)).c_str(), (int *)&selectedMaterialType,
-                 materialTypes, MaterialTypes::MaterialTypesCount);
+                 materialTypes, static_cast<int>(MaterialTypes::MaterialTypesCount) - 1);
 
     ImGui::SameLine();
     if (ImGui::Button("Change")) {
@@ -534,8 +547,7 @@ namespace rt::editor {
     }
   }
 
-  void Editor::changeScene(Scene *scene) {
-    camera.updateFromRtCamera(scene->cam);
+  void Editor::changeScene(editor::Scene *scene) {
     selectedObject = nullptr;
   }
 } // namespace rt

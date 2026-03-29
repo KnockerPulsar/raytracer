@@ -1,7 +1,13 @@
 #include "raytracer.h"
+#include "common/Hittable.h"
 
-#include "IState.h"
+#include "common/Scene.h"
+#include "common/IState.h"
+#include "common/Util.h"
+#include "materials//Material.h"
+
 #include "data_structures/Pixel.h"
+
 #include "editor/Utils.h"
 
 #include <imgui.h>
@@ -9,11 +15,11 @@
 #include <iostream>
 #include <raylib.h>
 
-rt::Raytracer::Raytracer(App *const app, AsyncRenderData &ard) : IState(app), ard(ard) {}
+rt::raytracer::Raytracer::Raytracer(App *const app, AsyncRenderData &ard) : IState(app), ard(ard) {}
 
-void rt::Raytracer::onEnter() { startRaytracing(); }
+void rt::raytracer::Raytracer::onEnter() { startRaytracing(); }
 
-void rt::Raytracer::onExit() {
+void rt::raytracer::Raytracer::onExit() {
   ard.KillThreads();
 
   // Reset job queue chunks
@@ -34,7 +40,7 @@ void rt::Raytracer::onExit() {
   allFinished = false;
 }
 
-void rt::Raytracer::onUpdate() {
+void rt::raytracer::Raytracer::onUpdate() {
   if(IsKeyPressed(KEY_SPACE))
     viewState.showProgress = !viewState.showProgress;
 
@@ -46,47 +52,47 @@ void rt::Raytracer::onUpdate() {
   EndDrawing();
 }
 
-void rt::Raytracer::startRaytracing() {
-  ard.exit = false;
-
-  for (auto &job : ard.pixelJobs->getJobsVector()) {
-    job.color = vec3::Zero();
-  }
-
-  for (int t = 0; t < app->getNumThreads(); t++) {
-    ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, std::ref(ard), getScene(), t));
-  }
+void rt::raytracer::Raytracer::startRaytracing() {
+  // ard.exit = false;
+  //
+  // for (auto &job : ard.pixelJobs->getJobsVector()) {
+  //   job.color = vec3::Zero();
+  // }
+  //
+  // for (int t = 0; t < app->getNumThreads(); t++) {
+  //   ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, std::ref(ard), getScene(), t));
+  // }
 }
 
-void rt::Raytracer::BlitToBuffer() {
+void rt::raytracer::Raytracer::BlitToBuffer() {
 
-  auto *pixelData = new Color[static_cast<int>(getScene()->imageSize.x * getScene()->imageSize.y)];
-  auto  jobs      = ard.pixelJobs->getJobsVector();
-
-  // Copy over only the color data
-  for (int i = 0; i < jobs.size(); ++i) {
-    pixelData[i] = jobs[i].color.toRaylibColor(255);
-  }
-
-  // Unload old texture
-  UnloadTexture(ard.raytraceRT.texture);
-
-  // Create texture from image containing the color data
-  Image raytraced = {.data    = pixelData,
-                     .width   = getScene()->imageSize.x,
-                     .height  = getScene()->imageSize.y,
-                     .mipmaps = 1,
-                     .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
-
-  // Deletes pixelData afte copying it to another buffer
-  ImageFlipVertical(&raytraced);
-
-  ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
-
-  UnloadImage(raytraced);
+  // auto *pixelData = new Color[static_cast<int>(getScene()->imageSize.x * getScene()->imageSize.y)];
+  // auto  jobs      = ard.pixelJobs->getJobsVector();
+  //
+  // // Copy over only the color data
+  // for (int i = 0; i < jobs.size(); ++i) {
+  //   pixelData[i] = jobs[i].color.toRaylibColor(255);
+  // }
+  //
+  // // Unload old texture
+  // UnloadTexture(ard.raytraceRT.texture);
+  //
+  // // Create texture from image containing the color data
+  // Image raytraced = {.data    = pixelData,
+  //                    .width   = getScene()->imageSize.x,
+  //                    .height  = getScene()->imageSize.y,
+  //                    .mipmaps = 1,
+  //                    .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+  //
+  // // Deletes pixelData afte copying it to another buffer
+  // ImageFlipVertical(&raytraced);
+  //
+  // ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
+  //
+  // UnloadImage(raytraced);
 }
 
-bool rt::Raytracer::onFinished() {
+bool rt::raytracer::Raytracer::onFinished() {
   ClearBackground(BLACK);
 
   bool finished = true;
@@ -113,13 +119,87 @@ bool rt::Raytracer::onFinished() {
   float const dWidth  = editorSize.x - fitSize.x;
   float const dHeight = editorSize.y - fitSize.y;
 
-  DrawTexturePro(ard.raytraceRT.texture,
-                 (Rectangle){0, 0, static_cast<float>(getScene()->imageSize.x), static_cast<float>(getScene()->imageSize.y)},
-                 (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
+  // DrawTexturePro(ard.raytraceRT.texture,
+  //                (Rectangle){0, 0, static_cast<float>(getScene()->imageSize.x), static_cast<float>(getScene()->imageSize.y)},
+  //                (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
   return allFinished;
 }
 
-void rt::Raytracer::RenderImGui() {
+void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, const Scene *scene, int threadIndex) {
+
+  while (true) {
+    auto start                = std::chrono::high_resolution_clock::now();
+    auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk(ard, threadIndex);
+
+    for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
+
+#ifdef FAST_EXIT
+      // Exit prematurely if signaled to
+      if (ard.exit == true)
+        return;
+#endif
+
+      Pixel &job = *currentJob;
+
+      int x = job.x;
+      int y = job.y;
+
+      auto const samplesPerPixel = 2; // TODO
+      auto const maxDepth = 5; // TODO
+      for (int s = 0; s < 5; s++) {
+        float   u   = (x + RandomFloat()) / (scene->imageSize.x - 1);
+        float   v   = (y + RandomFloat()) / (scene->imageSize.y - 1);
+        rt::Ray ray = scene->cam.GetRay(u, v);
+        job.color += RayColor(ray, scene, maxDepth);
+      }
+
+#ifdef GAMMA_CORRECTION
+      // Gamma correction
+      float r = job.color.x, g = job.color.y, b = job.color.z;
+
+      float scale = 1.0 / samplesPerPixel;
+      r           = sqrt(scale * r);
+      g           = sqrt(scale * g);
+      b           = sqrt(scale * b);
+
+      job.color = vec3(r, g, b);
+#else
+      job.color /= float(scene->settings.samplesPerPixel);
+#endif
+      ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
+    }
+    auto stop      = std::chrono::high_resolution_clock::now();
+    auto batchTime = duration_cast<std::chrono::milliseconds>(stop - start).count();
+    ard.threadTimes[threadIndex] += batchTime;
+  }
+}
+
+vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, const raytracer::Scene *scene, int depth) {
+  // Limit max recursion depth
+  if (depth <= 0) {
+    return vec3::Zero();
+  }
+
+  rt::raytracer::HitRecord rec;
+  if (!scene->worldRoot->hit(r, 0.001f, rt::constants::infinity, rec)) {
+    // if (scene->skysphere)
+    //   scene->skysphere->Hit(r, -rt::constants::infinity, rt::constants::infinity, rec);
+    // else
+    //   return scene->backgroundColor;
+    return scene->backgroundColor;
+  }
+
+  rt::Ray scattered;
+  vec3    attenuation;
+  vec3    emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+  if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+    return emitted;
+
+  return emitted + attenuation * RayColor(scattered, scene, depth - 1);
+}
+
+void rt::raytracer::Raytracer::RenderImGui() {
 
   rlImGuiBegin();
 
@@ -163,15 +243,15 @@ void rt::Raytracer::RenderImGui() {
   rlImGuiEnd();
 }
 
-void rt::Raytracer::Autosave() {
+void rt::raytracer::Raytracer::Autosave() {
   std::stringstream ss;
 
   auto t  = std::time(nullptr);
   auto tm = *std::localtime(&t);
-  ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageSize.x << "x"
-     << getScene()->imageSize.y << "_" << getScene()->settings.samplesPerPixel << "_" << getScene()->settings.maxDepth
-     << ".bmp";
-
+  // ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageSize.x << "x"
+  //    << getScene()->imageSize.y << "_" << getScene()->settings.samplesPerPixel << "_" << getScene()->settings.maxDepth
+  //    << ".bmp";
+  //
   std::cout << "Finished render: " << ss.str() << '\n';
 
   Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);

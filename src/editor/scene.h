@@ -48,10 +48,11 @@ public:
   // static Scene PlaneTest(int imageWidth, int imageHeight);
   // static Scene RasterTest(int imageWidth, int imageHeight);
 
-  // auto getInitialCamera() const -> rt::Camera;
+  auto getInitialCamera() const -> rt::Camera;
   auto setCamera(Camera const &cam) -> void;
     // scene->cam = camera.toSceneCamera();
     // scene->imageSize  = camera.imageSize();
+  auto getWorld() const -> std::vector<std::shared_ptr<Hittable>>&;
 
   void addSkysphere(std::string ssTex);
   void drawSkysphere();

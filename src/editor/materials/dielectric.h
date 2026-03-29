@@ -1,11 +1,12 @@
 #pragma once
 
 #include "material.h"
+#include "data_structures/vec3.h"
 
 namespace rt::editor {
   class Dielectric : public Material {
   public:
-    Dielectric(float refractionIndex);
+    Dielectric(float refractionIndex, vec3 tint = vec3(1.0));
     virtual void OnImgui() override {
       // albedo->OnImgui();
       // ImGui::DragFloat("Refraction Index", &refractionIndex, 0.01, 1, 100);

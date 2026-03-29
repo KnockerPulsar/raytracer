@@ -35,27 +35,10 @@ namespace rt {
         float time1 = 1.0
     );
 
-    Camera(nlohmann::json cameraJson, float aspectRatio);
-
     rt::Ray GetRay(float s, float t) const;
 
-    void                         RenderImgui();
-    std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
+    void RenderImgui();
 
     void RecomputeLocalBases();
   };
-
-  inline void to_json(json &j, const Camera &c) {
-    j = json{
-        "camera",
-        {{"look_from", c.lookFrom},
-         {"look_at", c.lookAt},
-         {"v_up", c.worldUp},
-         {"focus_dist", c.focusDist},
-         {"aperature", c.aperature},
-         {"fov", c.vFov},
-         {"time0", c.time0},
-         {"time1", c.time1}},
-    };
-  }
 } // namespace rt

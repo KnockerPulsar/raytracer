@@ -1,6 +1,7 @@
 #pragma once
 
-#include "AsyncRenderData.h"
+#include "common/AsyncRenderData.h"
+
 #include <algorithm>
 #include <condition_variable>
 #include <mutex>

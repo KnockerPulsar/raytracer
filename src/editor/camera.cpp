@@ -26,21 +26,22 @@ void rt::editor::Camera::DrawFrameOutline() const {
 
 void rt::editor::Camera::RenderImgui() {
   if (ImGui::Begin("Camera", 0, ImGuiWindowFlags_AlwaysAutoResize)) {
-    if (ImGui::DragFloat3("lookFrom", &rtCamera.lookFrom.x, 0.05)) {
-      rtCamera.lookAt = rtCamera.lookFrom + rtCamera.localForward;
+    auto const localForward = lookAt - lookFrom;
+    if (ImGui::DragFloat3("lookFrom", &lookFrom.x, 0.05)) {
+      lookAt = lookFrom + localForward;
     }
 
     ImGui::Combo("Camera type", (int *)&controlType, controlTypeLabels,
                  static_cast<int>(rt::editor::Camera::ControlType::controlTypesCount), 0);
 
     if (controlType == ControlType::lookAtPoint) {
-      ImGui::DragFloat3("rtCamera.lookAt", &rtCamera.lookAt.x, 0.05);
+      ImGui::DragFloat3("lookAt", &lookAt.x, 0.05);
     } else {
       if (ImGui::DragFloat2("rotation", &angle.x, 0.05f))
         lookAtAngle(angle);
     }
 
-    ImGui::DragFloat("Vertical FOV", &rtCamera.vFov, 1.0, 5.0, 179.0f);
+    ImGui::DragFloat("Vertical FOV", &vFov, 1.0, 5.0, 179.0f);
 
     {
       ImGui::Checkbox("Frame size affects crop?", &frameSizeAffectsCrop);
@@ -63,33 +64,16 @@ void rt::editor::Camera::RenderImgui() {
   ImGui::End();
 }
 
-// rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene const &initialScene)
-//     : editorSize(editorSize), _imageSize(imageSize), rtCamera(initialScene.getInitialCamera()),
-//       controlType(ControlType::flyCam) {
-//   updateFromRtCamera(rtCamera);
-// }
+rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene const &initialScene)
+    : editorSize(editorSize), _imageSize(imageSize), controlType(ControlType::flyCam) {}
 
-void rt::editor::Camera::updateFromRtCamera(rt::Camera const &sceneCamera) {
-  rtCamera = sceneCamera;
-  rtCamera.RecomputeLocalBases();
-
-  forwardToAngle(localForward());
-  lookAtAngle(angle);
-}
-
-void rt::editor::Camera::UpdateRtCamera() {
-  rtCamera.aspectRatio = static_cast<float>(_imageSize.x) / _imageSize.y;
-  rtCamera.RecomputeLocalBases();
-}
 
 void rt::editor::Camera::Fwd(float deltaTime) {
-  rtCamera.lookFrom += moveDir * deltaTime;
-  UpdateRtCamera();
+  lookFrom += moveDir * deltaTime;
 }
 
 void rt::editor::Camera::Bck(float deltaTime) {
-  rtCamera.lookFrom += -moveDir * deltaTime;
-  UpdateRtCamera();
+  lookFrom += -moveDir * deltaTime;
 }
 
 void rt::editor::Camera::lookAtAngle(vec3 angle) {
@@ -102,8 +86,7 @@ void rt::editor::Camera::lookAtAngle(vec3 angle) {
       sin(pi / 2 - angle.y),
   };
 
-  rtCamera.lookAt = rtCamera.lookFrom + dir;
-  UpdateRtCamera();
+  lookAt = lookFrom + dir;
 }
 
 void rt::editor::Camera::forwardToAngle(vec3 fwd) {
@@ -128,13 +111,23 @@ void rt::editor::Camera::MouseLook(Vector2 mousePositionDelta) {
   lookAtAngle(angle);
 }
 
+std::tuple<vec3, vec3, vec3> rt::editor::Camera::getScaledDirectionVectors(float dt) const {
+  vec3 upChange  = worldUp * dt;
+  auto const localForward = (lookAt - lookFrom).Normalize();
+  vec3 fwdChange = localForward * dt;
+  auto const localRight = -vec3::CrsProd(worldUp, localForward).Normalize();
+  vec3 rgtChange = localRight * dt;
+
+  return std::make_tuple(upChange, fwdChange, rgtChange);
+}
+
 void rt::editor::Camera::Update(float dt) {
   float speedMultiplier = movementSpeedMultiplier;
 
   if (IsKeyDown(KEY_LEFT_SHIFT))
     speedMultiplier *= boostMultiplier;
 
-  auto [upChange, fwdChange, rgtChange] = rtCamera.getScaledDirectionVectors(dt * speedMultiplier);
+  auto [upChange, fwdChange, rgtChange] = getScaledDirectionVectors(dt * speedMultiplier);
 
   if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
     HideCursor();
@@ -143,28 +136,28 @@ void rt::editor::Camera::Update(float dt) {
 
   if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
     if (IsKeyDown(KEY_SPACE)) {
-      rtCamera.lookFrom += upChange;
-      rtCamera.lookAt += upChange;
+      lookFrom += upChange;
+      lookAt += upChange;
     }
     if (IsKeyDown(KEY_LEFT_CONTROL)) {
-      rtCamera.lookFrom -= upChange;
-      rtCamera.lookAt -= upChange;
+      lookFrom -= upChange;
+      lookAt -= upChange;
     }
     if (IsKeyDown(KEY_W)) {
-      rtCamera.lookFrom += fwdChange;
-      rtCamera.lookAt += fwdChange;
+      lookFrom += fwdChange;
+      lookAt += fwdChange;
     }
     if (IsKeyDown(KEY_S)) {
-      rtCamera.lookFrom -= fwdChange;
-      rtCamera.lookAt -= fwdChange;
+      lookFrom -= fwdChange;
+      lookAt -= fwdChange;
     }
     if (IsKeyDown(KEY_A)) {
-      rtCamera.lookFrom -= rgtChange;
-      rtCamera.lookAt -= rgtChange;
+      lookFrom -= rgtChange;
+      lookAt -= rgtChange;
     }
     if (IsKeyDown(KEY_D)) {
-      rtCamera.lookFrom += rgtChange;
-      rtCamera.lookAt += rgtChange;
+      lookFrom += rgtChange;
+      lookAt += rgtChange;
     }
 
     MouseLook(GetMouseDelta());
@@ -178,31 +171,30 @@ void rt::editor::Camera::Update(float dt) {
 }
 
 Camera3D rt::editor::Camera::toRaylibCamera3D() const {
-  return Camera3D{.position   = rtCamera.lookFrom,
-                  .target     = rtCamera.lookAt,
+  return Camera3D{.position   = lookFrom,
+                  .target     = lookAt,
                   .up         = {0, 1, 0},
-                  .fovy       = rtCamera.vFov,
+                  .fovy       = vFov,
                   .projection = CAMERA_PERSPECTIVE};
 }
 
 glm::mat4 rt::editor::Camera::getProjectionMatrix() const {
-  return glm::perspective(glm::radians(rtCamera.vFov), static_cast<float>(editorSize.x) / editorSize.y, 0.01f, 100.0f);
+  return glm::perspective(glm::radians(vFov), static_cast<float>(editorSize.x) / editorSize.y, 0.01f, 100.0f);
 }
 
 float rt::editor::Camera::GetCorrectedCropFov() const {
   // Clamp the scale in case the image is larger than the editor window.
   auto const scale = std::min(static_cast<float>(_imageSize.y) / editorSize.y, 1.0f);
-  return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(rtCamera.vFov) / 2)));
+  return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(vFov) / 2)));
 }
 
-rt::Camera rt::editor::Camera::toSceneCamera() const {
+rt::Camera rt::editor::Camera::toRaytracerCamera() const {
   auto const aspectRatio = static_cast<float>(_imageSize.x) / _imageSize.y;
-  auto       vFov        = rtCamera.vFov;
+  auto correctedVerticalFov = vFov;
 
   if (frameSizeAffectsCrop) {
-    vFov = GetCorrectedCropFov();
+    correctedVerticalFov = GetCorrectedCropFov();
   }
 
-  return rt::Camera(rtCamera.lookFrom, rtCamera.lookAt, rtCamera.worldUp, vFov, aspectRatio, rtCamera.aperature,
-                    rtCamera.focusDist, rtCamera.time0, rtCamera.time1);
+  return rt::Camera(lookFrom, lookAt, {0, 1, 0}, correctedVerticalFov, aspectRatio, aperature, focusDist_, 0, 1);
 }

@@ -2,18 +2,20 @@
 
 #include <memory>
 #include <vector>
+
 namespace rt {
   class Ray;
-  namespace raytracer {
-    struct HitRecord;
-    struct Hittable;
+  struct Hittable;
 
+  namespace raytracer {
+
+    struct HitRecord;
     class AccelerationStructure {
     public:
       virtual ~AccelerationStructure() = default;
 
       // common
-      virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
+      virtual bool hit(const rt::Ray &r, float t_min, float t_max, rt::raytracer::HitRecord &rec) const = 0;
 
       // editor only
       virtual void add(std::shared_ptr<Hittable> new_child)                        = 0;

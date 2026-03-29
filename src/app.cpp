@@ -1,14 +1,14 @@
 #include "app.h"
 
-#include "AsyncRenderData.h"
-#include "Constants.h"
-#include "Defs.h"
-#include "Ray.h"
-#include "Scene.h"
-#include "data_structures/JobQueue.h"
 #include "editor/editor.h"
-#include "raytracer.h"
-#include "rt.h"
+#include "editor/scene.h"
+
+#include "common/Constants.h"
+#include "common/Defs.h"
+#include "common/Ray.h"
+#include "data_structures/JobQueue.h"
+
+#include "raytracer/raytracer.h"
 
 #include <raylib.h>
 #include <rlImGui.h>
@@ -39,9 +39,9 @@ namespace rt {
         }()),
         editorSize(config.editorSize),
         // TODO: should be just `config.imageSize` but I'm too lazy to update all scene constructors
-        scene(config.pathToScene.empty() ? Scene::Earth(config.imageSize.x, config.imageSize.y)
-                                         : Scene::Load(config.imageSize, config.pathToScene)),
-        editor(std::make_shared<Editor>(this, config, scene)), rt(std::make_shared<Raytracer>(this, ard)),
+        scene(config.pathToScene.empty() ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
+                                         : editor::Scene::Load(config.imageSize, config.pathToScene)),
+        editor(std::make_shared<editor::Editor>(this, config, scene)), rt(std::make_shared<raytracer::Raytracer>(this, ard)),
         currentState(editor) {
     setup();
   }
@@ -76,7 +76,7 @@ namespace rt {
     }
   }
 
-  void App::changeScene(Scene scene) {
+  void App::changeScene(editor::Scene scene) {
     this->scene = std::move(scene);
 
     editor->changeScene(&this->scene);
@@ -99,12 +99,11 @@ namespace rt {
   }
 
   // Quick way of exporting hardcoded scenes into JSON
-  void App::jsonExportTest() {
-
-    rt::Scene     scene = rt::Scene::CornellBox(600, 600);
-    json          json  = scene.toJson();
-    std::ofstream output("scenes/cornell.json");
-    output << std::setw(4) << json << '\n';
-    output.close();
-  }
+  // void App::jsonExportTest() {
+  //   rt::editor::Scene     scene = rt::editor::Scene::CornellBox(600, 600);
+  //   json          json  = scene.toJson();
+  //   std::ofstream output("scenes/cornell.json");
+  //   output << std::setw(4) << json << '\n';
+  //   output.close();
+  // }
 } // namespace rt

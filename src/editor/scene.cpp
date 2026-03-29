@@ -415,6 +415,10 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
   return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
 }
 
+auto Scene::getInitialCamera() const -> rt::Camera {
+  return cam.toRaytracerCamera();
+}
+
 Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
   std::ifstream jsonFile(path);
   std::cout << "Loading scene from file " << path << '\n';
