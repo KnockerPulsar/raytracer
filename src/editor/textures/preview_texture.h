@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GroupPanel.h"
-#include "IImguiDrawable.h"
+#include "editor/IImguiDrawable.h"
+
 #include <imgui.h>
 #include <optional>
 #include <raylib.h>

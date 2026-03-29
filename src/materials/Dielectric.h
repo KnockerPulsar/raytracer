@@ -1,13 +1,13 @@
 #pragma once
-#include "../Defs.h"
-#include "../data_structures/vec3.h"
-#include "../textures/SolidColor.h"
-#include "../textures/Texture.h"
-#include "../textures/TextureFactory.h"
-#include "Material.h"
-#include <memory>
 
-namespace rt {
+#include "Material.h"
+#include "common/Defs.h"
+#include "common/Hittable.h"
+#include "common/Util.h"
+#include "data_structures/vec3.h"
+#include "textures/SolidColor.h"
+
+namespace rt::raytracer {
   /**
    * @brief Contains logic to model dielectric (glass) materials.
    */
@@ -31,7 +31,7 @@ namespace rt {
      * @param scattered Scattered/output ray
      * @return true Always, independent of whether the ray reflects or refracts
      */
-    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const rt::Ray &rIn, rt::HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
       attenuation  = albedo->Value(rec.u, rec.v, rec.p);
       float refIdx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
@@ -65,11 +65,6 @@ namespace rt {
       // clang-format on
     }
 
-    virtual void OnImgui() override {
-      albedo->OnImgui();
-      ImGui::DragFloat("Refraction Index", &refractionIndex, 0.01, 1, 100);
-    }
-
   private:
     /**
      * @brief Uses Schlick's approximation to calculate reflectance.
@@ -84,13 +79,5 @@ namespace rt {
 
       return r0 + (1 - r0) * pow(1 - cos, 5);
     }
-
   };
-
-  inline void from_json(const json &j, Dielectric &d) {
-    d.refractionIndex = j["refraction_index"].get<float>();
-    d.albedo          = TextureFactory::FromJson(j["texture"]);
-  }
-
-  inline void to_json(json &j, const Dielectric &d) { j = d.toJson(); }
 } // namespace rt

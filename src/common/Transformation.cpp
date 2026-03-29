@@ -85,23 +85,6 @@ namespace
   }
 }
 
-void rt::Transformation::OnImgui() {
-  auto const translationChanged =
-      ImGui::DragFloat3(("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
-
-  auto euler = toEulerRotation();
-  auto const originalEuler = euler;
-  auto const rotationChanged =
-      ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &euler.x, 0.05f);
-
-  if (rotationChanged) {
-    rotateDelta(euler - originalEuler);
-  }
-
-  if (translationChanged || rotationChanged)
-    recomputeCaches();
-}
-
 void rt::Transformation::setRotation(vec3 eulerAngles) {
   fromEulerRotation(eulerAngles);
   recomputeCaches();

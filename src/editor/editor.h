@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../Defs.h"
-#include "../IState.h"
-#include "../Scene.h"
-#include "../materials/Material.h"
+#include "IState.h"
 #include "app.h"
 #include "camera.h"
+#include "common/Defs.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -18,10 +16,10 @@
 
 class Vector2;
 
-namespace rt {
-  class Hittable;
-  class HittableList;
+namespace rt::editor {
   class Scene;
+  class Material;
+  class Hittable;
 
   class Editor : public IState {
   public:
@@ -45,7 +43,7 @@ namespace rt {
       BuiltInMenu builtInMenu;
     };
 
-    Editor(App *const app, CliConfig const &config, Scene const &initialScene)
+    Editor(App *const app, CliConfig const &config, editor::Scene const &initialScene)
         : IState(app),
           camera(config.editorSize, config.imageSize, initialScene),
           rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)) {}
@@ -75,7 +73,7 @@ namespace rt {
     void SelectedObjectImGui();
 
     // Tests a ray against the world and returns whatever it hits (can be null)
-    Hittable *CastRay(Vector2 mousePos);
+    editor::Hittable *CastRay(Vector2 mousePos);
 
     void AddObjectImgui();
 
@@ -95,14 +93,14 @@ namespace rt {
 
     void ObjectListImgui();
 
-    static std::optional<sPtr<Material>> MaterialChanger();
+    static std::optional<sPtr<editor::Material>> MaterialChanger();
 
     void TopMenuImgui();
 
-    virtual void changeScene(Scene *scene) override;
+    virtual void changeScene(editor::Scene *scene) override;
 
   private:
-    Hittable *selectedObject = nullptr;
+    editor::Hittable *selectedObject = nullptr;
 
     enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
     inline static const char *addableObjectTypes[] = {

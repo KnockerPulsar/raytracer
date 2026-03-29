@@ -9,4 +9,4 @@ using nlohmann::json;
 template <typename T> using sPtr = std::shared_ptr<T>; // Shared pointer alias
 
 // make_shared alias
-template <typename T, typename Args> inline auto ms(Args &&args...) { return std::make_shared<T>(args); }
+template <typename T, typename Args> auto ms(Args &&args...) { return std::make_shared<T>(args); }

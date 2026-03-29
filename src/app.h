@@ -1,6 +1,6 @@
 #pragma once
-#include "AsyncRenderData.h"
-#include "Scene.h"
+#include "common/AsyncRenderData.h"
+#include "editor/scene.h"
 
 #include <string>
 
@@ -19,7 +19,7 @@ namespace rt {
 
   class App {
 
-    Scene           scene;
+    editor::Scene           scene;
     AsyncRenderData ard;
 
     sPtr<Editor>    editor;
@@ -51,7 +51,7 @@ namespace rt {
 
     static void jsonImportTest();
 
-    Scene           *getScene() { return &scene; }
+    editor::Scene           *getScene() { return &scene; }
     AsyncRenderData *getARD() { return &ard; }
     int              getNumThreads() const { return numThreads; }
 

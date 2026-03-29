@@ -1,13 +1,12 @@
 #pragma once
-#include "../Defs.h"
+#include "common/Defs.h"
 #include "../materials/Material.h"
 #include "../textures/SolidColor.h"
 #include "../textures/Texture.h"
-#include "../textures/TextureFactory.h"
-#include "../Hittable.h"
+#include "common/Hittable.h"
 #include <memory>
 
-namespace rt {
+namespace rt::raytracer {
   class Metal : public Material {
   public:
     sPtr<Texture> albedo;
@@ -19,7 +18,7 @@ namespace rt {
 
     Metal(sPtr<Texture> tex) : albedo(tex) {}
 
-    bool scatter(const Ray &r_in, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    bool scatter(const rt::Ray &r_in, rt::HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
       vec3 inNormlized = r_in.direction.Normalize();
       vec3 reflected     = inNormlized.Reflect(rec.normal);
@@ -27,25 +26,5 @@ namespace rt {
       attenuation        = albedo->Value(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }
-
-    json toJson() const override {
-      return json{
-          {"type", "metal"},
-          {"fuzz", fuzz},
-          {"texture", albedo->toJson()},
-      };
-    }
-
-    virtual void OnImgui() override {
-      albedo->OnImgui();
-      ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
-    }
   };
-
-  inline void from_json(const json &j, Metal &m) {
-    m.fuzz   = j["fuzz"];
-    m.albedo = TextureFactory::FromJson(j["texture"]);
-  }
-
-  inline void to_json(json &j, const Metal &m) { j = m.toJson(); }
 } // namespace rt

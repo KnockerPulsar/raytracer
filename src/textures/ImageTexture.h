@@ -1,5 +1,4 @@
 #pragma once
-#include "../Perlin.h"
 #include "Texture.h"
 
 #include <imgui.h>
@@ -18,7 +17,7 @@
 
 // Another option if you're not using raylib is to use stb_image
 // It's already included in raylib so I just used what raylib provided.
-namespace rt {
+namespace rt::raytracer {
   class Texture;
 
   class ImageTexture : public Texture {
@@ -80,16 +79,16 @@ namespace rt {
 
     virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
 
-    ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
-      return Texture::SamplePreview(
-          [](float u, float v) { return vec3(u, v, 0); },
-          img.width,
-          img.height,
-          availableWidth,
-          availableHeight,
-          scale
-      );
-    }
+    // ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
+    //   return Texture::SamplePreview(
+    //       [](float u, float v) { return vec3(u, v, 0); },
+    //       img.width,
+    //       img.height,
+    //       availableWidth,
+    //       availableHeight,
+    //       scale
+    //   );
+    // }
 
   private:
     int              bytesPerScanline;
@@ -98,6 +97,4 @@ namespace rt {
     bool             flipH = false, flipV = false;
     const static int bytesPerPixel = 3;
   };
-
-  inline void to_json(json &j, const ImageTexture &it) { j = it.toJson(); }
 } // namespace rt

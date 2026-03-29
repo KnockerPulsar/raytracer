@@ -1,5 +1,6 @@
 #pragma once
-#include "vec3.h"
+
+#include "data_structures/vec3.h"
 
 namespace rt {
   /**

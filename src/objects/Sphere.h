@@ -1,8 +1,8 @@
 #pragma once
-#include "../Defs.h"
-#include "../Hittable.h"
-#include "../data_structures/vec3.h"
-#include "../materials/MaterialFactory.h"
+#include "common/Defs.h"
+#include "common/Hittable.h"
+#include "data_structures/vec3.h"
+#include "materials/MaterialFactory.h"
 
 namespace rt {
   class Material;
@@ -19,20 +19,20 @@ namespace rt {
 
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 
-    json toJsonSpecific() const override;
-
-    void Rasterize(vec3 color) override;
+    // json toJsonSpecific() const override;
+    //
+    // void Rasterize(vec3 color) override;
 
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v);
   };
 
-  inline void from_json(const json &j, Sphere &s) {
-    s.transformation = j["transform"].get<Transformation>();
-    s.radius         = j["radius"].get<float>();
-    s.material       = MaterialFactory::FromJson(j["material"]);
-  }
-
-  inline void to_json(json &j, const Sphere &s) { j = s.toJson(); }
-
+  // inline void from_json(const json &j, Sphere &s) {
+  //   s.transformation = j["transform"].get<Transformation>();
+  //   s.radius         = j["radius"].get<float>();
+  //   s.material       = MaterialFactory::FromJson(j["material"]);
+  // }
+  //
+  // inline void to_json(json &j, const Sphere &s) { j = s.toJson(); }
+  //
 } // namespace rt

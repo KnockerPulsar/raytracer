@@ -1,6 +1,6 @@
 #pragma once
-#include "../Perlin.h"
-#include "../data_structures/vec3.h"
+#include "common/Perlin.h"
+#include "data_structures/vec3.h"
 #include "Texture.h"
 
 #include <imgui.h>
@@ -8,10 +8,9 @@
 
 #include <cmath>
 #include <memory>
-#include <optional>
 
-namespace rt {
-  class NoiseTexture : public rt::Texture {
+namespace rt::raytracer {
+  class NoiseTexture : public Texture {
   public:
     NoiseTexture() : noise{std::make_shared<Perlin>()} {}
     NoiseTexture(float scl, float tScl = 10, vec3 baseCol = vec3(1))
@@ -36,22 +35,11 @@ namespace rt {
     // Main issue: result depends on the given point and not the uv coords
     // uvs give 2 degrees of freedom while points have 3 degrees of freedom
     // Can't use RNG since, well, it's random
-    ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) override {
-      return Texture::SamplePreview(
-          [](float u, float v) { return v * u; }, std::nullopt, std::nullopt, availableWidth, availableHeight, scale
-      );
-    }
-
-    virtual void OnImgui() override {
-
-      ImGui::DragFloat("Noise scale", &scale, 0.1f);
-      ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f);
-      ImGui::ColorEdit3("Base color", &baseColor.x);
-
-      ImGui::Spacing();
-
-      Texture::OnImgui();
-    }
+    // ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) override {
+    //   return Texture::SamplePreview(
+    //       [](float u, float v) { return v * u; }, std::nullopt, std::nullopt, availableWidth, availableHeight, scale
+    //   );
+    // }
 
   private:
     sPtr<Perlin> const noise;

@@ -1,15 +1,14 @@
 #include "editor.h"
 
-#include "../BVHNode.h"
-#include "../Camera.h"
-#include "../Hittable.h"
-#include "../HittableBuilder.h"
-#include "../materials/DiffuseLight.h"
-#include "../objects/Box.h"
-#include "../objects/Plane.h"
-#include "../objects/Sphere.h"
-#include "Constants.h"
 #include "Utils.h"
+#include "hittable.h"
+#include "hittatable_builder.h"
+
+#include "materials/diffuse_light.h"
+
+#include "objects/box.h"
+#include "objects/sphere.h"
+#include "objects/plane.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
@@ -20,21 +19,11 @@
 #include <rlgl.h>
 
 #include <algorithm>
-#include <format>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <optional>
-#include <ranges>
-#include <sstream>
 #include <string>
-#include <vector>
 
 using namespace rt::constants;
 
-namespace rt {
+namespace rt::editor {
   bool keyCombination(unsigned int key, std::initializer_list<unsigned int> modifiers) {
     auto const modifiersDown = std::ranges::any_of(modifiers, [](auto mod) { return IsKeyDown(mod); });
     auto const keyDown       = IsKeyPressed(key);
@@ -78,50 +67,49 @@ namespace rt {
   };
 
   void Editor::Rasterize() {
-
-    BeginTextureMode(rasterRT);
-    ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
-
-    BeginMode3D(camera.toRaylibCamera3D());
-    {
-      DrawGrid(10, 10);
-
-      if (!getScene()->skysphereTexture.empty()) {
-        getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
-        getScene()->drawSkysphere();
-      }
-
-      auto rasterizables = getScene()->worldRoot->get_hittables();
-
-      for (int i = 0; i < rasterizables.size(); i++) {
-        rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
-      }
-
-      auto aabBs = getScene()->worldRoot->get_hittables() | std::ranges::views::transform([](auto const &hittable) {
-                     AABB bb;
-                     hittable->BoundingBox(0, 1, bb);
-                     return bb;
-                   });
-
-      // AABB rootAABB;
-      // getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
-      // aabBs.push_back(rootAABB);
-
-      for (auto &&bb : aabBs) {
-        DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
-      }
-
-      DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
-
-      DrawLine3D(editor::Camera::lineStart, editor::Camera::lineEnd, BLUE);
-    }
-    EndMode3D();
-
-    BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
-    camera.DrawFrameOutline();
-    EndMode2D();
-
-    EndTextureMode();
+    // BeginTextureMode(rasterRT);
+    // ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
+    //
+    // BeginMode3D(camera.toRaylibCamera3D());
+    // {
+    //   DrawGrid(10, 10);
+    //
+    //   if (!getScene()->skysphereTexture.empty()) {
+    //     getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
+    //     getScene()->drawSkysphere();
+    //   }
+    //
+    //   auto rasterizables = getScene()->worldRoot->get_hittables();
+    //
+    //   for (int i = 0; i < rasterizables.size(); i++) {
+    //     rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
+    //   }
+    //
+    //   auto aabBs = getScene()->worldRoot->get_hittables() | std::ranges::views::transform([](auto const &hittable) {
+    //                  AABB bb;
+    //                  hittable->BoundingBox(0, 1, bb);
+    //                  return bb;
+    //                });
+    //
+    //   // AABB rootAABB;
+    //   // getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
+    //   // aabBs.push_back(rootAABB);
+    //
+    //   for (auto &&bb : aabBs) {
+    //     DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
+    //   }
+    //
+    //   DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
+    //
+    //   DrawLine3D(editor::Camera::lineStart, editor::Camera::lineEnd, BLUE);
+    // }
+    // EndMode3D();
+    //
+    // BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
+    // camera.DrawFrameOutline();
+    // EndMode2D();
+    //
+    // EndTextureMode();
   }
 
   void Editor::RenderImgui() {
@@ -143,7 +131,7 @@ namespace rt {
       {
         if (ImGui::Button("Regenerate BVH", {-1, 0})) {
           // Regenerate tree
-          getScene()->worldRoot->regenerate();
+          // getScene()->worldRoot->regenerate();
         }
 
         AddObjectImgui();
@@ -190,10 +178,10 @@ namespace rt {
 
     if (ImGuiFileDialog::Instance()->Display("OpenScene")) {
 
-      if (ImGuiFileDialog::Instance()->IsOk()) {
-        std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-        app->changeScene(Scene::Load(getScene()->imageSize, filePathName));
-      }
+      // if (ImGuiFileDialog::Instance()->IsOk()) {
+      //   std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+      //   app->changeScene(Scene::Load(getScene()->imageSize, filePathName));
+      // }
 
       ImGuiFileDialog::Instance()->Close();
     }
@@ -226,11 +214,11 @@ namespace rt {
     }
 
     if (ImGui::BeginMenu(builtInMenuTitle)) {
-      for (auto &[name, loader] : Scene::builtInScenes) {
-        if (ImGui::MenuItem(name.c_str())) {
-          app->changeScene(loader(getScene()->imageSize.x, getScene()->imageSize.y));
-        }
-      }
+      // for (auto &[name, loader] : Scene::builtInScenes) {
+      //   if (ImGui::MenuItem(name.c_str())) {
+      //     app->changeScene(loader(getScene()->imageSize.x, getScene()->imageSize.y));
+      //   }
+      // }
 
       ImGui::EndMenu();
     }
@@ -242,9 +230,9 @@ namespace rt {
 
       SelectedObjectGizmo();
 
-      const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
-      ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
-      selectedObject->OnImgui();
+      // const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
+      // ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
+      // selectedObject->OnImgui();
 
       ImGui::End();
     }
@@ -261,12 +249,12 @@ namespace rt {
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    auto const rotation = selectedObject->transformation.getRotationEuler();
+    auto const rotation = selectedObject->getRotationEuler();
 
     auto model = [this, rotation] {
       float                 scaleTemp[] = {1.0, 1.0, 1.0};
       std::array<float, 16> model;
-      auto const            translation = selectedObject->transformation.getTranslation();
+      auto const            translation = selectedObject->getTranslation();
       ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
       return model;
     }();
@@ -286,8 +274,8 @@ namespace rt {
 
       auto rotationDelta = newRotation - rotation;
 
-      selectedObject->transformation.setTranslation(translation);
-      selectedObject->transformation.rotateDelta(rotationDelta);
+      selectedObject->setTranslation(translation);
+      selectedObject->rotateDelta(rotationDelta);
     }
   }
 
@@ -359,7 +347,7 @@ namespace rt {
     }
   }
 
-  Hittable *Editor::CastRay(Vector2 mousePos) {
+  editor::Hittable *Editor::CastRay(Vector2 mousePos) {
 
     ::Ray raylibRay = GetMouseRay(mousePos, camera.toRaylibCamera3D());
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
@@ -368,7 +356,7 @@ namespace rt {
     editor::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
-    getScene()->worldRoot->hit(r, 0, rt::constants::infinity, rec);
+    // getScene()->worldRoot->hit(r, 0, rt::constants::infinity, rec);
 
     return rec.closestHit;
   }
@@ -401,26 +389,26 @@ namespace rt {
       sPtr<Hittable> added = [this] -> std::shared_ptr<Hittable> {
         const sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
         // TODO: This assumes that the root changes when we add new children, which might not be the case.
-        const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot.get());
+        // const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot.get());
 
         switch (selectedAddableObject) {
-        case Box:
-          return HittableBuilder<rt::Box>(1).withMaterial(defaultMaterial).withName("Added Box##" + rootID);
-
-        case Sphere:
-          return HittableBuilder<rt::Sphere>(1, defaultMaterial)
-              .withMaterial(defaultMaterial)
-              .withName("Added Sphere##" + rootID);
-
-        case Plane:
-          return HittableBuilder<rt::Plane>(1, 1).withMaterial(defaultMaterial).withName("Added Plane##" + rootID);
+        // case Box:
+        //   return HittableBuilder<editor::Box>(1).withMaterial(defaultMaterial).withName("Added Box##" + rootID);
+        //
+        // case Sphere:
+        //   return HittableBuilder<editor::Sphere>(1, defaultMaterial)
+        //       .withMaterial(defaultMaterial)
+        //       .withName("Added Sphere##" + rootID);
+        //
+        // case Plane:
+        //   return HittableBuilder<editor::Plane>(1, 1).withMaterial(defaultMaterial).withName("Added Plane##" + rootID);
 
         default:
           return nullptr;
         }
       }();
 
-      /*auto *const newRoot =*/ getScene()->worldRoot->add(added);
+      // /*auto *const newRoot =*/ getScene()->worldRoot->add(added);
 
       // if (newRoot == nullptr) {
       //   std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
@@ -437,9 +425,7 @@ namespace rt {
     auto *scene = getScene();
     auto  rtCam = camera.getRtCamera();
 
-    scene->cam = camera.toSceneCamera();
-
-    scene->imageSize  = camera.imageSize();
+    scene->setCamera(camera);
 
     *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
   }
@@ -451,10 +437,10 @@ namespace rt {
   }
 
   void Editor::RaytraceSettingsImgui() {
-    getScene()->settings.OnImgui();
+    // getScene()->settings.OnImgui();
 
     ImGui::Begin("Other settings");
-    ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
+    // ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
     ImGui::Checkbox("Save on render?", &app->saveOnRender);
 
     int numThreads = app->getNumThreads();
@@ -466,8 +452,7 @@ namespace rt {
   }
 
   void Editor::ObjectListImgui() {
-    auto objects = getScene()->worldRoot->get_hittables();
-    for (auto &&o : objects) {
+    for (auto &&o : world) {
       auto const selected = selectedObject == o.get();
 
       if(selected) {
@@ -491,17 +476,17 @@ namespace rt {
 
       // Remove current object from world and rebuild
       if (ImGui::Button(("x##" + EditorUtils::GetIDFromPointer(o.get())).c_str())) {
-        getScene()->worldRoot->remove(o);
+        // getScene()->worldRoot->remove(o);
       }
 
       ImGui::Separator();
     }
   }
 
-  std::optional<sPtr<Material>> Editor::MaterialChanger() {
+  std::optional<sPtr<editor::Material>> Editor::MaterialChanger() {
 
     static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
-    static MaterialTypes selectedMaterialType = Emissive;
+    static MaterialTypes selectedMaterialType = MaterialTypes::Emissive;
 
     ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(materialTypes)).c_str(), (int *)&selectedMaterialType,
                  materialTypes, MaterialTypes::MaterialTypesCount);

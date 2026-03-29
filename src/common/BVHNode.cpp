@@ -108,71 +108,71 @@ bool rt::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
   return true;
 }
 
-std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
-  std::unordered_set<sPtr<Hittable>> children;
-
-  // Otherwise, its an itermediate BVH node, get its left and right children
-  if (left != nullptr) {
-
-    // May god forgive me for I'm about to sin
-    auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
-
-    // If the cast failed and the the left child is not null
-    // Then the child is not an intermediate BVHNode, but a leaf Hittable.
-    // Add it to the list.
-
-    if (leftBVH == nullptr) {
-      children.insert(left);
-    } else {
-      auto leftChildren = left->getChildrenAsList();
-      children.insert(leftChildren.begin(), leftChildren.end());
-      // children.insert(left); // Add the intermediate node itself
-    }
-  }
-
-  if (right != nullptr) {
-    auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
-
-    // Same but for the right branch
-    if (rightBVH == nullptr && right != nullptr)
-      children.insert(right);
-    else {
-      auto rightChildren = right->getChildrenAsList();
-      children.insert(rightChildren.begin(), rightChildren.end());
-      // children.insert(right); // Add the intermediate node itself
-    }
-  }
-
-  return std::vector<sPtr<rt::Hittable>>(children.begin(), children.end());
-}
-
-std::vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
-  std::vector<sPtr<Hittable>> children = getChildrenAsList();
-  std::vector<AABB> childrenAABBs;
-
-  for (auto &&e : children) {
-    AABB output;
-    if (e->BoundingBox(0, 1, output))
-      childrenAABBs.push_back(output);
-  }
-
-  return childrenAABBs;
-}
-
-rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
-  std::vector<sPtr<Hittable>> children = getChildrenAsList();
-
-  if (newChild != nullptr)
-    children.push_back(sPtr<Hittable>(newChild));
-
-  return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
-}
-
-rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
-  auto children = getChildrenAsList();
-
-  auto const [eraseStart, _] = std::ranges::remove(children, childToRemove);
-  children.erase(eraseStart);
-
-  return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
-}
+// std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
+//   std::unordered_set<sPtr<Hittable>> children;
+//
+//   // Otherwise, its an itermediate BVH node, get its left and right children
+//   if (left != nullptr) {
+//
+//     // May god forgive me for I'm about to sin
+//     auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
+//
+//     // If the cast failed and the the left child is not null
+//     // Then the child is not an intermediate BVHNode, but a leaf Hittable.
+//     // Add it to the list.
+//
+//     if (leftBVH == nullptr) {
+//       children.insert(left);
+//     } else {
+//       auto leftChildren = left->getChildrenAsList();
+//       children.insert(leftChildren.begin(), leftChildren.end());
+//       // children.insert(left); // Add the intermediate node itself
+//     }
+//   }
+//
+//   if (right != nullptr) {
+//     auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
+//
+//     // Same but for the right branch
+//     if (rightBVH == nullptr && right != nullptr)
+//       children.insert(right);
+//     else {
+//       auto rightChildren = right->getChildrenAsList();
+//       children.insert(rightChildren.begin(), rightChildren.end());
+//       // children.insert(right); // Add the intermediate node itself
+//     }
+//   }
+//
+//   return std::vector<sPtr<rt::Hittable>>(children.begin(), children.end());
+// }
+//
+// std::vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
+//   std::vector<sPtr<Hittable>> children = getChildrenAsList();
+//   std::vector<AABB> childrenAABBs;
+//
+//   for (auto &&e : children) {
+//     AABB output;
+//     if (e->BoundingBox(0, 1, output))
+//       childrenAABBs.push_back(output);
+//   }
+//
+//   return childrenAABBs;
+// }
+//
+// rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
+//   std::vector<sPtr<Hittable>> children = getChildrenAsList();
+//
+//   if (newChild != nullptr)
+//     children.push_back(sPtr<Hittable>(newChild));
+//
+//   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
+// }
+//
+// rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
+//   auto children = getChildrenAsList();
+//
+//   auto const [eraseStart, _] = std::ranges::remove(children, childToRemove);
+//   children.erase(eraseStart);
+//
+//   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
+// }

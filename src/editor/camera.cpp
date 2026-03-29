@@ -1,7 +1,8 @@
 #include "camera.h"
-#include "Constants.h"
-#include "Scene.h"
-#include "Util.h"
+#include "scene.h"
+
+#include "common/Constants.h"
+#include "common/Util.h"
 
 #include <glm/gtc/matrix_transform.hpp>  // for perspective
 #include <glm/gtx/fast_trigonometry.hpp> // for wrapAngle
@@ -62,10 +63,11 @@ void rt::editor::Camera::RenderImgui() {
   ImGui::End();
 }
 
-rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene const &initialScene)
-    : editorSize(editorSize), _imageSize(imageSize), rtCamera(initialScene.cam), controlType(ControlType::flyCam) {
-  updateFromRtCamera(rtCamera);
-}
+// rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene const &initialScene)
+//     : editorSize(editorSize), _imageSize(imageSize), rtCamera(initialScene.getInitialCamera()),
+//       controlType(ControlType::flyCam) {
+//   updateFromRtCamera(rtCamera);
+// }
 
 void rt::editor::Camera::updateFromRtCamera(rt::Camera const &sceneCamera) {
   rtCamera = sceneCamera;

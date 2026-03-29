@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Hittable.h"
+#include "common/Hittable.h"
 
-namespace rt {
-  class Mesh: public Hittable {
+namespace rt::raytracer {
+  class Mesh: public rt::Hittable {
     public:
       Mesh(std::filesystem::path path);
       ~Mesh();
 
-      bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+      bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
       bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-      void Rasterize(vec3 color) override;
 
     private:
       struct Triangle {

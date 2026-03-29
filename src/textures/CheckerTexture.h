@@ -1,5 +1,5 @@
 #pragma once
-#include "../data_structures/vec3.h"
+#include "data_structures/vec3.h"
 #include "SolidColor.h"
 #include "Texture.h"
 
@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace rt {
+namespace rt::raytracer {
   class CheckerTexture : public Texture {
   private:
     std::shared_ptr<Texture> const even;
@@ -36,15 +36,6 @@ namespace rt {
         return odd->Value(u, v, p) * multiplier;
 
       return even->Value(u, v, p) * multiplier;
-    }
-
-    virtual void OnImgui() override {
-      even->OnImgui();
-      odd->OnImgui();
-
-      ImGui::DragFloat("Checker scale", &scale);
-
-      ImGui::Spacing();
     }
   };
 

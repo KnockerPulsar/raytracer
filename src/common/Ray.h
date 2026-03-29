@@ -6,11 +6,6 @@
 // clang-format off
 
 namespace rt {
-
-  class Hittable;
-  class Camera;
-  class HittableList;
-  class Pixel;
   class Scene;
 
   class Ray {

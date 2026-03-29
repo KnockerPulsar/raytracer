@@ -6,8 +6,6 @@
 #include <raylib.h>
 #include <raymath.h>
 
-#include <cmath>
-
 namespace rt {
 
   class Camera {

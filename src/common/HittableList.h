@@ -11,7 +11,7 @@
 using ::std::make_shared;
 using ::std::shared_ptr, std::optional, std::make_optional;
 
-namespace rt {
+namespace rt::raytracer {
   class HittableList : public AccelerationStructure {
   public:
     HittableList(sPtr<Hittable> object) : objects{{object}} {}

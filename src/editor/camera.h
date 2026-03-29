@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Camera.h"
+#include "common/Camera.h"
 
 namespace rt::editor {
+  class Scene;
   class Camera {
   public:
     enum class ControlType { flyCam, lookAtPoint, controlTypesCount };
 
     inline static vec3 lineStart, lineEnd;
 
-    Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene const &initialScene);
+    Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov, float aspectRatio, float aperature, float focusDist); // TODO
 
     void updateFromRtCamera(rt::Camera const &sceneCamera);
 

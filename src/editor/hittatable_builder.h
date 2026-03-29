@@ -1,20 +1,18 @@
-#include "Defs.h"
-#include "Scene.h"
+#include "common/Hittable.h"
+
+#include "materials/material.h"
+
 #include <memory>
 #include <string>
 
-namespace rt {
-  template <typename T = Hittable> class HittableBuilder {
+namespace rt::editor {
+  template <typename T = rt::Hittable> class HittableBuilder {
     std::shared_ptr<T> hittable;
 
     HittableBuilder(T *newHittable) : hittable(newHittable) {}
 
   public:
     template <typename... Args> HittableBuilder(Args... args) : hittable(std::make_shared<T>(args...)) {}
-
-    template <typename... Args> static HittableBuilder CreateHittable(Args... args) {
-      return HittableBuilder(args...);
-    }
 
     HittableBuilder &withName(std::string name) {
       hittable->name = name;
@@ -41,7 +39,7 @@ namespace rt {
       return *this;
     }
 
-    HittableBuilder &withMaterial(sPtr<Material> mat) {
+    HittableBuilder &withMaterial(sPtr<rt::editor::Material> mat) {
       hittable->changeMaterial(mat);
       return *this;
     }

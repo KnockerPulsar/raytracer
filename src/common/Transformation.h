@@ -1,13 +1,12 @@
 #pragma once
 
 #include "AABB.h"
-#include "IImguiDrawable.h"
 #include "data_structures/vec3.h"
 #include <raylib.h>
 #include <raymath.h>
 
 namespace rt {
-  class Transformation : public IImguiDrawable {
+  class Transformation {
   private:
     vec3 translate;
     Quaternion rotate;
@@ -39,7 +38,6 @@ namespace rt {
     glm::vec4 getRotationAxisAngle() const;
     vec3 getTranslation() const;
 
-    virtual void OnImgui() override;
     void setRotation(vec3 eulerAngles);
     void setTranslation(vec3 tranlsation);
     void rotateDelta(vec3 eulerDelta);

@@ -1,12 +1,12 @@
 #pragma once
-#include "../Defs.h"
-#include "../Hittable.h"
-#include "../textures/TextureFactory.h"
+#include "common/Defs.h"
+#include "common/Hittable.h"
 #include "Material.h"
+#include "textures/SolidColor.h"
 
 using nlohmann::json;
 
-namespace rt {
+namespace rt::raytracer {
 
   /**
    * @brief Contains logic to model lambertian/diffuse materials
@@ -33,7 +33,7 @@ namespace rt {
      * @return true
      * @return false
      */
-    virtual bool scatter(const Ray &rIn, HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
+    virtual bool scatter(const rt::Ray &rIn, rt::HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
       vec3 scatterDir = rec.normal + vec3::RandomUnitVec();
 
@@ -44,15 +44,5 @@ namespace rt {
       attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;
     }
-
-    json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }
-
-    virtual void OnImgui() override {
-      albedo->OnImgui();
-    }
   };
-
-  inline void from_json(const json &j, Lambertian &l) { l.albedo = TextureFactory::FromJson(j["texture"]); }
-
-  inline void to_json(json &j, const Lambertian &l) { j = l.toJson(); }
 } // namespace rt

@@ -1,5 +1,5 @@
 #pragma once
-#include "Defs.h"
+#include "common/Defs.h"
 #include "app.h"
 
 namespace rt {
@@ -17,8 +17,8 @@ namespace rt {
       return nextState;
     };
 
-    virtual void changeScene(Scene *scene) {}
-    Scene       *getScene() const { return app->getScene(); }
+    virtual void   changeScene(editor::Scene *scene) {}
+    editor::Scene *getScene() const { return app->getScene(); }
 
   protected:
     sPtr<IState> nextState;

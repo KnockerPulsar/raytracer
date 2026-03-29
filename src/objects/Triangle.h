@@ -1,10 +1,10 @@
 #pragma once
-#include "../Hittable.h"
+#include "common/Hittable.h"
 #include <cmath>
 #include <raylib.h>
 #include <rlgl.h>
 #include <vector>
-namespace rt {
+namespace rt::raytracer {
   struct vert {
     vec3 p;
     vec3 uvw; // should be vec2
@@ -15,21 +15,21 @@ namespace rt {
   };
 
   // Don't really need to rasterize a triangle by iteself YET
-  class Triangle : public Hittable {
+  class Triangle : public rt::Hittable {
   public:
     vert v0, v1, v2;
     vec3 normal;
 
-    Triangle() : Hittable("Triangle") {}
+    Triangle() /*: Hittable("Triangle")*/ {}
 
-    Triangle(vert _v0, vert _v1, vert _v2) : Hittable("Triangle"), v0(_v0), v1(_v1), v2(_v2) {
+    Triangle(vert _v0, vert _v1, vert _v2) : /*Hittable("Triangle"),*/ v0(_v0), v1(_v1), v2(_v2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
       normal = vec3::CrsProd(v01, v02).Normalize();
     }
 
-    Triangle(vec3 p0, vec3 p1, vec3 p2) : Hittable("Triangle"), v0(p0), v1(p1), v2(p2) {
+    Triangle(vec3 p0, vec3 p1, vec3 p2) : /*Hittable("Triangle"),*/ v0(p0), v1(p1), v2(p2) {
       vec3 v01 = (v1.p - v0.p).Normalize();
       vec3 v02 = (v2.p - v0.p).Normalize();
 
@@ -43,7 +43,7 @@ namespace rt {
     }
 
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
-    virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override {
+    virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override {
 
       vec3  v0v1 = v1.p - v0.p;
       vec3  v0v2 = v2.p - v0.p;
@@ -94,16 +94,6 @@ namespace rt {
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
       outputBox = transformation.regenAABB(AABB(std::vector<vec3>{{v0.p, v1.p, v2.p}}));
       return true;
-    }
-
-    virtual void Rasterize(vec3 color) override {
-
-      DrawTriangle3D(v0.p, v1.p, v2.p, color.toRaylibColor(255));
-      auto  normalStart = (v0.p + v1.p + v2.p) / 3;
-      Color inv         = color.toRaylibColor(255);
-      inv =
-          Color{(unsigned char)(255 - inv.r), (unsigned char)(255 - inv.g), (unsigned char)(255 - inv.b), uint8_t(255)};
-      DrawLine3D(normalStart, normalStart + normal, inv);
     }
   };
 } // namespace rt

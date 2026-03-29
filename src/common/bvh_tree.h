@@ -3,7 +3,7 @@
 #include "BVHNode.h"
 #include <memory>
 
-namespace rt {
+namespace rt::raytracer {
   class BVHTree : public AccelerationStructure {
   public:
     BVHTree(std::vector<sPtr<Hittable>> &&list, float t0, float t1);

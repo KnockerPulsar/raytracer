@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Defs.h"
+#include "common/Defs.h"
 
 #include <glm/glm.hpp>
 #include <nlohmann-json/json.hpp>
