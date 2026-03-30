@@ -2,7 +2,29 @@
 
 #include "editor/Utils.h"
 
-#include "imgui.h"
+#include <imgui.h>
+#include <raymath.h>
+
+void rt::editor::Transformation::setTranslation(vec3 translation) { translate = translation; }
+vec3 rt::editor::Transformation::getTranslation() const { return translate; }
+
+vec3 rt::editor::Transformation::getRotationEuler() const { return toEulerRotation(); }
+void rt::editor::Transformation::rotateDelta(vec3 euler) {
+  auto const xQuat = QuaternionFromEuler(glm::radians(euler.x), 0, 0);
+  auto const yQuat = QuaternionFromEuler(0, glm::radians(euler.y), 0);
+  auto const zQuat = QuaternionFromEuler(0, 0, glm::radians(euler.z));
+
+  auto const delta = QuaternionMultiply(QuaternionMultiply(xQuat, yQuat), zQuat);
+
+  rotate = QuaternionMultiply(delta, rotate);
+}
+
+vec3 rt::editor::Transformation::toEulerRotation() const {
+  auto const rollPitchYawRadians = QuaternionToEuler(rotate);
+  return vec3(glm::degrees(rollPitchYawRadians.x), glm::degrees(rollPitchYawRadians.y),
+              glm::degrees(rollPitchYawRadians.z));
+}
+
 
 void rt::editor::Transformation::OnImgui() {
   auto const translationChanged =
@@ -16,7 +38,4 @@ void rt::editor::Transformation::OnImgui() {
   if (rotationChanged) {
     rotateDelta(euler - originalEuler);
   }
-
-  if (translationChanged || rotationChanged)
-    recomputeCaches();
 }

@@ -18,8 +18,8 @@ namespace rt::raytracer {
 
       static auto load_triangles(Model model) -> std::vector<Triangle>;
       // TODO this is duplicated from `rt::Triangle`, both should be using the same code
-      static bool triangle_hit(Triangle const &tri, Mesh const *hittable, const Ray &r, float t_min, float t_max,
-                               HitRecord &rec);
+      static bool triangle_hit(Triangle const &tri, Mesh const *hittable, const rt::Ray &r, float t_min, float t_max,
+                               rt::HitRecord &rec);
 
       Model const model; // Useful for editor visualizations
       // TODO probably can be better optimized?

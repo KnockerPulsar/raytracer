@@ -6,13 +6,13 @@
 #include <optional>
 #include <raylib.h>
 
-namespace rt {
+namespace rt::editor {
   class Texture;
   class PreviewTexture: public IImguiDrawable {
   public:
     ~PreviewTexture();
 
-    void possiblyGeneratePreview(rt::Texture &tex);
+    void possiblyGeneratePreview(Texture &tex);
     void OnImgui() override;
 
     auto const inline static minDimensionSize = 32;

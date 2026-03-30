@@ -5,7 +5,6 @@
 
 #include "common/Constants.h"
 #include "common/Defs.h"
-#include "common/Ray.h"
 #include "data_structures/JobQueue.h"
 
 #include "raytracer/raytracer.h"
@@ -13,7 +12,6 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-#include <fstream>
 #include <memory>
 #include <string>
 

@@ -1,7 +1,7 @@
 #include "vec3.h"
-#include "../Defs.h"
-#include "../Util.h"
-#include <cstdint>
+#include "common/Constants.h"
+#include "common/Util.h"
+
 #include <sys/types.h>
 
 vec3::vec3() {}

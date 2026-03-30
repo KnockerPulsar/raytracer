@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
-#include <unordered_set>
 
 namespace {
   bool BoxCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b, int axis) {
@@ -38,10 +37,10 @@ namespace {
   bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
 } // namespace
 
-rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
-rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0, float t1)
-    : Hittable("BVH Node") {
+rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
+                                float t1) {
 
   if (srcObjects.empty()) {
     left  = nullptr;
@@ -94,16 +93,16 @@ rt::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start
   box = AABB::SurroundingBox(boxLeft, boxRight);
 }
 
-bool rt::BVHNode::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
   if (!box.Hit(r, t_min, t_max))
     return false;
 
-  bool leftHit  = left->HitTransformed(r, t_min, t_max, rec);
-  bool rightHit = right->HitTransformed(r, t_min, leftHit ? rec.t : t_max, rec);
+  bool leftHit  = left->Hit(r, t_min, t_max, rec);
+  bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);
 
   return leftHit || rightHit;
 }
-bool rt::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
+bool rt::raytracer::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
   outputBox = box;
   return true;
 }

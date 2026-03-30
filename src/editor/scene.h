@@ -52,12 +52,12 @@ public:
   auto setCamera(Camera const &cam) -> void;
     // scene->cam = camera.toSceneCamera();
     // scene->imageSize  = camera.imageSize();
-  auto getWorld() const -> std::vector<std::shared_ptr<Hittable>>&;
+  auto getWorld() -> std::vector<std::shared_ptr<Hittable>>&;
 
   void addSkysphere(std::string ssTex);
   void drawSkysphere();
 
-  nlohmann::json toJson() const;
+  // nlohmann::json toJson() const;
 
   // Initialized in Scene.cpp to a list of scene names and loading functions
   static std::vector<std::pair<std::string, std::function<Scene(int, int)>>> builtInScenes;

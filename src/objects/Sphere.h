@@ -2,9 +2,8 @@
 #include "common/Defs.h"
 #include "common/Hittable.h"
 #include "data_structures/vec3.h"
-#include "materials/MaterialFactory.h"
 
-namespace rt {
+namespace rt::raytracer {
   class Material;
 
   class Sphere : public Hittable {
@@ -15,7 +14,7 @@ namespace rt {
     Sphere(float r);
     Sphere(float r, sPtr<Material> m);
 
-    bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+    bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
 
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 

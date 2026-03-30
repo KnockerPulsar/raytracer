@@ -1,11 +1,8 @@
 #include "mesh.h"
 
 
-namespace rt {
-  Mesh::Mesh(std::filesystem::path path)
-      : Hittable{std::format("Mesh: {}", path.string())}, model{LoadModel(path.c_str())},
-        triangles{load_triangles(model)}
-  {}
+namespace rt::raytracer {
+  Mesh::Mesh(std::filesystem::path path) : model{LoadModel(path.c_str())}, triangles{load_triangles(model)} {}
 
   Mesh::~Mesh() { UnloadModel(model); }
 
@@ -56,7 +53,7 @@ namespace rt {
     return triangles;
   }
 
-  bool Mesh::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+  bool Mesh::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
     // TODO: Looks like BVHNode (and maybe HittableList) depend on leaf nodes
     // checking their own bounding boxes.They could probably be moved to be
     // stored in `Hittable`, each primitive can then initialize it accordingly.
@@ -101,13 +98,13 @@ namespace rt {
     return true;
   }
 
-  void Mesh::Rasterize(vec3 color) {
-    // Before calling this method, we push the object's transform onto raylib's
-    // internal transformation stack.
-    DrawModel(model, Vector3Zero(), 1.0f, color.toRaylibColor(255));
-  }
+  // void Mesh::Rasterize(vec3 color) {
+  //   // Before calling this method, we push the object's transform onto raylib's
+  //   // internal transformation stack.
+  //   DrawModel(model, Vector3Zero(), 1.0f, color.toRaylibColor(255));
+  // }
 
-  bool Mesh::triangle_hit(Triangle const &tri, Mesh const* hittable, const Ray &r, float t_min, float t_max, HitRecord &rec) {
+  bool Mesh::triangle_hit(Triangle const &tri, Mesh const* hittable, const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) {
     auto const [v0, v1, v2, normal] = tri;
 
     vec3  v0v1 = v1 - v0;

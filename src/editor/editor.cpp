@@ -4,6 +4,9 @@
 #include "hittable.h"
 #include "hittatable_builder.h"
 
+#include "common/Constants.h"
+#include "common/Hittable.h"
+
 #include "materials/diffuse_light.h"
 #include "materials/lambertian.h"
 #include "materials/dielectric.h"

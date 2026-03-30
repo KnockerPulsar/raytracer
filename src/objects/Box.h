@@ -15,6 +15,8 @@ namespace rt::raytracer {
     vec3         boxMin, boxMax;
     HittableList sides;
 
+    static auto createBox(vec3 p0, vec3 p1) -> rt::raytracer::HittableList;
+
     Box() : Box(1.0f) {}
     Box(const vec3 &p0, const vec3 &p1);
     Box(float edgeLength);

@@ -2,10 +2,13 @@
 
 #include "editor/IImguiDrawable.h"
 
-#include <cstdint>
+namespace rt {
+  class Ray;
+  class HitRecord;
 
-namespace rt::editor {
-  class Material: public IImguiDrawable {
-  public:
-  };
-}
+  namespace editor {
+    class Material : public IImguiDrawable {
+      // TODO ImGui and serailization
+    };
+  } // namespace editor
+} // namespace rt

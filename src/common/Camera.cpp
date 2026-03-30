@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-#include "rt.h"
 #include "Util.h"
 
 #include <glm/ext/matrix_clip_space.hpp>

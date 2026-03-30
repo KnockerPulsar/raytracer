@@ -30,11 +30,10 @@ set(SOURCES
   src/common/Camera.cpp
   src/common/HittableList.cpp
   src/common/Ray.cpp
-  src/AsyncRenderData.cpp
-  src/GroupPanel.cpp
-  src/Transformation.cpp
-  src/BVHNode.cpp
-  src/bvh_tree.cpp
+  src/common/AsyncRenderData.cpp
+  src/common/Transformation.cpp
+  src/common/BVHNode.cpp
+  src/common/bvh_tree.cpp
 
   src/data_structures/vec3.cpp
 
@@ -44,10 +43,14 @@ set(SOURCES
   src/objects/mesh.cpp
 
   src/editor/editor.cpp
-  src/raytracer.cpp
+  src/raytracer/raytracer.cpp
+
   src/editor/Utils.cpp
-  src/editor/PreviewTexture.cpp
   src/editor/camera.cpp
+  src/editor/transformation.cpp
+  src/editor/GroupPanel.cpp
+  src/editor/textures/preview_texture.cpp
+  src/editor/scene.cpp
 
   vendor/argumentum/src/argparser.cpp
 

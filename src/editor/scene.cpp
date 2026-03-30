@@ -568,4 +568,6 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
 Scene::Scene(std::vector<std::shared_ptr<Hittable>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor,
              RaytraceSettings settings)
     : world(std::move(world)), cam(cam), backgroundColor(backgroundColor), imageSize(imageSize), settings(settings) {}
+
+auto Scene::getWorld() -> std::vector<std::shared_ptr<Hittable>> & { return world; }
 } // namespace rt::editor

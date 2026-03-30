@@ -1,20 +1,19 @@
 #include "Sphere.h"
-#include "../AABB.h"
-#include "../Ray.h"
-#include "../materials/Material.h"
+
+#include "common/Ray.h"
+#include "materials/Material.h"
+
 #include <cmath>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
 
-namespace rt {
-  Sphere::Sphere() : Hittable("Sphere") {}
+namespace rt::raytracer {
+  Sphere::Sphere() {}
 
-  Sphere::Sphere(float r) : Hittable("Sphere"), radius(r) {}
+  Sphere::Sphere(float r) : radius(r) {}
 
-  Sphere::Sphere(float r, std::shared_ptr<Material> m) : Sphere(r) { material = m; }
-
-  bool Sphere::Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const {
+  bool Sphere::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
 
     // Spheres are centered at zero by default
     // We transform the ray hitting the object so no need to move it.
@@ -54,13 +53,6 @@ namespace rt {
     outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
 
     return true;
-  }
-
-  json Sphere::toJsonSpecific() const { return json{{"type", "sphere"}, {"radius", radius}}; }
-
-  void Sphere::Rasterize(vec3 color) {
-    // RasterizeTransformed takes care of the transformation and rotation
-    DrawSphere(vec3::Zero(), radius, color.toRaylibColor(255));
   }
 
   void Sphere::GetSphereUV(const vec3 &p, float &u, float &v) {

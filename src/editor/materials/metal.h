@@ -5,13 +5,12 @@
 #include "data_structures/vec3.h"
 
 namespace rt::editor {
+  class Texture;
+
   class Metal : public Material {
   public:
     Metal(vec3 albedo, float fuzz);
-    virtual void OnImgui() override {
-      // albedo->OnImgui();
-      // ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
-    }
+    virtual void OnImgui() override;
 
     // json toJson() const override {
     //   return json{
@@ -20,6 +19,9 @@ namespace rt::editor {
     //       {"texture", albedo->toJson()},
     //   };
     // }
+  private:
+    std::shared_ptr<Texture> albedo;
+    float                    fuzz;
   };
 
   // inline void from_json(const json &j, Metal &m) {

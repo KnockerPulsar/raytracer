@@ -180,7 +180,7 @@ vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, const raytracer::Scene
     return vec3::Zero();
   }
 
-  rt::raytracer::HitRecord rec;
+  rt::HitRecord rec;
   if (!scene->worldRoot->hit(r, 0.001f, rt::constants::infinity, rec)) {
     // if (scene->skysphere)
     //   scene->skysphere->Hit(r, -rt::constants::infinity, rt::constants::infinity, rec);

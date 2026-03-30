@@ -2,7 +2,6 @@
 #include "AABB.h"
 #include "Defs.h"
 #include "Hittable.h"
-#include "HittableList.h"
 #include "Ray.h"
 
 #include <cassert>
