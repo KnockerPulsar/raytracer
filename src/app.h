@@ -19,7 +19,7 @@ namespace rt {
 
   class App {
 
-    editor::Scene           scene;
+    std::unique_ptr<editor::Scene> scene;
     AsyncRenderData ard;
 
     sPtr<editor::Editor>    editor;
@@ -41,7 +41,7 @@ namespace rt {
     void run();
     void onFrameRender() const;
     void checkInput();
-    void changeScene(editor::Scene scene);
+    void changeScene(std::unique_ptr<editor::Scene> scene);
     void quit();
 
     ~App();
@@ -51,7 +51,7 @@ namespace rt {
 
     static void jsonImportTest();
 
-    editor::Scene           *getScene() { return &scene; }
+    editor::Scene   *getScene() { return scene.get(); }
     AsyncRenderData *getARD() { return &ard; }
     int              getNumThreads() const { return numThreads; }
 

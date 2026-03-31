@@ -1,11 +1,11 @@
 #pragma once
 
-#include "editor/IRasterizable.h"
+#include "object.h"
 
 #include "data_structures/vec3.h"
 
 namespace rt::editor {
-  class Triangle : public IRasterizable {
+  class Triangle : public Object {
     virtual void Rasterize(vec3 color) override {
 
       // DrawTriangle3D(v0.p, v1.p, v2.p, color.toRaylibColor(255));

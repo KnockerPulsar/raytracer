@@ -8,7 +8,7 @@
 #include <memory>
 
 namespace rt::editor {
-  class Hittable {
+  class Hittable: public IImguiDrawable {
   public:
     void setTranslation(vec3 translation);
     auto getTranslation() const -> vec3;
@@ -22,19 +22,8 @@ namespace rt::editor {
 
     auto setMaterial(std::shared_ptr<Material> newMat) -> void;
 
-    // virtual void OnImgui() override {
-    //   transformation.OnImgui();
-    //   ImGui::Spacing();
-    //   if (material) { // TODO should I enforce all hittables to have a material?
-    //     if (auto const newMat = rt::editor::Editor::MaterialChanger()) {
-    //       material = newMat.value();
-    //     }
-    //
-    //     ImGui::Spacing();
-    //
-    //     material->OnImgui();
-    //   }
-    // }
+    virtual void OnImgui() override;
+
   private:
     template <typename T> friend class HittableBuilder;
     Transformation transformation;

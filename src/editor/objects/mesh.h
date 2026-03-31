@@ -1,12 +1,13 @@
 #pragma once
 
-#include "editor/IRasterizable.h"
-#include "editor/hittable.h"
+#include "object.h""
 
 namespace rt::editor {
-  class Mesh : public IRasterizable, public Hittable {
+  class Mesh : public Object {
   public:
       Mesh(std::filesystem::path path);
       void Rasterize(vec3 color) override;
+  private:
+      Model const model;
   };
 }

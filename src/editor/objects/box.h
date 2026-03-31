@@ -1,15 +1,17 @@
 #pragma once
 
-#include "editor/IRasterizable.h"
-#include "editor/hittable.h"
+#include "object.h"
 
 namespace rt::editor {
-  class Box : public IRasterizable, public Hittable {
+  class Box : public Object {
   public:
     Box(float edgeLength);
     Box(const vec3& extents);
+
     virtual void Rasterize(vec3 color) override;
     // virtual json toJsonSpecific() const override;
+  private:
+    vec3 extents;
   };
 
   // // This is how you use `json.get<Box>()`

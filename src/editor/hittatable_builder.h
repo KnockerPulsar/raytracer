@@ -1,13 +1,13 @@
-#include "hittable.h"
+#include "objects/object.h"
 
 #include "materials/material.h"
 
 #include <memory>
 #include <string>
 
+// TODO rename HittableBuilder
 namespace rt::editor {
-
-  template <typename T = rt::editor::Hittable> class HittableBuilder {
+  template <typename T = rt::editor::Object> class HittableBuilder {
     std::shared_ptr<T> hittable;
 
     HittableBuilder(T *newHittable) : hittable(newHittable) {}
@@ -40,6 +40,6 @@ namespace rt::editor {
       return *this;
     }
 
-    operator std::shared_ptr<Hittable>() const { return hittable; }
+    operator std::shared_ptr<Object>() const { return hittable; }
   };
 } // namespace rt

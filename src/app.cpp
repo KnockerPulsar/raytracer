@@ -37,10 +37,11 @@ namespace rt {
         }()),
         editorSize(config.editorSize),
         // TODO: should be just `config.imageSize` but I'm too lazy to update all scene constructors
-        scene(config.pathToScene.empty() ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
-                                         : editor::Scene::Load(config.imageSize, config.pathToScene)),
-        editor(std::make_shared<editor::Editor>(this, config, scene)), rt(std::make_shared<raytracer::Raytracer>(this, ard)),
-        currentState(editor) {
+        scene(std::make_unique<editor::Scene>(config.pathToScene.empty()
+                                                  ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
+                                                  : editor::Scene::Load(config.imageSize, config.pathToScene))),
+        editor(std::make_shared<editor::Editor>(this, config, *scene)),
+        rt(std::make_shared<raytracer::Raytracer>(this, ard)), currentState(editor) {
     setup();
   }
 
@@ -74,11 +75,9 @@ namespace rt {
     }
   }
 
-  void App::changeScene(editor::Scene scene) {
+  void App::changeScene(std::unique_ptr<editor::Scene> scene) {
     this->scene = std::move(scene);
-
-    editor->changeScene(&this->scene);
-    rt->changeScene(&this->scene);
+    currentState->changeScene(this->scene.get());
   }
 
   void App::quit()

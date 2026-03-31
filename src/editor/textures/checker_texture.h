@@ -1,19 +1,19 @@
 #pragma once
 
 #include "texture.h"
+#include "solid_color.h"
 
 namespace rt::editor {
   class CheckerTexture : public Texture {
     public:
-      CheckerTexture(vec3 even, vec3 odd, float scale = 6.0f);
+      CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 6.0f);
+      CheckerTexture(vec3 c1, vec3 c2, float s = 6.0f);
 
-    virtual void OnImgui() override {
-      // even->OnImgui();
-      // odd->OnImgui();
-      //
-      // ImGui::DragFloat("Checker scale", &scale);
-      //
-      // ImGui::Spacing();
-    }
+      virtual void OnImgui() override;
+
+    private:
+      std::shared_ptr<Texture> const even;
+      std::shared_ptr<Texture> const odd;
+      float                          scale;
   };
 }

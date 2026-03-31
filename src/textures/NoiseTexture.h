@@ -26,10 +26,9 @@ namespace rt::raytracer {
       return (vec3(1, 1, 1) * 0.5 * (1.0 + sin(scale * (p.z) + turbScale * noise->Turb(p))) * baseColor) * multiplier;
     }
 
-    virtual json toJson() const override {
-      return json{{"type", "noise"}, {"scale", scale}, {"turb_scale", turbScale}, {"base_color", baseColor}};
-    }
-
+    // virtual json toJson() const override {
+    //   return json{{"type", "noise"}, {"scale", scale}, {"turb_scale", turbScale}, {"base_color", baseColor}};
+    // }
 
     // TODO: Better perlin preview
     // Main issue: result depends on the given point and not the uv coords
@@ -47,6 +46,6 @@ namespace rt::raytracer {
     float        turbScale;
     vec3         baseColor;
   };
-
-  inline void to_json(json &j, const NoiseTexture &nt) { j = json{{"type", "noise"}, nt.toJson()}; }
+  //
+  // inline void to_json(json &j, const NoiseTexture &nt) { j = json{{"type", "noise"}, nt.toJson()}; }
 } // namespace rt

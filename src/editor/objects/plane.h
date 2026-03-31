@@ -1,10 +1,9 @@
 #pragma once
 
-#include "editor/IRasterizable.h"
-#include "editor/hittable.h"
+#include "object.h"
 
 namespace rt::editor {
-  class Plane : public IRasterizable, public Hittable {
+  class Plane : public Object {
   public:
     Plane(float w, float h);
     // static Plane YZPlane(float w, float h) {
@@ -21,21 +20,7 @@ namespace rt::editor {
     //   return plane;
     // }
 
-    virtual void Rasterize(vec3 color) override {
-      // static const Color colors[] = {GREEN, BLUE, RED, ORANGE, MAGENTA};
-      // rlDisableBackfaceCulling();
-      // //                                 Get "unique" index based on address
-      // //                                                vvvvvvvvvvvvvvvvvvvv
-      // // DrawPlane({0, 0, 0}, {w, h}, colors[(long)this >> 4 & 0b11]);
-      // // All addresses seem to be aligned on 4's so need to shift down a few bits to get
-      // // different numbers
-      // // The & with 0b11 is to limit the range to 0->3 to not overflow
-      //
-      // t0.Rasterize(color);
-      // t1.Rasterize(color);
-      //
-      // rlEnableBackfaceCulling();
-    }
+    virtual void Rasterize(vec3 color) override;
 
     // json toJsonSpecific() const override {
     //   return {
@@ -45,11 +30,8 @@ namespace rt::editor {
     //   };
     // }
 
-    // void changeMaterial(sPtr<Material> &newMat) override {
-    //   this->material = newMat;
-    //   t0.changeMaterial(newMat);
-    //   t1.changeMaterial(newMat);
-    // }
+  private:
+    float w, h;
   };
 
   // inline void from_json(const json &j, Plane &p) {

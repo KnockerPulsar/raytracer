@@ -1,30 +1,24 @@
 #pragma once
 
 #include "common/Camera.h"
+#include "scene.h"
 
 namespace rt::editor {
   class Scene;
-  class Camera {
+  class Camera: public Scene::Camera {
   public:
     enum class ControlType { flyCam, lookAtPoint, controlTypesCount };
 
     inline static vec3 lineStart, lineEnd;
 
-    Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene const &initialScene);
-    Camera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vFov, float aspectRatio, float aperature, float focusDist); // TODO
-
-    void Fwd(float deltaTime);
-
-    void Bck(float deltaTime);
+    Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene::Camera const &initialSceneCamera);
 
     void lookAtAngle(vec3 angle);
-
     void forwardToAngle(vec3 fwd);
 
     void MouseLook(Vector2 mousePositionDelta);
 
     void DrawFrameOutline() const;
-
     void RenderImgui();
 
     void Update(float dt);
@@ -32,29 +26,23 @@ namespace rt::editor {
     Camera3D toRaylibCamera3D() const;
 
     vec3 getLookFrom() const { return lookFrom; }
-
     vec3 localForward() const { return (lookAt - lookFrom).Normalize(); }
-
     float focusDist() const { return focusDist_; }
 
     glm::mat4 getProjectionMatrix() const;
 
     std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
 
-    glm::ivec2 imageSize() const { return _imageSize; }
+    auto imageSize() const -> glm::ivec2 { return _imageSize; }
+    auto editorSize() const -> glm::ivec2 { return editorSize_; }
 
     float GetCorrectedCropFov() const;
 
     rt::Camera toRaytracerCamera() const;
 
-  private:
-    vec3 lookFrom, lookAt;
-    float focusDist_;
-    float aspectRatio;
-    float vFov;
-    float aperature;
 
-    glm::ivec2 editorSize; // TODO should be const but that deletes `editor::Scene`'s copy ctor
+  private:
+    glm::ivec2 editorSize_; // TODO should be const but that deletes `editor::Scene`'s copy ctor
     glm::ivec2 _imageSize;
 
     vec3 moveDir;

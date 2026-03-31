@@ -45,7 +45,7 @@ namespace rt::editor {
 
     Editor(App *const app, CliConfig const &config, editor::Scene const &initialScene)
         : IState(app),
-          camera(config.editorSize, config.imageSize, initialScene),
+          camera(config.editorSize, config.imageSize, initialScene.getCamera()),
           rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)) {}
 
     ~Editor() { UnloadRenderTexture(rasterRT); }
@@ -73,7 +73,7 @@ namespace rt::editor {
     void SelectedObjectImGui();
 
     // Tests a ray against the world and returns whatever it hits (can be null)
-    editor::Hittable *CastRay(Vector2 mousePos);
+    editor::Object *CastRay(Vector2 mousePos);
 
     void AddObjectImgui();
 
@@ -100,7 +100,7 @@ namespace rt::editor {
     virtual void changeScene(editor::Scene *scene) override;
 
   private:
-    editor::Hittable *selectedObject = nullptr;
+    editor::Object *selectedObject = nullptr;
 
     enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
     inline static const char *addableObjectTypes[] = {

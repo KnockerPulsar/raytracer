@@ -45,12 +45,25 @@ set(SOURCES
   src/editor/editor.cpp
   src/raytracer/raytracer.cpp
 
+  src/editor/GroupPanel.cpp
   src/editor/Utils.cpp
   src/editor/camera.cpp
-  src/editor/transformation.cpp
-  src/editor/GroupPanel.cpp
-  src/editor/textures/preview_texture.cpp
+  src/editor/hittable.cpp
+  src/editor/materials/dielectric.cpp
+  src/editor/materials/diffuse_light.cpp
+  src/editor/materials/lambertian.cpp
+  src/editor/materials/metal.cpp
+  src/editor/objects/box.cpp
+  src/editor/objects/mesh.cpp
+  src/editor/objects/plane.cpp
+  src/editor/objects/sphere.cpp
   src/editor/scene.cpp
+  src/editor/textures/checker_texture.cpp
+  src/editor/textures/image_texture.cpp
+  src/editor/textures/noise_texture.cpp
+  src/editor/textures/preview_texture.cpp
+  src/editor/textures/solid_color.cpp
+  src/editor/transformation.cpp
 
   vendor/argumentum/src/argparser.cpp
 

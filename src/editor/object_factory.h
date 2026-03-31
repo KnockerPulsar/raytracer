@@ -1,11 +1,11 @@
 #pragma once
 
-#include "editor/hittable.h"
+#include "objects/object.h"
 
 namespace rt::editor {
   class ObjectFactory {
   public:
-    static std::shared_ptr<Hittable> FromJson(nlohmann::json objectJson) {
+    static std::shared_ptr<Object> FromJson(nlohmann::json objectJson) {
     //   std::string objType = objectJson["type"].get<std::string>();
     //
     //   if (objType == "sphere")

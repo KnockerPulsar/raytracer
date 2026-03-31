@@ -5,16 +5,12 @@
 namespace rt::editor {
   class NoiseTexture : public Texture {
   public:
-    NoiseTexture(float scale);
-    virtual void OnImgui() override {
+    NoiseTexture(float scale, float turbulanceScale = 10, vec3 baseColor = vec3(1));
+    virtual void OnImgui() override;
 
-      // ImGui::DragFloat("Noise scale", &scale, 0.1f);
-      // ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f);
-      // ImGui::ColorEdit3("Base color", &baseColor.x);
-
-      ImGui::Spacing();
-
-      Texture::OnImgui();
-    }
+  private:
+    float        scale;
+    float        turbScale;
+    vec3         baseColor;
   };
 } // namespace rt::editor

@@ -51,17 +51,4 @@ namespace rt::raytracer {
 
     return false;
   }
-
-  // void Box::Rasterize(vec3 color) {
-  //   for (auto &side : sides.get_hittables()) {
-  //     side->RasterizeTransformed(side->transformation, color);
-  //   }
-  // }
-
-  // void Box::changeMaterial(sPtr<Material> &newMat) {
-  //   material = newMat;
-  //   for (auto &side : sides.get_hittables()) {
-  //     side->changeMaterial(material);
-  //   }
-  // }
 } // namespace rt

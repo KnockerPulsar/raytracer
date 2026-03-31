@@ -73,49 +73,56 @@ namespace rt::editor {
   };
 
   void Editor::Rasterize() {
-    // BeginTextureMode(rasterRT);
+    BeginTextureMode(rasterRT);
+
+    // TODO either draw the background color or the skysphere
     // ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
-    //
-    // BeginMode3D(camera.toRaylibCamera3D());
-    // {
-    //   DrawGrid(10, 10);
-    //
-    //   if (!getScene()->skysphereTexture.empty()) {
-    //     getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
-    //     getScene()->drawSkysphere();
-    //   }
-    //
-    //   auto rasterizables = getScene()->worldRoot->get_hittables();
-    //
-    //   for (int i = 0; i < rasterizables.size(); i++) {
-    //     rasterizables[i]->RasterizeTransformed(rasterizables[i]->transformation, vec3(colors[i % numColors]));
-    //   }
-    //
-    //   auto aabBs = getScene()->worldRoot->get_hittables() | std::ranges::views::transform([](auto const &hittable) {
-    //                  AABB bb;
-    //                  hittable->BoundingBox(0, 1, bb);
-    //                  return bb;
-    //                });
-    //
-    //   // AABB rootAABB;
-    //   // getScene()->worldRoot->BoundingBox(0, 1, rootAABB);
-    //   // aabBs.push_back(rootAABB);
-    //
-    //   for (auto &&bb : aabBs) {
-    //     DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
-    //   }
-    //
-    //   DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
-    //
-    //   DrawLine3D(editor::Camera::lineStart, editor::Camera::lineEnd, BLUE);
-    // }
-    // EndMode3D();
-    //
-    // BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
-    // camera.DrawFrameOutline();
-    // EndMode2D();
-    //
-    // EndTextureMode();
+    ClearBackground(BLACK);
+
+    BeginMode3D(camera.toRaylibCamera3D());
+    {
+      DrawGrid(10, 10);
+
+      // if (!getScene()->skysphereTexture.empty()) {
+      //   getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
+      //   getScene()->drawSkysphere();
+      // }
+
+
+      auto const world = getScene()->getWorld();
+      for (int i = 0; i < world.size(); i++) {
+        // world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
+        world[i]->Rasterize(vec3(colors[i % numColors]));
+      }
+
+      // TODO
+      // auto aabBs = world | std::ranges::views::transform([](auto const &hittable) {
+      //                AABB bb;
+      //                hittable->BoundingBox(0, 1, bb);
+      //                return bb;
+      //              });
+      // for (auto &&bb : aabBs) {
+      //   DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
+      // }
+
+      for(auto const &object : world) {
+        // placeholder
+        auto const min = object->getTranslation() - vec3(0.5f);
+        auto const max = object->getTranslation() + vec3(0.5f);
+        DrawBoundingBox(BoundingBox{min, max}, MAGENTA);
+      }
+
+      DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
+
+      DrawLine3D(editor::Camera::lineStart, editor::Camera::lineEnd, BLUE);
+    }
+    EndMode3D();
+
+    BeginMode2D(Camera2D{Vector2{0}, Vector2{0}, 0.0f, 1.0f});
+    camera.DrawFrameOutline();
+    EndMode2D();
+
+    EndTextureMode();
   }
 
   void Editor::RenderImgui() {
@@ -202,10 +209,11 @@ namespace rt::editor {
         std::stringstream sceneNamePlusTime;
         sceneNamePlusTime << fileDir << "/" << fileName;
 
-        json          json = getScene()->toJson();
-        std::ofstream outputFile(sceneNamePlusTime.str());
-        outputFile << std::setw(4) << json << '\n';
-        outputFile.close();
+        // TODO
+        // json          json = getScene()->toJson();
+        // std::ofstream outputFile(sceneNamePlusTime.str());
+        // outputFile << std::setw(4) << json << '\n';
+        // outputFile.close();
       }
 
       ImGuiFileDialog::Instance()->Close();
@@ -220,11 +228,14 @@ namespace rt::editor {
     }
 
     if (ImGui::BeginMenu(builtInMenuTitle)) {
-      // for (auto &[name, loader] : Scene::builtInScenes) {
-      //   if (ImGui::MenuItem(name.c_str())) {
-      //     app->changeScene(loader(getScene()->imageSize.x, getScene()->imageSize.y));
-      //   }
-      // }
+      for (auto &[name, loader] : Scene::builtInScenes) {
+        if (ImGui::MenuItem(name.c_str())) {
+          {
+            auto const imageSize = getScene()->imageSize();
+            app->changeScene(loader(imageSize.x, imageSize.y));
+          }
+        }
+      }
 
       ImGui::EndMenu();
     }
@@ -238,7 +249,7 @@ namespace rt::editor {
 
       // const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       // ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
-      // selectedObject->OnImgui();
+      selectedObject->OnImgui();
 
       ImGui::End();
     }
@@ -287,12 +298,13 @@ namespace rt::editor {
 
   void Editor::CheckInput() {
     ImGuiIO &io = ImGui::GetIO();
-    if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
-      float mouseX = GetMouseX();
-      float mouseY = GetMouseY();
-
-      selectedObject = CastRay({mouseX, mouseY});
-    }
+    // TODO
+    // if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
+    //   float mouseX = GetMouseX();
+    //   float mouseY = GetMouseY();
+    //
+    //   selectedObject = CastRay({mouseX, mouseY});
+    // }
 
     if (!io.WantCaptureKeyboard) {
 
@@ -353,7 +365,7 @@ namespace rt::editor {
     }
   }
 
-  editor::Hittable *Editor::CastRay(Vector2 mousePos) {
+  editor::Object *Editor::CastRay(Vector2 mousePos) {
 
     ::Ray raylibRay = GetMouseRay(mousePos, camera.toRaylibCamera3D());
     Ray   r         = {raylibRay.position, raylibRay.direction, 0};
@@ -362,9 +374,13 @@ namespace rt::editor {
     editor::Camera::lineEnd   = r.At(1000).toGlm();
 
     rt::HitRecord rec;
-    // getScene()->worldRoot->hit(r, 0, rt::constants::infinity, rec);
+    // TODO we proabably need to have `editor::Hittable` somehow implement this logic as well.
+    // for (auto const &object : getScene()->getWorld()) {
+    //   if (object->HitTransformed(r, 0, rt::constants::infinity, rec)) {
+    //     return object.get();
+    //   }
+    // }
 
-    // return rec.closestHit;
     return nullptr;
   }
 
@@ -552,5 +568,6 @@ namespace rt::editor {
 
   void Editor::changeScene(editor::Scene *scene) {
     selectedObject = nullptr;
+    camera         = editor::Camera(camera.editorSize(), camera.imageSize(), scene->getCamera());
   }
 } // namespace rt

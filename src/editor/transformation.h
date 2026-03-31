@@ -9,6 +9,7 @@ namespace rt::editor {
     void setTranslation(vec3 translation);
     vec3 getTranslation() const;
 
+    void setRotationEuler(vec3 eulerRotation);
     vec3 getRotationEuler() const;
     void rotateDelta(vec3 euler);
 

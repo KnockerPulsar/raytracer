@@ -1,17 +1,16 @@
 #pragma once
 
-#include "editor/IRasterizable.h"
-#include "editor/hittable.h"
+#include "object.h"
 
 #include "data_structures/vec3.h"
 
 namespace rt::editor {
-  class Sphere : public IRasterizable, public Hittable {
+  class Sphere : public Object {
   public:
     Sphere(float radius);
+    virtual void Rasterize(vec3 color) override;
 
-    virtual void Rasterize(vec3 color) override {
-      // TODO
-    }
+  private:
+    float radius;
   };
 }

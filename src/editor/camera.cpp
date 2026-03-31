@@ -17,8 +17,8 @@ void rt::editor::Camera::DrawFrameOutline() const {
   auto constexpr thickness = 5.0;
   // Account for titlebar
   auto constexpr titlebarClearence = 4;
-  auto rectX                       = (editorSize.x - _imageSize.x) / 2;
-  auto rectY                       = (editorSize.y - _imageSize.y) / 2;
+  auto rectX                       = (editorSize_.x - _imageSize.x) / 2;
+  auto rectY                       = (editorSize_.y - _imageSize.y) / 2;
   DrawRectangleLinesEx(::Rectangle(rectX, rectY + (thickness * titlebarClearence), _imageSize.x - thickness,
                                    _imageSize.y - (thickness * titlebarClearence)),
                        thickness, MAGENTA);
@@ -64,17 +64,9 @@ void rt::editor::Camera::RenderImgui() {
   ImGui::End();
 }
 
-rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene const &initialScene)
-    : editorSize(editorSize), _imageSize(imageSize), controlType(ControlType::flyCam) {}
-
-
-void rt::editor::Camera::Fwd(float deltaTime) {
-  lookFrom += moveDir * deltaTime;
-}
-
-void rt::editor::Camera::Bck(float deltaTime) {
-  lookFrom += -moveDir * deltaTime;
-}
+rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene::Camera const &initialSceneCamera)
+    : Scene::Camera(initialSceneCamera), editorSize_(editorSize), _imageSize(imageSize),
+      controlType(ControlType::flyCam) {}
 
 void rt::editor::Camera::lookAtAngle(vec3 angle) {
   // x = r * cos(90 - angle.y) * sin(90 - angle.x)
@@ -179,12 +171,12 @@ Camera3D rt::editor::Camera::toRaylibCamera3D() const {
 }
 
 glm::mat4 rt::editor::Camera::getProjectionMatrix() const {
-  return glm::perspective(glm::radians(vFov), static_cast<float>(editorSize.x) / editorSize.y, 0.01f, 100.0f);
+  return glm::perspective(glm::radians(vFov), static_cast<float>(editorSize_.x) / editorSize_.y, 0.01f, 100.0f);
 }
 
 float rt::editor::Camera::GetCorrectedCropFov() const {
   // Clamp the scale in case the image is larger than the editor window.
-  auto const scale = std::min(static_cast<float>(_imageSize.y) / editorSize.y, 1.0f);
+  auto const scale = std::min(static_cast<float>(_imageSize.y) / editorSize_.y, 1.0f);
   return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(vFov) / 2)));
 }
 
