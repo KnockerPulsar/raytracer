@@ -8,7 +8,8 @@ namespace rt::editor {
     Box(float edgeLength);
     Box(const vec3& extents);
 
-    virtual void Rasterize(vec3 color) override;
+    virtual void RasterizeWithoutTransformation(vec3 color) override;
+    std::optional<float> hit(const rt::Ray &worldspaceRay) const override;
     // virtual json toJsonSpecific() const override;
   private:
     vec3 extents;

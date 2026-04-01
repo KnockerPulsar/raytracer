@@ -17,6 +17,23 @@ namespace
   }
 }
 
+// We only support translation and rotation
+vec3 rt::editor::Transformation::Apply(const vec3 &inVec) const {
+  return translate + ApplyRotation(inVec);
+}
+
+vec3 rt::editor::Transformation::Inverse(const vec3 &inVec) const {
+  return ApplyInverseRotation(inVec - translate);
+}
+
+vec3 rt::editor::Transformation::ApplyRotation(const vec3 &inVec) const {
+  return Vector3RotateByQuaternion(inVec, rotate);
+}
+
+vec3 rt::editor::Transformation::ApplyInverseRotation(const vec3 &inVec) const {
+  return Vector3RotateByQuaternion(inVec, QuaternionInvert(rotate));
+}
+
 void rt::editor::Transformation::setTranslation(vec3 translation) { translate = translation; }
 vec3 rt::editor::Transformation::getTranslation() const { return translate; }
 
@@ -26,6 +43,13 @@ vec3 rt::editor::Transformation::getRotationEuler() const { return toEulerRotati
 void rt::editor::Transformation::rotateDelta(vec3 euler) {
   auto const delta = quaternionFromEuler(euler);
   rotate = QuaternionMultiply(delta, rotate);
+}
+
+glm::vec4 rt::editor::Transformation::getRotationAxisAngle() const {
+  Vector3 outAxis;
+  float outAngle;
+  QuaternionToAxisAngle(rotate, &outAxis, &outAngle);
+  return glm::vec4(outAxis.x, outAxis.y, outAxis.z, glm::degrees(outAngle));
 }
 
 vec3 rt::editor::Transformation::toEulerRotation() const {

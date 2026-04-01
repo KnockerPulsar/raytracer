@@ -21,17 +21,17 @@ namespace rt::editor {
     }
 
     HittableBuilder &withTranslation(vec3 translation) {
-      hittable->setTranslation(translation);
+      hittable->getTransformation().setTranslation(translation);
       return *this;
     }
 
     HittableBuilder &withRotation(vec3 rotation) {
-      hittable->setRotationEuler(rotation);
+      hittable->getTransformation().setRotationEuler(rotation);
       return *this;
     }
 
     HittableBuilder &rotate(vec3 rotation) {
-      hittable->rotateDelta(rotation);
+      hittable->getTransformation().rotateDelta(rotation);
       return *this;
     }
 

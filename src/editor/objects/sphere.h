@@ -8,7 +8,8 @@ namespace rt::editor {
   class Sphere : public Object {
   public:
     Sphere(float radius);
-    virtual void Rasterize(vec3 color) override;
+    virtual std::optional<float> hit(const Ray &worldspaceRay) const override;
+    virtual void RasterizeWithoutTransformation(vec3 color) override;
 
   private:
     float radius;

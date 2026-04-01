@@ -20,6 +20,7 @@
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
+#include <iostream>
 #include <raylib.h>
 #include <rlImGui.h>
 #include <rlgl.h>
@@ -88,11 +89,9 @@ namespace rt::editor {
       //   getScene()->drawSkysphere();
       // }
 
-
       auto const world = getScene()->getWorld();
       for (int i = 0; i < world.size(); i++) {
-        // world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
-        world[i]->Rasterize(vec3(colors[i % numColors]));
+        world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
       }
 
       // TODO
@@ -107,8 +106,8 @@ namespace rt::editor {
 
       for(auto const &object : world) {
         // placeholder
-        auto const min = object->getTranslation() - vec3(0.5f);
-        auto const max = object->getTranslation() + vec3(0.5f);
+        auto const min = object->getTransformation().getTranslation() - vec3(0.5f);
+        auto const max = object->getTransformation().getTranslation() + vec3(0.5f);
         DrawBoundingBox(BoundingBox{min, max}, MAGENTA);
       }
 
@@ -266,12 +265,12 @@ namespace rt::editor {
     ImGuiIO &io = ImGui::GetIO();
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-    auto const rotation = selectedObject->getRotationEuler();
+    auto const rotation = selectedObject->getTransformation().getRotationEuler();
 
     auto model = [this, rotation] {
       float                 scaleTemp[] = {1.0, 1.0, 1.0};
       std::array<float, 16> model;
-      auto const            translation = selectedObject->getTranslation();
+      auto const            translation = selectedObject->getTransformation().getTranslation();
       ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, scaleTemp, model.data());
       return model;
     }();
@@ -291,20 +290,19 @@ namespace rt::editor {
 
       auto rotationDelta = newRotation - rotation;
 
-      selectedObject->setTranslation(translation);
-      selectedObject->rotateDelta(rotationDelta);
+      selectedObject->getTransformation().setTranslation(translation);
+      selectedObject->getTransformation().rotateDelta(rotationDelta);
     }
   }
 
   void Editor::CheckInput() {
     ImGuiIO &io = ImGui::GetIO();
-    // TODO
-    // if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
-    //   float mouseX = GetMouseX();
-    //   float mouseY = GetMouseY();
-    //
-    //   selectedObject = CastRay({mouseX, mouseY});
-    // }
+    if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
+      float mouseX = GetMouseX();
+      float mouseY = GetMouseY();
+
+      selectedObject = CastRay({mouseX, mouseY});
+    }
 
     if (!io.WantCaptureKeyboard) {
 
@@ -373,15 +371,20 @@ namespace rt::editor {
     editor::Camera::lineStart = r.origin.toGlm();
     editor::Camera::lineEnd   = r.At(1000).toGlm();
 
-    rt::HitRecord rec;
-    // TODO we proabably need to have `editor::Hittable` somehow implement this logic as well.
-    // for (auto const &object : getScene()->getWorld()) {
-    //   if (object->HitTransformed(r, 0, rt::constants::infinity, rec)) {
-    //     return object.get();
-    //   }
-    // }
+    auto const &world = getScene()->getWorld();
+    auto        closestT      = rt::constants::infinity;
+    Object     *closestObject = nullptr;
 
-    return nullptr;
+    for (auto const &obj : world) {
+      if (auto const t = obj->hit(r)) {
+        if (t < closestT) {
+          closestT      = *t;
+          closestObject = obj.get();
+        }
+      }
+    }
+
+    return closestObject;
   }
 
   void Editor::onUpdate() {

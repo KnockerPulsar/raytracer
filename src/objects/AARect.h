@@ -5,6 +5,7 @@
 #include <nlohmann-json/json.hpp>
 
 
+// TODO superseded by Plane
 namespace rt::raytracer {
 
   class Material;

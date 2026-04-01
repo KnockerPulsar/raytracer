@@ -14,7 +14,7 @@ namespace rt::raytracer {
     Sphere(float r);
     Sphere(float r, sPtr<Material> m);
 
-    bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
+    bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
 
     bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
 

@@ -1,84 +1,60 @@
 #pragma once
 #include "common/Hittable.h"
-#include "Triangle.h"
+#include "common/raycast.h"
 
 #include <raylib.h>
-
-namespace {
-  auto compute_corners(float w, float h) {
-    vec3 width  = vec3(w, 0, 0);
-    vec3 height = vec3(0, 0, h);
-
-    vec3 botLPoint = -width / 2 - height / 2;
-    vec3 topRPoint = width / 2 + height / 2;
-    vec3 topLPoint = -width / 2 + height / 2;
-    vec3 botRPoint = width / 2 - height / 2;
-
-    /*
-     The x axis is flipped in the triangle test scene
-     Top view
-
-                    z-
-                    |
-                    |
-                    |
-                    |
-        x+ --------+---------- x-
-                    |
-                    |
-                    |
-                    |
-                    z+
-    */
-
-    using vert = rt::raytracer::vert;
-    vert botL  = vert(botLPoint, vec3(1, 0, 0));
-    vert topR  = vert(topRPoint, vec3(0, 1, 0));
-    vert topL  = vert(topLPoint, vec3(1, 1, 0));
-    vert botR  = vert(botRPoint, vec3(0, 0, 0));
-
-    return std::tuple{botL, topR, topL, botR};
-  }
-}
 
 namespace rt::raytracer {
   // Base case is an XZ plane
   class Plane : public rt::Hittable {
   public:
-    Triangle const t0, t1;
+    Plane() {}
+    Plane(float width, float height)
+        : width(width), height(height) {}
 
-    //  _______
-    // |      /|
-    // | t0  / |
-    // |   c   |
-    // |  / t1 |
-    // |/______|
+    virtual bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override {
+      // TODO can this be done in a less hacky way?
+      auto x = 0;
+      auto z = 0;
+      auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const &localspaceRay) {
+        return rt::raycastPlane(localspaceRay, width, height, t_min, t_max)
+            .transform([&](auto const planeRaycastResult) {
+              auto const hitpoint = localspaceRay.At(planeRaycastResult.t);
+              x = hitpoint.x;
+              z = hitpoint.z;
+              auto const normal   = vec3{0, 1, 0};
+              return LocalspaceRaycastResult{hitpoint, normal, planeRaycastResult.t};
+            });
+      });
 
-    Plane() /*: Hittable("Plane")*/ {}
-    Plane(float w, float h)
-        /*: Hittable("Plane")*/
-        : t0{[&] {
-            auto [botL, topR, topL, botR] = compute_corners(w, h);
-            return Triangle(botL, topR, botR);
-          }()},
-          t1{[&] {
-            auto [botL, topR, topL, botR] = compute_corners(w, h);
-            return Triangle(botL, topL, topR);
-          }()} {}
+      if (!raycastResult)
+        return false;
 
-    virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override {
-      if (t0.Hit(r, t_min, t_max, rec) || t1.Hit(r, t_min, t_max, rec)) {
-        rec.closestHit = (Hittable *)this;
-        return true;
-      }
-      return false;
-    }
+      auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
-      outputBox = transformation.regenAABB(AABB(
-          std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
+      auto const x0 = -width / 2;
+      auto const x1 = width / 2;
+      auto const z0 = -height / 2;
+      auto const z1 = height / 2;
+
+
+      rec.p = worldspaceHitPoint;
+      rec.set_face_normal(worldspaceRay, worldspaceNormal);
+      rec.u = (x - width) / (x - x1);
+      rec.v = (z - z0) / (z - z1);
+      rec.t = t;
+      rec.mat_ptr    = material;
+      rec.closestHit = (Hittable *)this;
       return true;
     }
 
+    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
+      // TODO
+      // outputBox = transformation.regenAABB(AABB(
+      //     std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
+      return true;
+    }
+  private:
+    float width, height;
   };
 } // namespace rt

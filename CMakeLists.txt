@@ -34,6 +34,7 @@ set(SOURCES
   src/common/Transformation.cpp
   src/common/BVHNode.cpp
   src/common/bvh_tree.cpp
+  src/common/raycast.cpp
 
   src/data_structures/vec3.cpp
 

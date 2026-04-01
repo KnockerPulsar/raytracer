@@ -2,12 +2,8 @@
 
 #include <imgui.h>
 
-void rt::editor::Hittable::setTranslation(vec3 translation) { transformation.setTranslation(translation); }
-vec3 rt::editor::Hittable::getTranslation() const { return transformation.getTranslation(); }
-
-void rt::editor::Hittable::setRotationEuler(vec3 eulerRotation) { transformation.setRotationEuler(eulerRotation); }
-void rt::editor::Hittable::rotateDelta(vec3 rotationDelta) { transformation.rotateDelta(rotationDelta); }
-vec3 rt::editor::Hittable::getRotationEuler() const { return transformation.getRotationEuler(); }
+auto rt::editor::Hittable::getTransformation() const -> const Transformation & { return transformation; }
+auto rt::editor::Hittable::getTransformation() -> Transformation & { return transformation; }
 
 void rt::editor::Hittable::setName(std::string newName) { name = newName; }
 auto rt::editor::Hittable::getName() const -> std::string { return name; }

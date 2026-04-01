@@ -1,6 +1,5 @@
 #pragma once
 
-#include "data_structures/vec3.h"
 #include "materials/material.h"
 
 #include "transformation.h"
@@ -10,17 +9,15 @@
 namespace rt::editor {
   class Hittable: public IImguiDrawable {
   public:
-    void setTranslation(vec3 translation);
-    auto getTranslation() const -> vec3;
-
-    void setRotationEuler(vec3 eulerRotation);
-    void rotateDelta(vec3 rotationDelta);
-    auto getRotationEuler() const -> vec3;
+    auto getTransformation() const -> const Transformation &;
+    auto getTransformation() -> Transformation &;
 
     void setName(std::string newName);
     auto getName() const -> std::string;
 
     auto setMaterial(std::shared_ptr<Material> newMat) -> void;
+
+    virtual std::optional<float> hit(const rt::Ray &worldspaceRay) const = 0;
 
     virtual void OnImgui() override;
 

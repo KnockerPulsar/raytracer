@@ -1,6 +1,8 @@
 #include "Sphere.h"
 
 #include "common/Ray.h"
+#include "common/raycast.h"
+
 #include "materials/Material.h"
 
 #include <cmath>
@@ -13,36 +15,30 @@ namespace rt::raytracer {
 
   Sphere::Sphere(float r) : radius(r) {}
 
-  bool Sphere::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
+  bool Sphere::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
+    auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {
+      return rt::raycastSphere(localspaceRay, radius, t_min, t_max).transform([&](auto const sphereRaycastResult) {
+        auto const hitpoint = localspaceRay.At(sphereRaycastResult.t);
 
-    // Spheres are centered at zero by default
-    // We transform the ray hitting the object so no need to move it.
-    auto center = vec3::Zero();
+        // Spheres are centered at zero by default, we transform the ray instead of the sphere.
+        auto const center = vec3::Zero();
+        auto const normal = (hitpoint - center) / radius;
 
-    // Vector between ray origin and sphere center
-    vec3  oc    = r.origin - center;
-    float a     = r.direction.SqrLen();
-    float halfB = vec3::DotProd(oc, r.direction);
-    float c     = oc.Len() * oc.Len() - radius * radius;
+        return LocalspaceRaycastResult{hitpoint, normal, sphereRaycastResult.t};
+      });
+    });
 
-    float discriminant = halfB * halfB - a * c;
-    if (discriminant < 0)
+    auto const foo = rt::raycastSphere(Ray{}, radius, t_min, t_max);
+    if (!raycastResult)
       return false;
 
-    float sqrtDisc = sqrt(discriminant);
+    auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
 
-    float root = (-halfB - sqrtDisc) / a;
-    if (root < t_min || t_max < root) {
-      root = (-halfB + sqrtDisc) / a;
-      if (root < t_min || t_max < root)
-        return false;
-    }
+    rec.p = worldspaceHitPoint;
+    rec.set_face_normal(worldspaceRay, worldspaceNormal);
+    rec.t = t;
 
-    rec.t                    = root;
-    rec.p                    = r.At(rec.t);
-    const vec3 outwardNormal = (rec.p - center) / radius;
-    rec.set_face_normal(r, outwardNormal);
-    GetSphereUV(outwardNormal, rec.u, rec.v);
+    GetSphereUV(worldspaceNormal, rec.u, rec.v);
     rec.mat_ptr    = material;
     rec.closestHit = (Hittable *)this;
 
@@ -50,7 +46,8 @@ namespace rt::raytracer {
   }
 
   bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
+    // outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
+    // TODO
 
     return true;
   }

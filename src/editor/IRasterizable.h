@@ -1,21 +1,22 @@
 #pragma once
-#include "common/Transformation.h"
+
+#include "editor/transformation.h"
+
 #include <rlgl.h>
-#include "imgui.h"
 
 /**
  * @brief Interface that rasterizable objects should inherit from.
  */
-namespace rt {
+namespace rt::editor {
   class IRasterizable {
   public:
     std::string name;
 
-    virtual void Rasterize(vec3 color){};
+    virtual void RasterizeWithoutTransformation(vec3 color) = 0;
     virtual void RasterizeTransformed(Transformation t, vec3 color){
       rlPushMatrix();
       Transform(t);
-      Rasterize(color);
+      RasterizeWithoutTransformation(color);
       rlPopMatrix();
     };
 
