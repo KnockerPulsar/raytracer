@@ -8,6 +8,7 @@ namespace rt::editor {
     NoiseTexture(float scale, float turbulanceScale = 10, vec3 baseColor = vec3(1));
     virtual void OnImgui() override;
 
+    auto toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
   private:
     float        scale;
     float        turbScale;

@@ -8,9 +8,8 @@ namespace rt::raytracer {
   // Base case is an XZ plane
   class Plane : public rt::Hittable {
   public:
-    Plane() {}
-    Plane(float width, float height)
-        : width(width), height(height) {}
+    Plane(float width, float height, Transformation const &transformation, sPtr<raytracer::Material> const &material)
+        : Hittable(transformation, material), width(width), height(height) {}
 
     virtual bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override {
       // TODO can this be done in a less hacky way?
@@ -55,6 +54,6 @@ namespace rt::raytracer {
       return true;
     }
   private:
-    float width, height;
+    float const width, height;
   };
 } // namespace rt

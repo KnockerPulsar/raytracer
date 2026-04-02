@@ -1,47 +1,47 @@
 #pragma once
 
-#include "common/Hittable.h"
-
-#include <nlohmann-json/json.hpp>
+// #include "common/Hittable.h"
+//
+// #include <nlohmann-json/json.hpp>
 
 
 // TODO superseded by Plane
 namespace rt::raytracer {
 
-  class Material;
-
-  class XYRect : public Hittable {
-  public:
-    float                     x0, x1, y0, y1, z;
-
-    XYRect() = default;
-    XYRect(float _x0, float _x1, float _y0, float _y1, float _z);
-
-    virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-  };
-
-  class XZRect : public Hittable {
-  public:
-    float                     x0, x1, z0, z1, y;
-
-    XZRect() = default;
-    XZRect(float _x0, float _x1, float _z0, float _z1, float _y);
-
-    virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-  };
-
-  class YZRect : public Hittable {
-  public:
-    float                     y0, y1, z0, z1, x;
-
-    YZRect() = default;
-    YZRect(float _y0, float _y1, float _z0, float _z1, float _x);
-
-    virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-  };
+  // class Material;
+  //
+  // class XYRect : public Hittable {
+  // public:
+  //   float                     x0, x1, y0, y1, z;
+  //
+  //   XYRect() = default;
+  //   XYRect(float _x0, float _x1, float _y0, float _y1, float _z);
+  //
+  //   virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
+  //   virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+  // };
+  //
+  // class XZRect : public Hittable {
+  // public:
+  //   float                     x0, x1, z0, z1, y;
+  //
+  //   XZRect() = default;
+  //   XZRect(float _x0, float _x1, float _z0, float _z1, float _y);
+  //
+  //   virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
+  //   virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+  // };
+  //
+  // class YZRect : public Hittable {
+  // public:
+  //   float                     y0, y1, z0, z1, x;
+  //
+  //   YZRect() = default;
+  //   YZRect(float _y0, float _y1, float _z0, float _z1, float _x);
+  //
+  //   virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
+  //   virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
+  // };
 
   // inline void to_json(json &j, const XYRect &xy) { j = xy.toJson(); }
   // inline void from_json(const json &j, XYRect &plane) {

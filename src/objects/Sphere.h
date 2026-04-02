@@ -8,11 +8,7 @@ namespace rt::raytracer {
 
   class Sphere : public Hittable {
   public:
-    float radius;
-
-    Sphere();
-    Sphere(float r);
-    Sphere(float r, sPtr<Material> m);
+    Sphere(float r, Transformation const &transformation, sPtr<raytracer::Material> const &material);
 
     bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
 
@@ -24,6 +20,8 @@ namespace rt::raytracer {
 
   private:
     static void GetSphereUV(const vec3 &p, float &u, float &v);
+
+    float const radius;
   };
 
   // inline void from_json(const json &j, Sphere &s) {

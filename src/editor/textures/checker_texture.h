@@ -11,6 +11,7 @@ namespace rt::editor {
 
       virtual void OnImgui() override;
 
+      auto toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
     private:
       std::shared_ptr<Texture> const even;
       std::shared_ptr<Texture> const odd;

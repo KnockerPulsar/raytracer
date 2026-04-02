@@ -9,8 +9,10 @@ namespace rt::editor {
 
   class Metal : public Material {
   public:
+    // TODO textured metals?
     Metal(vec3 albedo, float fuzz);
     virtual void OnImgui() override;
+    auto toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> override;
 
     // json toJson() const override {
     //   return json{

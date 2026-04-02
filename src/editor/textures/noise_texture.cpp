@@ -1,4 +1,5 @@
 #include "noise_texture.h"
+#include "textures/NoiseTexture.h"
 
 rt::editor::NoiseTexture::NoiseTexture(float scale, float turbulanceScale, vec3 baseColor)
     : scale(scale), turbScale(turbulanceScale), baseColor(baseColor) {}
@@ -11,4 +12,14 @@ void rt::editor::NoiseTexture::OnImgui() {
   ImGui::Spacing();
 
   Texture::OnImgui();
+}
+
+auto rt::editor::NoiseTexture::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+  // TODO Right now, the editor impl doesn't generate perlin noise. When it
+  // does eventually do, it should be a shared handle that both the editor and
+  // raytracer impls can use.
+  //
+  // Then, the raytracer impl won't need to store scales. And the preview
+  // should match the raytraced result.
+  return std::make_shared<raytracer::NoiseTexture>(scale, turbScale, baseColor);
 }

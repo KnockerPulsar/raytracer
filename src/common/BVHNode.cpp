@@ -40,7 +40,8 @@ namespace {
 rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
 rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
-                                float t1) {
+                                float t1)
+    : Hittable(Transformation{}, nullptr) {
 
   if (srcObjects.empty()) {
     left  = nullptr;
@@ -94,8 +95,8 @@ rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, s
 }
 
 bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
-  if (!box.Hit(r, t_min, t_max))
-    return false;
+  // if (!box.Hit(r, t_min, t_max))
+  //   return false;
 
   bool leftHit  = left->Hit(r, t_min, t_max, rec);
   bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);

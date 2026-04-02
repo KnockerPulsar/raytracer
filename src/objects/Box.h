@@ -11,10 +11,8 @@
 namespace rt::raytracer {
   class Box : public rt::Hittable {
   public:
-    static auto createBox(vec3 p0, vec3 p1) -> rt::raytracer::HittableList;
-
-    Box(float edgeLength);
-    Box(const vec3& extents);
+    Box(const vec3& extents, Transformation const &transformation, sPtr<raytracer::Material> const &material);
+    Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material);
 
     bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
     virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;

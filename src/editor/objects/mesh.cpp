@@ -1,5 +1,7 @@
 #include "mesh.h"
+
 #include "common/raycast.h"
+#include "objects/mesh.h"
 
 #include <ranges>
 #include <algorithm>
@@ -37,4 +39,11 @@ std::optional<float> rt::editor::Mesh::hit(const Ray &worldspaceRay) const {
 
   return *minIter;
 
+}
+
+auto rt::editor::Mesh::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
+  // TODO the raytracer mesh impl copies over the triangles and keeps the model
+  // in memory. Which means we duplicate some data.
+  return std::make_shared<raytracer::Mesh>(model, getTransformation().toRaytracerTransformation(),
+                                           getMaterial()->toRaytracerMaterial());
 }

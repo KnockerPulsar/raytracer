@@ -13,15 +13,8 @@ namespace rt::raytracer {
    */
   class Lambertian : public Material {
   public:
-    sPtr<Texture> albedo; // Base matte/diffuse texture
-
-    Lambertian() = default;
-
-    Lambertian(const vec3 &color) : albedo(ms<SolidColor>(color)) {}
-
     Lambertian(sPtr<Texture> color) : albedo(color) {}
-
-    Lambertian(const sPtr<Lambertian> &l) : albedo(l->albedo) {}
+    Lambertian(const vec3 &color) : Lambertian(ms<SolidColor>(color)) {}
 
     /**
      * @brief Scattering logic, scatters ray in random direction.
@@ -44,5 +37,8 @@ namespace rt::raytracer {
       attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;
     }
+
+  private:
+    sPtr<Texture const> const albedo; // Base matte/diffuse texture
   };
 } // namespace rt

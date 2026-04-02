@@ -20,8 +20,9 @@ namespace rt::editor {
     //   return plane;
     // }
 
-    virtual void RasterizeWithoutTransformation(vec3 color) override;
-    std::optional<float>         hit(const Ray &worldspaceRay) const override;
+    virtual void         RasterizeWithoutTransformation(vec3 color) override;
+    std::optional<float> hit(const Ray &worldspaceRay) const override;
+    auto                 toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> override;
 
     // json toJsonSpecific() const override {
     //   return {

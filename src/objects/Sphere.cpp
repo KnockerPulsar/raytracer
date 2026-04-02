@@ -11,9 +11,9 @@
 #include <raymath.h>
 
 namespace rt::raytracer {
-  Sphere::Sphere() {}
 
-  Sphere::Sphere(float r) : radius(r) {}
+  Sphere::Sphere(float r, Transformation const &transformation, sPtr<raytracer::Material> const &material)
+      : Hittable(transformation, material), radius(r) {}
 
   bool Sphere::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
     auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {

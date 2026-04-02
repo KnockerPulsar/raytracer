@@ -39,7 +39,12 @@ vec3 rt::editor::Transformation::getTranslation() const { return translate; }
 
 void rt::editor::Transformation::setRotationEuler(vec3 eulerRotation) { rotate = quaternionFromEuler(eulerRotation); }
 
-vec3 rt::editor::Transformation::getRotationEuler() const { return toEulerRotation(); }
+vec3 rt::editor::Transformation::getRotationEuler() const {
+  auto const rollPitchYawRadians = QuaternionToEuler(rotate);
+  return vec3(glm::degrees(rollPitchYawRadians.x), glm::degrees(rollPitchYawRadians.y),
+              glm::degrees(rollPitchYawRadians.z));
+}
+
 void rt::editor::Transformation::rotateDelta(vec3 euler) {
   auto const delta = quaternionFromEuler(euler);
   rotate = QuaternionMultiply(delta, rotate);
@@ -52,18 +57,15 @@ glm::vec4 rt::editor::Transformation::getRotationAxisAngle() const {
   return glm::vec4(outAxis.x, outAxis.y, outAxis.z, glm::degrees(outAngle));
 }
 
-vec3 rt::editor::Transformation::toEulerRotation() const {
-  auto const rollPitchYawRadians = QuaternionToEuler(rotate);
-  return vec3(glm::degrees(rollPitchYawRadians.x), glm::degrees(rollPitchYawRadians.y),
-              glm::degrees(rollPitchYawRadians.z));
-}
-
+auto rt::editor::Transformation::toRaytracerTransformation() const -> rt::Transformation {
+  return rt::Transformation(translate, getRotationEuler());
+};
 
 void rt::editor::Transformation::OnImgui() {
   auto const translationChanged =
       ImGui::DragFloat3(("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
 
-  auto euler = toEulerRotation();
+  auto euler = getRotationEuler();
   auto const originalEuler = euler;
   auto const rotationChanged =
       ImGui::DragFloat3(("Rotation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &euler.x, 0.05f);

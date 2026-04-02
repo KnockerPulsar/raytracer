@@ -2,6 +2,7 @@
 
 #include "editor/IImguiDrawable.h"
 
+#include "common/Transformation.h"
 #include "data_structures/vec3.h"
 
 namespace rt::editor {
@@ -23,9 +24,8 @@ namespace rt::editor {
     glm::vec4 getRotationAxisAngle() const;
     void rotateDelta(vec3 euler);
 
+    auto toRaytracerTransformation() const -> rt::Transformation;
   private:
-    vec3 toEulerRotation() const;
-
     vec3 translate{0, 0, 0};
     Quaternion rotate{QuaternionIdentity()};
   };

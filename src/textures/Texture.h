@@ -19,7 +19,7 @@ namespace rt::raytracer {
     }
 
     virtual vec3 Value(float u, float v, const vec3 &p) const = 0;
-    virtual json toJson() const                               = 0;
+    // virtual json toJson() const                               = 0;
     virtual void setIntensity(float i) { multiplier = i; }
 
     virtual ~Texture() = default;

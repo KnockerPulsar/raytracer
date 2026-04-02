@@ -1,5 +1,7 @@
 #include "checker_texture.h"
 
+#include "textures/CheckerTexture.h"
+
 rt::editor::CheckerTexture::CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s)
     : even(_even), odd(_odd), scale(s) {}
 
@@ -13,4 +15,8 @@ void rt::editor::CheckerTexture::OnImgui() {
   ImGui::DragFloat("Checker scale", &scale);
 
   ImGui::Spacing();
+}
+
+auto rt::editor::CheckerTexture::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+  return std::make_shared<raytracer::CheckerTexture>(even->toRaytracerTexture(), odd->toRaytracerTexture(), scale);
 }

@@ -17,6 +17,8 @@ namespace rt::raytracer {
 
   public:
     CheckerTexture() = default;
+
+    // TODO underscore prefixes are reserved by the standard. Use underscore suffixes instead.
     CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 6.0f)
         : even(_even), odd(_odd), scale(s) {}
 
@@ -26,9 +28,9 @@ namespace rt::raytracer {
     CheckerTexture(const json &json)
         : CheckerTexture(json["even"].get<vec3>(), json["odd"].get<vec3>(), json["scale"].get<float>()) {}
 
-    virtual json toJson() const override {
-      return json{{"type", "checker"}, {"even", even->toJson()}, {"odd", odd->toJson()}, {"scale", scale}};
-    }
+    // virtual json toJson() const override {
+    //   return json{{"type", "checker"}, {"even", even->toJson()}, {"odd", odd->toJson()}, {"scale", scale}};
+    // }
 
     virtual vec3 Value(float u, float v, const vec3 &p) const override {
       float sines = sin(scale * p.x) * sin(scale * p.y) * sin(scale * p.z);
@@ -39,6 +41,6 @@ namespace rt::raytracer {
     }
   };
 
-  inline void to_json(json &j, const CheckerTexture &ct) { j = ct.toJson(); }
+  // inline void to_json(json &j, const CheckerTexture &ct) { j = ct.toJson(); }
 
 } // namespace rt

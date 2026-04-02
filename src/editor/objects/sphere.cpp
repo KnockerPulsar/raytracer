@@ -4,6 +4,8 @@
 #include "common/Constants.h"
 #include "common/raycast.h"
 
+#include "objects/Sphere.h"
+
 rt::editor::Sphere::Sphere(float radius) : radius(radius) {}
 
 std::optional<float> rt::editor::Sphere::hit(const Ray &worldspaceRay) const {
@@ -14,4 +16,9 @@ std::optional<float> rt::editor::Sphere::hit(const Ray &worldspaceRay) const {
 
 void rt::editor::Sphere::RasterizeWithoutTransformation(vec3 color) {
   DrawSphere(Vector3Zero(), radius, color.toRaylibColor());
+}
+
+auto rt::editor::Sphere::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
+  return std::make_shared<raytracer::Sphere>(radius, getTransformation().toRaytracerTransformation(),
+                                             getMaterial()->toRaytracerMaterial());
 }

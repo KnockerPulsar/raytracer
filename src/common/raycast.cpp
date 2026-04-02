@@ -5,8 +5,8 @@
 #include "data_structures/vec3.h"
 #include <iostream>
 
-std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspaceRay, float radius, float t_min,
-                                                   float t_max) {
+std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspaceRay, float radius, float tMin,
+                                                   float tMax) {
   // Spheres are centered at zero by default
   // We transform the ray hitting the object so no need to move it.
   auto center = vec3::Zero();
@@ -18,16 +18,15 @@ std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspa
   float c     = oc.Len() * oc.Len() - radius * radius;
 
   float discriminant = halfB * halfB - a * c;
-  std::println(std::cerr, "Raycast: a={}, halfB={}, c={}, discriminant={}", a, halfB, c, discriminant);
   if (discriminant < 0)
     return {};
 
   float sqrtDisc = sqrt(discriminant);
 
   float root = (-halfB - sqrtDisc) / a;
-  if (root < t_min || t_max < root) {
+  if (root < tMin || tMax < root) {
     root = (-halfB + sqrtDisc) / a;
-    if (root < t_min || t_max < root)
+    if (root < tMin || tMax < root)
       return {};
   }
 

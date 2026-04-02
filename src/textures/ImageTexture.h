@@ -24,17 +24,17 @@ namespace rt::raytracer {
   public:
     ImageTexture() : img{} {}
 
-    ImageTexture(const char *filename, bool fv = false, bool fh = false) : path(filename), flipH(fh), flipV(fv) {
-      ImageFromPath(filename);
+    ImageTexture(std::filesystem::path path, bool fv = false, bool fh = false) : path(path), flipH(fh), flipV(fv) {
+      ImageFromPath(path);
     }
 
     ImageTexture(const json &json) { ImageFromPath(json["path"].get<std::string>().c_str()); }
 
-    void ImageFromPath(const char *filename) {
+    void ImageFromPath(std::filesystem::path filename) {
       int compsPerPixel = bytesPerPixel;
       path              = filename;
 
-      img = LoadImage(filename);
+      img = LoadImage(filename.c_str());
       if (img.data == nullptr) {
         std::cerr << "ERROR: could not load texture image file " << filename << ".\n";
         img.width = img.height = 0;
@@ -77,7 +77,7 @@ namespace rt::raytracer {
       return vec3(pixel[0], pixel[1], pixel[2]) * colorScale * multiplier;
     }
 
-    virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
+    // virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
 
     // ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
     //   return Texture::SamplePreview(
@@ -91,10 +91,10 @@ namespace rt::raytracer {
     // }
 
   private:
-    int              bytesPerScanline;
-    std::string      path;
-    Image            img;
-    bool             flipH = false, flipV = false;
-    const static int bytesPerPixel = 3;
+    int                   bytesPerScanline;
+    std::filesystem::path path;
+    Image                 img;
+    bool                  flipH = false, flipV = false;
+    const static int      bytesPerPixel = 3;
   };
 } // namespace rt

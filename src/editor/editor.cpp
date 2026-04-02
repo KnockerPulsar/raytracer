@@ -5,7 +5,6 @@
 #include "hittatable_builder.h"
 
 #include "common/Constants.h"
-#include "common/Hittable.h"
 
 #include "materials/diffuse_light.h"
 #include "materials/lambertian.h"
@@ -16,11 +15,16 @@
 // #include "objects/sphere.h"
 // #include "objects/plane.h"
 
+#include "raytracer/raytracer.h"
+#include "common/Hittable.h"
+#include "common/bvh_tree.h"
+#include "common/Scene.h"
+
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-#include <iostream>
+
 #include <raylib.h>
 #include <rlImGui.h>
 #include <rlgl.h>
@@ -89,7 +93,7 @@ namespace rt::editor {
       //   getScene()->drawSkysphere();
       // }
 
-      auto const world = getScene()->getWorld();
+      auto const world = scene->getWorld();
       for (int i = 0; i < world.size(); i++) {
         world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
       }
@@ -230,8 +234,8 @@ namespace rt::editor {
       for (auto &[name, loader] : Scene::builtInScenes) {
         if (ImGui::MenuItem(name.c_str())) {
           {
-            auto const imageSize = getScene()->imageSize();
-            app->changeScene(loader(imageSize.x, imageSize.y));
+            auto const imageSize = scene->imageSize();
+            scene = loader(imageSize.x, imageSize.y);
           }
         }
       }
@@ -371,7 +375,7 @@ namespace rt::editor {
     editor::Camera::lineStart = r.origin.toGlm();
     editor::Camera::lineEnd   = r.At(1000).toGlm();
 
-    auto const &world = getScene()->getWorld();
+    auto const &world = scene->getWorld();
     auto        closestT      = rt::constants::infinity;
     Object     *closestObject = nullptr;
 
@@ -444,16 +448,26 @@ namespace rt::editor {
     }
   }
 
-  void Editor::onEnter() {}
+  auto Editor::compileScene() const -> std::shared_ptr<raytracer::Scene>
+  {
+    auto const world = scene->getWorld();
 
-  // Regenerate BVH on exit / before entering the raytracer
+    // TODO can this store unique pointers instead?
+    std::vector<std::shared_ptr<rt::Hittable>> raytracerHittables;
+    raytracerHittables.reserve(world.size());
+
+    for (auto const &obj : world) {
+      raytracerHittables.push_back(obj->toRaytracerHittable());
+    }
+
+    return std::make_shared<raytracer::Scene>(
+        std::make_unique<raytracer::BVHTree>(std::move(raytracerHittables), 0.0f, 1.0f), camera.toRaytracerCamera(),
+        scene->imageSize(), scene->backgroundColor());
+  }
+
   void Editor::onExit() {
-    // auto *scene = getScene();
-    // auto  rtCam = camera.getRtCamera();
-    //
-    // scene->setCamera(camera);
-    //
-    // *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
+    *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
+    rebuildRaytracer(std::make_shared<rt::raytracer::Raytracer>(app, *app->getARD(), compileScene()));
   }
 
   void Editor::RenderViewport() {
@@ -478,7 +492,7 @@ namespace rt::editor {
   }
 
   void Editor::ObjectListImgui() {
-    for (auto &o : getScene()->getWorld()) {
+    for (auto &o : scene->getWorld()) {
       auto const selected = selectedObject == o.get();
 
       if(selected) {
@@ -567,10 +581,5 @@ namespace rt::editor {
 
       ImGui::EndMainMenuBar();
     }
-  }
-
-  void Editor::changeScene(editor::Scene *scene) {
-    selectedObject = nullptr;
-    camera         = editor::Camera(camera.editorSize(), camera.imageSize(), scene->getCamera());
   }
 } // namespace rt

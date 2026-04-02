@@ -13,14 +13,8 @@ namespace rt::raytracer {
    */
   class Dielectric : public Material {
   public:
-    sPtr<Texture> albedo;          // Shared pointer to the texture this material has
-    float         refractionIndex; // Controls how likely a ray is to reflect or refract
-
-    Dielectric() = default;
-
-    Dielectric(float refIdx, vec3 color = vec3(1.0)) : refractionIndex(refIdx), albedo(ms<SolidColor>(color)) {}
-
     Dielectric(float refIdx, sPtr<Texture> tex) : refractionIndex(refIdx), albedo(tex) {}
+    Dielectric(float refIdx, vec3 color = vec3(1.0)) : Dielectric(refIdx, ms<SolidColor>(color)) {}
 
     /**
      * @brief Hit logic, simulates dielectric/glass materials
@@ -55,15 +49,15 @@ namespace rt::raytracer {
       return true;
     }
 
-    virtual json toJson() const override {
-      // clang-format off
-      return json{
-        {"type", "dielectric"},
-        {"refraction_index", refractionIndex},
-        {"texture", albedo->toJson()}
-      };
-      // clang-format on
-    }
+    // virtual json toJson() const override {
+    //   // clang-format off
+    //   return json{
+    //     {"type", "dielectric"},
+    //     {"refraction_index", refractionIndex},
+    //     {"texture", albedo->toJson()}
+    //   };
+    //   // clang-format on
+    // }
 
   private:
     /**
@@ -79,5 +73,8 @@ namespace rt::raytracer {
 
       return r0 + (1 - r0) * pow(1 - cos, 5);
     }
+
+    sPtr<Texture const> const albedo;
+    float const               refractionIndex; // Controls how likely a ray is to reflect or refract
   };
 } // namespace rt

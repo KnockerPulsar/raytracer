@@ -15,7 +15,13 @@
 #include <iostream>
 #include <raylib.h>
 
-rt::raytracer::Raytracer::Raytracer(App *const app, AsyncRenderData &ard) : IState(app), ard(ard) {}
+namespace {
+  auto const samplesPerPixel = 2; // TODO
+  auto const maxDepth        = 5; // TODO
+}
+
+rt::raytracer::Raytracer::Raytracer(App *const app, AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene)
+    : IState(app), ard(ard), compiledScene(compiledScene) {}
 
 void rt::raytracer::Raytracer::onEnter() { startRaytracing(); }
 
@@ -53,43 +59,44 @@ void rt::raytracer::Raytracer::onUpdate() {
 }
 
 void rt::raytracer::Raytracer::startRaytracing() {
-  // ard.exit = false;
-  //
-  // for (auto &job : ard.pixelJobs->getJobsVector()) {
-  //   job.color = vec3::Zero();
-  // }
-  //
-  // for (int t = 0; t < app->getNumThreads(); t++) {
-  //   ard.threads.push_back(std::make_shared<std::thread>(Ray::Trace, std::ref(ard), getScene(), t));
-  // }
+  ard.exit = false;
+
+  for (auto &job : ard.pixelJobs->getJobsVector()) {
+    job.color = vec3::Zero();
+  }
+
+  for (int t = 0; t < app->getNumThreads(); t++) {
+    ard.threads.push_back(std::make_shared<std::thread>(TraceRay, std::ref(ard), compiledScene, t));
+  }
 }
 
 void rt::raytracer::Raytracer::BlitToBuffer() {
 
-  // auto *pixelData = new Color[static_cast<int>(getScene()->imageSize.x * getScene()->imageSize.y)];
-  // auto  jobs      = ard.pixelJobs->getJobsVector();
-  //
-  // // Copy over only the color data
-  // for (int i = 0; i < jobs.size(); ++i) {
-  //   pixelData[i] = jobs[i].color.toRaylibColor(255);
-  // }
-  //
-  // // Unload old texture
-  // UnloadTexture(ard.raytraceRT.texture);
-  //
-  // // Create texture from image containing the color data
-  // Image raytraced = {.data    = pixelData,
-  //                    .width   = getScene()->imageSize.x,
-  //                    .height  = getScene()->imageSize.y,
-  //                    .mipmaps = 1,
-  //                    .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
-  //
-  // // Deletes pixelData afte copying it to another buffer
-  // ImageFlipVertical(&raytraced);
-  //
-  // ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
-  //
-  // UnloadImage(raytraced);
+  auto const imageSize = compiledScene->imageSize();
+  auto *pixelData = new Color[static_cast<int>(imageSize.x * imageSize.y)];
+  auto  jobs      = ard.pixelJobs->getJobsVector();
+
+  // Copy over only the color data
+  for (int i = 0; i < jobs.size(); ++i) {
+    pixelData[i] = jobs[i].color.toRaylibColor(255);
+  }
+
+  // Unload old texture
+  UnloadTexture(ard.raytraceRT.texture);
+
+  // Create texture from image containing the color data
+  Image raytraced = {.data    = pixelData,
+                     .width   = imageSize.x,
+                     .height  = imageSize.y,
+                     .mipmaps = 1,
+                     .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
+
+  // Deletes pixelData afte copying it to another buffer
+  ImageFlipVertical(&raytraced);
+
+  ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
+
+  UnloadImage(raytraced);
 }
 
 bool rt::raytracer::Raytracer::onFinished() {
@@ -125,7 +132,8 @@ bool rt::raytracer::Raytracer::onFinished() {
   return allFinished;
 }
 
-void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, const Scene *scene, int threadIndex) {
+void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene,
+                                        int threadIndex) {
 
   while (true) {
     auto start                = std::chrono::high_resolution_clock::now();
@@ -144,13 +152,12 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, const Scene *scene
       int x = job.x;
       int y = job.y;
 
-      auto const samplesPerPixel = 2; // TODO
-      auto const maxDepth = 5; // TODO
       for (int s = 0; s < 5; s++) {
-        float   u   = (x + RandomFloat()) / (scene->imageSize.x - 1);
-        float   v   = (y + RandomFloat()) / (scene->imageSize.y - 1);
-        rt::Ray ray = scene->cam.GetRay(u, v);
-        job.color += RayColor(ray, scene, maxDepth);
+        auto const imageSize = compiledScene->imageSize();
+        float   u   = (x + RandomFloat()) / (imageSize.x - 1);
+        float   v   = (y + RandomFloat()) / (imageSize.y - 1);
+        rt::Ray ray = compiledScene->getRay(u, v);
+        job.color += RayColor(ray, compiledScene, maxDepth);
       }
 
 #ifdef GAMMA_CORRECTION
@@ -174,19 +181,15 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, const Scene *scene
   }
 }
 
-vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, const raytracer::Scene *scene, int depth) {
+vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, std::shared_ptr<Scene> const &compiledScene, int depth) {
   // Limit max recursion depth
   if (depth <= 0) {
     return vec3::Zero();
   }
 
   rt::HitRecord rec;
-  if (!scene->worldRoot->hit(r, 0.001f, rt::constants::infinity, rec)) {
-    // if (scene->skysphere)
-    //   scene->skysphere->Hit(r, -rt::constants::infinity, rt::constants::infinity, rec);
-    // else
-    //   return scene->backgroundColor;
-    return scene->backgroundColor;
+  if (!compiledScene->hit(r, 0.001f, rt::constants::infinity, rec)) {
+    return compiledScene->backgroundColor(r.direction);
   }
 
   rt::Ray scattered;
@@ -196,7 +199,7 @@ vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, const raytracer::Scene
   if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
     return emitted;
 
-  return emitted + attenuation * RayColor(scattered, scene, depth - 1);
+  return emitted + attenuation * RayColor(scattered, compiledScene, depth - 1);
 }
 
 void rt::raytracer::Raytracer::RenderImGui() {
@@ -248,10 +251,11 @@ void rt::raytracer::Raytracer::Autosave() {
 
   auto t  = std::time(nullptr);
   auto tm = *std::localtime(&t);
-  // ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << getScene()->imageSize.x << "x"
-  //    << getScene()->imageSize.y << "_" << getScene()->settings.samplesPerPixel << "_" << getScene()->settings.maxDepth
-  //    << ".bmp";
-  //
+  auto const imageSize = compiledScene->imageSize();
+  ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << imageSize.x << "x"
+     << imageSize.y << "_" << samplesPerPixel << "_" << maxDepth
+     << ".bmp";
+
   std::cout << "Finished render: " << ss.str() << '\n';
 
   Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);

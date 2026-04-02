@@ -8,6 +8,14 @@
 #include <cstddef>
 
 namespace rt::raytracer {
+
+  // TODO BVHNodes aren't really "hittables" as they don't really have a
+  // transformation and material. To fix that, the state in `rt::Hittable`
+  // could be moved to a `rt::Raytracable` class that implements it, and
+  // hittable would then become just the interface.
+  //
+  // Spheres, Boxes, etc.. would implement `Raytracable`, BVHNode would
+  // implement `Hittable`
   class BVHNode : public rt::Hittable {
   private:
     sPtr<Hittable> left = nullptr, right = nullptr;

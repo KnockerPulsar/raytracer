@@ -4,12 +4,14 @@
 
 
 namespace rt::raytracer {
-  Box::Box(float edgeLength) : extents(vec3(edgeLength)) {}
-  Box::Box(const vec3 &extents) : extents(extents) {}
+  Box::Box(const vec3 &extents, Transformation const &transformation, sPtr<raytracer::Material> const &material)
+      : Hittable(transformation, material), extents(extents) {}
+
+  Box::Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material)
+      : Box(vec3(edgeLength), transformation, material) {}
 
   bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
     // outputBox = transformation.regenAABB(AABB(boxMin, boxMax));
-    outputBox = AABB{vec3{-1.337}, vec3{1.337}}; // TODO
     return true;
   }
 

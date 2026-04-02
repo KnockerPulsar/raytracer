@@ -3,25 +3,20 @@
 #include "app.h"
 
 namespace rt {
+  namespace raytracer { class Raytracer; }
   class IState {
   public:
-    IState(App *const app) : app(app) {}
-    void setNextState(sPtr<IState> const &nextState) { this->nextState = nextState; }
+    IState(App *app) : app(app) {}
 
-    virtual void         onEnter()  = 0;
-    virtual void         onExit()   = 0;
-    virtual void         onUpdate() = 0;
-    virtual sPtr<IState> toNextState() {
-      this->onExit();
-      nextState->onEnter();
-      return nextState;
-    };
+    virtual void onEnter() {}
+    virtual void onExit() {}
+    virtual void onUpdate() = 0;
 
-    virtual void   changeScene(editor::Scene *scene) {}
-    editor::Scene *getScene() const { return app->getScene(); }
+    void rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> const& newRaytracer) {
+      app->rebuildRaytracer(newRaytracer);
+    }
 
   protected:
-    sPtr<IState> nextState;
-    App *const   app;
+    App *app;
   };
 } // namespace rt

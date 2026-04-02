@@ -1,6 +1,5 @@
 #pragma once
 #include "common/AsyncRenderData.h"
-#include "editor/scene.h"
 
 #include <string>
 
@@ -17,12 +16,12 @@ namespace rt {
   namespace raytracer { class Raytracer; }
   class IState;
 
-  class App {
 
-    std::unique_ptr<editor::Scene> scene;
+  class App {
     AsyncRenderData ard;
 
-    sPtr<editor::Editor>    editor;
+    //  We don't intend to point the editor to new instances.
+    sPtr<editor::Editor> const editor;
     sPtr<raytracer::Raytracer> rt;
 
     int  numThreads;
@@ -31,27 +30,18 @@ namespace rt {
     sPtr<IState> currentState;
 
   public:
-    glm::ivec2 const editorSize;
-
-    bool saveOnRender = true;
-    void setup();
-
     App(CliConfig);
+    ~App();
 
     void run();
-    void onFrameRender() const;
+    void rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> newState);
     void checkInput();
-    void changeScene(std::unique_ptr<editor::Scene> scene);
     void quit();
-
-    ~App();
 
     // Quick way of exporting hardcoded scenes into JSON
     static void jsonExportTest();
-
     static void jsonImportTest();
 
-    editor::Scene   *getScene() { return scene.get(); }
     AsyncRenderData *getARD() { return &ard; }
     int              getNumThreads() const { return numThreads; }
 
@@ -59,5 +49,8 @@ namespace rt {
       numThreads = newNumThreads;
       ard.changeNumThreads(numThreads);
     }
+
+    glm::ivec2 const editorSize;
+    bool saveOnRender = true;
   };
 } // namespace rt

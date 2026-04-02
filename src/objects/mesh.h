@@ -5,7 +5,8 @@
 namespace rt::raytracer {
   class Mesh: public rt::Hittable {
     public:
-      Mesh(std::filesystem::path path);
+      Mesh(Model model, Transformation const &transformation, sPtr<raytracer::Material> const &material);
+      Mesh(std::filesystem::path path, Transformation const &transformation, sPtr<raytracer::Material> const &material);
       ~Mesh();
 
       bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;

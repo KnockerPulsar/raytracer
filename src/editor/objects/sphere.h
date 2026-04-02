@@ -8,8 +8,10 @@ namespace rt::editor {
   class Sphere : public Object {
   public:
     Sphere(float radius);
+
     virtual std::optional<float> hit(const Ray &worldspaceRay) const override;
-    virtual void RasterizeWithoutTransformation(vec3 color) override;
+    virtual void                 RasterizeWithoutTransformation(vec3 color) override;
+    auto                         toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> override;
 
   private:
     float radius;

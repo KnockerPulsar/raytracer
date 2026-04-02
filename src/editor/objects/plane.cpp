@@ -1,6 +1,9 @@
 #include "plane.h"
+
 #include "common/raycast.h"
 #include "common/Constants.h"
+
+#include "objects/Plane.h"
 
 rt::editor::Plane::Plane(float w, float h) : w(w), h(h) {}
 
@@ -16,4 +19,9 @@ std::optional<float> rt::editor::Plane::hit(const Ray &worldspaceRay) const {
   auto const localspaceRay = rt::rayWorldToLocal(worldspaceRay, getTransformation());
   return rt::raycastPlane(localspaceRay, w, h, rt::constants::epsilon, rt::constants::infinity)
       .transform([](auto const &r) { return r.t; });
+}
+
+auto rt::editor::Plane::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
+  return std::make_shared<raytracer::Plane>(w, h, getTransformation().toRaytracerTransformation(),
+                                            getMaterial()->toRaytracerMaterial());
 }

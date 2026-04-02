@@ -6,25 +6,34 @@
 
 #include <memory>
 
-namespace rt::editor {
-  class Hittable: public IImguiDrawable {
-  public:
-    auto getTransformation() const -> const Transformation &;
-    auto getTransformation() -> Transformation &;
+namespace rt {
+  class Hittable;
+  namespace editor {
+    class Hittable : public IImguiDrawable {
+    public:
+      // TODO default material? Default name?
+      Hittable() = default;
 
-    void setName(std::string newName);
-    auto getName() const -> std::string;
+      auto getTransformation() const -> const Transformation &;
+      auto getTransformation() -> Transformation &;
 
-    auto setMaterial(std::shared_ptr<Material> newMat) -> void;
+      void setName(std::string newName);
+      auto getName() const -> std::string;
 
-    virtual std::optional<float> hit(const rt::Ray &worldspaceRay) const = 0;
+      auto setMaterial(std::shared_ptr<Material> newMat) -> void;
+      auto getMaterial() const -> std::shared_ptr<Material>;
 
-    virtual void OnImgui() override;
+      virtual std::optional<float> hit(const rt::Ray &worldspaceRay) const = 0;
 
-  private:
-    template <typename T> friend class HittableBuilder;
-    Transformation transformation;
-    std::shared_ptr<Material> material;
-    std::string name;
-  };
-}
+      virtual void OnImgui() override;
+
+      virtual auto toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> = 0;
+
+    private:
+      template <typename T> friend class HittableBuilder;
+      Transformation            transformation;
+      std::shared_ptr<Material> material;
+      std::string               name;
+    };
+  } // namespace editor
+} // namespace rt

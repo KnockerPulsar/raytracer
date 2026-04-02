@@ -2,10 +2,16 @@
 
 
 namespace rt::raytracer {
-  Mesh::Mesh(std::filesystem::path path) : model{LoadModel(path.c_str())}, triangles{load_triangles(model)} {}
+  Mesh::Mesh(Model model, Transformation const &transformation, sPtr<raytracer::Material> const &material)
+      : Hittable(transformation, material), model(model), triangles(load_triangles(model)) {}
+
+  Mesh::Mesh(std::filesystem::path path, Transformation const &transformation,
+             sPtr<raytracer::Material> const &material)
+      : Mesh(LoadModel(path.c_str()), transformation, material) {}
 
   Mesh::~Mesh() { UnloadModel(model); }
 
+  // TODO camelCase naming convention!!!
   auto Mesh::load_triangles(Model model) -> std::vector<Triangle> {
     auto const meshes         = std::span{model.meshes, static_cast<size_t>(model.meshCount)};
     auto const triangle_count = std::ranges::fold_left(

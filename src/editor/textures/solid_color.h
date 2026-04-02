@@ -2,13 +2,21 @@
 
 #include "texture.h"
 
-namespace rt::editor {
-  class SolidColor : public Texture {
-  public:
-    SolidColor(vec3 color);
-    virtual void OnImgui() override;
+namespace rt {
+  namespace raytracer {
+    class Texture;
+  }
 
-  private:
-    vec3 color;
-  };
-} // namespace rt::editor
+  namespace editor {
+    class SolidColor : public Texture {
+    public:
+      SolidColor(vec3 color);
+      virtual void OnImgui() override;
+
+      auto toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
+
+    private:
+      vec3 color;
+    };
+  } // namespace editor
+} // namespace rt

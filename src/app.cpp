@@ -16,18 +16,6 @@
 #include <string>
 
 namespace rt {
-  void App::setup() {
-    editor->setNextState(rt);
-    rt->setNextState(editor);
-
-    rlImGuiSetup(true);
-    SetTargetFPS(60); // Not like we're gonna hit it...
-    SetExitKey(KEY_NULL);
-
-    ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
-  }
-
   App::App(CliConfig config)
       : numThreads(config.numThreads), ard([&] {
           // AsyncRenderData tries to create a RenderTexture which requires a
@@ -36,13 +24,18 @@ namespace rt {
           return AsyncRenderData(config.imageSize, config.editorSize, config.numThreads);
         }()),
         editorSize(config.editorSize),
-        // TODO: should be just `config.imageSize` but I'm too lazy to update all scene constructors
-        scene(std::make_unique<editor::Scene>(config.pathToScene.empty()
-                                                  ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
-                                                  : editor::Scene::Load(config.imageSize, config.pathToScene))),
-        editor(std::make_shared<editor::Editor>(this, config, *scene)),
-        rt(std::make_shared<raytracer::Raytracer>(this, ard)), currentState(editor) {
-    setup();
+        editor(std::make_shared<editor::Editor>(
+            this, config,
+            std::make_unique<editor::Scene>(config.pathToScene.empty()
+                                                ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
+                                                : editor::Scene::Load(config.imageSize, config.pathToScene)))),
+        currentState(editor) {
+    rlImGuiSetup(true);
+    SetTargetFPS(60); // Not like we're gonna hit it...
+    SetExitKey(KEY_NULL);
+
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
   }
 
   void App::run() {
@@ -52,7 +45,7 @@ namespace rt {
     }
   }
 
-  void App::onFrameRender() const {}
+  void App::rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> newState) { rt = newState; }
 
   void App::checkInput() {
     int keyPressed = GetKeyPressed();
@@ -64,7 +57,12 @@ namespace rt {
 
     switch (keyPressed) {
     case KEY_E: {
-      currentState = currentState->toNextState();
+      currentState->onExit();
+      auto const nextState = currentState == editor ? std::shared_ptr<IState>{rt} : std::shared_ptr<IState>{editor};
+      nextState->onEnter();
+
+      currentState = nextState;
+
       break;
     }
     case KEY_Q: {
@@ -73,11 +71,6 @@ namespace rt {
       break;
     }
     }
-  }
-
-  void App::changeScene(std::unique_ptr<editor::Scene> scene) {
-    this->scene = std::move(scene);
-    currentState->changeScene(this->scene.get());
   }
 
   void App::quit()

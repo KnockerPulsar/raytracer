@@ -1,8 +1,7 @@
 #pragma once
 
 #include "IImguiDrawable.h"
-
-#include "editor/hittable.h"
+#include "data_structures/vec3.h"
 
 #include <glm/fwd.hpp>
 #include <imgui.h>
@@ -79,6 +78,7 @@ public:
   // nlohmann::json toJson() const;
 
   auto imageSize() const -> glm::ivec2 { return imageSize_; }
+  auto backgroundColor() const -> vec3 { return backgroundColor_; }
 
   // Initialized in Scene.cpp to a list of scene names and loading functions
   static std::vector<std::pair<std::string, std::function<std::unique_ptr<Scene>(int, int)>>> builtInScenes;
@@ -90,7 +90,7 @@ private:
   RaytraceSettings settings;
   std::vector<std::shared_ptr<Object>> world;
   Camera cam;
-  vec3 backgroundColor;
+  vec3 backgroundColor_;
   glm::ivec2  imageSize_;
 };
 

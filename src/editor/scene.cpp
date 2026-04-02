@@ -561,7 +561,7 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
 
 Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor,
              RaytraceSettings settings)
-    : world(std::move(world)), cam(cam), backgroundColor(backgroundColor), imageSize_(imageSize), settings(settings) {}
+    : world(std::move(world)), cam(cam), backgroundColor_(backgroundColor), imageSize_(imageSize), settings(settings) {}
 
 auto Scene::getWorld() -> std::vector<std::shared_ptr<Object>> & { return world; }
 

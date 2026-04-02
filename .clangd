@@ -18,7 +18,8 @@ Diagnostics:
         readability-simplify-boolean-expr,
         readability-identifier-length,
         performance-unnecessary-value-param,
-        readability-math-missing-parentheses
+        readability-math-missing-parentheses,
+        readability-avoid-const-params-in-decls
       ]
     CheckOptions:
       readability-identifier-naming.VariableCase: camelBack

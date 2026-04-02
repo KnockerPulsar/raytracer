@@ -7,6 +7,7 @@ namespace rt::editor {
   public:
     ImageTexture(std::filesystem::path imagePath, bool flipVertically = false, bool flipHorizontally = false);
 
+    auto toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
   private:
     void imageFromPath(std::filesystem::path imagePath);
 
