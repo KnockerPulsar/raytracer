@@ -6,19 +6,28 @@
 #include <ranges>
 #include <algorithm>
 
-rt::editor::Mesh::Mesh(std::filesystem::path path) : model(LoadModel(path.string().c_str())) {}
+namespace {
+  auto loadModel(std::filesystem::path path) -> std::shared_ptr<::Model> {
+    return std::shared_ptr<::Model>(new Model{LoadModel(path.c_str())}, [](auto modelPtr) {
+      UnloadModel(*modelPtr);
+      delete modelPtr;
+    });
+  }
+} // namespace
+
+rt::editor::Mesh::Mesh(std::filesystem::path path) : model(loadModel(path)) {}
 
 void rt::editor::Mesh::RasterizeWithoutTransformation(vec3 color) {
   auto const scale = 1.0f;
-  DrawModel(model, Vector3Zero(), scale, color.toRaylibColor());
+  DrawModel(*model, Vector3Zero(), scale, color.toRaylibColor());
 }
 
 std::optional<float> rt::editor::Mesh::hit(const Ray &worldspaceRay) const {
-  if (model.meshes == nullptr || model.meshCount == 0)
+  if (model->meshes == nullptr || model->meshCount == 0)
     return false;
 
   auto const localspaceRay = rt::rayWorldToLocal(worldspaceRay, getTransformation());
-  auto const meshes = std::span{model.meshes, static_cast<size_t>(model.meshCount)};
+  auto const meshes = std::span{model->meshes, static_cast<size_t>(model->meshCount)};
 
   auto const hitMesh = [&](auto const &mesh) -> std::optional<float> {
     auto const collisionResult =
@@ -42,8 +51,6 @@ std::optional<float> rt::editor::Mesh::hit(const Ray &worldspaceRay) const {
 }
 
 auto rt::editor::Mesh::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
-  // TODO the raytracer mesh impl copies over the triangles and keeps the model
-  // in memory. Which means we duplicate some data.
   return std::make_shared<raytracer::Mesh>(model, getTransformation().toRaytracerTransformation(),
                                            getMaterial()->toRaytracerMaterial());
 }

@@ -61,7 +61,7 @@ namespace rt
     float t; // Distance along the ray
     vec3  normal;
   };
-  std::optional<BoxRaycastResult> raycastBox(const rt::Ray &localspaceRay, vec3 extents, float tMin, float tMax);
+  std::optional<BoxRaycastResult> raycastBox(const rt::Ray &localspaceRay, vec3 min, vec3 max, float tMin, float tMax);
 
   struct PlaneRaycastResult {
     float t;

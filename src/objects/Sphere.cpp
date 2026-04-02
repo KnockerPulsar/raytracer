@@ -11,9 +11,8 @@
 #include <raymath.h>
 
 namespace rt::raytracer {
-
   Sphere::Sphere(float r, Transformation const &transformation, sPtr<raytracer::Material> const &material)
-      : Hittable(transformation, material), radius(r) {}
+      : Hittable(transformation, material, AABB{vec3{-r}, vec3{r}}), radius(r) {}
 
   bool Sphere::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
     auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {
@@ -41,13 +40,6 @@ namespace rt::raytracer {
     GetSphereUV(worldspaceNormal, rec.u, rec.v);
     rec.mat_ptr    = material;
     rec.closestHit = (Hittable *)this;
-
-    return true;
-  }
-
-  bool Sphere::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    // outputBox = transformation.regenAABB(AABB(-vec3(radius), vec3(radius)));
-    // TODO
 
     return true;
   }

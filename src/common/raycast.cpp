@@ -33,14 +33,10 @@ std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspa
   return {{root}};
 }
 
-std::optional<rt::BoxRaycastResult> rt::raycastBox(const rt::Ray &localspaceRay, vec3 extents, float tMin, float tMax) {
+std::optional<rt::BoxRaycastResult> rt::raycastBox(const rt::Ray &localspaceRay, vec3 min, vec3 max, float tMin, float tMax) {
   // When raycasting in localspace, if the raycast hits the -x face first, then
   // the normal is {-1, 0, 0}. If it hits the +y face first, then the normal is
   // {1, 0, 0}. This pattern extends to all other faces.
-
-  auto const min = -extents / 2;
-  auto const max = extents / 2;
-
 
   vec3 outwardNormal{0};
   {

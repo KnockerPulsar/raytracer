@@ -15,10 +15,6 @@ namespace rt::raytracer {
     Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material);
 
     bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-
-  private:
-    vec3 const extents;
   };
 
 } // namespace rt

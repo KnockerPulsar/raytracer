@@ -5,23 +5,19 @@
 
 namespace rt::raytracer {
   Box::Box(const vec3 &extents, Transformation const &transformation, sPtr<raytracer::Material> const &material)
-      : Hittable(transformation, material), extents(extents) {}
+      : Hittable(transformation, material, AABB{-extents/2, extents/2}) {}
 
   Box::Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material)
       : Box(vec3(edgeLength), transformation, material) {}
 
-  bool Box::BoundingBox(float t0, float t1, AABB &outputBox) const {
-    // outputBox = transformation.regenAABB(AABB(boxMin, boxMax));
-    return true;
-  }
-
   bool Box::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
     auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {
-      return rt::raycastBox(localspaceRay, extents, t_min, t_max).transform([&](auto const &boxRaycastResult) {
-        auto const localspaceHitPoint = localspaceRay.At(boxRaycastResult.t);
-        auto const localspaceNormal   = boxRaycastResult.normal;
-        return rt::LocalspaceRaycastResult{localspaceHitPoint, localspaceNormal, boxRaycastResult.t};
-      });
+      return rt::raycastBox(localspaceRay, boundingBox.min, boundingBox.max, t_min, t_max)
+          .transform([&](auto const &boxRaycastResult) {
+            auto const localspaceHitPoint = localspaceRay.At(boxRaycastResult.t);
+            auto const localspaceNormal   = boxRaycastResult.normal;
+            return rt::LocalspaceRaycastResult{localspaceHitPoint, localspaceNormal, boxRaycastResult.t};
+          });
     });
 
     if (!raycastResult)

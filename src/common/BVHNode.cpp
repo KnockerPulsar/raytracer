@@ -9,11 +9,9 @@
 
 namespace {
   bool BoxCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b, int axis) {
-    rt::AABB boxA;
-    rt::AABB boxB;
+    auto const &boxA = a->boundingBox;
+    auto const &boxB = b->boundingBox;
 
-    if (!a->BoundingBox(0, 0, boxA) || !b->BoundingBox(0, 0, boxB))
-      std::cerr << "No bounding box in BVHNode constructor.\n";
     switch (axis) {
     // X
     case 0:
@@ -37,16 +35,12 @@ namespace {
   bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
 } // namespace
 
-rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
-
-rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
-                                float t1)
-    : Hittable(Transformation{}, nullptr) {
+rt::raytracer::BVHNodeData::BVHNodeData(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end,
+                                        float t0, float t1) {
 
   if (srcObjects.empty()) {
     left  = nullptr;
     right = nullptr;
-    box   = {vec3::Zero(), vec3::Zero()};
     return;
   }
 
@@ -84,95 +78,19 @@ rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, s
     left     = std::make_shared<BVHNode>(objs, start, mid, t0, t1);
     right    = std::make_shared<BVHNode>(objs, mid, end, t0, t1);
   }
-
-  AABB boxLeft;
-  AABB boxRight;
-
-  if (!left->BoundingBox(t0, t1, boxLeft) || !right->BoundingBox(t0, t1, boxRight))
-    std::cerr << "No bounding box in BVHNode constructor.\n";
-
-  box = AABB::SurroundingBox(boxLeft, boxRight);
 }
 
+rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
+                                float t1)
+    : BVHNodeData(srcObjects, start, end, t0, t1),
+      Hittable(Transformation{}, nullptr, AABB::SurroundingBox(left->boundingBox, right->boundingBox)) {}
+
 bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
-  // if (!box.Hit(r, t_min, t_max))
-  //   return false;
+  if (!boundingBox.Hit(r, t_min, t_max))
+    return false;
 
   bool leftHit  = left->Hit(r, t_min, t_max, rec);
   bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);
 
   return leftHit || rightHit;
 }
-bool rt::raytracer::BVHNode::BoundingBox(float t0, float t1, AABB &outputBox) const {
-  outputBox = box;
-  return true;
-}
-
-// std::vector<sPtr<rt::Hittable>> rt::BVHNode::getChildrenAsList() {
-//   std::unordered_set<sPtr<Hittable>> children;
-//
-//   // Otherwise, its an itermediate BVH node, get its left and right children
-//   if (left != nullptr) {
-//
-//     // May god forgive me for I'm about to sin
-//     auto leftBVH = std::dynamic_pointer_cast<BVHNode>(left);
-//
-//     // If the cast failed and the the left child is not null
-//     // Then the child is not an intermediate BVHNode, but a leaf Hittable.
-//     // Add it to the list.
-//
-//     if (leftBVH == nullptr) {
-//       children.insert(left);
-//     } else {
-//       auto leftChildren = left->getChildrenAsList();
-//       children.insert(leftChildren.begin(), leftChildren.end());
-//       // children.insert(left); // Add the intermediate node itself
-//     }
-//   }
-//
-//   if (right != nullptr) {
-//     auto rightBVH = std::dynamic_pointer_cast<BVHNode>(right);
-//
-//     // Same but for the right branch
-//     if (rightBVH == nullptr && right != nullptr)
-//       children.insert(right);
-//     else {
-//       auto rightChildren = right->getChildrenAsList();
-//       children.insert(rightChildren.begin(), rightChildren.end());
-//       // children.insert(right); // Add the intermediate node itself
-//     }
-//   }
-//
-//   return std::vector<sPtr<rt::Hittable>>(children.begin(), children.end());
-// }
-//
-// std::vector<rt::AABB> rt::BVHNode::getChildrenAABBs() {
-//   std::vector<sPtr<Hittable>> children = getChildrenAsList();
-//   std::vector<AABB> childrenAABBs;
-//
-//   for (auto &&e : children) {
-//     AABB output;
-//     if (e->BoundingBox(0, 1, output))
-//       childrenAABBs.push_back(output);
-//   }
-//
-//   return childrenAABBs;
-// }
-//
-// rt::Hittable *rt::BVHNode::addChild(sPtr<Hittable> newChild) {
-//   std::vector<sPtr<Hittable>> children = getChildrenAsList();
-//
-//   if (newChild != nullptr)
-//     children.push_back(sPtr<Hittable>(newChild));
-//
-//   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
-// }
-//
-// rt::Hittable *rt::BVHNode::removeChild(sPtr<Hittable> childToRemove) {
-//   auto children = getChildrenAsList();
-//
-//   auto const [eraseStart, _] = std::ranges::remove(children, childToRemove);
-//   children.erase(eraseStart);
-//
-//   return new BVHNode(children, 0, children.size(), 0.0f, 1.0f);
-// }

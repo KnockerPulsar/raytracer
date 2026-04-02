@@ -9,7 +9,10 @@ namespace rt::raytracer {
   class Plane : public rt::Hittable {
   public:
     Plane(float width, float height, Transformation const &transformation, sPtr<raytracer::Material> const &material)
-        : Hittable(transformation, material), width(width), height(height) {}
+        : Hittable(transformation, material,
+                   AABB{vec3{-width / 2, -constants::epsilon, -height / 2},
+                        vec3{width / 2, constants::epsilon, height / 2}}),
+          width(width), height(height) {}
 
     virtual bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override {
       // TODO can this be done in a less hacky way?
@@ -47,12 +50,6 @@ namespace rt::raytracer {
       return true;
     }
 
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const override {
-      // TODO
-      // outputBox = transformation.regenAABB(AABB(
-      //     std::vector<vec3>{this->t0.v0.p, this->t0.v1.p, this->t0.v2.p, this->t1.v0.p, this->t1.v1.p, this->t1.v2.p}));
-      return true;
-    }
   private:
     float const width, height;
   };

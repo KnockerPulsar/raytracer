@@ -98,22 +98,7 @@ namespace rt::editor {
         world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
       }
 
-      // TODO
-      // auto aabBs = world | std::ranges::views::transform([](auto const &hittable) {
-      //                AABB bb;
-      //                hittable->BoundingBox(0, 1, bb);
-      //                return bb;
-      //              });
-      // for (auto &&bb : aabBs) {
-      //   DrawBoundingBox({bb.min, bb.max}, {255, 0, 255, 255});
-      // }
-
-      for(auto const &object : world) {
-        // placeholder
-        auto const min = object->getTransformation().getTranslation() - vec3(0.5f);
-        auto const max = object->getTransformation().getTranslation() + vec3(0.5f);
-        DrawBoundingBox(BoundingBox{min, max}, MAGENTA);
-      }
+      // TODO bounding box visualizations
 
       DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
 

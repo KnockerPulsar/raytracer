@@ -14,7 +14,7 @@ void rt::editor::Box::RasterizeWithoutTransformation(vec3 color) {
 
 std::optional<float> rt::editor::Box::hit(const rt::Ray &worldspaceRay) const {
   auto const localspaceRay = rt::rayWorldToLocal(worldspaceRay, getTransformation());
-  return rt::raycastBox(localspaceRay, extents, rt::constants::epsilon, rt::constants::infinity)
+  return rt::raycastBox(localspaceRay, -extents / 2, extents / 2, rt::constants::epsilon, rt::constants::infinity)
       .transform([](auto const &r) { return r.t; });
 }
 

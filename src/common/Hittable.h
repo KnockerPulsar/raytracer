@@ -29,16 +29,15 @@ namespace rt
 
   class Hittable {
   public:
-    Hittable(Transformation const &transformation, sPtr<raytracer::Material> const &material)
+    Hittable(Transformation const &transformation, sPtr<raytracer::Material> const &material, AABB const& boundingBox)
         : transformation(transformation), material(material) {}
 
     virtual ~Hittable() = default;
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
-    virtual bool BoundingBox(float t0, float t1, AABB &outputBox) const            = 0;
 
-  protected:
-    Transformation const transformation;
+    Transformation const            transformation;
     sPtr<raytracer::Material> const material;
+    AABB const                      boundingBox;
   };
 }
 

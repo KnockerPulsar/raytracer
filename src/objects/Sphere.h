@@ -12,8 +12,6 @@ namespace rt::raytracer {
 
     bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
 
-    bool BoundingBox(float t0, float t1, AABB &outputBox) const override;
-
     // json toJsonSpecific() const override;
     //
     // void Rasterize(vec3 color) override;
