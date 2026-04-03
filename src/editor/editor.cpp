@@ -130,11 +130,6 @@ namespace rt::editor {
     if (viewState.viewMenu.objectList) {
       ImGui::Begin("Objects");
       {
-        if (ImGui::Button("Regenerate BVH", {-1, 0})) {
-          // Regenerate tree
-          // getScene()->worldRoot->regenerate();
-        }
-
         AddObjectImgui();
         ObjectListImgui();
       }
@@ -478,7 +473,9 @@ namespace rt::editor {
   }
 
   void Editor::ObjectListImgui() {
-    for (auto &o : scene->getWorld()) {
+    auto& world = scene->getWorld();
+    for (auto i = 0u; i < world.size(); i++) {
+      auto const& o = world[i];
       auto const selected = selectedObject == o.get();
 
       if(selected) {
@@ -502,7 +499,7 @@ namespace rt::editor {
 
       // Remove current object from world and rebuild
       if (ImGui::Button(("x##" + EditorUtils::GetIDFromPointer(o.get())).c_str())) {
-        // getScene()->worldRoot->remove(o);
+        world.erase(world.begin() + i);
       }
 
       ImGui::Separator();
