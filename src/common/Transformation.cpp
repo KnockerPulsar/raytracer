@@ -5,9 +5,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-
-rt::Transformation::Transformation(vec3 translation, vec3 rotation)
-    : translate(translation), rotate(QuaternionFromEuler(rotation.x, rotation.y, rotation.z)),
+rt::Transformation::Transformation(vec3 translation, vec3 rotationEuler)
+    : translate(translation), rotate(QuaternionFromEuler(glm::radians(rotationEuler.x), glm::radians(rotationEuler.y),
+                                                         glm::radians(rotationEuler.z))),
       invertedRotate(QuaternionInvert(rotate)) {}
 
 vec3 rt::Transformation::Apply(const vec3 &inVec) const {
