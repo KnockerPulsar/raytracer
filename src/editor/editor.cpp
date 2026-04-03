@@ -447,9 +447,8 @@ namespace rt::editor {
       raytracerHittables.push_back(obj->toRaytracerHittable());
     }
 
-    return std::make_shared<raytracer::Scene>(
-        std::make_unique<raytracer::BVHTree>(std::move(raytracerHittables), 0.0f, 1.0f), camera.toRaytracerCamera(),
-        scene->imageSize(), scene->backgroundColor());
+    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::HittableList>(std::move(raytracerHittables)),
+                                              camera.toRaytracerCamera(), camera.imageSize(), scene->backgroundColor());
   }
 
   void Editor::onExit() {
