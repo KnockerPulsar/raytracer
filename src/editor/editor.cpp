@@ -221,6 +221,8 @@ namespace rt::editor {
           {
             auto const imageSize = scene->imageSize();
             scene = loader(imageSize.x, imageSize.y);
+            // Re-initialize the camera.
+            camera = Camera(camera.editorSize(), scene->imageSize(), scene->getCamera());
           }
         }
       }
