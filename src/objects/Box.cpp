@@ -18,18 +18,17 @@ namespace rt::raytracer {
 
           return rt::raycastBox(localspaceRay, boundingBox.min, boundingBox.max, t_min, t_max)
               .transform([&](auto const &boxRaycastResult) {
-                auto const localspaceHitPoint = localspaceRay.At(boxRaycastResult.t);
                 auto const localspaceNormal   = boxRaycastResult.normal;
-                return rt::LocalspaceRaycastResult{localspaceHitPoint, localspaceNormal, boxRaycastResult.t};
+                return rt::LocalspaceRaycastResult{localspaceNormal, boxRaycastResult.t};
               });
         });
 
     if (!raycastResult)
       return false;
 
-    auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
+    auto const [worldspaceNormal, t] = *raycastResult;
 
-    rec.p = worldspaceHitPoint;
+    rec.p = worldspaceRay.At(t);
     rec.normal = worldspaceNormal;
     rec.t = t;
     // TODO UVs

@@ -13,13 +13,11 @@ namespace rt
   class Transformation;
 
   struct LocalspaceRaycastResult {
-    vec3 const hitpoint;
     vec3 const normal;
     float const t;
   };
 
   struct WorldspaceRaycastResult {
-    vec3 const hitpoint;
     vec3 const normal;
     float const t;
   };
@@ -42,10 +40,9 @@ namespace rt
     auto const localspaceRay = rayWorldToLocal(worldspaceRay, transformation);
 
     return localspaceRaycastFn(localspaceRay).transform([&](auto const &localspaceRaycastResult) {
-      auto const worldspaceHitPoint = transformation.Apply(localspaceRaycastResult.hitpoint);
       auto const worldspaceNormal   = transformation.ApplyRotation(localspaceRaycastResult.normal).Normalize();
 
-      return WorldspaceRaycastResult{worldspaceHitPoint, worldspaceNormal, localspaceRaycastResult.t};
+      return WorldspaceRaycastResult{worldspaceNormal, localspaceRaycastResult.t};
     });
   }
 

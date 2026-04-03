@@ -30,14 +30,14 @@ namespace rt::raytracer {
                   x                   = hitpoint.x;
                   z                   = hitpoint.z;
                   auto const normal   = vec3{0, 1, 0};
-                  return LocalspaceRaycastResult{hitpoint, normal, planeRaycastResult.t};
+                  return LocalspaceRaycastResult{normal, planeRaycastResult.t};
                 });
           });
 
       if (!raycastResult)
         return false;
 
-      auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
+      auto const [worldspaceNormal, t] = *raycastResult;
 
       auto const x0 = -width / 2;
       auto const x1 = width / 2;
@@ -45,7 +45,7 @@ namespace rt::raytracer {
       auto const z1 = height / 2;
 
 
-      rec.p = worldspaceHitPoint;
+      rec.p = worldspaceRay.At(t);
       rec.setFaceNormal(worldspaceRay, worldspaceNormal);
       rec.u = (x - x1) / (x - x1);
       rec.v = (z - z0) / (z - z1);

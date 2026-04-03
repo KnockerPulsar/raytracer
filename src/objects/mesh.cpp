@@ -140,14 +140,13 @@ namespace rt::raytracer {
           if (!closestHitResult)
             return {};
 
-          return LocalspaceRaycastResult{localspaceRay.At(closestHitResult->t), closestHitResult->n,
-                                         closestHitResult->t};
+          return LocalspaceRaycastResult{closestHitResult->n, closestHitResult->t};
         });
 
     if (!raycastResult)
       return false;
 
-    rec.p = raycastResult->hitpoint;
+    rec.p = worldspaceRay.At(raycastResult->t);
     rec.setFaceNormal(worldspaceRay, raycastResult->normal);
     rec.t = raycastResult->t;
 

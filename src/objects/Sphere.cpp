@@ -26,16 +26,16 @@ namespace rt::raytracer {
             auto const center = vec3::Zero();
             auto const normal = (hitpoint - center) / radius;
 
-            return LocalspaceRaycastResult{hitpoint, normal, sphereRaycastResult.t};
+            return LocalspaceRaycastResult{normal, sphereRaycastResult.t};
           });
         });
 
     if (!raycastResult)
       return false;
 
-    auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
+    auto const [worldspaceNormal, t] = *raycastResult;
 
-    rec.p = worldspaceHitPoint;
+    rec.p = worldspaceRay.At(t);
     rec.setFaceNormal(worldspaceRay, worldspaceNormal);
     rec.t = t;
 
