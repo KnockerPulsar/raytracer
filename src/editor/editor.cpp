@@ -1,6 +1,7 @@
 #include "editor.h"
 
 #include "Utils.h"
+#include "common/HittableList.h"
 #include "hittable.h"
 #include "hittatable_builder.h"
 

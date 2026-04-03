@@ -116,35 +116,40 @@ namespace rt::raytracer {
              sPtr<raytracer::Material> const &material)
       : Model(model), Hittable(transformation, material, localspaceBoundingBox(triangles)) {}
 
-  bool Mesh::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
-    // TODO: Looks like BVHNode (and maybe HittableList) depend on leaf nodes
-    // checking their own bounding boxes.They could probably be moved to be
-    // stored in `Hittable`, each primitive can then initialize it accordingly.
-    // That then can be checked in `HitTransformed`?
-    //
-    // Might be a bit difficult since bounding boxes should react to the
-    // objects being transformed.
-    if(!boundingBox.Hit(r, t_min, t_max))
+  bool Mesh::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
+    auto const raycastResult = rt::raycastInLocalspace(
+        worldspaceRay, transformation, [&](auto const localspaceRay) -> std::optional<LocalspaceRaycastResult> {
+          if (!boundingBox.Hit(localspaceRay, t_min, t_max))
+            return {};
+
+          struct HitResult {
+            float t{constants::infinity};
+            vec3  n;
+          };
+
+          std::optional<HitResult> closestHitResult;
+
+          std::ranges::for_each(triangles, [&](auto const &triangle) {
+            auto const currentTMax = closestHitResult.transform([](auto chr) { return chr.t; }).value_or(t_max);
+            if (auto const hitDistance =
+                    raycastTriangle(localspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, currentTMax)) {
+              closestHitResult = {*hitDistance, triangle.normal};
+            }
+          });
+
+          if (!closestHitResult)
+            return {};
+
+          return LocalspaceRaycastResult{localspaceRay.At(closestHitResult->t), closestHitResult->n,
+                                         closestHitResult->t};
+        });
+
+    if (!raycastResult)
       return false;
 
-    struct HitResult {
-      float t;
-      vec3 n;
-    };
-
-    std::optional<HitResult> closestHitResult;
-    std::ranges::for_each(triangles, [&](auto const &triangle) {
-      if (auto const hitDistance = raycastTriangle(r, triangle.v0, triangle.v1, triangle.v2, t_min, t_max)) {
-        closestHitResult = {*hitDistance, triangle.normal};
-      }
-    });
-
-    if (!closestHitResult)
-      return false;
-
-    vec3 p     = r.At(closestHitResult->t);
-    rec.p      = p;
-    rec.normal = closestHitResult->n;
+    rec.p = raycastResult->hitpoint;
+    rec.setFaceNormal(worldspaceRay, raycastResult->normal);
+    rec.t = raycastResult->t;
 
     // TODO UV interpolation
     // source:
@@ -156,9 +161,6 @@ namespace rt::raytracer {
     rec.u = 0;
     rec.v = 0;
     rec.mat_ptr = material;
-    rec.t       = closestHitResult->t;
-    rec.set_face_normal(r, closestHitResult->n);
-    rec.closestHit = (Hittable *)this;
 
     return true;
   }

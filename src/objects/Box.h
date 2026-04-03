@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/HittableList.h"
+#include "common/Hittable.h"
 #include "common/Ray.h"
 #include "data_structures/vec3.h"
 

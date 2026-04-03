@@ -15,7 +15,7 @@ namespace {
   }
 } // namespace
 
-rt::editor::Mesh::Mesh(std::filesystem::path path) : model(loadModel(path)) {}
+rt::editor::Mesh::Mesh(std::filesystem::path path) : model(loadModel(path)) { setName(path); }
 
 void rt::editor::Mesh::RasterizeWithoutTransformation(vec3 color) {
   auto const scale = 1.0f;

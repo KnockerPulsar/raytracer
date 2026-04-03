@@ -11,9 +11,10 @@
 #include "editor/Utils.h"
 
 #include <imgui.h>
+#include <raylib.h>
 
 #include <iostream>
-#include <raylib.h>
+#include <algorithm>
 
 namespace {
   auto const samplesPerPixel = 2; // TODO
@@ -102,11 +103,7 @@ void rt::raytracer::Raytracer::BlitToBuffer() {
 bool rt::raytracer::Raytracer::onFinished() {
   ClearBackground(BLACK);
 
-  bool finished = true;
-  for (auto finishedThread : ard.finishedThreads) {
-    finished &= finishedThread;
-  }
-
+  bool const finished = std::ranges::all_of(ard.finishedThreads, std::identity{});
   if (finished && !allFinished) {
     allFinished = true;
 
@@ -126,9 +123,10 @@ bool rt::raytracer::Raytracer::onFinished() {
   float const dWidth  = editorSize.x - fitSize.x;
   float const dHeight = editorSize.y - fitSize.y;
 
-  // DrawTexturePro(ard.raytraceRT.texture,
-  //                (Rectangle){0, 0, static_cast<float>(getScene()->imageSize.x), static_cast<float>(getScene()->imageSize.y)},
-  //                (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
+  auto const imageSize = compiledScene->imageSize();
+  DrawTexturePro(ard.raytraceRT.texture,
+                 (Rectangle){0, 0, static_cast<float>(imageSize.x), static_cast<float>(imageSize.y)},
+                 (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
   return allFinished;
 }
 

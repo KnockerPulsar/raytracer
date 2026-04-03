@@ -87,11 +87,11 @@ private:
   Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor,
         RaytraceSettings settings = RaytraceSettings{});
 
-  RaytraceSettings settings;
+  RaytraceSettings const settings;
   std::vector<std::shared_ptr<Object>> world;
-  Camera cam;
-  vec3 backgroundColor_;
-  glm::ivec2  imageSize_;
+  Camera const cam;
+  vec3 const backgroundColor_;
+  glm::ivec2  const imageSize_;
 };
 
 // void to_json(json &j, const Scene &s) {

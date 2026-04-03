@@ -11,14 +11,18 @@ namespace rt::raytracer {
       : Box(vec3(edgeLength), transformation, material) {}
 
   bool Box::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
-    auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {
-      return rt::raycastBox(localspaceRay, boundingBox.min, boundingBox.max, t_min, t_max)
-          .transform([&](auto const &boxRaycastResult) {
-            auto const localspaceHitPoint = localspaceRay.At(boxRaycastResult.t);
-            auto const localspaceNormal   = boxRaycastResult.normal;
-            return rt::LocalspaceRaycastResult{localspaceHitPoint, localspaceNormal, boxRaycastResult.t};
-          });
-    });
+    auto const raycastResult = rt::raycastInLocalspace(
+        worldspaceRay, transformation, [&](auto const localspaceRay) -> std::optional<LocalspaceRaycastResult> {
+          if (!boundingBox.Hit(localspaceRay, t_min, t_max))
+            return {};
+
+          return rt::raycastBox(localspaceRay, boundingBox.min, boundingBox.max, t_min, t_max)
+              .transform([&](auto const &boxRaycastResult) {
+                auto const localspaceHitPoint = localspaceRay.At(boxRaycastResult.t);
+                auto const localspaceNormal   = boxRaycastResult.normal;
+                return rt::LocalspaceRaycastResult{localspaceHitPoint, localspaceNormal, boxRaycastResult.t};
+              });
+        });
 
     if (!raycastResult)
       return false;
@@ -30,7 +34,6 @@ namespace rt::raytracer {
     rec.t = t;
     // TODO UVs
     rec.mat_ptr    = material;
-    rec.closestHit = (Hittable *)this;
     return true;
   }
 } // namespace rt

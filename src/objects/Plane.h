@@ -18,16 +18,21 @@ namespace rt::raytracer {
       // TODO can this be done in a less hacky way?
       auto x = 0;
       auto z = 0;
-      auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const &localspaceRay) {
-        return rt::raycastPlane(localspaceRay, width, height, t_min, t_max)
-            .transform([&](auto const planeRaycastResult) {
-              auto const hitpoint = localspaceRay.At(planeRaycastResult.t);
-              x = hitpoint.x;
-              z = hitpoint.z;
-              auto const normal   = vec3{0, 1, 0};
-              return LocalspaceRaycastResult{hitpoint, normal, planeRaycastResult.t};
-            });
-      });
+
+      auto const raycastResult = rt::raycastInLocalspace(
+          worldspaceRay, transformation, [&](auto const &localspaceRay) -> std::optional<LocalspaceRaycastResult> {
+            if (!boundingBox.Hit(localspaceRay, t_min, t_max))
+              return {};
+
+            return rt::raycastPlane(localspaceRay, width, height, t_min, t_max)
+                .transform([&](auto const planeRaycastResult) {
+                  auto const hitpoint = localspaceRay.At(planeRaycastResult.t);
+                  x                   = hitpoint.x;
+                  z                   = hitpoint.z;
+                  auto const normal   = vec3{0, 1, 0};
+                  return LocalspaceRaycastResult{hitpoint, normal, planeRaycastResult.t};
+                });
+          });
 
       if (!raycastResult)
         return false;
@@ -41,12 +46,11 @@ namespace rt::raytracer {
 
 
       rec.p = worldspaceHitPoint;
-      rec.set_face_normal(worldspaceRay, worldspaceNormal);
-      rec.u = (x - width) / (x - x1);
+      rec.setFaceNormal(worldspaceRay, worldspaceNormal);
+      rec.u = (x - x1) / (x - x1);
       rec.v = (z - z0) / (z - z1);
       rec.t = t;
       rec.mat_ptr    = material;
-      rec.closestHit = (Hittable *)this;
       return true;
     }
 

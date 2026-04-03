@@ -3,13 +3,12 @@
 #include "common/Ray.h"
 
 #include "data_structures/vec3.h"
-#include <iostream>
 
 std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspaceRay, float radius, float tMin,
                                                    float tMax) {
   // Spheres are centered at zero by default
   // We transform the ray hitting the object so no need to move it.
-  auto center = vec3::Zero();
+  auto const center = vec3::Zero();
 
   // Vector between ray origin and sphere center
   vec3  oc    = localspaceRay.origin - center;

@@ -5,7 +5,7 @@
 #include "common/Hittable.h"
 #include "common/Util.h"
 #include "data_structures/vec3.h"
-#include "textures/SolidColor.h"
+#include "textures/Texture.h"
 
 namespace rt::raytracer {
   /**
@@ -14,7 +14,6 @@ namespace rt::raytracer {
   class Dielectric : public Material {
   public:
     Dielectric(float refIdx, sPtr<Texture> tex) : refractionIndex(refIdx), albedo(tex) {}
-    Dielectric(float refIdx, vec3 color = vec3(1.0)) : Dielectric(refIdx, ms<SolidColor>(color)) {}
 
     /**
      * @brief Hit logic, simulates dielectric/glass materials

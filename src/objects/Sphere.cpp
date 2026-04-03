@@ -15,31 +15,32 @@ namespace rt::raytracer {
       : Hittable(transformation, material, AABB{vec3{-r}, vec3{r}}), radius(r) {}
 
   bool Sphere::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
-    auto const raycastResult = rt::raycastInLocalspace(worldspaceRay, transformation, [&](auto const localspaceRay) {
-      return rt::raycastSphere(localspaceRay, radius, t_min, t_max).transform([&](auto const sphereRaycastResult) {
-        auto const hitpoint = localspaceRay.At(sphereRaycastResult.t);
+    auto const raycastResult = rt::raycastInLocalspace(
+        worldspaceRay, transformation, [&](auto const localspaceRay) -> std::optional<LocalspaceRaycastResult> {
+          if (!boundingBox.Hit(localspaceRay, t_min, t_max))
+            return {};
+          return rt::raycastSphere(localspaceRay, radius, t_min, t_max).transform([&](auto const sphereRaycastResult) {
+            auto const hitpoint = localspaceRay.At(sphereRaycastResult.t);
 
-        // Spheres are centered at zero by default, we transform the ray instead of the sphere.
-        auto const center = vec3::Zero();
-        auto const normal = (hitpoint - center) / radius;
+            // Spheres are centered at zero by default, we transform the ray instead of the sphere.
+            auto const center = vec3::Zero();
+            auto const normal = (hitpoint - center) / radius;
 
-        return LocalspaceRaycastResult{hitpoint, normal, sphereRaycastResult.t};
-      });
-    });
+            return LocalspaceRaycastResult{hitpoint, normal, sphereRaycastResult.t};
+          });
+        });
 
-    auto const foo = rt::raycastSphere(Ray{}, radius, t_min, t_max);
     if (!raycastResult)
       return false;
 
     auto const [worldspaceHitPoint, worldspaceNormal, t] = *raycastResult;
 
     rec.p = worldspaceHitPoint;
-    rec.set_face_normal(worldspaceRay, worldspaceNormal);
+    rec.setFaceNormal(worldspaceRay, worldspaceNormal);
     rec.t = t;
 
     GetSphereUV(worldspaceNormal, rec.u, rec.v);
     rec.mat_ptr    = material;
-    rec.closestHit = (Hittable *)this;
 
     return true;
   }

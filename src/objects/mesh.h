@@ -18,6 +18,6 @@ namespace rt::raytracer {
     Mesh(std::shared_ptr<::Model> const &model, Transformation const &transformation,
          sPtr<raytracer::Material> const &material);
 
-    bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
+    bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
   };
 } // namespace rt::raytracer
