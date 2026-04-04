@@ -17,7 +17,7 @@ void rt::editor::Plane::RasterizeWithoutTransformation(vec3 color) {
 
 std::optional<float> rt::editor::Plane::hit(const Ray &worldspaceRay) const {
   auto const localspaceRay = rt::rayWorldToLocal(worldspaceRay, getTransformation());
-  return rt::raycastPlane(localspaceRay, w, h, rt::constants::epsilon, rt::constants::infinity)
+  return rt::raycastPlaneLocalspace(localspaceRay, w, h, rt::constants::epsilon, rt::constants::infinity)
       .transform([](auto const &r) { return r.t; });
 }
 

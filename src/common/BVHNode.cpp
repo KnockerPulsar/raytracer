@@ -8,44 +8,9 @@
 #include <memory>
 
 namespace {
-  rt::AABB ToWorldspace(const rt::AABB &aabb, const rt::Transformation &transform) {
-    // Generate all 8 vertices of the input AABB
-    // Apply the transform to all 8
-    // Get the bounding box of the rotated bounding box
-    std::vector<vec3> vertices = {
-        aabb.min,                                 // 000
-        vec3(aabb.min.x, aabb.min.y, aabb.max.z), // 001
-        vec3(aabb.min.x, aabb.max.y, aabb.min.z), // 010
-        vec3(aabb.min.x, aabb.max.y, aabb.max.z), // 011
-        vec3(aabb.max.x, aabb.min.y, aabb.min.z), // 100
-        vec3(aabb.max.x, aabb.min.y, aabb.max.z), // 101
-        vec3(aabb.max.x, aabb.max.y, aabb.min.z), // 110
-        aabb.max,                                 // 111
-    };
-
-    for (auto &&vert : vertices) {
-      vert = transform.Apply(vert);
-    }
-
-    vec3 newMin = vec3(rt::constants::infinity);
-    vec3 newMax = -newMin;
-
-    for (auto &&vert : vertices) {
-      newMin.x = fmin(newMin.x, vert.x);
-      newMin.y = fmin(newMin.y, vert.y);
-      newMin.z = fmin(newMin.z, vert.z);
-
-      newMax.x = fmax(newMax.x, vert.x);
-      newMax.y = fmax(newMax.y, vert.y);
-      newMax.z = fmax(newMax.z, vert.z);
-    }
-
-    return rt::AABB(newMin, newMax);
-  }
-
   bool BoxCompare(sPtr<const rt::Raytracable>& a, sPtr<const rt::Raytracable> &b, int axis) {
-    auto const boxA = ToWorldspace(a->boundingBox, a->transformation);
-    auto const boxB = ToWorldspace(b->boundingBox, b->transformation);
+    auto const boxA = a->worldspaceBoundingBox;
+    auto const boxB = b->worldspaceBoundingBox;
 
     switch (axis) {
     // X
@@ -77,28 +42,10 @@ namespace {
   }
 
   rt::AABB GetAABB(std::shared_ptr<rt::Hittable> left, std::shared_ptr<rt::Hittable> right) {
-    auto const raytracableWorldspaceBoundingBox =
-        [](auto const &node) {
-          if (auto const leafRaytracable = std::dynamic_pointer_cast<rt::Raytracable>(node))
-            return std::optional{ToWorldspace(leafRaytracable->boundingBox, leafRaytracable->transformation)};
-          return std::optional<rt::AABB>{};
-        };
-
-    // Leaf node.. Bounding box is in local space
     if (left == right) {
-      return *raytracableWorldspaceBoundingBox(left);
+      return right->worldspaceBoundingBox;
     } else {
-      auto worldspaceBoundingBox = [&](auto const &node) {
-        // Raytracable node bounding boxes are in local space
-        return raytracableWorldspaceBoundingBox(node)
-            .transform([](auto const &box) { return box; })
-            // BVH node bounding boxes are in worldspace.
-            .value_or(node->boundingBox);
-      };
-      auto const boxLeft  = worldspaceBoundingBox(left);
-      auto const boxRight = worldspaceBoundingBox(right);
-
-      return SurroundingBox(boxLeft, boxRight);
+      return SurroundingBox(left->worldspaceBoundingBox, right->worldspaceBoundingBox);
     }
   }
 
@@ -124,7 +71,7 @@ namespace {
     auto [zMin, zMax] = std::pair{infinity, -infinity};
     auto const objSpan = std::span{srcObjects}.subspan(start, end - start);
     for(auto const& obj: objSpan) {
-      auto const box = ToWorldspace(obj->boundingBox, obj->transformation);
+      auto const box = obj->worldspaceBoundingBox;
       xMin = fmin(xMin, box.min.x);
       yMin = fmin(yMin, box.min.y);
       zMin = fmin(zMin, box.min.z);
@@ -188,7 +135,7 @@ rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Raytracable>> &srcObjects, size
 
 bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
   // Bounding box and ray are both in worldspace.
-  if (!boundingBox.Hit(r, t_min, t_max))
+  if (!worldspaceBoundingBox.Hit(r, t_min, t_max))
     return false;
 
   bool leftHit  = left->Hit(r, t_min, t_max, rec);

@@ -11,21 +11,22 @@ namespace rt::raytracer {
   public:
     Plane(float width, float height, Transformation const &transformation, sPtr<raytracer::Material> const &material)
         : Raytracable(transformation, material,
-                   AABB{vec3{-width / 2, -constants::epsilon, -height / 2},
-                        vec3{width / 2, constants::epsilon, height / 2}}),
+                      AABB{vec3{-width / 2, -constants::epsilon, -height / 2},
+                           vec3{width / 2, constants::epsilon, height / 2}}),
           width(width), height(height) {}
 
     virtual bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override {
+      if (!worldspaceBoundingBox.Hit(worldspaceRay, t_min, t_max))
+        return {};
+
       // TODO can this be done in a less hacky way?
       auto x = 0;
       auto z = 0;
 
       auto const raycastResult = rt::raycastInLocalspace(
           worldspaceRay, transformation, [&](auto const &localspaceRay) -> std::optional<LocalspaceRaycastResult> {
-            if (!boundingBox.Hit(localspaceRay, t_min, t_max))
-              return {};
 
-            return rt::raycastPlane(localspaceRay, width, height, t_min, t_max)
+            return rt::raycastPlaneLocalspace(localspaceRay, width, height, t_min, t_max)
                 .transform([&](auto const planeRaycastResult) {
                   auto const hitpoint = localspaceRay.At(planeRaycastResult.t);
                   x                   = hitpoint.x;
@@ -58,4 +59,4 @@ namespace rt::raytracer {
   private:
     float const width, height;
   };
-} // namespace rt
+} // namespace rt::raytracer

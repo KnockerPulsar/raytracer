@@ -8,9 +8,10 @@ namespace rt::raytracer {
       vec3 v0, v1, v2, normal;
     };
 
-    Model(std::shared_ptr<::Model> const& model);
+    Model(std::shared_ptr<::Model> const &model);
+    void transform(Transformation const &transformation);
 
-    std::vector<Triangle> const    triangles;
+    std::vector<Triangle> triangles;
   };
 
   class Mesh : public Model, public rt::Raytracable {

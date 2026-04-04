@@ -29,12 +29,14 @@ namespace rt {
 
   class Hittable {
   public:
-    Hittable(AABB const &boundingBox) : boundingBox(boundingBox) {}
+    Hittable(AABB const &worldspaceBoundingBox) : worldspaceBoundingBox(worldspaceBoundingBox) {}
 
     virtual ~Hittable()                                                            = default;
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
 
-    AABB const boundingBox;
+    // AABBs are expected to be in worldspace. While implementations are free
+    // to choose which space they compute `Hit` in.
+    AABB const worldspaceBoundingBox;
   };
 } // namespace rt
 

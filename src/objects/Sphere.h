@@ -20,6 +20,7 @@ namespace rt::raytracer {
     static void GetSphereUV(const vec3 &p, float &u, float &v);
 
     float const radius;
+    vec3 const center;
   };
 
   // inline void from_json(const json &j, Sphere &s) {

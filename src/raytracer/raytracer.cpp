@@ -17,7 +17,7 @@
 #include <algorithm>
 
 namespace {
-  auto const samplesPerPixel = 100; // TODO
+  auto const samplesPerPixel = 10; // TODO
   auto const maxDepth        = 10; // TODO
 }
 

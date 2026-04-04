@@ -6,6 +6,7 @@
 
 namespace rt {
   class Ray;
+  class Transformation;
 
   class AABB {
   public:
@@ -18,7 +19,7 @@ namespace rt {
     AABB(std::vector<vec3> points);
 
     void Pad();
-
     bool Hit(const Ray &r, float tMin, float tMax) const;
+    static rt::AABB ToWorldspace(const rt::AABB &aabb, const rt::Transformation &transform);
   };
 } // namespace rt

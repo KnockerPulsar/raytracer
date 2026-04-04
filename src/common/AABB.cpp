@@ -1,6 +1,8 @@
 #include "AABB.h"
 #include "Ray.h"
+
 #include "common/Constants.h"
+#include "common/Transformation.h"
 
 namespace rt {
   AABB::AABB(const vec3 &a, const vec3 &b) {
@@ -84,4 +86,40 @@ namespace rt {
       max.z += eps;
     }
   }
+
+  AABB AABB::ToWorldspace(const AABB &aabb, const Transformation &transform) {
+    // Generate all 8 vertices of the input AABB
+    // Apply the transform to all 8
+    // Get the bounding box of the rotated bounding box
+    std::vector<vec3> vertices = {
+        aabb.min,                                 // 000
+        vec3(aabb.min.x, aabb.min.y, aabb.max.z), // 001
+        vec3(aabb.min.x, aabb.max.y, aabb.min.z), // 010
+        vec3(aabb.min.x, aabb.max.y, aabb.max.z), // 011
+        vec3(aabb.max.x, aabb.min.y, aabb.min.z), // 100
+        vec3(aabb.max.x, aabb.min.y, aabb.max.z), // 101
+        vec3(aabb.max.x, aabb.max.y, aabb.min.z), // 110
+        aabb.max,                                 // 111
+    };
+
+    for (auto &&vert : vertices) {
+      vert = transform.Apply(vert);
+    }
+
+    vec3 newMin = vec3(rt::constants::infinity);
+    vec3 newMax = -newMin;
+
+    for (auto &&vert : vertices) {
+      newMin.x = fmin(newMin.x, vert.x);
+      newMin.y = fmin(newMin.y, vert.y);
+      newMin.z = fmin(newMin.z, vert.z);
+
+      newMax.x = fmax(newMax.x, vert.x);
+      newMax.y = fmax(newMax.y, vert.y);
+      newMax.z = fmax(newMax.z, vert.z);
+    }
+
+    return rt::AABB(newMin, newMax);
+  }
+
 } // namespace rt

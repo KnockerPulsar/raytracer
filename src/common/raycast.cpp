@@ -4,16 +4,12 @@
 
 #include "data_structures/vec3.h"
 
-std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspaceRay, float radius, float tMin,
-                                                   float tMax) {
-  // Spheres are centered at zero by default
-  // We transform the ray hitting the object so no need to move it.
-  auto const center = vec3::Zero();
-
+std::optional<rt::SphereRaycastResult> rt::raycastSphereWorldspace(const rt::Ray &worldspaceRay, float radius, vec3 center,
+                                                         float tMin, float tMax) {
   // Vector between ray origin and sphere center
-  vec3  oc    = localspaceRay.origin - center;
-  float a     = localspaceRay.direction.SqrLen();
-  float halfB = vec3::DotProd(oc, localspaceRay.direction);
+  vec3  oc    = worldspaceRay.origin - center;
+  float a     = worldspaceRay.direction.SqrLen();
+  float halfB = vec3::DotProd(oc, worldspaceRay.direction);
   float c     = oc.Len() * oc.Len() - radius * radius;
 
   float discriminant = halfB * halfB - a * c;
@@ -32,7 +28,7 @@ std::optional<rt::SphereRaycastResult> rt::raycastSphere(const rt::Ray &localspa
   return {{root}};
 }
 
-std::optional<rt::BoxRaycastResult> rt::raycastBox(const rt::Ray &localspaceRay, vec3 min, vec3 max, float tMin, float tMax) {
+std::optional<rt::LocalspaceRaycastResult> rt::raycastAABBLocalspace(const rt::Ray &localspaceRay, vec3 min, vec3 max, float tMin, float tMax) {
   // When raycasting in localspace, if the raycast hits the -x face first, then
   // the normal is {-1, 0, 0}. If it hits the +y face first, then the normal is
   // {1, 0, 0}. This pattern extends to all other faces.
@@ -97,10 +93,10 @@ std::optional<rt::BoxRaycastResult> rt::raycastBox(const rt::Ray &localspaceRay,
       return {};
   }
 
-  return {{tMin, outwardNormal}};
+  return {{outwardNormal, tMin}};
 }
 
-std::optional<rt::PlaneRaycastResult> rt::raycastPlane(const rt::Ray &localspaceRay, float width, float height,
+std::optional<rt::PlaneRaycastResult> rt::raycastPlaneLocalspace(const rt::Ray &localspaceRay, float width, float height,
                                                        float tMin, float tMax) {
   auto const y = 0; // By default, all planes are XZ planes
   float      t = (y - localspaceRay.origin.y) / localspaceRay.direction.y;

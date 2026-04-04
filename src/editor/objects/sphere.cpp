@@ -9,8 +9,8 @@
 rt::editor::Sphere::Sphere(float radius) : radius(radius) {}
 
 std::optional<float> rt::editor::Sphere::hit(const Ray &worldspaceRay) const {
-  auto const localspaceRay = rt::rayWorldToLocal(worldspaceRay, getTransformation());
-  return rt::raycastSphere(localspaceRay, radius, rt::constants::epsilon, rt::constants::infinity)
+  return rt::raycastSphereWorldspace(worldspaceRay, radius, getTransformation().getTranslation(), rt::constants::epsilon,
+                           rt::constants::infinity)
       .transform([](auto const &r) { return r.t; });
 }
 

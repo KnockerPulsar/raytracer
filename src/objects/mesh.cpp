@@ -3,10 +3,13 @@
 #include "common/Constants.h"
 #include "common/raycast.h"
 
+#include <ranges>
+#include <algorithm>
+
 namespace {
   using Triangle = rt::raytracer::Mesh::Triangle;
 
-  auto loadTriangles(::Model const& model) -> std::vector<Triangle> {
+  auto loadTriangles(::Model const &model) -> std::vector<Triangle> {
     auto const meshes         = std::span{model.meshes, static_cast<size_t>(model.meshCount)};
     auto const triangleCount = std::ranges::fold_left(
         meshes, 0u, [](auto const accumulator, auto const &mesh) { return accumulator + mesh.triangleCount; });
@@ -111,38 +114,48 @@ namespace {
 } // namespace
 
 namespace rt::raytracer {
-  Model::Model(std::shared_ptr<::Model> const &model) : triangles(loadTriangles(*model)) {}
+  Model::Model(std::shared_ptr<::Model> const &model)
+      : triangles(loadTriangles(*model)) {}
 
+  void Model::transform(const Transformation &transformation) {
+    std::ranges::transform(triangles, triangles.begin(), [&](auto const &triangle) {
+      auto const v0 = transformation.Apply(triangle.v0);
+      auto const v1 = transformation.Apply(triangle.v1);
+      auto const v2 = transformation.Apply(triangle.v2);
+
+      vec3 v01 = (v1 - v0).Normalize();
+      vec3 v02 = (v2 - v0).Normalize();
+      vec3 n   = vec3::CrsProd(v01, v02).Normalize();
+
+      return Triangle{v0, v1, v2, n};
+    });
+  }
+
+  // Loads the model in localspace first, computes the AABB (which gets
+  // transforme by the transformation) into worldspace in `Hittable`, then
+  // bakes the transformation into the triangles.
   Mesh::Mesh(std::shared_ptr<::Model> const &model, Transformation const &transformation,
              sPtr<raytracer::Material> const &material)
-      : Model(model), Raytracable(transformation, material, localspaceBoundingBox(triangles)) {}
+      : Model(model), Raytracable(transformation, material, localspaceBoundingBox(triangles)) {
+    transform(transformation);
+  }
 
   bool Mesh::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
-    auto const raycastResult = rt::raycastInLocalspace(
-        worldspaceRay, transformation, [&](auto const localspaceRay) -> std::optional<LocalspaceRaycastResult> {
-          if (!boundingBox.Hit(localspaceRay, t_min, t_max))
-            return {};
+    if (!worldspaceBoundingBox.Hit(worldspaceRay, t_min, t_max))
+      return {};
 
-          struct HitResult {
-            float t{constants::infinity};
-            vec3  n;
-          };
+    auto const raycastResult = [&] {
+      std::optional<WorldspaceRaycastResult> closestHitResult;
+      std::ranges::for_each(triangles, [&](auto const &triangle) {
+        auto const currentTMax = closestHitResult.transform([](auto chr) { return chr.t; }).value_or(t_max);
+        if (auto const hitDistance =
+                raycastTriangle(worldspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, currentTMax)) {
+          closestHitResult.emplace(WorldspaceRaycastResult{triangle.normal, *hitDistance});
+        }
+      });
 
-          std::optional<HitResult> closestHitResult;
-
-          std::ranges::for_each(triangles, [&](auto const &triangle) {
-            auto const currentTMax = closestHitResult.transform([](auto chr) { return chr.t; }).value_or(t_max);
-            if (auto const hitDistance =
-                    raycastTriangle(localspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, currentTMax)) {
-              closestHitResult = {*hitDistance, triangle.normal};
-            }
-          });
-
-          if (!closestHitResult)
-            return {};
-
-          return LocalspaceRaycastResult{closestHitResult->n, closestHitResult->t};
-        });
+      return closestHitResult;
+    }();
 
     if (!raycastResult)
       return false;

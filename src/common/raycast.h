@@ -40,8 +40,7 @@ namespace rt
     auto const localspaceRay = rayWorldToLocal(worldspaceRay, transformation);
 
     return localspaceRaycastFn(localspaceRay).transform([&](auto const &localspaceRaycastResult) {
-      auto const worldspaceNormal   = transformation.ApplyRotation(localspaceRaycastResult.normal).Normalize();
-
+      auto const worldspaceNormal = transformation.ApplyRotation(localspaceRaycastResult.normal).Normalize();
       return WorldspaceRaycastResult{worldspaceNormal, localspaceRaycastResult.t};
     });
   }
@@ -50,19 +49,18 @@ namespace rt
     float t; // Distance along the ray
   };
 
-  // In localspace, the sphere is centered at the origin.
-  std::optional<SphereRaycastResult> raycastSphere(const rt::Ray &localspaceRay, float radius, float tMin,
-                                                   float tMax);
+  std::optional<SphereRaycastResult> raycastSphereWorldspace(const rt::Ray &worldspaceRay, float radius, vec3 center,
+                                                             float tMin, float tMax);
 
-  struct BoxRaycastResult {
-    float t; // Distance along the ray
-    vec3  normal;
-  };
-  std::optional<BoxRaycastResult> raycastBox(const rt::Ray &localspaceRay, vec3 min, vec3 max, float tMin, float tMax);
+  // Yes, this is done in local space. If the AABB has been transformed,
+  // inversely transform the ray and use this.
+  std::optional<LocalspaceRaycastResult> raycastAABBLocalspace(const rt::Ray &localspaceRay, vec3 min, vec3 max,
+                                                               float tMin, float tMax);
 
   struct PlaneRaycastResult {
     float t;
   };
-  std::optional<PlaneRaycastResult> raycastPlane(const rt::Ray &localspaceRay, float width, float height, float tMin,
-                                                 float tMax);
+  // Faster to raycast in localspace.
+  std::optional<PlaneRaycastResult> raycastPlaneLocalspace(const rt::Ray &localspaceRay, float width, float height,
+                                                           float tMin, float tMax);
 }
