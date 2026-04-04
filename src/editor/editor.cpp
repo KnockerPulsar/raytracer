@@ -1,7 +1,6 @@
 #include "editor.h"
 
 #include "Utils.h"
-#include "common/HittableList.h"
 #include "hittable.h"
 #include "hittatable_builder.h"
 
@@ -20,6 +19,7 @@
 #include "common/Hittable.h"
 #include "common/bvh_tree.h"
 #include "common/Scene.h"
+#include "common/bvh_tree.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
@@ -443,7 +443,7 @@ namespace rt::editor {
       raytracerHittables.push_back(obj->toRaytracerHittable());
     }
 
-    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::HittableList>(std::move(raytracerHittables)),
+    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracerHittables), 0, 1),
                                               camera.toRaytracerCamera(), camera.imageSize(), scene->backgroundColor());
   }
 

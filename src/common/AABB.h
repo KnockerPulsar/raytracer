@@ -1,10 +1,7 @@
 #pragma once
 
-#include "Constants.h"
 #include "data_structures/vec3.h"
-#include <cmath>
 #include <raylib.h>
-#include <tuple>
 #include <vector>
 
 namespace rt {
@@ -23,6 +20,5 @@ namespace rt {
     void Pad();
 
     bool Hit(const Ray &r, float tMin, float tMax) const;
-    static AABB SurroundingBox(AABB b0, AABB b1);
   };
 } // namespace rt

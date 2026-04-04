@@ -9,7 +9,7 @@ inline float DegressToRadians(float degress) { return degress * rt::constants::p
 inline float RandomFloat() {
   // Returns a random float in [0,1)
   static thread_local std::uniform_real_distribution<float> distribution(0, 1);
-  static thread_local std::mt19937                          generator;
+  static thread_local std::mt19937                          generator{42}; // TODO user provided seed
   return distribution(generator);
 }
 

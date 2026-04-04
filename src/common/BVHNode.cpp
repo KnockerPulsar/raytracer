@@ -8,9 +8,44 @@
 #include <memory>
 
 namespace {
-  bool BoxCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b, int axis) {
-    auto const &boxA = a->boundingBox;
-    auto const &boxB = b->boundingBox;
+  rt::AABB ToWorldspace(const rt::AABB &aabb, const rt::Transformation &transform) {
+    // Generate all 8 vertices of the input AABB
+    // Apply the transform to all 8
+    // Get the bounding box of the rotated bounding box
+    std::vector<vec3> vertices = {
+        aabb.min,                                 // 000
+        vec3(aabb.min.x, aabb.min.y, aabb.max.z), // 001
+        vec3(aabb.min.x, aabb.max.y, aabb.min.z), // 010
+        vec3(aabb.min.x, aabb.max.y, aabb.max.z), // 011
+        vec3(aabb.max.x, aabb.min.y, aabb.min.z), // 100
+        vec3(aabb.max.x, aabb.min.y, aabb.max.z), // 101
+        vec3(aabb.max.x, aabb.max.y, aabb.min.z), // 110
+        aabb.max,                                 // 111
+    };
+
+    for (auto &&vert : vertices) {
+      vert = transform.Apply(vert);
+    }
+
+    vec3 newMin = vec3(rt::constants::infinity);
+    vec3 newMax = -newMin;
+
+    for (auto &&vert : vertices) {
+      newMin.x = fmin(newMin.x, vert.x);
+      newMin.y = fmin(newMin.y, vert.y);
+      newMin.z = fmin(newMin.z, vert.z);
+
+      newMax.x = fmax(newMax.x, vert.x);
+      newMax.y = fmax(newMax.y, vert.y);
+      newMax.z = fmax(newMax.z, vert.z);
+    }
+
+    return rt::AABB(newMin, newMax);
+  }
+
+  bool BoxCompare(sPtr<const rt::Hittable>& a, sPtr<const rt::Hittable> &b, int axis) {
+    auto const boxA = ToWorldspace(a->boundingBox, a->transformation);
+    auto const boxB = ToWorldspace(b->boundingBox, b->transformation);
 
     switch (axis) {
     // X
@@ -33,59 +68,119 @@ namespace {
   bool boxXCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 0); }
   bool boxYCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 1); }
   bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
+
+  rt::AABB SurroundingBox(rt::AABB b0, rt::AABB b1) {
+    vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y), fmin(b0.min.z, b1.min.z));
+    vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y), fmax(b0.max.z, b1.max.z));
+
+    return rt::AABB(smol, big);
+  }
+
+  rt::AABB GetAABB(std::shared_ptr<rt::Hittable> left, std::shared_ptr<rt::Hittable> right) {
+    // Leaf node.. Bounding box is in local space
+    if (left == right) {
+      auto const boxRight = ToWorldspace(right->boundingBox, right->transformation);
+      return boxRight;
+    } else {
+      // Interior nodes might be BVH nodes themselves, their bounding boxes are
+      // already in worldspace and they have an identity transform.
+      //
+      // If they aren't BVH nodes, then the following two lines converts their
+      // bounding boxes to worldspace.
+      auto const boxLeft  = ToWorldspace(left->boundingBox, left->transformation);
+      auto const boxRight = ToWorldspace(right->boundingBox, right->transformation);
+
+      return SurroundingBox(boxLeft, boxRight);
+    }
+  }
+
+  auto RandomAxisComparator() {
+    int axis = RandomInt(0, 2);
+    switch (axis) {
+    case 0:
+      return boxXCompare;
+    case 1:
+      return boxYCompare;
+    case 2:
+      return boxZCompare;
+    default:
+      return boxXCompare;
+    }
+  }
+
+  // Somehow this is about twice as slow in the Cornell box scene
+  auto LongestAxisComparator(std::vector<sPtr<rt::Hittable>> &srcObjects, size_t start, size_t end) {
+    auto const infinity = rt::constants::infinity;
+    auto [xMin, xMax] = std::pair{infinity, -infinity};
+    auto [yMin, yMax] = std::pair{infinity, -infinity};
+    auto [zMin, zMax] = std::pair{infinity, -infinity};
+    auto const objSpan = std::span{srcObjects}.subspan(start, end - start);
+    for(auto const& obj: objSpan) {
+      auto const box = ToWorldspace(obj->boundingBox, obj->transformation);
+      xMin = fmin(xMin, box.min.x);
+      yMin = fmin(yMin, box.min.y);
+      zMin = fmin(zMin, box.min.z);
+
+      xMax = fmax(xMax, box.max.x);
+      yMax = fmax(yMax, box.max.y);
+      zMax = fmax(zMax, box.max.z);
+    }
+
+    auto const xSpan = xMax - xMin;
+    auto const ySpan = yMax - yMin;
+    auto const zSpan = zMax - zMin;
+    auto const biggestSpan = std::max({xSpan, ySpan, zSpan});
+
+    if (biggestSpan == xSpan) {
+      return boxXCompare;
+    } else if (biggestSpan == ySpan) {
+      return boxYCompare;
+    } else {
+      return boxZCompare;
+    }
+  }
 } // namespace
 
-rt::raytracer::BVHNodeData::BVHNodeData(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end,
-                                        float t0, float t1) {
+// TODO this constructor can be rewritten to use spans
+// TODO SAH
+rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Hittable>> &srcObjects, size_t start,
+                                                 size_t end, float t0, float t1) {
+  using BVHNode = rt::raytracer::BVHNode;
 
-  if (srcObjects.empty()) {
-    left  = nullptr;
-    right = nullptr;
-    return;
-  }
+  auto const comparator = LongestAxisComparator(srcObjects, start, end);
 
-  std::vector<sPtr<Hittable>> objs;
-  // If root node, need to filter only at root
-  if (start == 0 && end == srcObjects.size()) {
-    for (auto &&e : srcObjects) { // If not a bvh node, add to list
-      if (auto *bvh = dynamic_cast<BVHNode *>(e.get()); bvh == nullptr)
-        objs.push_back(sPtr<Hittable>(e));
-    }
-    end = objs.size();
-  } else {
-    objs = srcObjects;
-  }
-
-  int  axis       = RandomInt(0, 2);
-  auto comparator = (axis == 0) ? boxXCompare : (axis == 1) ? boxYCompare : boxZCompare;
-
-  size_t objSpan = end - start;
-
-  if (objSpan == 1) {
-    left = right = objs[start];
-  } else if (objSpan == 2) {
-    if (comparator(objs[start], objs[start + 1])) {
-      left  = objs[start];
-      right = objs[start + 1];
+  auto const numberOfObjects = end - start;
+  if (numberOfObjects == 1) {
+    left = right = srcObjects[start];
+  } else if (numberOfObjects == 1) {
+    if (comparator(srcObjects[start], srcObjects[start + 1])) {
+      left  = srcObjects[start];
+      right = srcObjects[start + 1];
     } else {
-      left  = objs[start + 1];
-      right = objs[start];
+      left  = srcObjects[start + 1];
+      right = srcObjects[start];
     }
   } else {
-    std::sort(objs.begin() + start, objs.begin() + end, comparator);
+    // TODO we're doing a bunch of matrix math in the comparator. Can we
+    // compute the worldspace AABB for all objects at the start and just reuse
+    // that?
+    std::sort(srcObjects.begin() + start, srcObjects.begin() + end, comparator);
 
-    auto mid = start + objSpan / 2;
-    left     = std::make_shared<BVHNode>(objs, start, mid, t0, t1);
-    right    = std::make_shared<BVHNode>(objs, mid, end, t0, t1);
+    auto mid = start + numberOfObjects / 2;
+    left     = std::make_shared<BVHNode>(srcObjects, start, mid, t0, t1);
+    right    = std::make_shared<BVHNode>(srcObjects, mid, end, t0, t1);
   }
 }
 
-rt::raytracer::BVHNode::BVHNode(const std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
+rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+
+rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
                                 float t1)
     : BVHNodeData(srcObjects, start, end, t0, t1),
-      Hittable(Transformation{}, nullptr, AABB::SurroundingBox(left->boundingBox, right->boundingBox)) {}
+      Hittable(Transformation{}, nullptr, GetAABB(left, right)) {}
 
 bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
+  // Bounding box and ray are both in worldspace.
   if (!boundingBox.Hit(r, t_min, t_max))
     return false;
 

@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+#include "common/Constants.h"
 #include "common/raycast.h"
 
 namespace {

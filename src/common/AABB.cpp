@@ -1,5 +1,6 @@
 #include "AABB.h"
 #include "Ray.h"
+#include "common/Constants.h"
 
 namespace rt {
   AABB::AABB(const vec3 &a, const vec3 &b) {
@@ -65,14 +66,6 @@ namespace rt {
     }
 
     return true;
-  }
-
-  AABB AABB::SurroundingBox(AABB b0, AABB b1) {
-    vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y), fmin(b0.min.z, b1.min.z));
-
-    vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y), fmax(b0.max.z, b1.max.z));
-
-    return AABB(smol, big);
   }
 
   void AABB::Pad() {
