@@ -77,7 +77,7 @@ namespace {
 
     float t = vec3::DotProd(v0v2, qvec) * invDet;
 
-    if (t < tMin && t > tMax) {
+    if (t < tMin || t > tMax) {
       return {};
     }
     return t;
