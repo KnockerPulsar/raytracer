@@ -150,7 +150,7 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Sc
       int x = job.x;
       int y = job.y;
 
-      for (int s = 0; s < 5; s++) {
+      for (int s = 0; s < samplesPerPixel; s++) {
         auto const imageSize = compiledScene->imageSize();
         float   u   = (x + RandomFloat()) / (imageSize.x - 1);
         float   v   = (y + RandomFloat()) / (imageSize.y - 1);
@@ -169,7 +169,7 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Sc
 
       job.color = vec3(r, g, b);
 #else
-      job.color /= float(scene->settings.samplesPerPixel);
+      job.color /= float(samplesPerPixel);
 #endif
       ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
     }
