@@ -60,7 +60,7 @@ namespace {
     float det  = vec3::DotProd(v0v1, pvec);
 
     // ray and triangle are parallel if det is close to 0
-    if (fabs(det) < 1e-6)
+    if (fabs(det) < rt::constants::epsilon)
       return {};
 
     float invDet = 1 / det;
