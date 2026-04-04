@@ -21,13 +21,13 @@ namespace rt {
     AsyncRenderData ard;
 
     //  We don't intend to point the editor to new instances.
-    sPtr<editor::Editor> const editor;
+    sPtr<editor::Editor> editor;
     sPtr<raytracer::Raytracer> rt;
 
     int  numThreads;
     bool shouldQuit = false;
 
-    sPtr<IState> currentState;
+    std::weak_ptr<IState> currentState;
 
   public:
     App(CliConfig);

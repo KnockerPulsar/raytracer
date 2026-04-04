@@ -41,7 +41,7 @@ namespace rt {
   void App::run() {
     while (!WindowShouldClose() && !shouldQuit) {
       checkInput();
-      currentState->onUpdate();
+      currentState.lock()->onUpdate();
     }
   }
 
@@ -57,8 +57,9 @@ namespace rt {
 
     switch (keyPressed) {
     case KEY_E: {
-      currentState->onExit();
-      auto const nextState = currentState == editor ? std::shared_ptr<IState>{rt} : std::shared_ptr<IState>{editor};
+      auto currentStateLocked = currentState.lock();
+      currentStateLocked->onExit();
+      auto const nextState = currentStateLocked == editor ? std::shared_ptr<IState>{rt} : std::shared_ptr<IState>{editor};
       nextState->onEnter();
 
       currentState = nextState;
@@ -82,6 +83,9 @@ namespace rt {
     // Note that if you kill the application in fullscreen, the resolution won't
     // reset to native.
 
+    // Destroy the editor before we close the window so the raster texture can
+    // be unloaded properly.
+    editor.reset();
     UnloadRenderTexture(ard.raytraceRT);
 
     rlImGuiShutdown();
