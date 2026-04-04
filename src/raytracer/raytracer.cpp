@@ -17,8 +17,8 @@
 #include <algorithm>
 
 namespace {
-  auto const samplesPerPixel = 2; // TODO
-  auto const maxDepth        = 5; // TODO
+  auto const samplesPerPixel = 100; // TODO
+  auto const maxDepth        = 10; // TODO
 }
 
 rt::raytracer::Raytracer::Raytracer(App *const app, AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene)

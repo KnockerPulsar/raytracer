@@ -18,7 +18,7 @@ void rt::editor::Sphere::RasterizeWithoutTransformation(vec3 color) {
   DrawSphere(Vector3Zero(), radius, color.toRaylibColor());
 }
 
-auto rt::editor::Sphere::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
+auto rt::editor::Sphere::toRaytracable() const -> std::shared_ptr<rt::Raytracable> {
   return std::make_shared<raytracer::Sphere>(radius, getTransformation().toRaytracerTransformation(),
                                              getMaterial()->toRaytracerMaterial());
 }

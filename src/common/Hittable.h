@@ -1,24 +1,25 @@
 #pragma once
 
 #include "AABB.h"
-#include "Defs.h"
 #include "Ray.h"
-#include "Transformation.h"
 #include "data_structures/vec3.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "materials/Material.h"
 
-namespace rt
-{
+namespace rt {
   class Hittable;
+  namespace raytracer {
+    class Material;
+  }
 
   struct HitRecord {
-    vec3                      p;
-    vec3                      normal;
+    vec3  p;
+    vec3  normal;
+    float t, u, v;
+    bool  front_face;
+
     std::shared_ptr<raytracer::Material> mat_ptr;
-    float                     t, u, v;
-    bool                      front_face;
 
     void setFaceNormal(const Ray &r, const vec3 &outward_normal) {
       front_face = Vector3DotProduct(outward_normal, r.direction) < 0;
@@ -28,17 +29,14 @@ namespace rt
 
   class Hittable {
   public:
-    Hittable(Transformation const &transformation, sPtr<raytracer::Material> const &material, AABB const& boundingBox)
-        : transformation(transformation), material(material), boundingBox(boundingBox) {}
+    Hittable(AABB const &boundingBox) : boundingBox(boundingBox) {}
 
-    virtual ~Hittable() = default;
+    virtual ~Hittable()                                                            = default;
     virtual bool Hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
 
-    Transformation const            transformation;
-    sPtr<raytracer::Material> const material;
-    AABB const                      boundingBox;
+    AABB const boundingBox;
   };
-}
+} // namespace rt
 
 // namespace rt::raytracer {
 //   class Hittable {

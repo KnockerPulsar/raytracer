@@ -1,15 +1,16 @@
 #pragma once
-#include "common/Hittable.h"
+#include "common/Raytracable.h"
+#include "common/Constants.h"
 #include "common/raycast.h"
 
 #include <raylib.h>
 
 namespace rt::raytracer {
   // Base case is an XZ plane
-  class Plane : public rt::Hittable {
+  class Plane : public rt::Raytracable {
   public:
     Plane(float width, float height, Transformation const &transformation, sPtr<raytracer::Material> const &material)
-        : Hittable(transformation, material,
+        : Raytracable(transformation, material,
                    AABB{vec3{-width / 2, -constants::epsilon, -height / 2},
                         vec3{width / 2, constants::epsilon, height / 2}}),
           width(width), height(height) {}

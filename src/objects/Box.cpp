@@ -5,7 +5,7 @@
 
 namespace rt::raytracer {
   Box::Box(const vec3 &extents, Transformation const &transformation, sPtr<raytracer::Material> const &material)
-      : Hittable(transformation, material, AABB{-extents/2, extents/2}) {}
+      : Raytracable(transformation, material, AABB{-extents/2, extents/2}) {}
 
   Box::Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material)
       : Box(vec3(edgeLength), transformation, material) {}

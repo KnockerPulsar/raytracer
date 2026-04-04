@@ -431,19 +431,18 @@ namespace rt::editor {
     }
   }
 
-  auto Editor::compileScene() const -> std::shared_ptr<raytracer::Scene>
-  {
+  auto Editor::compileScene() const -> std::shared_ptr<raytracer::Scene> {
     auto const world = scene->getWorld();
 
     // TODO can this store unique pointers instead?
-    std::vector<std::shared_ptr<rt::Hittable>> raytracerHittables;
-    raytracerHittables.reserve(world.size());
+    std::vector<std::shared_ptr<rt::Raytracable>> raytracables;
+    raytracables.reserve(world.size());
 
     for (auto const &obj : world) {
-      raytracerHittables.push_back(obj->toRaytracerHittable());
+      raytracables.push_back(obj->toRaytracable());
     }
 
-    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracerHittables), 0, 1),
+    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1),
                                               camera.toRaytracerCamera(), camera.imageSize(), scene->backgroundColor());
   }
 

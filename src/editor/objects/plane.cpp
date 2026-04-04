@@ -21,7 +21,7 @@ std::optional<float> rt::editor::Plane::hit(const Ray &worldspaceRay) const {
       .transform([](auto const &r) { return r.t; });
 }
 
-auto rt::editor::Plane::toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> {
+auto rt::editor::Plane::toRaytracable() const -> std::shared_ptr<rt::Raytracable> {
   return std::make_shared<raytracer::Plane>(w, h, getTransformation().toRaytracerTransformation(),
                                             getMaterial()->toRaytracerMaterial());
 }

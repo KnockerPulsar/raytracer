@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace rt {
-  class Hittable;
+  class Raytracable;
   namespace editor {
     class Hittable : public IImguiDrawable {
     public:
@@ -27,7 +27,7 @@ namespace rt {
 
       virtual void OnImgui() override;
 
-      virtual auto toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> = 0;
+      virtual auto toRaytracable() const -> std::shared_ptr<rt::Raytracable> = 0;
 
     private:
       template <typename T> friend class HittableBuilder;

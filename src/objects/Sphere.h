@@ -1,12 +1,12 @@
 #pragma once
 #include "common/Defs.h"
-#include "common/Hittable.h"
+#include "common/Raytracable.h"
 #include "data_structures/vec3.h"
 
 namespace rt::raytracer {
   class Material;
 
-  class Sphere : public Hittable {
+  class Sphere : public Raytracable {
   public:
     Sphere(float r, Transformation const &transformation, sPtr<raytracer::Material> const &material);
 

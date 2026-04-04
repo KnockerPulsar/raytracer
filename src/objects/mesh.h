@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Hittable.h"
+#include "common/Raytracable.h"
 
 namespace rt::raytracer {
   struct Model {
@@ -13,7 +13,7 @@ namespace rt::raytracer {
     std::vector<Triangle> const    triangles;
   };
 
-  class Mesh : public Model, public rt::Hittable {
+  class Mesh : public Model, public rt::Raytracable {
   public:
     Mesh(std::shared_ptr<::Model> const &model, Transformation const &transformation,
          sPtr<raytracer::Material> const &material);

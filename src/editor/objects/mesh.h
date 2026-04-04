@@ -10,7 +10,7 @@ namespace rt {
       Mesh(std::filesystem::path path);
       void                 RasterizeWithoutTransformation(vec3 color) override;
       std::optional<float> hit(const Ray &worldspaceRay) const override;
-      auto                 toRaytracerHittable() const -> std::shared_ptr<rt::Hittable> override;
+      auto                 toRaytracable() const -> std::shared_ptr<rt::Raytracable> override;
 
     private:
       std::shared_ptr<::Model> const model;

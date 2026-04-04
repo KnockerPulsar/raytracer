@@ -1,10 +1,10 @@
 #include "BVHNode.h"
 
 #include "Util.h"
+#include "common/Raytracable.h"
 #include "data_structures/vec3.h"
 
 #include <algorithm>
-#include <iostream>
 #include <memory>
 
 namespace {
@@ -43,7 +43,7 @@ namespace {
     return rt::AABB(newMin, newMax);
   }
 
-  bool BoxCompare(sPtr<const rt::Hittable>& a, sPtr<const rt::Hittable> &b, int axis) {
+  bool BoxCompare(sPtr<const rt::Raytracable>& a, sPtr<const rt::Raytracable> &b, int axis) {
     auto const boxA = ToWorldspace(a->boundingBox, a->transformation);
     auto const boxB = ToWorldspace(b->boundingBox, b->transformation);
 
@@ -65,9 +65,9 @@ namespace {
     return false;
   }
 
-  bool boxXCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 0); }
-  bool boxYCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 1); }
-  bool boxZCompare(sPtr<const rt::Hittable> a, sPtr<const rt::Hittable> b) { return BoxCompare(a, b, 2); }
+  bool boxXCompare(sPtr<const rt::Raytracable> a, sPtr<const rt::Raytracable> b) { return BoxCompare(a, b, 0); }
+  bool boxYCompare(sPtr<const rt::Raytracable> a, sPtr<const rt::Raytracable> b) { return BoxCompare(a, b, 1); }
+  bool boxZCompare(sPtr<const rt::Raytracable> a, sPtr<const rt::Raytracable> b) { return BoxCompare(a, b, 2); }
 
   rt::AABB SurroundingBox(rt::AABB b0, rt::AABB b1) {
     vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y), fmin(b0.min.z, b1.min.z));
@@ -77,18 +77,26 @@ namespace {
   }
 
   rt::AABB GetAABB(std::shared_ptr<rt::Hittable> left, std::shared_ptr<rt::Hittable> right) {
+    auto const raytracableWorldspaceBoundingBox =
+        [](auto const &node) {
+          if (auto const leafRaytracable = std::dynamic_pointer_cast<rt::Raytracable>(node))
+            return std::optional{ToWorldspace(leafRaytracable->boundingBox, leafRaytracable->transformation)};
+          return std::optional<rt::AABB>{};
+        };
+
     // Leaf node.. Bounding box is in local space
     if (left == right) {
-      auto const boxRight = ToWorldspace(right->boundingBox, right->transformation);
-      return boxRight;
+      return *raytracableWorldspaceBoundingBox(left);
     } else {
-      // Interior nodes might be BVH nodes themselves, their bounding boxes are
-      // already in worldspace and they have an identity transform.
-      //
-      // If they aren't BVH nodes, then the following two lines converts their
-      // bounding boxes to worldspace.
-      auto const boxLeft  = ToWorldspace(left->boundingBox, left->transformation);
-      auto const boxRight = ToWorldspace(right->boundingBox, right->transformation);
+      auto worldspaceBoundingBox = [&](auto const &node) {
+        // Raytracable node bounding boxes are in local space
+        return raytracableWorldspaceBoundingBox(node)
+            .transform([](auto const &box) { return box; })
+            // BVH node bounding boxes are in worldspace.
+            .value_or(node->boundingBox);
+      };
+      auto const boxLeft  = worldspaceBoundingBox(left);
+      auto const boxRight = worldspaceBoundingBox(right);
 
       return SurroundingBox(boxLeft, boxRight);
     }
@@ -109,7 +117,7 @@ namespace {
   }
 
   // Somehow this is about twice as slow in the Cornell box scene
-  auto LongestAxisComparator(std::vector<sPtr<rt::Hittable>> &srcObjects, size_t start, size_t end) {
+  auto LongestAxisComparator(std::vector<sPtr<rt::Raytracable>> &srcObjects, size_t start, size_t end) {
     auto const infinity = rt::constants::infinity;
     auto [xMin, xMax] = std::pair{infinity, -infinity};
     auto [yMin, yMax] = std::pair{infinity, -infinity};
@@ -143,7 +151,7 @@ namespace {
 
 // TODO this constructor can be rewritten to use spans
 // TODO SAH
-rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Hittable>> &srcObjects, size_t start,
+rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Raytracable>> &srcObjects, size_t start,
                                                  size_t end, float t0, float t1) {
   using BVHNode = rt::raytracer::BVHNode;
 
@@ -172,12 +180,11 @@ rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Hittable>>
   }
 }
 
-rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Hittable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
+rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Raytracable>> &list, float t0, float t1) : BVHNode(list, 0, list.size(), t0, t1) {}
 
-rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Hittable>> &srcObjects, size_t start, size_t end, float t0,
+rt::raytracer::BVHNode::BVHNode(std::vector<sPtr<Raytracable>> &srcObjects, size_t start, size_t end, float t0,
                                 float t1)
-    : BVHNodeData(srcObjects, start, end, t0, t1),
-      Hittable(Transformation{}, nullptr, GetAABB(left, right)) {}
+    : BVHNodeData(srcObjects, start, end, t0, t1), Hittable(GetAABB(left, right)) {}
 
 bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const {
   // Bounding box and ray are both in worldspace.

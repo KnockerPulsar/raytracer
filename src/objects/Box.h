@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Hittable.h"
+#include "common/Raytracable.h"
 #include "common/Ray.h"
 #include "data_structures/vec3.h"
 
@@ -9,7 +9,7 @@
 #include <rlgl.h>
 
 namespace rt::raytracer {
-  class Box : public rt::Hittable {
+  class Box : public rt::Raytracable {
   public:
     Box(const vec3& extents, Transformation const &transformation, sPtr<raytracer::Material> const &material);
     Box(float edgeLength, Transformation const &transformation, sPtr<raytracer::Material> const &material);

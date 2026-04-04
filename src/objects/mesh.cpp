@@ -115,7 +115,7 @@ namespace rt::raytracer {
 
   Mesh::Mesh(std::shared_ptr<::Model> const &model, Transformation const &transformation,
              sPtr<raytracer::Material> const &material)
-      : Model(model), Hittable(transformation, material, localspaceBoundingBox(triangles)) {}
+      : Model(model), Raytracable(transformation, material, localspaceBoundingBox(triangles)) {}
 
   bool Mesh::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
     auto const raycastResult = rt::raycastInLocalspace(
