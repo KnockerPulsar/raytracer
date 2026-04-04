@@ -12,5 +12,5 @@ void rt::editor::Metal::OnImgui() {
 }
 
 auto rt::editor::Metal::toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> {
-  return std::make_shared<raytracer::Metal>(albedo->toRaytracerTexture());
+  return std::make_shared<raytracer::Metal>(albedo->toRaytracerTexture(), fuzz);
 }
