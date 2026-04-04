@@ -5,8 +5,8 @@
 #include <charconv>
 #include <cstdlib>
 #include <format>
-#include <ostream>
 #include <string>
+
 /*
  TODO:
     Regenerate BVH tree automatically on object transform with ImGuizmo?
@@ -81,11 +81,6 @@
 using namespace argumentum;
 
 CliConfig setupArguments(int argc, char **argv) {
-  const glm::ivec2 imageSizeDefault = {900, 900};
-  const glm::ivec2 editorSizeDefault = {1280, 720};
-  const int numThreadsDefault = 6;
-
-  CliConfig config;
 
   argument_parser parser = argument_parser{};
 
@@ -120,46 +115,45 @@ CliConfig setupArguments(int argc, char **argv) {
         return glm::ivec2{width, height};
   };
 
+  CliConfig config;
   parser.config().program(argv[0]).description("Raytracer");
-  parser.add_argument(config.imageSize, "--image-size")
+  parser.params().add_parameter(config.imageSize, "--image-size")
+      .absent(config.imageSize)
       .maxargs(1)
       .metavar("<width>x<height>")
-      .absent(imageSizeDefault)
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "image-size"); })
       .help("rendering resolution width in pixels");
 
-  parser.add_argument(config.editorSize, "--editor-size")
+  parser.params().add_parameter(config.editorSize, "--editor-size")
+      .absent(config.editorSize)
       .maxargs(1)
       .metavar("<width>x<height>")
-      .absent(editorSizeDefault)
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "editor-size"); })
       .help("Window resolution width in pixels");
 
-  parser.add_argument(config.pathToScene, "--scene")
+  parser.params().add_parameter(config.pathToScene, "--scene")
+      .absent("")
       .maxargs(1)
       .metavar("STRING PATH")
-      .absent("")
       .help("Path to scene json");
 
-  parser.add_argument(config.numThreads, "--threads")
+  parser.params().add_parameter(config.numThreads, "--threads")
+      .absent(config.numThreads)
       .maxargs(1)
       .metavar("UNSIGNED INT")
-      .absent(numThreadsDefault)
       .help("Number of threads to raytrace with")
       .action([&](auto &target, const std::string &value) {
         int parsedValue = std::atoi(value.c_str());
 
         if (parsedValue <= 0) {
           std::cout << "WARNING: Invalid number of threads entered (" << value << "), using default number of threads ("
-                    << numThreadsDefault << ")" << '\n';
-
-          target = numThreadsDefault;
+                    << target << ")" << '\n';
         } else {
           target = parsedValue;
         }
       });
 
-  parser.add_argument(config.potato_mode, "--potato")
+  parser.params().add_parameter(config.potato_mode, "--potato")
       .maxargs(1)
       .metavar("BOOL")
       .absent(false)

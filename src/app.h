@@ -4,9 +4,9 @@
 #include <string>
 
 struct CliConfig {
-  glm::ivec2     imageSize;
-  glm::ivec2     editorSize;
-  int         numThreads = 6;
+  glm::ivec2  imageSize{900, 900};
+  glm::ivec2  editorSize{1280, 720};
+  unsigned int numThreads{std::thread::hardware_concurrency()};
   std::string pathToScene;
   bool        potato_mode = false;
 };
