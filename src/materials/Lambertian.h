@@ -4,8 +4,6 @@
 #include "Material.h"
 #include "textures/SolidColor.h"
 
-using nlohmann::json;
-
 namespace rt::raytracer {
 
   /**
