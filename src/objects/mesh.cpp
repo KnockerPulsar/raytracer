@@ -56,8 +56,8 @@ namespace {
     return triangles;
   }
 
-  std::optional<float> raycastTriangle(const rt::Ray &localspaceRay, vec3 v0, vec3 v1, vec3 v2,
-                                                           float tMin, float tMax) {
+  bool raycastTriangle(const rt::Ray &localspaceRay, const vec3 &v0, const vec3 &v1, const vec3 &v2, float tMin,
+                       float tMax, float &hitDistance) {
     vec3  v0v1 = v1 - v0;
     vec3  v0v2 = v2 - v0;
     vec3  pvec = vec3::CrsProd(localspaceRay.direction, v0v2);
@@ -65,26 +65,28 @@ namespace {
 
     // ray and triangle are parallel if det is close to 0
     if (fabs(det) < rt::constants::epsilon)
-      return {};
+      return false;
 
     float invDet = 1 / det;
 
     vec3  tvec = localspaceRay.origin - v0;
     float u    = vec3::DotProd(tvec, pvec) * invDet;
     if (u < 0 || u > 1)
-      return {};
+      return false;
 
     vec3  qvec = vec3::CrsProd(tvec, v0v1);
     float v    = vec3::DotProd(localspaceRay.direction, qvec) * invDet;
     if (v < 0 || u + v > 1)
-      return {};
+      return false;
 
     float t = vec3::DotProd(v0v2, qvec) * invDet;
 
     if (t < tMin || t > tMax) {
-      return {};
+      return false;
     }
-    return t;
+
+    hitDistance = t;
+    return true;
   }
 
   auto localspaceBoundingBox(std::vector<Triangle> const &triangles) {
@@ -144,25 +146,23 @@ namespace rt::raytracer {
     if (!worldspaceBoundingBox.Hit(worldspaceRay, t_min, t_max))
       return {};
 
-    auto const raycastResult = [&] {
-      std::optional<WorldspaceRaycastResult> closestHitResult;
-      std::ranges::for_each(triangles, [&](auto const &triangle) {
-        auto const currentTMax = closestHitResult.transform([](auto chr) { return chr.t; }).value_or(t_max);
-        if (auto const hitDistance =
-                raycastTriangle(worldspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, currentTMax)) {
-          closestHitResult.emplace(WorldspaceRaycastResult{triangle.normal, *hitDistance});
-        }
-      });
+    auto closestNormal = vec3::Zero();
+    auto closestSoFar = t_max;
 
-      return closestHitResult;
-    }();
+    auto tempDist = t_max;
+    for (auto const &triangle : triangles) {
+      if (raycastTriangle(worldspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, closestSoFar, tempDist)) {
+        closestNormal = triangle.normal;
+        closestSoFar  = tempDist;
+      }
+    }
 
-    if (!raycastResult)
+    if (closestSoFar == t_max)
       return false;
 
-    rec.p = worldspaceRay.At(raycastResult->t);
-    rec.setFaceNormal(worldspaceRay, raycastResult->normal);
-    rec.t = raycastResult->t;
+    rec.p = worldspaceRay.At(closestSoFar);
+    rec.setFaceNormal(worldspaceRay, closestNormal);
+    rec.t = closestSoFar;
 
     // TODO UV interpolation
     // source:
