@@ -102,12 +102,12 @@ rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Raytracabl
                                                  size_t end, float t0, float t1) {
   using BVHNode = rt::raytracer::BVHNode;
 
-  auto const comparator = LongestAxisComparator(srcObjects, start, end);
+  auto const comparator = RandomAxisComparator();
 
   auto const numberOfObjects = end - start;
   if (numberOfObjects == 1) {
     left = right = srcObjects[start];
-  } else if (numberOfObjects == 1) {
+  } else if (numberOfObjects == 2) {
     if (comparator(srcObjects[start], srcObjects[start + 1])) {
       left  = srcObjects[start];
       right = srcObjects[start + 1];
