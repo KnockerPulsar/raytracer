@@ -116,9 +116,6 @@ rt::raytracer::BVHNode::BVHNodeData::BVHNodeData(std::vector<sPtr<rt::Raytracabl
       right = srcObjects[start];
     }
   } else {
-    // TODO we're doing a bunch of matrix math in the comparator. Can we
-    // compute the worldspace AABB for all objects at the start and just reuse
-    // that?
     std::sort(srcObjects.begin() + start, srcObjects.begin() + end, comparator);
 
     auto mid = start + numberOfObjects / 2;
