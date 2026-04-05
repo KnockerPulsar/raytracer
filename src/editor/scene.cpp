@@ -405,7 +405,7 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
           .withRotation(vec3(0, 12, 0))
           .withMaterial(purplishMetal)
           .withName("Box 2"),
-      HittableBuilder<Mesh>("assets/models/nefertiti-low-poly.obj")
+      HittableBuilder<Mesh>("assets/models/nefertiti-5k.obj")
           .withMaterial(gold)
           .withTranslation(vec3(10, 10, 10)), // On top of box 2
   };

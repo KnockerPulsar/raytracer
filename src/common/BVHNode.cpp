@@ -2,6 +2,7 @@
 
 #include "Util.h"
 #include "common/Raytracable.h"
+#include "common/AABB.h"
 #include "data_structures/vec3.h"
 
 #include <algorithm>
@@ -34,18 +35,11 @@ namespace {
   bool boxYCompare(sPtr<const rt::Raytracable> a, sPtr<const rt::Raytracable> b) { return BoxCompare(a, b, 1); }
   bool boxZCompare(sPtr<const rt::Raytracable> a, sPtr<const rt::Raytracable> b) { return BoxCompare(a, b, 2); }
 
-  rt::AABB SurroundingBox(rt::AABB b0, rt::AABB b1) {
-    vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y), fmin(b0.min.z, b1.min.z));
-    vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y), fmax(b0.max.z, b1.max.z));
-
-    return rt::AABB(smol, big);
-  }
-
   rt::AABB GetAABB(std::shared_ptr<rt::Hittable> left, std::shared_ptr<rt::Hittable> right) {
     if (left == right) {
       return right->worldspaceBoundingBox;
     } else {
-      return SurroundingBox(left->worldspaceBoundingBox, right->worldspaceBoundingBox);
+      return rt::AABB::SurroundingBox(left->worldspaceBoundingBox, right->worldspaceBoundingBox);
     }
   }
 

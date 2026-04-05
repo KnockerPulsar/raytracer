@@ -3,8 +3,8 @@
 #include "common/Constants.h"
 #include "common/raycast.h"
 
-#include <ranges>
 #include <algorithm>
+#include <ranges>
 
 namespace {
   using Triangle = rt::raytracer::Mesh::Triangle;
@@ -113,11 +113,135 @@ namespace {
 
     return rt::AABB{min, max};
   }
+
+    auto const componentWiseMin = [](std::initializer_list<vec3> vertices) {
+      return vec3{
+        std::min(vertices, [](const vec3& a, const vec3& b) { return a.x < b.x; }).x,
+        std::min(vertices, [](const vec3& a, const vec3& b) { return a.y < b.y; }).y,
+        std::min(vertices, [](const vec3& a, const vec3& b) { return a.z < b.z; }).z,
+      };
+    };
+
+    auto const componentWiseMax = [](std::initializer_list<vec3> vertices) {
+      return vec3{
+        std::max(vertices, [](const vec3& a, const vec3& b) { return a.x < b.x; }).x,
+        std::max(vertices, [](const vec3& a, const vec3& b) { return a.y < b.y; }).y,
+        std::max(vertices, [](const vec3& a, const vec3& b) { return a.z < b.z; }).z,
+      };
+    };
+
+  rt::AABB getAABB(const Triangle& triangle)
+  {
+    auto const min = componentWiseMin({triangle.v0, triangle.v1, triangle.v2});
+    auto const max = componentWiseMax({triangle.v0, triangle.v1, triangle.v2});
+
+    return rt::AABB{min - rt::constants::epsilon, max + rt::constants::epsilon};
+  }
 } // namespace
 
 namespace rt::raytracer {
-  Model::Model(std::shared_ptr<::Model> const &model)
-      : triangles(loadTriangles(*model)) {}
+  struct Mesh::MeshBVHNode {
+    MeshBVHNode(std::span<Triangle> triangles)
+    {
+      auto const computeBoundingBox = [](auto const &triangles) {
+        auto min = vec3(rt::constants::infinity);
+        auto max = -min;
+        for (auto const &triangle : triangles) {
+          auto const boundingBox = getAABB(triangle);
+          min                    = componentWiseMin({min, boundingBox.min});
+          max                    = componentWiseMax({max, boundingBox.max});
+        }
+
+        return AABB{min, max};
+      };
+
+      boundingBox = computeBoundingBox(triangles);
+
+      auto constexpr maxTrianglesPerLeaf = 4;
+      if (triangles.size() <= maxTrianglesPerLeaf) {
+        this->triangles = triangles;
+        return;
+      }
+
+      auto const longestAxis = [&]() {
+        auto xSpan = boundingBox.max.x - boundingBox.min.x;
+        auto ySpan = boundingBox.max.y - boundingBox.min.y;
+        auto zSpan = boundingBox.max.z - boundingBox.min.z;
+
+        auto const longestSpan = std::max({xSpan, ySpan, zSpan});
+
+        if (longestSpan == xSpan) {
+          return 0;
+        } else if (longestSpan == ySpan) {
+          return 1;
+        } else {
+          return 2;
+        }
+      }();
+
+      auto const triangleCentroid = [](const Triangle &triangle, auto const axis) {
+        auto const component = [](vec3 v, auto const axis) {
+          switch (axis) {
+          case 0:
+            return v.x;
+          case 1:
+            return v.y;
+          case 2:
+            return v.z;
+          default:
+            return 0.0f;
+          }
+        };
+        return (component(triangle.v0, axis) + component(triangle.v1, axis) + component(triangle.v2, axis)) / 3.0f;
+      };
+
+      std::ranges::sort(triangles, [&](auto const &a, auto const &b) {
+        return triangleCentroid(a, longestAxis) < triangleCentroid(b, longestAxis);
+      });
+
+      auto const mid = triangles.size() / 2;
+      left           = std::make_unique<MeshBVHNode>(triangles.subspan(0, mid));
+      right          = std::make_unique<MeshBVHNode>(triangles.subspan(mid));
+      auto const bb = AABB::SurroundingBox(left->boundingBox, right->boundingBox);
+    }
+
+    bool hit(const rt::Ray& r, float t_min, float t_max, rt::HitRecord& rec) const {
+      if (!boundingBox.Hit(r, t_min, t_max))
+        return false;
+
+      if (!triangles.empty()) {
+        bool anyHit = false;
+        auto closestT = t_max;
+
+        for (const auto& triangle : triangles) {
+          float hitDistance = rt::constants::infinity;
+          if (raycastTriangle(r, triangle.v0, triangle.v1, triangle.v2, t_min, closestT, hitDistance)) {
+            anyHit = true;
+            closestT = hitDistance;
+            rec.t = hitDistance;
+            rec.normal = triangle.normal;
+          }
+        }
+
+        return anyHit;
+      }
+
+      bool hitLeft  = left->hit(r, t_min, t_max, rec);
+      bool hitRight = right->hit(r, t_min, hitLeft ? rec.t : t_max, rec);
+
+      return hitLeft || hitRight;
+    }
+
+
+    std::unique_ptr<MeshBVHNode> left{nullptr};
+    std::unique_ptr<MeshBVHNode> right{nullptr};
+
+    rt::AABB boundingBox;
+    std::span<Triangle> triangles;
+  };
+
+  Model::Model(std::shared_ptr<::Model> const &model) : triangles(loadTriangles(*model)) {}
+
 
   void Model::transform(const Transformation &transformation) {
     std::ranges::transform(triangles, triangles.begin(), [&](auto const &triangle) {
@@ -140,29 +264,17 @@ namespace rt::raytracer {
              sPtr<raytracer::Material> const &material)
       : Model(model), Raytracable(transformation, material, localspaceBoundingBox(triangles)) {
     transform(transformation);
+    bvhRoot = std::make_unique<MeshBVHNode>(std::span{triangles});
   }
 
+  Mesh::~Mesh() = default;
+
   bool Mesh::Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const {
-    if (!worldspaceBoundingBox.Hit(worldspaceRay, t_min, t_max))
+    if (!bvhRoot->hit(worldspaceRay, t_min, t_max, rec))
       return {};
 
-    auto closestNormal = vec3::Zero();
-    auto closestSoFar = t_max;
-
-    auto tempDist = t_max;
-    for (auto const &triangle : triangles) {
-      if (raycastTriangle(worldspaceRay, triangle.v0, triangle.v1, triangle.v2, t_min, closestSoFar, tempDist)) {
-        closestNormal = triangle.normal;
-        closestSoFar  = tempDist;
-      }
-    }
-
-    if (closestSoFar == t_max)
-      return false;
-
-    rec.p = worldspaceRay.At(closestSoFar);
-    rec.setFaceNormal(worldspaceRay, closestNormal);
-    rec.t = closestSoFar;
+    // The BVH sets the normal and the hit distance (t)
+    rec.p = worldspaceRay.At(rec.t);
 
     // TODO UV interpolation
     // source:

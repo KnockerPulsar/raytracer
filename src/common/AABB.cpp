@@ -122,4 +122,10 @@ namespace rt {
     return rt::AABB(newMin, newMax);
   }
 
+  rt::AABB AABB::SurroundingBox(rt::AABB const &b0, rt::AABB const &b1) {
+    vec3 smol(fmin(b0.min.x, b1.min.x), fmin(b0.min.y, b1.min.y), fmin(b0.min.z, b1.min.z));
+    vec3 big(fmax(b0.max.x, b1.max.x), fmax(b0.max.y, b1.max.y), fmax(b0.max.z, b1.max.z));
+
+    return rt::AABB(smol, big);
+  }
 } // namespace rt

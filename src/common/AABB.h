@@ -21,5 +21,6 @@ namespace rt {
     void Pad();
     bool Hit(const Ray &r, float tMin, float tMax) const;
     static rt::AABB ToWorldspace(const rt::AABB &aabb, const rt::Transformation &transform);
+    static rt::AABB SurroundingBox(rt::AABB const &b0, rt::AABB const &b1);
   };
 } // namespace rt

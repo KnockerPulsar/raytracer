@@ -18,7 +18,11 @@ namespace rt::raytracer {
   public:
     Mesh(std::shared_ptr<::Model> const &model, Transformation const &transformation,
          sPtr<raytracer::Material> const &material);
+    ~Mesh();
 
     bool Hit(const rt::Ray &worldspaceRay, float t_min, float t_max, rt::HitRecord &rec) const override;
+
+    class MeshBVHNode;
+    std::unique_ptr<MeshBVHNode> bvhRoot;
   };
 } // namespace rt::raytracer
