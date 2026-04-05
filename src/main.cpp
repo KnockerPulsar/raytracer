@@ -9,12 +9,6 @@
 
 /*
  TODO:
-    Regenerate BVH tree automatically on object transform with ImGuizmo?
-      - Right now, we can delay util we start raytracing or picking in the editor
-      - But since I intend to impelement hover and picked object highlighting, this will have to be immediate
-      - HittableLists don't require any work
-      - BVH trees will require a full rebuild (can refit but a full rebuild works too)
-
     Why does the BVHNode ctor take t0, t1 as inputs? Can we remove those?
 
     Add the ability to change material textures
@@ -38,16 +32,6 @@
       - Need to setup a way to rebuild previews on parameter change
       - Perlin noise is difficult to preview since it's 3D
 
-    Can add a prepass before raytracing where triangles and AABBs are transformed
-        Try applying transformations before rendering instead of transforming each ray depending on the object we're checking collision with
-          - For boxes, planes, triangles: Should be as easy as applying the transform to the vertices once and recalculating normals
-          - For spheres and parameteric shapes: might have to do runtime transformations on normals for example.
-            - For example for spheres, on hit, we'd get the point and rotate it (or the normal?) based on the rotation component of the transformation
-
-        Modify all hittables so that they're centered at the world origin to use scaling matrices.
-          - Box, plane, sphere all done
-          - Not sure about the rest
-
 
     Re-implement incremental rendering with job queue chunks
       - Would require blitting whenever a thread finishes a chunk
@@ -58,18 +42,7 @@
       - Method naming convention jumps between PascalCase and camelCase
 
     Implement meshes properly
-      - Hacked together with raylib
-      - Problem: Editor bounding box preview expects the bounding box to be in
-      world space. If I want to use it for an early exit in `Hit()`, then it
-      has to be in local space. Hacked around it for not
       - TODO: Add the ability to add/change/reload? models at runtime
-      - TODO: BVH acceleration
-
-    Editor and raytracer should be two separate things with their own states.
-    The editor state should be dynamic to allow for live editing. When
-    raytracing, the raytracer state should be derived from the editor state and
-    should be constant for its lifetime. Should integrate nicely with the
-    prepass idea above.
 
     Update nlhomann-json
 */
