@@ -33,7 +33,6 @@ namespace rt {
 
     class Editor : public IState {
     public:
-      // TODO should be private
       struct ViewState {
         struct FileMenu {
           bool shouldOpen{false};
