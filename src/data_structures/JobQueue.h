@@ -1,31 +1,31 @@
 #pragma once
 
-#include "common/AsyncRenderData.h"
-
 #include <algorithm>
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 #include <utility>
 #include <vector>
 
-namespace rt {
-
-  class AsyncRenderData;
+// TODO should be moved to `src/raytracer`
+namespace rt::raytracer {
 
   template <typename JobData> class JobQueue {
   private:
     std::vector<JobData> jobs;
-    int             currentChunkStart;
-    std::mutex      queueMutex;
 
+    const int numberOfJobs;
+    const int chunkSize;
+    int       currentChunkStart;
+
+    std::mutex      queueMutex;
     std::condition_variable threadBarrier;
 
-    const int chunkSize;
+    std::function<void(int)> const onThreadDone;
 
   public:
-    int numberOfJobs;
-
-    JobQueue(int numberOfJobs, int chunkSize) : chunkSize(chunkSize), numberOfJobs(numberOfJobs) {
+    JobQueue(int numberOfJobs, int chunkSize, std::function<void(int)> onThreadDone)
+        : chunkSize(chunkSize), numberOfJobs(numberOfJobs), onThreadDone(onThreadDone), currentChunkStart(0) {
       jobs.reserve(numberOfJobs);
     }
 
@@ -33,7 +33,7 @@ namespace rt {
     void addJobNoLock(JobData newJobData) { jobs.push_back(newJobData); }
 
     std::pair<typename std::vector<JobData>::iterator, typename std::vector<JobData>::iterator>
-    getChunk(AsyncRenderData &ard, int threadIndex) {
+    getChunk(int threadIndex) {
 
       // Unlocks automatically on scope end
       std::unique_lock<std::mutex> lk{queueMutex};
@@ -41,7 +41,7 @@ namespace rt {
       // All jobs consumed, wait untill the main thread refreshes jobs and notifies threads.
       // Or main thread wants to stop threads
       if (currentChunkStart > jobs.size() - 1) {
-        ard.finishedThreads[threadIndex] = true;
+        onThreadDone(threadIndex);
         threadBarrier.wait(lk);
       }
 

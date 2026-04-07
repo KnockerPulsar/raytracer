@@ -16,10 +16,8 @@
 // #include "objects/plane.h"
 
 #include "raytracer/raytracer.h"
-#include "common/Hittable.h"
 #include "common/bvh_tree.h"
 #include "common/Scene.h"
-#include "common/bvh_tree.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
@@ -138,7 +136,7 @@ namespace rt::editor {
     }
 
     if (viewState.viewMenu.raytracingSettings)
-      RaytraceSettingsImgui();
+      config.OnImgui();
 
     if (viewState.viewMenu.cameraSettings)
       camera.RenderImgui();
@@ -374,6 +372,16 @@ namespace rt::editor {
     return closestObject;
   }
 
+  Editor::Editor(App *const app, CliConfig const &config)
+      : IState(app),
+        scene(std::make_unique<editor::Scene>(config.pathToScene.empty()
+                                                  ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
+                                                  : editor::Scene::Load(config.imageSize, config.pathToScene))),
+        camera(config.editorSize, config.imageSize, scene->getCamera()),
+        rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)), config(config, *scene) {}
+
+  Editor::~Editor() { UnloadRenderTexture(rasterRT); }
+
   void Editor::onUpdate() {
 
     CheckInput();
@@ -395,7 +403,7 @@ namespace rt::editor {
 
   void Editor::AddObjectImgui() {
     ImGui::Combo(("##" + EditorUtils::GetIDFromPointer(this)).c_str(), (int *)&selectedAddableObject,
-                 addableObjectTypes, AddableObjectsTypesCount, -1);
+                 addableObjectTypes, AddableObjectsTypes::AddableObjectsTypesCount, -1);
     ImGui::SameLine();
     if (ImGui::Button("+", {-1, 0})) {
 
@@ -431,7 +439,7 @@ namespace rt::editor {
     }
   }
 
-  auto Editor::compileScene() const -> std::shared_ptr<raytracer::Scene> {
+  auto Editor::compileScene() const -> std::unique_ptr<raytracer::Scene> {
     auto const world = scene->getWorld();
 
     // TODO can this store unique pointers instead?
@@ -442,34 +450,28 @@ namespace rt::editor {
       raytracables.push_back(obj->toRaytracable());
     }
 
-    return std::make_shared<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1),
+    return std::make_unique<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1),
                                               camera.toRaytracerCamera(), camera.imageSize(), scene->backgroundColor());
   }
 
   void Editor::onExit() {
-    *app->getARD() = AsyncRenderData(camera.imageSize(), app->editorSize, app->getNumThreads());
-    rebuildRaytracer(std::make_shared<rt::raytracer::Raytracer>(app, *app->getARD(), compileScene()));
+    auto raytracerConfig = raytracer::Config{
+        compileScene(),
+        config.seed,
+        config.numSamples,
+        config.maxDepth,
+        config.numThreads,
+        camera.imageSize(),
+    };
+
+    rebuildRaytracer(
+        std::make_shared<rt::raytracer::Raytracer>(app, std::move(raytracerConfig), config.saveOnRender, config.editorSize));
   }
 
-  void Editor::RenderViewport() {
+  void Editor::RenderViewport() const {
     // Flip on Y axis since ImGui and opengl/raylib use different axis
     DrawTextureRec(rasterRT.texture, {0, 0, float(rasterRT.texture.width), -float(rasterRT.texture.height)}, {0, 0},
                    WHITE);
-  }
-
-  void Editor::RaytraceSettingsImgui() {
-    // getScene()->settings.OnImgui();
-
-    ImGui::Begin("Other settings");
-    // ImGui::ColorEdit3("Background color", &getScene()->backgroundColor.x);
-    ImGui::Checkbox("Save on render?", &app->saveOnRender);
-
-    int numThreads = app->getNumThreads();
-    if (ImGui::InputScalar("Number of threads", ImGuiDataType_U32, &numThreads)) {
-      app->changeNumThreads(numThreads);
-    }
-
-    ImGui::End();
   }
 
   void Editor::ObjectListImgui() {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IImguiDrawable.h"
 #include "data_structures/vec3.h"
 
 #include <glm/fwd.hpp>
@@ -14,21 +13,6 @@
 namespace rt::editor {
 class Camera;
 class Object;
-
-struct RaytraceSettings : public rt::IImguiDrawable {
-  int samplesPerPixel = 1;
-  int maxDepth        = 10;
-
-  RaytraceSettings() = default;
-  RaytraceSettings(int spp, int md) : samplesPerPixel(spp), maxDepth(md) {}
-
-  void OnImgui() override {
-    ImGui::Begin("Raytrace settings");
-    ImGui::DragInt("Samples per pixel", &samplesPerPixel, 1, 1, 500);
-    ImGui::DragInt("Maximum depth", &maxDepth, 1, 1, 100);
-    ImGui::End();
-  }
-};
 
 class Scene {
 public:
@@ -48,6 +32,12 @@ public:
     float aperature;
 
     static inline const vec3 vUp = vec3(0, 1, 0); // TODO make customizable
+  };
+
+  struct Config {
+    uint64_t const seed;
+    uint64_t const numSamples;
+    uint64_t const maxDepth;
   };
 
   // TODO: update these to accept glm::vec2
@@ -84,14 +74,13 @@ public:
   static std::vector<std::pair<std::string, std::function<std::unique_ptr<Scene>(int, int)>>> builtInScenes;
 
 private:
-  Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor,
-        RaytraceSettings settings = RaytraceSettings{});
+  Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor);
 
-  RaytraceSettings const settings;
   std::vector<std::shared_ptr<Object>> world;
-  Camera const cam;
-  vec3 const backgroundColor_;
-  glm::ivec2  const imageSize_;
+  Camera const                         cam;
+  vec3 const                           backgroundColor_;
+  glm::ivec2 const                     imageSize_;
+
 };
 
 // void to_json(json &j, const Scene &s) {

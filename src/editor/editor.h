@@ -4,9 +4,11 @@
 #include "app.h"
 #include "camera.h"
 #include "common/Defs.h"
+#include "editor/IImguiDrawable.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
+#include <random>
 #include <raylib.h>
 
 #include <glm/glm.hpp>
@@ -28,8 +30,10 @@ namespace rt {
     class Material;
     class Hittable;
 
+
     class Editor : public IState {
     public:
+      // TODO should be private
       struct ViewState {
         struct FileMenu {
           bool shouldOpen{false};
@@ -49,11 +53,8 @@ namespace rt {
         BuiltInMenu builtInMenu;
       };
 
-      Editor(App *const app, CliConfig const &config, std::unique_ptr<editor::Scene> initialScene)
-          : IState(app), camera(config.editorSize, config.imageSize, initialScene->getCamera()),
-            rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)), scene(std::move(initialScene)) {}
-
-      ~Editor() { UnloadRenderTexture(rasterRT); }
+      Editor(App *const app, CliConfig const &config);
+      ~Editor();
 
       /*
         Checks for inputs, updates the editor camera and its GUI,
@@ -64,11 +65,40 @@ namespace rt {
 
       static std::optional<sPtr<editor::Material>> MaterialChanger();
 
-      auto compileScene() const -> std::shared_ptr<raytracer::Scene>;
+      auto compileScene() const -> std::unique_ptr<raytracer::Scene>;
 
     private:
+      struct Config : public rt::IImguiDrawable {
+        // All defaults are defined in `CliConfig`
+        glm::ivec2   const editorSize;
 
-      enum AddableObjectsTypes { Box, Sphere, Plane, AddableObjectsTypesCount };
+        uint64_t     numThreads;
+        bool         potatoMode;
+        bool         saveOnRender;
+
+        // If not set, defaults from the scene will be used
+        uint64_t numSamples;
+        uint64_t maxDepth;
+
+        uint64_t seed;
+
+        Config(CliConfig const &cliConfig, Scene const &scene)
+            : editorSize(cliConfig.editorSize), numThreads(cliConfig.numThreads), saveOnRender(cliConfig.saveOnRender),
+              numSamples(cliConfig.numSamples), maxDepth(cliConfig.maxDepth),
+              seed(cliConfig.seed.value_or(std::random_device{}())) {}
+
+        void OnImgui() override {
+          ImGui::Begin("Other settings");
+          ImGui::Checkbox("Save on render?", &saveOnRender);
+          ImGui::DragInt("Number of threads", reinterpret_cast<int*>(&numThreads), 1, 1, 128);
+          ImGui::DragInt("Samples per pixel", reinterpret_cast<int *>(&numSamples), 1, 1, 500);
+          ImGui::DragInt("Maximum depth", reinterpret_cast<int *>(&maxDepth), 1, 1, 100);
+          ImGui::InputScalar("Seed", ImGuiDataType_U64, &seed);
+          ImGui::End();
+        }
+      };
+
+      enum AddableObjectsTypes : uint8_t { Box, Sphere, Plane, AddableObjectsTypesCount };
       inline static const char *addableObjectTypes[] = {
           "Box",
           "Sphere",
@@ -92,8 +122,7 @@ namespace rt {
       // Tests a ray against the world and returns whatever it hits (can be null)
       editor::Object *CastRay(Vector2 mousePos);
       void AddObjectImgui();
-      void RenderViewport();
-      void RaytraceSettingsImgui();
+      void RenderViewport() const;
       void ObjectListImgui();
       void TopMenuImgui();
 
@@ -111,11 +140,12 @@ namespace rt {
 
       static const int numColors = sizeof(colors) / sizeof(colors[0]);
 
+      std::unique_ptr<Scene> scene;
       editor::Camera  camera;
       RenderTexture2D rasterRT;
 
-      ViewState              viewState;
-      std::unique_ptr<Scene> scene;
+      ViewState viewState;
+      Config    config;
 
     }; // namespace Editor
   } // namespace editor

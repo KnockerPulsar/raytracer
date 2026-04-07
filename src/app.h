@@ -1,14 +1,24 @@
 #pragma once
-#include "common/AsyncRenderData.h"
+
+#include "common/Defs.h"
+#include "glm/ext/vector_int2.hpp"
 
 #include <string>
+#include <thread>
 
 struct CliConfig {
-  glm::ivec2  imageSize{900, 900};
-  glm::ivec2  editorSize{1280, 720};
-  unsigned int numThreads{std::thread::hardware_concurrency()};
-  std::string pathToScene;
-  bool        potato_mode = false;
+  glm::ivec2   imageSize{900, 900};
+  glm::ivec2   editorSize{1280, 720};
+  uint64_t     numThreads{std::thread::hardware_concurrency()};
+  bool         potatoMode{false};
+  bool         saveOnRender{true};
+
+  std::string  pathToScene;
+
+  uint64_t numSamples{100};
+  uint64_t maxDepth{10};
+
+  std::optional<uint64_t> seed;
 };
 
 namespace rt {
@@ -18,16 +28,13 @@ namespace rt {
 
 
   class App {
-    AsyncRenderData ard;
-
     //  We don't intend to point the editor to new instances.
     sPtr<editor::Editor> editor;
     sPtr<raytracer::Raytracer> rt;
 
-    int  numThreads;
-    bool shouldQuit = false;
-
     std::weak_ptr<IState> currentState;
+    bool shouldQuit = false;
+    bool saveOnRender = true;
 
   public:
     App(CliConfig);
@@ -41,16 +48,5 @@ namespace rt {
     // Quick way of exporting hardcoded scenes into JSON
     static void jsonExportTest();
     static void jsonImportTest();
-
-    AsyncRenderData *getARD() { return &ard; }
-    int              getNumThreads() const { return numThreads; }
-
-    void changeNumThreads(int newNumThreads) {
-      numThreads = newNumThreads;
-      ard.changeNumThreads(numThreads);
-    }
-
-    glm::ivec2 const editorSize;
-    bool saveOnRender = true;
   };
 } // namespace rt

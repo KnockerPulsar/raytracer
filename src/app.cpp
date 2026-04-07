@@ -1,11 +1,9 @@
 #include "app.h"
 
 #include "editor/editor.h"
-#include "editor/scene.h"
 
 #include "common/Constants.h"
 #include "common/Defs.h"
-#include "data_structures/JobQueue.h"
 
 #include "raytracer/raytracer.h"
 
@@ -13,23 +11,16 @@
 #include <rlImGui.h>
 
 #include <memory>
-#include <string>
 
 namespace rt {
-  App::App(CliConfig config)
-      : numThreads(config.numThreads), ard([&] {
-          // AsyncRenderData tries to create a RenderTexture which requires a
-          // window to be created
-          InitWindow(config.editorSize.x, config.editorSize.y, rt::constants::title);
-          return AsyncRenderData(config.imageSize, config.editorSize, config.numThreads);
-        }()),
-        editorSize(config.editorSize),
-        editor(std::make_shared<editor::Editor>(
-            this, config,
-            std::make_unique<editor::Scene>(config.pathToScene.empty()
-                                                ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
-                                                : editor::Scene::Load(config.imageSize, config.pathToScene)))),
-        currentState(editor) {
+  App::App(CliConfig config) {
+
+    InitWindow(config.editorSize.x, config.editorSize.y, rt::constants::title);
+
+    // Editor MUST be initialized after the window is created
+    editor       = std::make_shared<editor::Editor>(this, config);
+    currentState = editor;
+
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
     SetExitKey(KEY_NULL);
@@ -83,10 +74,10 @@ namespace rt {
     // Note that if you kill the application in fullscreen, the resolution won't
     // reset to native.
 
-    // Destroy the editor before we close the window so the raster texture can
-    // be unloaded properly.
+    // Destroy the editor and raytracer before we close the window so the
+    // raster and raytrace textures can be unloaded properly.
     editor.reset();
-    UnloadRenderTexture(ard.raytraceRT);
+    rt.reset();
 
     rlImGuiShutdown();
     CloseWindow();

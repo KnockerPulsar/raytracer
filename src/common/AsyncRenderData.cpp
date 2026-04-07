@@ -1,45 +1,45 @@
 #include "AsyncRenderData.h"
+
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
 
+namespace rt::raytracer {
+  // TODO tiles instead of lines?
+  // Every thread gets 4 lines of the output
+  AsyncRenderData::AsyncRenderData(Config &&config)
+      : threadProgress(config.numThreads, 0), threadTimes(config.numThreads, 0L),
+        finishedThreads(0),
+        pixelJobs(config.imageSize.x * config.imageSize.y, config.imageSize.x * 4,
+                  [this](int threadIndex) { finishedThreads++; }),
+        config(std::move(config)) {
 
-namespace rt {
-  AsyncRenderData::AsyncRenderData(glm::ivec2 imageSize, glm::ivec2 editorSize, int numThreads)
-      : threadProgress(std::vector(numThreads, 0)), threadTimes(std::vector(numThreads, 0L)),
-        finishedThreads(std::vector(numThreads, false)) {
-
-    int queueChunkSize = imageSize.x * 4;
-    pixelJobs          = std::make_shared<JobQueue<Pixel>>(imageSize.x * imageSize.y, queueChunkSize);
-
-    raytraceRT = LoadRenderTexture(imageSize.x, imageSize.y);
+    raytraceRT = LoadRenderTexture(config.imageSize.x, config.imageSize.y);
 
     // Prepare pixel jobs
-    for (int y = 0; y < imageSize.y; y++) {
-      for (int x = 0; x < imageSize.x; x++) {
-        pixelJobs->addJobNoLock(Pixel{x, y, vec3::Zero()});
+    for (int y = 0; y < config.imageSize.y; y++) {
+      for (int x = 0; x < config.imageSize.x; x++) {
+        pixelJobs.addJobNoLock(Pixel{x, y, vec3::Zero()});
       }
     }
   }
 
+  AsyncRenderData::~AsyncRenderData() {
+    KillThreads();
+    UnloadRenderTexture(raytraceRT);
+  }
+
   void AsyncRenderData::KillThreads() {
-    this->pixelJobs->awakeAllWorkers();
+    this->pixelJobs.awakeAllWorkers();
 
     // Tell threads to exit
     this->exit = true;
 
     // Join threads
     for (auto &&t : this->threads) {
-      t->join();
+      t.join();
     }
 
     // Clear thread vector
     this->threads.clear();
   }
-
-  void AsyncRenderData::changeNumThreads(int newNumThreads) {
-    KillThreads();
-    threadProgress.resize(newNumThreads);
-    threadTimes.resize(newNumThreads);
-    finishedThreads.resize(newNumThreads);
-  }
-} // namespace rt
+} // namespace rt::raytracer

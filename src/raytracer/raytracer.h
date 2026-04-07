@@ -1,6 +1,6 @@
 #include "common/IState.h"
-#include "data_structures/JobQueue.h"
 #include "common/Ray.h"
+#include "common/AsyncRenderData.h"
 
 #include <raylib.h>
 #include <rlImGui.h>
@@ -8,9 +8,10 @@
 
 namespace rt::raytracer {
   class Scene;
+  class Config;
   class Raytracer : public IState {
   public:
-    Raytracer(App *const app, AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene);
+    Raytracer(App *const app, Config &&config, bool saveOnRender, glm::ivec2 editorSize);
 
     virtual void onEnter() override;
     virtual void onExit() override;
@@ -23,12 +24,14 @@ namespace rt::raytracer {
     void RenderImGui();
     void Autosave();
 
-    static void TraceRay(AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene, int threadIndex);
-    static vec3 RayColor(const rt::Ray &r, std::shared_ptr<Scene> const &compiledScene, int depth);
+    static void TraceRay(AsyncRenderData &ard, int threadIndex);
+    static vec3 RayColor(const rt::Ray &r, std::unique_ptr<Scene> const &compiledScene, int depth);
 
     bool allFinished = false;
-    AsyncRenderData &ard;
-    std::shared_ptr<Scene> const compiledScene;
+
+    AsyncRenderData ard;
+    bool const saveOnRender;
+    glm::ivec2 const editorSize;
 
     struct ViewState {
       bool showProgress = true;

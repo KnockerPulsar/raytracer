@@ -439,12 +439,11 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
   }();
 
   auto const settings         = readScene["settings"];
-  auto const raytraceSettings = [&] {
-    return RaytraceSettings{settings["max_depth"].get<int>(), settings["num_samples"].get<int>()};
-  }();
+  // auto const raytraceSettings = [&] {
+  //   return Config{settings["max_depth"].get<int>(), settings["num_samples"].get<int>()};
+  // }();
 
-  // TODO maybe the background color should be moved to the raytrace settings?
-  Scene s = Scene(std::move(world), camera, imageSize, settings["background_color"].get<vec3>(), raytraceSettings);
+  Scene s = Scene(std::move(world), camera, imageSize, settings["background_color"].get<vec3>());
 
   std::cout << "Loaded scene with\n"
             << "\tsettings " << settings << '\n'
@@ -559,9 +558,8 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
 //   return sceneJson;
 // }
 
-Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor,
-             RaytraceSettings settings)
-    : world(std::move(world)), cam(cam), backgroundColor_(backgroundColor), imageSize_(imageSize), settings(settings) {}
+Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor)
+    : world(std::move(world)), cam(cam), backgroundColor_(backgroundColor), imageSize_(imageSize) {}
 
 auto Scene::getWorld() -> std::vector<std::shared_ptr<Object>> & { return world; }
 

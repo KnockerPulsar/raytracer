@@ -1,41 +1,37 @@
 #pragma once
-#include "Defs.h"
+
 #include "data_structures/Pixel.h"
+#include "data_structures/JobQueue.h"
+#include "raytracer/config.h"
 
 #include <raylib.h>
 
 #include <thread>
 #include <vector>
 
-namespace rt {
-
-  template<typename JobData> class JobQueue;
+// TODO should be moved to `src/raytracer`
+namespace rt::raytracer {
+  class Config;
 
   struct AsyncRenderData {
-    std::vector<sPtr<std::thread>> threads;
+    std::vector<std::thread> threads;
 
-    sPtr<JobQueue<Pixel>> pixelJobs;
+    JobQueue<Pixel> pixelJobs;
 
     std::vector<long> threadTimes;
     std::vector<int>  threadProgress;
-    std::vector<bool> finishedThreads;
+    std::atomic<int>  finishedThreads;
 
     bool exit = false; // To make threads exit their loops
 
     RenderTexture2D raytraceRT;
 
   public:
-    AsyncRenderData() = default;
-
-    AsyncRenderData(glm::ivec2 imageSize, glm::ivec2 editorSize, int numThreads);
-
-    AsyncRenderData(sPtr<JobQueue<Pixel>> pj, std::vector<long> tt, std::vector<int> tp, std::vector<bool> ft)
-        : pixelJobs(pj), threadTimes(tt), threadProgress(tp), finishedThreads(ft) {}
+    AsyncRenderData(Config &&config);
+    ~AsyncRenderData();
 
     void KillThreads();
 
-    void changeNumThreads(int newNumThreads);
-
-    ~AsyncRenderData() { KillThreads(); }
+    Config const config;
   };
 } // namespace rt

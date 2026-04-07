@@ -7,6 +7,7 @@
 #include "materials//Material.h"
 
 #include "data_structures/Pixel.h"
+#include "data_structures/JobQueue.h"
 
 #include "editor/Utils.h"
 
@@ -16,13 +17,8 @@
 #include <iostream>
 #include <algorithm>
 
-namespace {
-  auto const samplesPerPixel = 10; // TODO
-  auto const maxDepth        = 10; // TODO
-}
-
-rt::raytracer::Raytracer::Raytracer(App *const app, AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene)
-    : IState(app), ard(ard), compiledScene(compiledScene) {}
+rt::raytracer::Raytracer::Raytracer(App *const app, Config &&config, bool saveOnRender, glm::ivec2 editorSize)
+    : IState(app), ard(std::move(config)), saveOnRender(saveOnRender), editorSize(editorSize) {}
 
 void rt::raytracer::Raytracer::onEnter() { startRaytracing(); }
 
@@ -30,17 +26,17 @@ void rt::raytracer::Raytracer::onExit() {
   ard.KillThreads();
 
   // Reset job queue chunks
-  ard.pixelJobs->setCurrentChunkStart(0);
+  ard.pixelJobs.setCurrentChunkStart(0);
 
+  ard.finishedThreads = 0;
   // Reset thread times and progress
-  for (int i = 0; i < app->getNumThreads(); i++) {
+  for (int i = 0; i < ard.config.numThreads; i++) {
     ard.threadTimes[i]     = 0;
     ard.threadProgress[i]  = 0;
-    ard.finishedThreads[i] = false;
   }
 
   // Clear results from previous job.
-  for (auto it = ard.pixelJobs->getJobsVector().begin(); it != ard.pixelJobs->getJobsVector().end(); ++it) {
+  for (auto it = ard.pixelJobs.getJobsVector().begin(); it != ard.pixelJobs.getJobsVector().end(); ++it) {
     it->color = vec3(0);
   }
 
@@ -62,20 +58,20 @@ void rt::raytracer::Raytracer::onUpdate() {
 void rt::raytracer::Raytracer::startRaytracing() {
   ard.exit = false;
 
-  for (auto &job : ard.pixelJobs->getJobsVector()) {
+  for (auto &job : ard.pixelJobs.getJobsVector()) {
     job.color = vec3::Zero();
   }
 
-  for (int t = 0; t < app->getNumThreads(); t++) {
-    ard.threads.push_back(std::make_shared<std::thread>(TraceRay, std::ref(ard), compiledScene, t));
+  for (int t = 0; t < ard.config.numThreads; t++) {
+    ard.threads.emplace_back(TraceRay, std::ref(ard), t);
   }
 }
 
 void rt::raytracer::Raytracer::BlitToBuffer() {
 
-  auto const imageSize = compiledScene->imageSize();
+  auto const imageSize = ard.config.imageSize;
   auto *pixelData = new Color[static_cast<int>(imageSize.x * imageSize.y)];
-  auto  jobs      = ard.pixelJobs->getJobsVector();
+  auto  jobs      = ard.pixelJobs.getJobsVector();
 
   // Copy over only the color data
   for (int i = 0; i < jobs.size(); ++i) {
@@ -103,39 +99,36 @@ void rt::raytracer::Raytracer::BlitToBuffer() {
 bool rt::raytracer::Raytracer::onFinished() {
   ClearBackground(BLACK);
 
-  bool const finished = std::ranges::all_of(ard.finishedThreads, std::identity{});
-  if (finished && !allFinished) {
+  if (ard.finishedThreads == ard.config.numThreads && !allFinished) {
     allFinished = true;
 
     ard.KillThreads();
 
     BlitToBuffer();
 
-    if (app->saveOnRender)
+    if (saveOnRender)
       Autosave();
   }
 
-  // TODO: figure out how to enable imgui's operator overloading
-  auto const editorSize = ImVec2(app->editorSize.x, app->editorSize.y);
+  auto const editorSize = ImVec2(this->editorSize.x, this->editorSize.y);
   auto const fitSize = EditorUtils::FitIntoArea(editorSize,
                                                 ImVec2(ard.raytraceRT.texture.width, ard.raytraceRT.texture.height));
 
   float const dWidth  = editorSize.x - fitSize.x;
   float const dHeight = editorSize.y - fitSize.y;
 
-  auto const imageSize = compiledScene->imageSize();
+  auto const imageSize = ard.config.imageSize;
   DrawTexturePro(ard.raytraceRT.texture,
                  (Rectangle){0, 0, static_cast<float>(imageSize.x), static_cast<float>(imageSize.y)},
                  (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
   return allFinished;
 }
 
-void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Scene> const &compiledScene,
-                                        int threadIndex) {
+void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, int threadIndex) {
 
   while (true) {
     auto start                = std::chrono::high_resolution_clock::now();
-    auto [jobsStart, jobsEnd] = ard.pixelJobs->getChunk(ard, threadIndex);
+    auto [jobsStart, jobsEnd] = ard.pixelJobs.getChunk(threadIndex);
 
     for (auto currentJob = jobsStart; currentJob != jobsEnd; ++currentJob) {
 
@@ -145,22 +138,27 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Sc
         return;
 #endif
 
+
       Pixel &job = *currentJob;
 
       int x = job.x;
       int y = job.y;
 
+      auto const& compiledScene = ard.config.compiledScene;
+      auto const samplesPerPixel = ard.config.numSamples;
       for (int s = 0; s < samplesPerPixel; s++) {
-        auto const imageSize = compiledScene->imageSize();
+        auto const imageSize = ard.config.imageSize;
         float   u   = (x + RandomFloat()) / (imageSize.x - 1);
         float   v   = (y + RandomFloat()) / (imageSize.y - 1);
         rt::Ray ray = compiledScene->getRay(u, v);
-        job.color += RayColor(ray, compiledScene, maxDepth);
+        job.color += RayColor(ray, compiledScene, ard.config.maxDepth);
       }
 
 #ifdef GAMMA_CORRECTION
       // Gamma correction
-      float r = job.color.x, g = job.color.y, b = job.color.z;
+      float r = job.color.x;
+      float g = job.color.y;
+      float b = job.color.z;
 
       float scale = 1.0 / samplesPerPixel;
       r           = sqrt(scale * r);
@@ -179,7 +177,7 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, std::shared_ptr<Sc
   }
 }
 
-vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, std::shared_ptr<Scene> const &compiledScene, int depth) {
+vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, std::unique_ptr<Scene> const &compiledScene, int depth) {
   // Limit max recursion depth
   if (depth <= 0) {
     return vec3::Zero();
@@ -213,7 +211,7 @@ void rt::raytracer::Raytracer::RenderImGui() {
 
       ImGui::Text("Rendering progress");
       ImGui::SameLine();
-      ImGui::ProgressBar(float(ard.pixelJobs->getCurrentChunkStart()) / ard.pixelJobs->getJobsVector().size());
+      ImGui::ProgressBar(float(ard.pixelJobs.getCurrentChunkStart()) / ard.pixelJobs.getJobsVector().size());
 
       ImGui::Separator();
 
@@ -223,7 +221,7 @@ void rt::raytracer::Raytracer::RenderImGui() {
         if (ImGui::BeginTable("Thread status", 3)) {
           ImGui::TableNextRow();
 
-          for (int t = 0; t < app->getNumThreads(); t++) {
+          for (int t = 0; t < ard.config.numThreads; t++) {
             // Thread labels
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -249,9 +247,9 @@ void rt::raytracer::Raytracer::Autosave() {
 
   auto t  = std::time(nullptr);
   auto tm = *std::localtime(&t);
-  auto const imageSize = compiledScene->imageSize();
+  auto const imageSize = ard.config.imageSize;
   ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << imageSize.x << "x"
-     << imageSize.y << "_" << samplesPerPixel << "_" << maxDepth
+     << imageSize.y << "_" << ard.config.numSamples << "_" << ard.config.maxDepth
      << ".bmp";
 
   std::cout << "Finished render: " << ss.str() << '\n';

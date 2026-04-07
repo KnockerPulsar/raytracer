@@ -1,10 +1,13 @@
 #include "app.h"
 
 #include <argumentum/argparse.h>
+#include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_int2.hpp"
 
 #include <charconv>
 #include <cstdlib>
 #include <format>
+#include <random>
 #include <string>
 
 /*
@@ -89,28 +92,29 @@ CliConfig setupArguments(int argc, char **argv) {
   };
 
   CliConfig config;
+  auto      params = parser.params();
   parser.config().program(argv[0]).description("Raytracer");
-  parser.params().add_parameter(config.imageSize, "--image-size")
+  params.add_parameter(config.imageSize, "--image-size")
       .absent(config.imageSize)
       .maxargs(1)
       .metavar("<width>x<height>")
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "image-size"); })
       .help("rendering resolution width in pixels");
 
-  parser.params().add_parameter(config.editorSize, "--editor-size")
+  params.add_parameter(config.editorSize, "--editor-size")
       .absent(config.editorSize)
       .maxargs(1)
       .metavar("<width>x<height>")
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "editor-size"); })
       .help("Window resolution width in pixels");
 
-  parser.params().add_parameter(config.pathToScene, "--scene")
+  params.add_parameter(config.pathToScene, "--scene")
       .absent("")
       .maxargs(1)
       .metavar("STRING PATH")
       .help("Path to scene json");
 
-  parser.params().add_parameter(config.numThreads, "--threads")
+  params.add_parameter(config.numThreads, "--threads")
       .absent(config.numThreads)
       .maxargs(1)
       .metavar("UNSIGNED INT")
@@ -126,17 +130,63 @@ CliConfig setupArguments(int argc, char **argv) {
         }
       });
 
-  parser.params().add_parameter(config.potato_mode, "--potato")
+  auto const parseInt = [](const std::string& value, const std::string_view paramName) -> std::optional<uint64_t>
+  {
+    uint64_t parsedValue;
+    auto     result = std::from_chars(value.c_str(), value.c_str() + value.size(), parsedValue);
+
+    if (result.ec != std::errc())
+    {
+      std::cout << "WARNING: Invalid " << paramName << " entered (" << value << "), using default instead." << '\n';
+      return std::nullopt;
+    }
+    else
+    {
+      return parsedValue;
+    }
+  };
+
+  params.add_parameter(config.potatoMode, "--potato")
       .maxargs(1)
       .metavar("BOOL")
       .absent(false)
       .help(
           "Potato mode renders scenes at a quarter of the resolution. Useful for debugging and developing on battery.");
 
+  params.add_parameter(config.seed, "--seed")
+      .absent(std::random_device{}())
+      .maxargs(1)
+      .metavar("UNSIGNED INT")
+      .help("Seed for random number generation. If not set, a random seed will be generated.")
+      .action([&](auto &target, const std::string &value) {
+        if (auto const parsedValue = parseInt(value, "seed"))
+          target = parsedValue;
+      });
+
+  params.add_parameter(config.numSamples, "--num-samples")
+      .absent(config.numSamples)
+      .maxargs(1)
+      .metavar("UNSIGNED INT")
+      .help("Number of samples to render with. If not set, the default from the scene will be used.")
+      .action([&](auto &target, const std::string &value) {
+        if (auto const parsedValue = parseInt(value, "num-samples"))
+          target = *parsedValue;
+      });
+
+  params.add_parameter(config.maxDepth, "--max-depth")
+      .absent(config.maxDepth)
+      .maxargs(1)
+      .metavar("UNSIGNED INT")
+      .help("Maximum ray bounce depth. If not set, the default from the scene will be used.")
+      .action([&](auto &target, const std::string &value) {
+        if (auto const parsedValue = parseInt(value, "max-depth"))
+          target = *parsedValue;
+      });
+
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);
 
-  if (config.potato_mode)
+  if (config.potatoMode)
     // glm's ivec2 multiply-assign operator first converts the scalar to an
     // int. So 0.25f becomes zero. To get around this, let's cast it up to a
     // float vec, multiply, then assign.
