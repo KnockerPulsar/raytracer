@@ -15,7 +15,10 @@ namespace rt::raytracer {
     bool scatter(const rt::Ray &r_in, rt::HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
       vec3 inNormlized = r_in.direction.Normalize();
       vec3 reflected     = inNormlized.Reflect(rec.normal);
-      scattered          = Ray(rec.p, reflected + vec3::RandomInUnitSphere() * fuzz, r_in.time);
+
+      auto const scatterDirection = (reflected + vec3::RandomInUnitSphere() * fuzz).Normalize();
+
+      scattered          = Ray(rec.p, scatterDirection, r_in.time);
       attenuation        = albedo->Value(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }

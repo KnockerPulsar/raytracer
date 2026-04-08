@@ -1,9 +1,12 @@
 #include "scene.h"
 
 #include "common/Util.h"
+
 #include "hittatable_builder.h"
 #include "camera.h"
 #include "object_factory.h"
+#include "solid_color_background.h"
+#include "skysphere_background.h"
 
 #include "data_structures/vec3.h"
 
@@ -20,6 +23,8 @@
 #include "textures/noise_texture.h"
 #include "textures/checker_texture.h"
 #include "textures/image_texture.h"
+
+#include "raytracer/background.h"
 
 #include <functional>
 #include <vector>
@@ -68,7 +73,8 @@ namespace rt::editor {
             .withMaterial(light),
     };
 
-    return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+    return Scene(std::move(world), cam, {imageWidth, imageHeight},
+                 std::make_unique<SolidColorBackground>(backgroundColor));
   }
 
 Scene Scene::Scene1(int imageWidth, int imageHeight) {
@@ -120,7 +126,8 @@ Scene Scene::Scene1(int imageWidth, int imageHeight) {
       rightSphere,
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 } // namespace rt
 
 Scene Scene::Scene2(int imageWidth, int imageHeight) {
@@ -145,14 +152,15 @@ Scene Scene::Scene2(int imageWidth, int imageHeight) {
       HittableBuilder<Sphere>(r).withTranslation(vec3(r, 0, -1)).withMaterial(materialRight),
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
-  vec3 lookFrom        = vec3(13, 2, 5);
-  vec3 lookAt          = vec3(0, 0, 0);
-  vec3 vUp             = vec3(0, 1, 0);
-  vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
+  vec3              lookFrom         = vec3(13, 2, 5);
+  vec3              lookAt           = vec3(0, 0, 0);
+  vec3              vUp              = vec3(0, 1, 0);
+  const auto *const skyspherePath = "assets/textures/skysphere.png";
 
   float distToFocus = 10.0f;
   float aperature   = 0.1F;
@@ -199,7 +207,8 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
     }
   }
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SkysphereBackground>(skyspherePath));
 }
 
 // Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
@@ -290,7 +299,8 @@ Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
       HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin),
       HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker)};
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Earth(int imageWidth, int imageHeight) {
@@ -311,7 +321,8 @@ Scene Scene::Earth(int imageWidth, int imageHeight) {
 
   std::vector<std::shared_ptr<Object>> world = {HittableBuilder<Sphere>(2).withMaterial(earthSurface)};
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Light(int imageWidth, int imageHeight) {
@@ -340,7 +351,8 @@ Scene Scene::Light(int imageWidth, int imageHeight) {
           .withRotation(vec3(0, 90, 0))
           .withMaterial(diffLight)};
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::CornellBox(int imageWidth, int imageHeight) {
@@ -410,7 +422,8 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
           .withTranslation(vec3(10, 10, 10)), // On top of box 2
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight}, backgroundColor);
+  return Scene(std::move(world), cam, {imageWidth, imageHeight},
+               std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
@@ -443,7 +456,9 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
   //   return Config{settings["max_depth"].get<int>(), settings["num_samples"].get<int>()};
   // }();
 
-  Scene s = Scene(std::move(world), camera, imageSize, settings["background_color"].get<vec3>());
+  // Differentiate skysphere and solid color backgrounds
+  Scene s = Scene(std::move(world), camera, imageSize,
+                  std::make_unique<SolidColorBackground>(settings["background_color"].get<vec3>()));
 
   std::cout << "Loaded scene with\n"
             << "\tsettings " << settings << '\n'
@@ -558,8 +573,9 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
 //   return sceneJson;
 // }
 
-Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor)
-    : world(std::move(world)), cam(cam), backgroundColor_(backgroundColor), imageSize_(imageSize) {}
+Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize,
+             std::unique_ptr<Background> background)
+    : world(std::move(world)), cam(cam), background(std::move(background)), imageSize_(imageSize) {}
 
 auto Scene::getWorld() -> std::vector<std::shared_ptr<Object>> & { return world; }
 

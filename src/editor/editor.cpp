@@ -16,6 +16,7 @@
 // #include "objects/plane.h"
 
 #include "raytracer/raytracer.h"
+#include "raytracer/background.h"
 #include "common/bvh_tree.h"
 #include "common/Scene.h"
 
@@ -79,12 +80,11 @@ namespace rt::editor {
   void Editor::Rasterize() {
     BeginTextureMode(rasterRT);
 
-    // TODO either draw the background color or the skysphere
-    // ClearBackground(getScene()->backgroundColor.toRaylibColor(255));
-    ClearBackground(BLACK);
-
     BeginMode3D(camera.toRaylibCamera3D());
     {
+      ClearBackground(PURPLE); // So errors in drawing the background stand out.
+
+      scene->getBackground().drawBackground(camera.getLookFrom());
       DrawGrid(10, 10);
 
       // if (!getScene()->skysphereTexture.empty()) {
@@ -439,6 +439,9 @@ namespace rt::editor {
     }
   }
 
+  // TODO this probably fits better in editor::Scene
+  // Would require passing the editor camera, but would not require us to have
+  // a getter for the raytracer background.
   auto Editor::compileScene() const -> std::unique_ptr<raytracer::Scene> {
     auto const world = scene->getWorld();
 
@@ -451,7 +454,8 @@ namespace rt::editor {
     }
 
     return std::make_unique<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1),
-                                              camera.toRaytracerCamera(), camera.imageSize(), scene->backgroundColor());
+                                              camera.toRaytracerCamera(), camera.imageSize(),
+                                              scene->getBackground().toRaytracerBackground());
   }
 
   void Editor::onExit() {

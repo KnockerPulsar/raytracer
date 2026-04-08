@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Defs.h"
 #include "acceleration_structure.h"
+#include "raytracer/background.h"
 
 #include <nlohmann-json/json.hpp>
 #include <raylib.h>
@@ -14,7 +15,7 @@ namespace rt::raytracer {
   class Scene {
   public:
     Scene(std::unique_ptr<AccelerationStructure> accelerationStructure, Camera camera, glm::ivec2 imageSize,
-          vec3 backgroundColor);
+          std::unique_ptr<Background> background);
 
     bool hit(rt::Ray const& worldspaceRay, float tMin, float tMax, rt::HitRecord& hitRecord) const;
     vec3 backgroundColor(vec3 direction) const;
@@ -32,7 +33,7 @@ namespace rt::raytracer {
 
     Camera     cam;
     glm::ivec2 imageSize_;
-    vec3       backgroundColor_;
+    std::unique_ptr<Background> const background;
   };
 
   void to_json(json &j, const Scene &s);

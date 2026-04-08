@@ -43,9 +43,11 @@ set(SOURCES
   src/objects/AARect.cpp
   src/objects/mesh.cpp
 
-  src/editor/editor.cpp
-  src/raytracer/raytracer.cpp
 
+  src/raytracer/raytracer.cpp
+  src/raytracer/skysphere_background.cpp
+
+  src/editor/editor.cpp
   src/editor/GroupPanel.cpp
   src/editor/Utils.cpp
   src/editor/camera.cpp
@@ -65,6 +67,8 @@ set(SOURCES
   src/editor/textures/preview_texture.cpp
   src/editor/textures/solid_color.cpp
   src/editor/transformation.cpp
+  src/editor/solid_color_background.cpp
+  src/editor/skysphere_background.cpp
 
   vendor/argumentum/src/argparser.cpp
 

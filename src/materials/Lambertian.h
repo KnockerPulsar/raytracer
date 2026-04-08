@@ -31,7 +31,7 @@ namespace rt::raytracer {
       if (scatterDir.NearZero())
         scatterDir = rec.normal;
 
-      scattered   = Ray(rec.p, scatterDir, rIn.time);
+      scattered   = Ray(rec.p, scatterDir.Normalize(), rIn.time);
       attenuation = albedo->Value(rec.u, rec.v, rec.p);
       return true;
     }

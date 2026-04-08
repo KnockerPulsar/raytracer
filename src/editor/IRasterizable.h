@@ -10,8 +10,6 @@
 namespace rt::editor {
   class IRasterizable {
   public:
-    std::string name;
-
     virtual void RasterizeWithoutTransformation(vec3 color) = 0;
     virtual void RasterizeTransformed(Transformation t, vec3 color){
       rlPushMatrix();

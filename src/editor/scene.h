@@ -1,6 +1,7 @@
 #pragma once
 
 #include "data_structures/vec3.h"
+#include "background.h"
 
 #include <glm/fwd.hpp>
 #include <imgui.h>
@@ -62,25 +63,22 @@ public:
     // scene->imageSize  = camera.imageSize();
   auto getWorld() -> std::vector<std::shared_ptr<Object>>&;
 
-  void addSkysphere(std::string ssTex);
-  void drawSkysphere();
-
   // nlohmann::json toJson() const;
 
   auto imageSize() const -> glm::ivec2 { return imageSize_; }
-  auto backgroundColor() const -> vec3 { return backgroundColor_; }
+  auto getBackground() const -> Background& { return *background; }
 
   // Initialized in Scene.cpp to a list of scene names and loading functions
   static std::vector<std::pair<std::string, std::function<std::unique_ptr<Scene>(int, int)>>> builtInScenes;
 
 private:
-  Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize, vec3 backgroundColor);
+  Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize,
+        std::unique_ptr<Background> background);
 
   std::vector<std::shared_ptr<Object>> world;
   Camera const                         cam;
-  vec3 const                           backgroundColor_;
+  std::unique_ptr<Background>          background;
   glm::ivec2 const                     imageSize_;
-
 };
 
 // void to_json(json &j, const Scene &s) {

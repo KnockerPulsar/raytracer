@@ -19,7 +19,7 @@ namespace EditorUtils {
 
   // Create a sphere (the vertex order in the triangles are CCW from the outside)
   // Segments define the number of divisions on the both the latitude and the longitude
-  ::Mesh generateSkysphere(float radius, const glm::ivec2 &segments);
+  ::Mesh generateSkysphere(float radius, int rings, int slices);
 
   auto FitIntoArea(ImVec2 availableArea, ImVec2 areaToFit) -> ImVec2;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Defs.h"
+#include "common/Constants.h"
 
 #include <glm/glm.hpp>
 #include <nlohmann-json/json.hpp>
@@ -33,6 +34,7 @@ public:
 
   inline vec3  Normalize() const; // Normalizes the vector so that its length is 1
   inline float SqrLen() const;    // Returns x^2 + y^2 + z^2
+  inline bool  SqrLenNear(float value, float eps = rt::constants::epsilon) const;
   inline float Len() const;       // Returns the length of the vector `sqrt(SqrLen())`
 
   inline vec3 operator-() const;              // Negates all components
@@ -72,6 +74,11 @@ inline vec3 vec3::Normalize() const { return Vector3Normalize(*this); }
 inline float vec3::SqrLen() const {
   auto [x, y, z] = *this;
   return x * x + y * y + z * z;
+}
+
+inline bool vec3::SqrLenNear(float value, float eps) const {
+  auto const sqrLen = SqrLen();
+  return value - eps < sqrLen && sqrLen < value + eps;
 }
 
 inline float vec3::Len() const { return sqrt(SqrLen()); }

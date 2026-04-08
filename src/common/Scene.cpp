@@ -1,24 +1,20 @@
 #include "Scene.h"
+#include "raytracer/background.h"
 
 using nlohmann::json;
 
 namespace rt::raytracer {
   Scene::Scene(std::unique_ptr<AccelerationStructure> accelerationStructure, Camera camera, glm::ivec2 imageSize,
-               vec3 backgroundColor)
+               std::unique_ptr<Background> background)
       : worldRoot(std::move(accelerationStructure)), cam(camera), imageSize_(imageSize),
-        backgroundColor_(backgroundColor) {}
+        background(std::move(background)) {}
 
   bool Scene::hit(rt::Ray const &worldspaceRay, float tMin, float tMax, rt::HitRecord &hitRecord) const {
     return worldRoot->hit(worldspaceRay, tMin, tMax, hitRecord);
   }
 
-  vec3 Scene::backgroundColor(vec3 /*direction*/) const {
-    // TODO sample skysphere
-    // if (scene->skysphere)
-    //   scene->skysphere->Hit(r, -rt::constants::infinity, rt::constants::infinity, rec);
-    // else
-    //   return scene->backgroundColor;
-    return backgroundColor_;
+  vec3 Scene::backgroundColor(vec3 direction) const {
+    return background->sampleBackground(direction);
   }
 
   auto Scene::imageSize() const -> glm::ivec2 { return imageSize_; }

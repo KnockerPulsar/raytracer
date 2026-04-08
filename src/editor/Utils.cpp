@@ -4,8 +4,8 @@
 #include <raylib.h>
 
 #include <algorithm>
-#include <cstdlib>
 #include <format>
+#include <cstring>
 #include <vector>
 
 namespace EditorUtils {
@@ -21,67 +21,82 @@ namespace EditorUtils {
     return std::to_string((u_int64_t)address);
   }
 
-  ::Mesh generateSkysphere(float radius, const glm::ivec2 &segments) {
-    Mesh mesh = {0};
+  ::Mesh generateSkysphere(float radius, int rings, int slices) {
+    ::Mesh mesh = {0};
 
-    std::vector<float> *verts, *textCoords, *normals;
-    verts = new std::vector<float>();
-    textCoords = new std::vector<float>();
-    normals = new std::vector<float>();
+    // 1. Calculate counts
+    int vertexCount   = (rings + 1) * (slices + 1);
+    int triangleCount = rings * slices * 2;
 
-    std::vector<unsigned short> *elements = new std::vector<unsigned short>();
+    // 2. Build data in temporary vectors
+    std::vector<float>          vertices;
+    std::vector<float>          texcoords;
+    std::vector<unsigned short> indices;
 
-    // We populate the sphere vertices by looping over its longitude and
-    // latitude
-    for (int lat = 0; lat <= segments.y; lat++) {
-      float v = (float)lat / segments.y;
-      float pitch = v * glm::pi<float>() - glm::half_pi<float>();
-      float cos = glm::cos(pitch), sin = glm::sin(pitch);
-      for (int lng = 0; lng <= segments.x; lng++) {
-        float u = (float)lng / segments.x;
-        float yaw = u * glm::two_pi<float>();
+    vertices.reserve(vertexCount * 3);
+    texcoords.reserve(vertexCount * 2);
+    indices.reserve(triangleCount * 3);
 
-        glm::vec3 normal =
-            glm::vec3{cos * glm::cos(yaw), sin, cos * glm::sin(yaw)} * radius;
-        glm::vec3 position = normal;
-        glm::vec2 tex_coords = glm::vec2(u, v);
-        ::Color color = {255, 255, 255, 255};
+    // 3. Generate Geometry
+    for (int r = 0; r <= rings; r++) {
+      float v = (float)r / rings;
+      // theta: 0 to PI (latitude)
+      float theta    = v * std::numbers::pi_v<float>;
+      float sinTheta = std::sin(theta);
+      float cosTheta = std::cos(theta);
 
-        verts->push_back(position.x);
-        verts->push_back(position.y);
-        verts->push_back(position.z);
+      for (int s = 0; s <= slices; s++) {
+        float u = (float)s / slices;
+        // phi: 0 to 2PI (longitude)
+        float phi = u * 2.0f * std::numbers::pi_v<float>;
 
-        textCoords->push_back(tex_coords.x);
-        textCoords->push_back(tex_coords.y);
+        // Standard Spherical to Cartesian (Y-up)
+        float x = radius * sinTheta * std::cos(phi);
+        float y = radius * cosTheta; // Note: cos(theta) gives us the height
+        float z = radius * sinTheta * std::sin(phi);
 
-        normals->push_back(normal.x);
-        normals->push_back(normal.y);
-        normals->push_back(normal.z);
+        vertices.push_back(x);
+        vertices.push_back(y);
+        vertices.push_back(z);
+
+        texcoords.push_back(u);
+        texcoords.push_back(v);
       }
     }
 
-    for (int lat = 1; lat <= segments.y; lat++) {
-      int start = lat * (segments.x + 1);
-      for (int lng = 1; lng <= segments.x; lng++) {
-        int prev_lng = lng - 1;
-        elements->push_back(lng + start);
-        elements->push_back(lng + start - segments.x - 1);
-        elements->push_back(prev_lng + start - segments.x - 1);
-        elements->push_back(prev_lng + start - segments.x - 1);
-        elements->push_back(prev_lng + start);
-        elements->push_back(lng + start);
+    // 4. Generate Indices (Clockwise winding for inside-out viewing)
+    for (int r = 0; r < rings; r++) {
+      for (int s = 0; s < slices; s++) {
+        int first  = r * (slices + 1) + s;
+        int second = first + slices + 1;
+
+        // Triangle 1 (Reversed order for inward facing)
+        indices.push_back(first);
+        indices.push_back(first + 1);
+        indices.push_back(second);
+
+        // Triangle 2 (Reversed order for inward facing)
+        indices.push_back(second);
+        indices.push_back(first + 1);
+        indices.push_back(second + 1);
       }
     }
 
-    mesh.vertices = verts->data();
-    mesh.texcoords = textCoords->data();
-    mesh.normals = normals->data();
-    mesh.indices = elements->data();
-    mesh.triangleCount = elements->size() / 3;
-    mesh.vertexCount = verts->size() / 3;
+    // 5. Transfer to Raylib-owned memory
+    // Raylib's UnloadMesh() calls RL_FREE, so we must use RL_MALLOC or MemAlloc
+    mesh.vertexCount   = vertexCount;
+    mesh.triangleCount = triangleCount;
 
-    // ::Mesh kak = GenMeshSphere(500, 8, 8);
+    mesh.vertices = (float *)MemAlloc(vertices.size() * sizeof(float));
+    std::memcpy(mesh.vertices, vertices.data(), vertices.size() * sizeof(float));
 
+    mesh.texcoords = (float *)MemAlloc(texcoords.size() * sizeof(float));
+    std::memcpy(mesh.texcoords, texcoords.data(), texcoords.size() * sizeof(float));
+
+    mesh.indices = (unsigned short *)MemAlloc(indices.size() * sizeof(unsigned short));
+    std::memcpy(mesh.indices, indices.data(), indices.size() * sizeof(unsigned short));
+
+    // 6. Upload to GPU
     UploadMesh(&mesh, false);
 
     return mesh;
