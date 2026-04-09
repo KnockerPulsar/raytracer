@@ -130,7 +130,7 @@ bool rt::raytracer::BVHNode::Hit(const rt::Ray &r, float t_min, float t_max, rt:
     return false;
 
   bool leftHit  = left->Hit(r, t_min, t_max, rec);
-  bool rightHit = right->Hit(r, t_min, leftHit ? rec.t : t_max, rec);
+  bool rightHit = (left != right) ? right->Hit(r, t_min, leftHit ? rec.t : t_max, rec) : leftHit;
 
   return leftHit || rightHit;
 }
