@@ -12,7 +12,7 @@ namespace rt {
   namespace editor {
     class Material : public IImguiDrawable {
     public:
-      virtual auto toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> = 0;
+      virtual auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> = 0;
       // TODO ImGui and serailization
     };
   } // namespace editor

@@ -9,10 +9,10 @@
 namespace rt::raytracer {
   class HittableList : public AccelerationStructure {
   public:
-    HittableList(std::vector<std::shared_ptr<Raytracable>> &&objects) : objects{std::move(objects)} {}
+    HittableList(std::vector<std::unique_ptr<Raytracable>> &&objects) : objects{std::move(objects)} {}
 
     bool hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
   private:
-    std::vector<sPtr<rt::Raytracable>> objects;
+    std::vector<std::unique_ptr<rt::Raytracable>> objects;
   };
 } // namespace rt

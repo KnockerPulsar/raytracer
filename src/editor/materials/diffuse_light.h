@@ -12,7 +12,7 @@ namespace rt::editor {
     DiffuseLight(vec3 color);
     virtual void OnImgui() override;
 
-    auto toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> override;
+    auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> override;
     // json toJson() const override { return json{{"type", "diffuse_light"}, {"texture", emssiveTex->toJson()}}; }
   private:
     std::shared_ptr<SolidColor> emssiveTex;

@@ -7,6 +7,6 @@ rt::editor::Lambertian::Lambertian(std::shared_ptr<Texture> albedo) : albedo(alb
 
 void rt::editor::Lambertian::OnImgui() { albedo->OnImgui(); }
 
-auto rt::editor::Lambertian::toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> {
-  return std::make_shared<raytracer::Lambertian>(albedo->toRaytracerTexture());
+auto rt::editor::Lambertian::toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> {
+  return std::make_unique<raytracer::Lambertian>(albedo->toRaytracerTexture());
 }

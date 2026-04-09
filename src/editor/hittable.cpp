@@ -9,7 +9,7 @@ void rt::editor::Hittable::setName(std::string newName) { name = newName; }
 auto rt::editor::Hittable::getName() const -> std::string { return name; }
 
 auto rt::editor::Hittable::setMaterial(std::shared_ptr<Material> newMat) -> void { material = newMat; }
-auto rt::editor::Hittable::getMaterial() const -> std::shared_ptr<Material> { return material; }
+auto rt::editor::Hittable::getMaterial() const -> Material& { return *material; }
 
 void rt::editor::Hittable::OnImgui() {
   transformation.OnImgui();

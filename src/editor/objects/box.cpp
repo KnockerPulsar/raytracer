@@ -18,8 +18,8 @@ std::optional<float> rt::editor::Box::hit(const rt::Ray &worldspaceRay) const {
       .transform([](auto const &r) { return r.t; });
 }
 
-auto rt::editor::Box::toRaytracable() const -> std::shared_ptr<rt::Raytracable>
+auto rt::editor::Box::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
 {
-  return std::make_shared<raytracer::Box>(extents, getTransformation().toRaytracerTransformation(),
-                                          getMaterial()->toRaytracerMaterial());
+  return std::make_unique<raytracer::Box>(extents, getTransformation().toRaytracerTransformation(),
+                                          getMaterial().toRaytracerMaterial());
 }

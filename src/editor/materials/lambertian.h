@@ -14,7 +14,7 @@ namespace rt::editor {
 
     virtual void OnImgui() override;
 
-    auto toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> override;
+    auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> override;
     // json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }
 
   private:

@@ -11,6 +11,6 @@ void rt::editor::Metal::OnImgui() {
   ImGui::DragFloat("Fuzziness", &fuzz, 0.05, 0, 1);
 }
 
-auto rt::editor::Metal::toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> {
-  return std::make_shared<raytracer::Metal>(albedo->toRaytracerTexture(), fuzz);
+auto rt::editor::Metal::toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> {
+  return std::make_unique<raytracer::Metal>(albedo->toRaytracerTexture(), fuzz);
 }

@@ -11,7 +11,7 @@ namespace rt::editor {
     Dielectric(float refractionIndex, vec3 tint = vec3(1.0));
     virtual void OnImgui() override;
 
-    auto toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> override;
+    auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> override;
   private:
     std::shared_ptr<Texture> albedo;
     float                    refractionIndex;

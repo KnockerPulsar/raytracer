@@ -1,6 +1,5 @@
 #pragma once
 #include "AABB.h"
-#include "Defs.h"
 #include "Hittable.h"
 #include "Ray.h"
 
@@ -12,13 +11,16 @@ namespace rt {
   namespace raytracer {
 
     struct BVHNodeData {
-      BVHNodeData(std::vector<sPtr<Raytracable>> &srcObjects, size_t start, size_t end, float t0, float t1);
-      sPtr<Hittable> left = nullptr, right = nullptr;
+      BVHNodeData(std::vector<std::unique_ptr<Raytracable>> &srcObjects, size_t start, size_t end, float t0, float t1);
+      std::unique_ptr<Hittable> left, right;
     };
+
     class BVHNode : public BVHNodeData, public rt::Hittable {
     public:
-      BVHNode(std::vector<sPtr<Raytracable>> &list, float t0, float t1);
-      BVHNode(std::vector<sPtr<Raytracable>> &srcObjects, size_t start, size_t end, float t0, float t1);
+      BVHNode(std::vector<std::unique_ptr<Raytracable>> &list, float t0, float t1);
+      BVHNode(std::vector<std::unique_ptr<Raytracable>> &srcObjects, size_t start, size_t end, float t0, float t1);
+
+      ~BVHNode();
 
       virtual bool Hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
     };

@@ -50,7 +50,7 @@ std::optional<float> rt::editor::Mesh::hit(const Ray &worldspaceRay) const {
 
 }
 
-auto rt::editor::Mesh::toRaytracable() const -> std::shared_ptr<rt::Raytracable> {
-  return std::make_shared<raytracer::Mesh>(model, getTransformation().toRaytracerTransformation(),
-                                           getMaterial()->toRaytracerMaterial());
+auto rt::editor::Mesh::toRaytracable() const -> std::unique_ptr<rt::Raytracable> {
+  return std::make_unique<raytracer::Mesh>(model, getTransformation().toRaytracerTransformation(),
+                                           getMaterial().toRaytracerMaterial());
 }

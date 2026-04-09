@@ -21,13 +21,13 @@ namespace rt {
       auto getName() const -> std::string;
 
       auto setMaterial(std::shared_ptr<Material> newMat) -> void;
-      auto getMaterial() const -> std::shared_ptr<Material>;
+      auto getMaterial() const -> Material&;
 
       virtual std::optional<float> hit(const rt::Ray &worldspaceRay) const = 0;
 
       virtual void OnImgui() override;
 
-      virtual auto toRaytracable() const -> std::shared_ptr<rt::Raytracable> = 0;
+      virtual auto toRaytracable() const -> std::unique_ptr<rt::Raytracable> = 0;
 
     private:
       template <typename T> friend class HittableBuilder;

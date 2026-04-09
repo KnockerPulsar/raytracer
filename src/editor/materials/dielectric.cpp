@@ -11,6 +11,6 @@ void rt::editor::Dielectric::OnImgui() {
   ImGui::DragFloat("Refraction Index", &refractionIndex, 0.01, 1, 100);
 }
 
-auto rt::editor::Dielectric::toRaytracerMaterial() const -> std::shared_ptr<raytracer::Material> {
-  return std::make_shared<raytracer::Dielectric>(refractionIndex, albedo->toRaytracerTexture());
+auto rt::editor::Dielectric::toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> {
+  return std::make_unique<raytracer::Dielectric>(refractionIndex, albedo->toRaytracerTexture());
 }

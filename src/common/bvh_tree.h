@@ -10,7 +10,7 @@ namespace rt {
   namespace raytracer {
     class BVHTree : public AccelerationStructure {
     public:
-      BVHTree(std::vector<sPtr<Raytracable>> &&list, float t0, float t1);
+      BVHTree(std::vector<std::unique_ptr<Raytracable>> &&list, float t0, float t1);
 
       bool hit(const rt::Ray &r, float t_min, float t_max, rt::HitRecord &rec) const override;
 

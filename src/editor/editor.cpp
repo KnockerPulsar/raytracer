@@ -16,7 +16,8 @@
 // #include "objects/plane.h"
 
 #include "raytracer/raytracer.h"
-#include "raytracer/background.h"
+#include "common/Hittable.h"
+#include "common/Raytracable.h"
 #include "common/bvh_tree.h"
 #include "common/Scene.h"
 
@@ -445,8 +446,7 @@ namespace rt::editor {
   auto Editor::compileScene() const -> std::unique_ptr<raytracer::Scene> {
     auto const world = scene->getWorld();
 
-    // TODO can this store unique pointers instead?
-    std::vector<std::shared_ptr<rt::Raytracable>> raytracables;
+    std::vector<std::unique_ptr<rt::Raytracable>> raytracables;
     raytracables.reserve(world.size());
 
     for (auto const &obj : world) {

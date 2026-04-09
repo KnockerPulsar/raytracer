@@ -22,7 +22,7 @@ namespace rt::editor {
 
     virtual void         RasterizeWithoutTransformation(vec3 color) override;
     std::optional<float> hit(const Ray &worldspaceRay) const override;
-    auto                 toRaytracable() const -> std::shared_ptr<rt::Raytracable> override;
+    auto                 toRaytracable() const -> std::unique_ptr<rt::Raytracable> override;
 
     // json toJsonSpecific() const override {
     //   return {
