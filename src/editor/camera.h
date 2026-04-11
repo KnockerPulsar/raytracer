@@ -7,7 +7,7 @@ namespace rt::editor {
   class Scene;
   class Camera: public Scene::Camera {
   public:
-    enum class ControlType { flyCam, lookAtPoint, controlTypesCount };
+    enum class ControlType : uint8_t { flyCam, lookAtPoint, controlTypesCount };
 
     inline static vec3 lineStart, lineEnd;
 
