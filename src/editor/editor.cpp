@@ -16,10 +16,6 @@
 // #include "objects/plane.h"
 
 #include "raytracer/raytracer.h"
-#include "common/Hittable.h"
-#include "common/Raytracable.h"
-#include "common/bvh_tree.h"
-#include "common/Scene.h"
 
 #include <ImGuiFileDialog.h>
 #include <ImGuizmo.h>
@@ -440,27 +436,9 @@ namespace rt::editor {
     }
   }
 
-  // TODO this probably fits better in editor::Scene
-  // Would require passing the editor camera, but would not require us to have
-  // a getter for the raytracer background.
-  auto Editor::compileScene() const -> std::unique_ptr<raytracer::Scene> {
-    auto const world = scene->getWorld();
-
-    std::vector<std::unique_ptr<rt::Raytracable>> raytracables;
-    raytracables.reserve(world.size());
-
-    for (auto const &obj : world) {
-      raytracables.push_back(obj->toRaytracable());
-    }
-
-    return std::make_unique<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1),
-                                              camera.toRaytracerCamera(), camera.imageSize(),
-                                              scene->getBackground().toRaytracerBackground());
-  }
-
   void Editor::onExit() {
     auto raytracerConfig = raytracer::Config{
-        compileScene(),
+        scene->compile(camera.toRaytracerCamera()),
         config.seed,
         config.numSamples,
         config.maxDepth,

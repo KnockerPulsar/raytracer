@@ -14,7 +14,7 @@ namespace rt::raytracer {
 
   class Scene {
   public:
-    Scene(std::unique_ptr<AccelerationStructure> accelerationStructure, Camera camera, glm::ivec2 imageSize,
+    Scene(std::unique_ptr<AccelerationStructure> accelerationStructure, Camera camera,
           std::unique_ptr<Background> background);
 
     bool hit(rt::Ray const& worldspaceRay, float tMin, float tMax, rt::HitRecord& hitRecord) const;
@@ -24,15 +24,9 @@ namespace rt::raytracer {
     auto getRay(float u, float v) -> rt::Ray;
 
   private:
-    std::unique_ptr<AccelerationStructure> worldRoot;
+    std::unique_ptr<AccelerationStructure> const worldRoot;
 
-    sPtr<Hittable> skysphere;
-
-    std::string skysphereTexture;
-    ::Model     skysphereModel;
-
-    Camera     cam;
-    glm::ivec2 imageSize_;
+    Camera const                      cam;
     std::unique_ptr<Background> const background;
   };
 

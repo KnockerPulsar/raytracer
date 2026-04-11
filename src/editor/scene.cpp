@@ -1,10 +1,15 @@
 #include "scene.h"
 
+#include "common/Camera.h"
+#include "common/Raytracable.h"
 #include "common/Util.h"
+#include "common/bvh_tree.h"
+#include "common/Scene.h"
 
 #include "hittatable_builder.h"
 #include "camera.h"
 #include "object_factory.h"
+#include "background.h"
 #include "solid_color_background.h"
 #include "skysphere_background.h"
 
@@ -23,8 +28,6 @@
 #include "textures/noise_texture.h"
 #include "textures/checker_texture.h"
 #include "textures/image_texture.h"
-
-#include "raytracer/background.h"
 
 #include <functional>
 #include <vector>
@@ -578,6 +581,18 @@ Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec
     : world(std::move(world)), cam(cam), background(std::move(background)), imageSize_(imageSize) {}
 
 auto Scene::getWorld() -> std::vector<std::shared_ptr<Object>> & { return world; }
+
+auto Scene::compile(rt::Camera const &camera) const -> std::unique_ptr<raytracer::Scene> {
+  std::vector<std::unique_ptr<rt::Raytracable>> raytracables;
+  raytracables.reserve(world.size());
+
+  for (auto const &obj : world) {
+    raytracables.push_back(obj->toRaytracable());
+  }
+
+  return std::make_unique<raytracer::Scene>(std::make_unique<raytracer::BVHTree>(std::move(raytracables), 0, 1), camera,
+                                            background->toRaytracerBackground());
+}
 
 Scene::Camera::Camera(vec3 lookFrom, vec3 lookAt, float fov, float aspectRatio, float aperature, float focusDist)
     : lookFrom(lookFrom), lookAt(lookAt), vFov(fov), aspectRatio(aspectRatio), aperature(aperature),

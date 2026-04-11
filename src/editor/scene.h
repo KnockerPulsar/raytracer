@@ -11,6 +11,13 @@
 #include <string>
 #include <vector>
 
+namespace rt {
+  class Camera;
+  namespace raytracer {
+    class Scene;
+  }
+} // namespace rt
+
 namespace rt::editor {
 class Camera;
 class Object;
@@ -55,6 +62,8 @@ public:
   // static Scene TransformationTest(int imageWidth, int imageHeight);
   // static Scene PlaneTest(int imageWidth, int imageHeight);
   // static Scene RasterTest(int imageWidth, int imageHeight);
+
+  auto compile(rt::Camera const &camera) const -> std::unique_ptr<raytracer::Scene>;
 
   auto getCamera() const -> Scene::Camera { return cam; }
 
