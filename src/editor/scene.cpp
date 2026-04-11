@@ -68,7 +68,7 @@ namespace rt::editor {
     auto light = std::make_shared<DiffuseLight>(vec3(3, 3, 3));
 
     std::vector<std::shared_ptr<Object>> world = {
-        HittableBuilder<Box>(1).withMaterial(mat),
+        HittableBuilder<Box>(1).withMaterial(mat).withName("Box"),
         HittableBuilder<Plane>(2.0, 2.0)
             .withTranslation(vec3(2, 0, 2))
             .withRotation(vec3(0, -45, 90))
@@ -151,8 +151,8 @@ Scene Scene::Scene2(int imageWidth, int imageHeight) {
   auto materialRight = std::make_shared<Lambertian>(vec3(1, 0, 0));
 
   std::vector<std::shared_ptr<Object>> world = {
-      HittableBuilder<Sphere>(r).withTranslation(vec3(-r, 0, -1)).withMaterial(materialLeft),
-      HittableBuilder<Sphere>(r).withTranslation(vec3(r, 0, -1)).withMaterial(materialRight),
+      HittableBuilder<Sphere>(r).withTranslation(vec3(-r, 0, -1)).withMaterial(materialLeft).withName("Left"),
+      HittableBuilder<Sphere>(r).withTranslation(vec3(r, 0, -1)).withMaterial(materialRight).withName("Right"),
   };
 
   return Scene(std::move(world), cam, {imageWidth, imageHeight},
@@ -173,16 +173,22 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
   Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
 
   std::vector<std::shared_ptr<Object>> world = {
-      HittableBuilder<Sphere>(1.0).withTranslation(vec3(0, 1, 0)).withMaterial(std::make_shared<Dielectric>(1.5)),
+      HittableBuilder<Sphere>(1.0)
+          .withTranslation(vec3(0, 1, 0))
+          .withMaterial(std::make_shared<Dielectric>(1.5))
+          .withName("Glass Sphere"),
       HittableBuilder<Sphere>(1.0)
           .withTranslation(vec3(-4, 1, 0))
-          .withMaterial(std::make_shared<Lambertian>(vec3(0.4, 0.2, 0.1))),
+          .withMaterial(std::make_shared<Lambertian>(vec3(0.4, 0.2, 0.1)))
+          .withName("Diffuse Sphere"),
       HittableBuilder<Sphere>(1.0)
           .withTranslation(vec3(4, 1, 0))
-          .withMaterial(std::make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0)),
+          .withMaterial(std::make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0))
+          .withName("Metal Sphere"),
       HittableBuilder<Sphere>(1000)
           .withTranslation(vec3(0, -1000, 0))
-          .withMaterial(std::make_shared<Lambertian>(vec3(0.5f))),
+          .withMaterial(std::make_shared<Lambertian>(vec3(0.5f)))
+          .withName("Ground"),
   };
 
   for (int a = -ballGridWidth; a < ballGridWidth; a++) {
@@ -190,22 +196,26 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
       float chooseMat = RandomFloat();
       vec3  center(a + 0.9 * RandomFloat(), 0.2, b + 0.9 * RandomFloat());
       if ((center - vec3(4, 0.2, 0)).Len() > 0.9) {
-        std::shared_ptr<Material> sphereMaterial;
 
-        if (chooseMat < 0.8) {
-          // Diffuse
-          auto albedo    = vec3::Random() * vec3::Random();
-          sphereMaterial = std::make_shared<Lambertian>(albedo);
-        } else if (chooseMat < 0.95) {
-          // Metal
-          auto  albedo   = vec3::Random(0.5, 1);
-          float fuzz     = RandomFloat(0, 0.5);
-          sphereMaterial = std::make_shared<Metal>(albedo, fuzz);
-        } else {
-          sphereMaterial = std::make_shared<Dielectric>(1.5);
-        }
+        auto const [material, materialName] = [&chooseMat] -> std::pair<std::shared_ptr<Material>, std::string> {
+          if (chooseMat < 0.8) {
+            // Diffuse
+            auto albedo = vec3::Random() * vec3::Random();
+            return {std::make_shared<Lambertian>(albedo), "Diffuse"};
+          } else if (chooseMat < 0.95) {
+            // Metal
+            auto  albedo = vec3::Random(0.5, 1);
+            float fuzz   = RandomFloat(0, 0.5);
+            return {std::make_shared<Metal>(albedo, fuzz), "Metal"};
+          } else {
+            return {std::make_shared<Dielectric>(1.5), "Glass"};
+          }
+        }();
 
-        world.push_back(HittableBuilder<Sphere>(0.2).withTranslation(center).withMaterial(sphereMaterial));
+        auto const smallSphere = HittableBuilder<Sphere>(0.2).withTranslation(center).withMaterial(material).withName(
+            std::format("Small {} Sphere", materialName));
+
+        world.push_back(smallSphere);
       }
     }
   }
@@ -299,8 +309,15 @@ Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
   sPtr<Material> lambertianChecker = std::make_shared<Lambertian>(checkerTexture);
 
   std::vector<std::shared_ptr<Object>> world = {
-      HittableBuilder<Sphere>(10).withTranslation(vec3(0, -10, 0)).withMaterial(lambertianPerlin),
-      HittableBuilder<Sphere>(10).withTranslation(vec3(0, 10, 0)).withMaterial(lambertianChecker)};
+      HittableBuilder<Sphere>(10)
+          .withTranslation(vec3(0, -10, 0))
+          .withMaterial(lambertianPerlin)
+          .withName("Perlin Sphere"),
+      HittableBuilder<Sphere>(10)
+          .withTranslation(vec3(0, 10, 0))
+          .withMaterial(lambertianChecker)
+          .withName("Checker Sphere"),
+  };
 
   return Scene(std::move(world), cam, {imageWidth, imageHeight},
                std::make_unique<SolidColorBackground>(backgroundColor));
@@ -322,7 +339,8 @@ Scene Scene::Earth(int imageWidth, int imageHeight) {
   auto earthTexture = std::make_shared<ImageTexture>("assets/textures/earthmap.png");
   auto earthSurface = std::make_shared<Lambertian>(earthTexture);
 
-  std::vector<std::shared_ptr<Object>> world = {HittableBuilder<Sphere>(2).withMaterial(earthSurface)};
+  std::vector<std::shared_ptr<Object>> world = {
+      HittableBuilder<Sphere>(2).withMaterial(earthSurface).withName("Earth")};
 
   return Scene(std::move(world), cam, {imageWidth, imageHeight},
                std::make_unique<SolidColorBackground>(backgroundColor));
@@ -346,13 +364,14 @@ Scene Scene::Light(int imageWidth, int imageHeight) {
   auto diffLight = std::make_shared<DiffuseLight>(vec3(4, 4, 4));
 
   std::vector<std::shared_ptr<Object>> world = {
-      HittableBuilder<Sphere>(1000).withTranslation(vec3(0, -1000, 0)).withMaterial(perMat),
-      HittableBuilder<Sphere>(2).withTranslation(vec3(0, 2, 0)).withMaterial(perMat),
-      // HittableBuilder<XYRect>(3, 5, 1, 3, -2, diffLight),
+      HittableBuilder<Sphere>(1000).withTranslation(vec3(0, -1000, 0)).withMaterial(perMat).withName("Floor Sphere"),
+      HittableBuilder<Sphere>(2).withTranslation(vec3(0, 2, 0)).withMaterial(perMat).withName("Sphere"),
       HittableBuilder<Plane>(2, 2)
           .withTranslation(vec3(2, 2, -2))
           .withRotation(vec3(0, 90, 0))
-          .withMaterial(diffLight)};
+          .withMaterial(diffLight)
+          .withName("Light"),
+  };
 
   return Scene(std::move(world), cam, {imageWidth, imageHeight},
                std::make_unique<SolidColorBackground>(backgroundColor));
