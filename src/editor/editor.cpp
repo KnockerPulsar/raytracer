@@ -85,11 +85,6 @@ namespace rt::editor {
       scene->getBackground().drawBackground(camera.getLookFrom());
       DrawGrid(10, 10);
 
-      // if (!getScene()->skysphereTexture.empty()) {
-      //   getScene()->skysphere->transformation.setTranslation(camera.getLookFrom());
-      //   getScene()->drawSkysphere();
-      // }
-
       auto const world = scene->getWorld();
       for (int i = 0; i < world.size(); i++) {
         world[i]->RasterizeTransformed(world[i]->getTransformation(), vec3(colors[i % numColors]));
