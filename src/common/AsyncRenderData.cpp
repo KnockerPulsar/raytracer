@@ -2,6 +2,8 @@
 
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
+#include <cstdint>
+#include <random>
 
 namespace rt::raytracer {
   // TODO tiles instead of lines?
@@ -15,10 +17,13 @@ namespace rt::raytracer {
 
     raytraceRT = LoadRenderTexture(config.imageSize.x, config.imageSize.y);
 
+    std::uniform_int_distribution<uint64_t> distribution;
+    std::mt19937                            generator{config.seed};
+
     // Prepare pixel jobs
     for (int y = 0; y < config.imageSize.y; y++) {
       for (int x = 0; x < config.imageSize.x; x++) {
-        pixelJobs.addJobNoLock(Pixel{x, y, vec3::Zero()});
+        pixelJobs.addJobNoLock(Pixel{x, y, generator(), vec3::Zero()});
       }
     }
   }

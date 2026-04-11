@@ -7,8 +7,10 @@ namespace rt {
    * @brief Stores information used for parallelized computations
    */
   struct Pixel {
-    int  x;     // X position of the pixel in screen-space
-    int  y;     // Y position ...
+    int const      x; // X position of the pixel in screen-space
+    int const      y; // Y position ...
+    uint64_t const seed;
+
     vec3 color; // Pixel color in RGB
   };
 } // namespace rt

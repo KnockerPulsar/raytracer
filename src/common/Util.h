@@ -1,15 +1,18 @@
 #pragma once
 #include "Constants.h"
-#include "data_structures/vec3.h"
+
 #include <random>
 #include <raylib.h>
 
 inline float DegressToRadians(float degress) { return degress * rt::constants::pi / 180; }
 
+static thread_local std::uniform_real_distribution<float> distribution(0, 1);
+static thread_local std::mt19937                          generator;
+
+static void SetSeed(uint64_t seed) { generator.seed(seed); }
+
 inline float RandomFloat() {
   // Returns a random float in [0,1)
-  static thread_local std::uniform_real_distribution<float> distribution(0, 1);
-  static thread_local std::mt19937                          generator{42};
   return distribution(generator);
 }
 

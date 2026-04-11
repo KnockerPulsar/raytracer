@@ -15,7 +15,6 @@
 #include <raylib.h>
 
 #include <iostream>
-#include <algorithm>
 
 rt::raytracer::Raytracer::Raytracer(App *const app, Config &&config, bool saveOnRender, glm::ivec2 editorSize)
     : IState(app), ard(std::move(config)), saveOnRender(saveOnRender), editorSize(editorSize) {}
@@ -143,6 +142,7 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, int threadIndex) {
 
       int x = job.x;
       int y = job.y;
+      SetSeed(job.seed);
 
       auto const& compiledScene = ard.config.compiledScene;
       auto const samplesPerPixel = ard.config.numSamples;
