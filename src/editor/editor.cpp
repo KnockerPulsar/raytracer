@@ -11,9 +11,10 @@
 #include "materials/dielectric.h"
 #include "materials/metal.h"
 
-// #include "objects/box.h"
-// #include "objects/sphere.h"
-// #include "objects/plane.h"
+#include "objects/box.h"
+#include "objects/sphere.h"
+#include "objects/plane.h"
+#include "objects/mesh.h"
 
 #include "raytracer/raytracer.h"
 
@@ -404,35 +405,34 @@ namespace rt::editor {
     ImGui::SameLine();
     if (ImGui::Button("+", {-1, 0})) {
 
-      sPtr<Hittable> added = [this] -> std::shared_ptr<Hittable> {
+      sPtr<Object> added = [this] -> std::shared_ptr<Object> {
         const sPtr<Material> defaultMaterial = std::make_shared<DiffuseLight>(vec3(10, 0, 10));
+        auto constexpr defaultMeshPath       = "assets/models/nefertiti-5k.obj";
+
         // TODO: This assumes that the root changes when we add new children, which might not be the case.
-        // const auto rootID = EditorUtils::GetIDFromPointer(getScene()->worldRoot.get());
+        const auto rootID = EditorUtils::GetIDFromPointer(scene.get());
 
         switch (selectedAddableObject) {
-        // case Box:
-        //   return HittableBuilder<editor::Box>(1).withMaterial(defaultMaterial).withName("Added Box##" + rootID);
-        //
-        // case Sphere:
-        //   return HittableBuilder<editor::Sphere>(1, defaultMaterial)
-        //       .withMaterial(defaultMaterial)
-        //       .withName("Added Sphere##" + rootID);
-        //
-        // case Plane:
-        //   return HittableBuilder<editor::Plane>(1, 1).withMaterial(defaultMaterial).withName("Added Plane##" + rootID);
+        case Box:
+          return HittableBuilder<editor::Box>(1).withMaterial(defaultMaterial).withName("Added Box##" + rootID);
+
+        case Sphere:
+          return HittableBuilder<editor::Sphere>(1).withMaterial(defaultMaterial).withName("Added Sphere##" + rootID);
+
+        case Plane:
+          return HittableBuilder<editor::Plane>(1, 1).withMaterial(defaultMaterial).withName("Added Plane##" + rootID);
+
+        case Mesh:
+          return HittableBuilder<editor::Mesh>(defaultMeshPath)
+              .withMaterial(defaultMaterial)
+              .withName("Added Mesh##" + rootID);
 
         default:
           return nullptr;
         }
       }();
 
-      // /*auto *const newRoot =*/ getScene()->worldRoot->add(added);
-
-      // if (newRoot == nullptr) {
-      //   std::cerr << "Attempting to add a child to a world root that's not a BVHNode or a HittableList\n";
-      // } else {
-      //   getScene()->worldRoot = newRoot;
-      // }
+      scene->getWorld().push_back(added);
     }
   }
 
