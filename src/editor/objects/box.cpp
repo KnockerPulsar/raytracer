@@ -5,6 +5,8 @@
 
 #include "objects/Box.h"
 
+#include <imgui.h>
+
 rt::editor::Box::Box(float edgeLength) : Box(vec3(edgeLength)) {}
 rt::editor::Box::Box(const vec3& extents) : extents(extents) {}
 
@@ -22,4 +24,12 @@ auto rt::editor::Box::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
 {
   return std::make_unique<raytracer::Box>(extents, getTransformation().toRaytracerTransformation(),
                                           getMaterial().toRaytracerMaterial());
+}
+
+void rt::editor::Box::OnImgui() {
+  Hittable::OnImgui();
+  ImGui::DragFloat3("Extents", reinterpret_cast<float*>(&extents), 0.1f);
+
+  ImGui::Spacing();
+  getMaterial().OnImgui();
 }

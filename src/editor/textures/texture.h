@@ -10,8 +10,8 @@ namespace rt {
     class Texture : public IImguiDrawable {
     public:
       void OnImgui() override {
-        // previewTexture.possiblyGeneratePreview(*this);
-        // previewTexture.OnImgui();
+        previewTexture.possiblyGeneratePreview(*this);
+        previewTexture.OnImgui();
       }
 
       virtual ::Texture generatePreview(int availableWidth, int availableHeight, float scale = 1.0f) {
@@ -50,6 +50,7 @@ namespace rt {
             float v = float(y) / height;
 
             // previewData[x + (y * width)] = Value(u, v, pointSampler(u, v));
+            previewData[x + (y * width)] = vec3{1, 0, 1}; // Placeholder until I get to re-implement previews
           }
         }
 
