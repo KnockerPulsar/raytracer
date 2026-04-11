@@ -206,10 +206,8 @@ namespace rt::editor {
       for (auto &[name, loader] : Scene::builtInScenes) {
         if (ImGui::MenuItem(name.c_str())) {
           {
-            auto const imageSize = scene->imageSize();
-            scene = loader(imageSize.x, imageSize.y);
-            // Re-initialize the camera.
-            camera = Camera(camera.editorSize(), scene->imageSize(), scene->getCamera());
+            auto const imageSize = camera.imageSize();
+            ChangeScene(loader(imageSize.x, imageSize.y));
           }
         }
       }
@@ -543,5 +541,12 @@ namespace rt::editor {
 
       ImGui::EndMainMenuBar();
     }
+  }
+
+  void Editor::ChangeScene(std::unique_ptr<Scene> newScene) {
+    camera         = Camera(camera.editorSize(), camera.imageSize(), newScene->getCamera());
+    selectedObject = nullptr;
+
+    scene = std::move(newScene);
   }
 } // namespace rt

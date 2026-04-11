@@ -125,6 +125,7 @@ namespace rt {
       void RenderViewport() const;
       void ObjectListImgui();
       void TopMenuImgui();
+      void ChangeScene(std::unique_ptr<Scene> newScene);
 
       editor::Object *selectedObject = nullptr;
 

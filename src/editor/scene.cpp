@@ -76,8 +76,7 @@ namespace rt::editor {
             .withMaterial(light),
     };
 
-    return Scene(std::move(world), cam, {imageWidth, imageHeight},
-                 std::make_unique<SolidColorBackground>(backgroundColor));
+    return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
   }
 
 Scene Scene::Scene1(int imageWidth, int imageHeight) {
@@ -129,8 +128,7 @@ Scene Scene::Scene1(int imageWidth, int imageHeight) {
       rightSphere,
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 } // namespace rt
 
 Scene Scene::Scene2(int imageWidth, int imageHeight) {
@@ -155,8 +153,7 @@ Scene Scene::Scene2(int imageWidth, int imageHeight) {
       HittableBuilder<Sphere>(r).withTranslation(vec3(r, 0, -1)).withMaterial(materialRight).withName("Right"),
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
@@ -220,8 +217,7 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
     }
   }
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SkysphereBackground>(skyspherePath));
+  return Scene(std::move(world), cam, std::make_unique<SkysphereBackground>(skyspherePath));
 }
 
 // Scene Scene::RandomMovingSpheres(int imageWidth, int imageHeight, int ballGridWidth, int ballGridHeight) {
@@ -319,8 +315,7 @@ Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
           .withName("Checker Sphere"),
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Earth(int imageWidth, int imageHeight) {
@@ -342,8 +337,7 @@ Scene Scene::Earth(int imageWidth, int imageHeight) {
   std::vector<std::shared_ptr<Object>> world = {
       HittableBuilder<Sphere>(2).withMaterial(earthSurface).withName("Earth")};
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Light(int imageWidth, int imageHeight) {
@@ -373,8 +367,7 @@ Scene Scene::Light(int imageWidth, int imageHeight) {
           .withName("Light"),
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::CornellBox(int imageWidth, int imageHeight) {
@@ -444,8 +437,7 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
           .withTranslation(vec3(10, 10, 10)), // On top of box 2
   };
 
-  return Scene(std::move(world), cam, {imageWidth, imageHeight},
-               std::make_unique<SolidColorBackground>(backgroundColor));
+  return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
 Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
@@ -479,8 +471,8 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
   // }();
 
   // Differentiate skysphere and solid color backgrounds
-  Scene s = Scene(std::move(world), camera, imageSize,
-                  std::make_unique<SolidColorBackground>(settings["background_color"].get<vec3>()));
+  Scene s =
+      Scene(std::move(world), camera, std::make_unique<SolidColorBackground>(settings["background_color"].get<vec3>()));
 
   std::cout << "Loaded scene with\n"
             << "\tsettings " << settings << '\n'
@@ -595,9 +587,8 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
 //   return sceneJson;
 // }
 
-Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, glm::ivec2 imageSize,
-             std::unique_ptr<Background> background)
-    : world(std::move(world)), cam(cam), background(std::move(background)), imageSize_(imageSize) {}
+Scene::Scene(std::vector<std::shared_ptr<Object>> &&world, Camera cam, std::unique_ptr<Background> background)
+    : world(std::move(world)), cam(cam), background(std::move(background)) {}
 
 auto Scene::getWorld() -> std::vector<std::shared_ptr<Object>> & { return world; }
 
