@@ -97,11 +97,12 @@ namespace rt {
         }
       };
 
-      enum AddableObjectsTypes : uint8_t { Box, Sphere, Plane, AddableObjectsTypesCount };
+      enum AddableObjectsTypes : uint8_t { Box, Sphere, Plane, Mesh, AddableObjectsTypesCount };
       inline static const char *addableObjectTypes[] = {
           "Box",
           "Sphere",
           "Plane",
+          "Mesh",
       };
 
       // Calls overloaded `Rasterize()` function for each object
