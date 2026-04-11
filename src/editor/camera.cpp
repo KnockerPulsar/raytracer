@@ -66,7 +66,9 @@ void rt::editor::Camera::RenderImgui() {
 
 rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene::Camera const &initialSceneCamera)
     : Scene::Camera(initialSceneCamera), editorSize_(editorSize), _imageSize(imageSize),
-      controlType(ControlType::flyCam) {}
+      controlType(ControlType::flyCam) {
+  forwardToAngle((lookAt - lookFrom).Normalize());
+}
 
 void rt::editor::Camera::lookAtAngle(vec3 angle) {
   // x = r * cos(90 - angle.y) * sin(90 - angle.x)
