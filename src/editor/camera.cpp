@@ -71,13 +71,10 @@ rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene::C
 }
 
 void rt::editor::Camera::lookAtAngle(vec3 angle) {
-  // x = r * cos(90 - angle.y) * sin(90 - angle.x)
-  // y = r * cos(90 - angle.x)
-  // z = r * sin(90 - angle.y) * sin(90 - angle.x)
   auto const dir = vec3{
-      cos(pi / 2 - angle.y),
-      cos(angle.x - pi / 2),
-      sin(pi / 2 - angle.y),
+      sin(angle.y),
+      sin(angle.x),
+      cos(angle.y),
   };
 
   lookAt = lookFrom + dir;
