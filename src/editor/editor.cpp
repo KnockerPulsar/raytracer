@@ -229,8 +229,8 @@ namespace rt::editor {
 
       SelectedObjectGizmo();
 
-      // const auto selectedObjectUniqueName = selectedObject->name + "##" + EditorUtils::GetIDFromPointer(selectedObject);
-      // ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
+      const auto selectedObjectUniqueName = selectedObject->getName() + "##" + EditorUtils::GetIDFromPointer(selectedObject);
+      ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
       selectedObject->OnImgui();
 
       ImGui::End();
