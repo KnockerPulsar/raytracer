@@ -6,23 +6,11 @@ namespace rt::editor {
   class Plane : public Object {
   public:
     Plane(float w, float h);
-    // static Plane YZPlane(float w, float h) {
-    //   Plane plane                 = Plane(w, h);
-    //   plane.transformation.setRotation(vec3(0.0f, 0.0f, 90.0f));
-    //
-    //   return plane;
-    // }
-    //
-    // static Plane XYPlane(float w, float h) {
-    //   Plane plane                 = Plane(w, h);
-    //   plane.transformation.setRotation(vec3(90.0f, 0.0f, 0.0f));
-    //
-    //   return plane;
-    // }
 
     virtual void         RasterizeWithoutTransformation(vec3 color) override;
     std::optional<float> hit(const Ray &worldspaceRay) const override;
     auto                 toRaytracable() const -> std::unique_ptr<rt::Raytracable> override;
+    void                 OnImgui() override;
 
     // json toJsonSpecific() const override {
     //   return {

@@ -3,6 +3,10 @@
 #include "common/raycast.h"
 #include "objects/mesh.h"
 
+#include <ImGuiFileDialog.h>
+#include <imgui.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
+
 #include <ranges>
 #include <algorithm>
 
@@ -15,7 +19,7 @@ namespace {
   }
 } // namespace
 
-rt::editor::Mesh::Mesh(std::filesystem::path path) : model(loadModel(path)) { setName(path); }
+rt::editor::Mesh::Mesh(std::filesystem::path path) : filepathStr(path), model(loadModel(path)) { setName(path); }
 
 void rt::editor::Mesh::RasterizeWithoutTransformation(vec3 color) {
   auto const scale = 1.0f;
@@ -53,4 +57,28 @@ std::optional<float> rt::editor::Mesh::hit(const Ray &worldspaceRay) const {
 auto rt::editor::Mesh::toRaytracable() const -> std::unique_ptr<rt::Raytracable> {
   return std::make_unique<raytracer::Mesh>(model, getTransformation().toRaytracerTransformation(),
                                            getMaterial().toRaytracerMaterial());
+}
+
+void rt::editor::Mesh::OnImgui() {
+  ImGui::BeginGroup();
+  ImGui::InputText("File path", &filepathStr, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+  ImGui::SameLine();
+
+  if (ImGui::Button("Load mesh")) {
+    ImGuiFileDialog::Instance()->OpenDialog("LoadMesh", "Load mesh", ".obj",
+                                            IGFD::FileDialogConfig{.path = "assets/models/"});
+  }
+
+  if (ImGuiFileDialog::Instance()->Display("LoadMesh") && ImGuiFileDialog::Instance()->IsOk()) {
+    auto const newPath = std::filesystem::path{ImGuiFileDialog::Instance()->GetCurrentPath()} /
+                         ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+    model = loadModel(newPath);
+    filepathStr = newPath;
+
+    ImGuiFileDialog::Instance()->Close();
+  }
+
+
+  ImGui::EndGroup();
 }

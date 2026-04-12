@@ -5,6 +5,8 @@
 
 #include "objects/Plane.h"
 
+#include <imgui.h>
+
 rt::editor::Plane::Plane(float w, float h) : w(w), h(h) {}
 
 void rt::editor::Plane::RasterizeWithoutTransformation(vec3 color) {
@@ -24,4 +26,8 @@ std::optional<float> rt::editor::Plane::hit(const Ray &worldspaceRay) const {
 auto rt::editor::Plane::toRaytracable() const -> std::unique_ptr<rt::Raytracable> {
   return std::make_unique<raytracer::Plane>(w, h, getTransformation().toRaytracerTransformation(),
                                             getMaterial().toRaytracerMaterial());
+}
+
+void rt::editor::Plane::OnImgui() {
+  ImGui::DragFloat("Plane Dimensions", (&w), constants::dragFloatVSpeed);
 }

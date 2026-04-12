@@ -6,4 +6,5 @@ namespace rt::constants {
   const float infinity = std::numeric_limits<float>::infinity();
   const float epsilon  = 1e-6;
   const auto  title    = "rt";
+  const auto dragFloatVSpeed = 0.01;
 } // namespace rt::costants

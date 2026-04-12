@@ -6,6 +6,8 @@
 
 #include "objects/Sphere.h"
 
+#include <imgui.h>
+
 rt::editor::Sphere::Sphere(float radius) : radius(radius) {}
 
 std::optional<float> rt::editor::Sphere::hit(const Ray &worldspaceRay) const {
@@ -21,4 +23,8 @@ void rt::editor::Sphere::RasterizeWithoutTransformation(vec3 color) {
 auto rt::editor::Sphere::toRaytracable() const -> std::unique_ptr<rt::Raytracable> {
   return std::make_unique<raytracer::Sphere>(radius, getTransformation().toRaytracerTransformation(),
                                              getMaterial().toRaytracerMaterial());
+}
+
+void rt::editor::Sphere::OnImgui() {
+  ImGui::DragFloat("Radius", &radius, constants::dragFloatVSpeed);
 }

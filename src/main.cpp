@@ -44,9 +44,6 @@
     Clean up code and naming
       - Method naming convention jumps between PascalCase and camelCase
 
-    Implement meshes properly
-      - TODO: Add the ability to add/change/reload? models at runtime
-
     Update nlhomann-json
 */
 

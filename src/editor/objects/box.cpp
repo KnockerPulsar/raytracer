@@ -27,5 +27,5 @@ auto rt::editor::Box::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
 }
 
 void rt::editor::Box::OnImgui() {
-  ImGui::DragFloat3("Extents", reinterpret_cast<float*>(&extents), 0.1f);
+  ImGui::DragFloat3("Extents", reinterpret_cast<float *>(&extents), constants::dragFloatVSpeed);
 }

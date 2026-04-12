@@ -81,6 +81,7 @@ set(SOURCES
   vendor/imgui/imgui_draw.cpp
   vendor/imgui/imgui_tables.cpp
   vendor/imgui/backends/imgui_impl_opengl3.cpp
+  vendor/imgui/misc/cpp/imgui_stdlib.cpp
 
   vendor/ImGuizmo/ImGuizmo.cpp
 )

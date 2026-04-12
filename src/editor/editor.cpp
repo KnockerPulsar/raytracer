@@ -222,6 +222,7 @@ namespace rt::editor {
 
       SelectedObjectGizmo();
 
+      // TODO double clicks should allow rename
       const auto selectedObjectUniqueName = selectedObject->getName() + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
 
@@ -466,6 +467,7 @@ namespace rt::editor {
       }
 
       std::string idPlusName = o->getName() + "##" + EditorUtils::GetIDFromPointer(o.get());
+      // TODO double clicks should allow renames
       if (ImGui::Button(idPlusName.c_str())) {
         selectedObject = o.get();
       }
