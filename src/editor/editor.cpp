@@ -224,7 +224,12 @@ namespace rt::editor {
 
       const auto selectedObjectUniqueName = selectedObject->getName() + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
+
+      selectedObject->getTransformation().OnImgui();
+      ImGui::Spacing();
       selectedObject->OnImgui();
+      ImGui::Spacing();
+      selectedObject->getMaterial().OnImgui();
 
       ImGui::End();
     }

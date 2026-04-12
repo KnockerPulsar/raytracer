@@ -27,9 +27,5 @@ auto rt::editor::Box::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
 }
 
 void rt::editor::Box::OnImgui() {
-  Hittable::OnImgui();
   ImGui::DragFloat3("Extents", reinterpret_cast<float*>(&extents), 0.1f);
-
-  ImGui::Spacing();
-  getMaterial().OnImgui();
 }
