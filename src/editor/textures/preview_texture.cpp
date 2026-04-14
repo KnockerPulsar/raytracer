@@ -4,6 +4,7 @@
 #include "editor/GroupPanel.h"
 
 #include "editor/Utils.h"
+#include <raylib.h>
 
 rt::editor::PreviewTexture::PreviewTexture() : projection([](float u, float v) { return vec3(u, v, 1); }) {}
 
@@ -72,12 +73,10 @@ void rt::editor::PreviewTexture::OnImgui() {
     // If the scale changed, free the texture. The next time
     // `possibleGeneratePreview` is called, the texture will be
     // regenerated.
-    if (ImGui::InputFloat("Scale", &scale, 0.1f, 0.1f, "%.2f")) {
+    if (ImGui::InputFloat("Preview Scale", &scale, 0.1f, 0.1f, "%.2f")) {
       scale = std::clamp(scale, 0.1f, 1.0f);
 
-      // Should be its own wrapper but  ¯\_(ツ)_/¯
-      UnloadTexture(*texture);
-      texture.reset();
+      invalidate();
     }
   }
   ImGui::EndGroupPanel();
@@ -85,6 +84,13 @@ void rt::editor::PreviewTexture::OnImgui() {
 
 auto rt::editor::PreviewTexture::getRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
   return raytracerTexture;
+}
+
+void rt::editor::PreviewTexture::invalidate() {
+  // Should be its own wrapper but  ¯\_(ツ)_/¯
+  UnloadTexture(*texture);
+  texture.reset();
+  raytracerTexture.reset();
 }
 
 auto rt::editor::PreviewTexture::GetImTextureID() const -> ImTextureID {

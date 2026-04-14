@@ -23,6 +23,8 @@ namespace rt {
 
       virtual auto createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> = 0;
 
+      void invalidatePreview() { previewTexture.invalidate(); }
+
     private:
       PreviewTexture previewTexture;
     };

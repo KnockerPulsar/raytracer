@@ -9,7 +9,8 @@ void rt::editor::SolidColor::OnImgui() {
   Texture::OnImgui();
 
   std::string id = EditorUtils::GetIDFromPointer(this);
-  ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x);
+  if(ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x))
+    invalidatePreview();
 }
 
 auto rt::editor::SolidColor::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {

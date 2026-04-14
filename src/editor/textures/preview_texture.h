@@ -20,6 +20,8 @@ namespace rt::editor {
 
     auto getRaytracerTexture() const -> std::shared_ptr<raytracer::Texture>;
 
+    void invalidate();
+
   private:
     auto GetImTextureID() const -> ImTextureID;
     auto FitDisplayArea(ImVec2 availableArea) const -> ImVec2;
