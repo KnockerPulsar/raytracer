@@ -16,6 +16,17 @@ void rt::editor::CheckerTexture::OnImgui() {
     invalidatePreview();
 
   ImGui::Spacing();
+
+  if (ImGui::TreeNodeEx("Even Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
+    even->OnImgui();
+    ImGui::Spacing();
+  }
+
+
+  if (ImGui::TreeNodeEx("Odd Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
+    odd->OnImgui();
+    ImGui::Spacing();
+  }
 }
 
 auto rt::editor::CheckerTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
