@@ -463,7 +463,6 @@ namespace rt::editor {
 
       if(selected) {
         ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertFloat4ToU32({0.6, 0.4, 0.3, 1.0}));
-        ImGui::SetScrollHereY();
       }
 
       std::string idPlusName = o->getName() + "##" + EditorUtils::GetIDFromPointer(o.get());
