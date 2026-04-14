@@ -19,7 +19,7 @@ namespace rt::raytracer {
       auto const scatterDirection = (reflected + vec3::RandomInUnitSphere() * fuzz).Normalize();
 
       scattered          = Ray(rec.p, scatterDirection, r_in.time);
-      attenuation        = albedo->Value(rec.u, rec.v, rec.p);
+      attenuation        = albedo->sample(rec.u, rec.v, rec.p);
       return (vec3::DotProd(scattered.direction, rec.normal) > 0);
     }
   private:

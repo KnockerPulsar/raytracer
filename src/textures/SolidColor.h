@@ -11,7 +11,7 @@ namespace rt::raytracer {
   public:
     SolidColor(vec3 c) : color(c) {}
 
-    virtual vec3 Value(float u, float v, const vec3 &p) const override { return color * multiplier; }
+    virtual vec3 sample(float u, float v, const vec3 &p) const override { return color; }
   private:
     vec3 color;
   };

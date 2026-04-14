@@ -48,7 +48,7 @@ namespace rt::raytracer {
       /*UnloadImage(img);*/
     }
 
-    virtual vec3 Value(float u, float v, const vec3 &p) const override {
+    virtual vec3 sample(float u, float v, const vec3 &p) const override {
       // If we have no texture data, then return solid cyan as a debugging aid.
       if (img.data == nullptr)
         return vec3(0, 1, 1);
@@ -74,21 +74,8 @@ namespace rt::raytracer {
       // Need to convert them to [0,1.0]
       const float    colorScale = 1.0 / 255.0;
       unsigned char *pixel      = (unsigned char *)img.data + j * bytesPerScanline + i * bytesPerPixel;
-      return vec3(pixel[0], pixel[1], pixel[2]) * colorScale * multiplier;
+      return vec3(pixel[0], pixel[1], pixel[2]) * colorScale;
     }
-
-    // virtual json toJson() const override { return json{{"type", "image"}, {"path", path}}; }
-
-    // ::Texture generatePreview(int availableWidth, int availableHeight, float scale) override {
-    //   return Texture::SamplePreview(
-    //       [](float u, float v) { return vec3(u, v, 0); },
-    //       img.width,
-    //       img.height,
-    //       availableWidth,
-    //       availableHeight,
-    //       scale
-    //   );
-    // }
 
   private:
     int                   bytesPerScanline;

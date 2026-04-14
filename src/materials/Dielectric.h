@@ -26,7 +26,7 @@ namespace rt::raytracer {
      */
     virtual bool scatter(const rt::Ray &rIn, rt::HitRecord &rec, vec3 &attenuation, Ray &scattered) const override {
 
-      attenuation  = albedo->Value(rec.u, rec.v, rec.p);
+      attenuation  = albedo->sample(rec.u, rec.v, rec.p);
       float refIdx = rec.front_face ? (1 / refractionIndex) : refractionIndex;
 
       vec3  unitDir  = rIn.direction.Normalize();
@@ -47,16 +47,6 @@ namespace rt::raytracer {
       scattered = Ray(rec.p, dir, rIn.time);
       return true;
     }
-
-    // virtual json toJson() const override {
-    //   // clang-format off
-    //   return json{
-    //     {"type", "dielectric"},
-    //     {"refraction_index", refractionIndex},
-    //     {"texture", albedo->toJson()}
-    //   };
-    //   // clang-format on
-    // }
 
   private:
     /**

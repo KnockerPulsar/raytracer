@@ -37,7 +37,7 @@ namespace rt::raytracer {
      * @param p Hit point in world space
      * @return vec3 Color of light that this material emits
      */
-    virtual vec3 emitted(float u, float v, const vec3 &p) const override { return emssiveTex->Value(u, v, p); }
+    virtual vec3 emitted(float u, float v, const vec3 &p) const override { return emssiveTex->sample(u, v, p); }
 
   private:
     // TODO read intensity from editor

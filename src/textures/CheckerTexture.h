@@ -16,31 +16,15 @@ namespace rt::raytracer {
     float                    scale;
 
   public:
-    CheckerTexture() = default;
+    CheckerTexture(std::shared_ptr<Texture> even_, std::shared_ptr<Texture> _odd, float s = 6.0f)
+        : even(even_), odd(_odd), scale(s) {}
 
-    // TODO underscore prefixes are reserved by the standard. Use underscore suffixes instead.
-    CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 6.0f)
-        : even(_even), odd(_odd), scale(s) {}
-
-    CheckerTexture(vec3 c1, vec3 c2, float s = 6.0f)
-        : even(std::make_shared<SolidColor>(c1)), odd(std::make_shared<SolidColor>(c2)), scale(s) {}
-
-    CheckerTexture(const json &json)
-        : CheckerTexture(json["even"].get<vec3>(), json["odd"].get<vec3>(), json["scale"].get<float>()) {}
-
-    // virtual json toJson() const override {
-    //   return json{{"type", "checker"}, {"even", even->toJson()}, {"odd", odd->toJson()}, {"scale", scale}};
-    // }
-
-    virtual vec3 Value(float u, float v, const vec3 &p) const override {
+    virtual vec3 sample(float u, float v, const vec3 &p) const override {
       float sines = sin(scale * p.x) * sin(scale * p.y) * sin(scale * p.z);
       if (sines < 0)
-        return odd->Value(u, v, p) * multiplier;
+        return odd->sample(u, v, p);
 
-      return even->Value(u, v, p) * multiplier;
+      return even->sample(u, v, p);
     }
   };
-
-  // inline void to_json(json &j, const CheckerTexture &ct) { j = ct.toJson(); }
-
 } // namespace rt
