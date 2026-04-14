@@ -12,5 +12,5 @@ void rt::editor::Metal::OnImgui() {
 }
 
 auto rt::editor::Metal::toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> {
-  return std::make_unique<raytracer::Metal>(albedo->toRaytracerTexture(), fuzz);
+  return std::make_unique<raytracer::Metal>(albedo->createRaytracerTexture(), fuzz);
 }

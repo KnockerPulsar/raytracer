@@ -17,6 +17,6 @@ void rt::editor::CheckerTexture::OnImgui() {
   ImGui::Spacing();
 }
 
-auto rt::editor::CheckerTexture::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
-  return std::make_shared<raytracer::CheckerTexture>(even->toRaytracerTexture(), odd->toRaytracerTexture(), scale);
+auto rt::editor::CheckerTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+  return std::make_shared<raytracer::CheckerTexture>(even->createRaytracerTexture(), odd->createRaytracerTexture(), scale);
 }

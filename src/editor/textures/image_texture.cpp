@@ -22,11 +22,10 @@ void rt::editor::ImageTexture::imageFromPath(std::filesystem::path imagePath) {
   bytesPerScanline = bytesPerPixel * img.width;
 }
 
-auto rt::editor::ImageTexture::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+auto rt::editor::ImageTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
   // TODO the editor and raytracer impls are almost identical, including
   // loading an image on construction. This effectively means that we allocate
   // double the texture memory. It would be better if both classes could share
   // a handle.
   return std::make_shared<raytracer::ImageTexture>(path, flipV, flipH);
-
 }

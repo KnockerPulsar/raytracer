@@ -12,6 +12,6 @@ void rt::editor::SolidColor::OnImgui() {
   ImGui::ColorEdit3(("Color##" + id).c_str(), &color.x);
 }
 
-auto rt::editor::SolidColor::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+auto rt::editor::SolidColor::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
   return std::make_shared<raytracer::SolidColor>(color);
 }

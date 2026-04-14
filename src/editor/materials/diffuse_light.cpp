@@ -9,5 +9,5 @@ void rt::editor::DiffuseLight::OnImgui() {
 }
 
 auto rt::editor::DiffuseLight::toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> {
-  return std::make_unique<raytracer::DiffuseLight>(emssiveTex->toRaytracerTexture());
+  return std::make_unique<raytracer::DiffuseLight>(emssiveTex->createRaytracerTexture());
 }

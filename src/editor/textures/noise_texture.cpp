@@ -14,7 +14,7 @@ void rt::editor::NoiseTexture::OnImgui() {
   Texture::OnImgui();
 }
 
-auto rt::editor::NoiseTexture::toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
+auto rt::editor::NoiseTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
   // TODO Right now, the editor impl doesn't generate perlin noise. When it
   // does eventually do, it should be a shared handle that both the editor and
   // raytracer impls can use.
