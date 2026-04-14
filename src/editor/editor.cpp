@@ -48,17 +48,17 @@ namespace rt::editor {
   };
 
   std::initializer_list<ViewMenuEntry> const viewMenuItems = {
-      {"Raytracing settings",
+      {"Toggle Raytracing settings",
        [](auto &viewState) { viewState.viewMenu.raytracingSettings = !viewState.viewMenu.raytracingSettings; },
        "ALT+R",
        {KEY_LEFT_ALT, KEY_RIGHT_ALT},
        KEY_R},
-      {"Camera settings",
+      {"Toggle Camera settings",
        [](auto &viewState) { viewState.viewMenu.cameraSettings = !viewState.viewMenu.cameraSettings; },
        "ALT+C",
        {KEY_LEFT_ALT, KEY_RIGHT_ALT},
        KEY_C},
-      {"Object list",
+      {"Toggle Object list",
        [](auto &viewState) { viewState.viewMenu.objectList = !viewState.viewMenu.objectList; },
        "ALT+O",
        {KEY_LEFT_ALT, KEY_RIGHT_ALT},
@@ -337,7 +337,7 @@ namespace rt::editor {
 
     if (ImGui::BeginMenu(viewMenuTitle)) {
       for (auto const &[text, onPress, strShortcut, _, __] : viewMenuItems) {
-        if (ImGui::MenuItem(std::format("Toggle {}", text).c_str(), strShortcut.c_str())) {
+        if (ImGui::MenuItem(text.c_str(), strShortcut.c_str())) {
           onPress(viewState);
         }
       }
