@@ -73,7 +73,8 @@ void rt::editor::PreviewTexture::OnImgui() {
     // If the scale changed, free the texture. The next time
     // `possibleGeneratePreview` is called, the texture will be
     // regenerated.
-    if (ImGui::InputFloat("Preview Scale", &scale, 0.1f, 0.1f, "%.2f")) {
+    auto const id = std::format("Preview Scale##{}", EditorUtils::GetIDFromPointer(this));
+    if (ImGui::InputFloat(id.c_str(), &scale, 0.1f, 0.1f, "%.2f")) {
       scale = std::clamp(scale, 0.1f, 1.0f);
 
       invalidate();
