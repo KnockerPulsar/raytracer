@@ -13,9 +13,6 @@ bool rt::editor::CheckerTexture::OnImgui() {
   auto const baseTextureChanged = Texture::OnImgui();
   auto const textureScaleChanged = ImGui::DragFloat("Checker scale", &scale);
 
-  if (textureScaleChanged)
-    invalidatePreview();
-
   ImGui::Spacing();
 
   auto evenTextureChanged = false;
@@ -29,6 +26,9 @@ bool rt::editor::CheckerTexture::OnImgui() {
     oddTextureChanged = odd->OnImgui();
     ImGui::Spacing();
   }
+
+  if (textureScaleChanged || evenTextureChanged || oddTextureChanged)
+    invalidatePreview();
 
   return baseTextureChanged || textureScaleChanged || evenTextureChanged || oddTextureChanged;
 }
