@@ -31,8 +31,6 @@
           - `frame = raytracer.render(scene, parameters)`
           - Need to set up a scene with the selected object and the material, with the object fully inside the camera
             frustum
-      - Caching results is a must, can't calculate a preview each frame
-      - Need to setup a way to rebuild previews on parameter change
       - Perlin noise is difficult to preview since it's 3D
 
 
