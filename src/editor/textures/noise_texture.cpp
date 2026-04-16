@@ -4,14 +4,18 @@
 rt::editor::NoiseTexture::NoiseTexture(float scale, float turbulanceScale, vec3 baseColor)
     : scale(scale), turbScale(turbulanceScale), baseColor(baseColor) {}
 
-void rt::editor::NoiseTexture::OnImgui() {
-  if (ImGui::DragFloat("Noise scale", &scale, 0.1f) || ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f) ||
-      ImGui::ColorEdit3("Base color", &baseColor.x))
+bool rt::editor::NoiseTexture::OnImgui() {
+  auto const noiseScaleChanged = ImGui::DragFloat("Noise scale", &scale, 0.1f);
+  auto const turbulanceScaleChanged = ImGui::DragFloat("Turbulance scale", &turbScale, 0.1f);
+  auto const baseColorChanged = ImGui::ColorEdit3("Base color", &baseColor.x);
+  if (noiseScaleChanged || turbulanceScaleChanged || baseColorChanged)
     invalidatePreview();
 
   ImGui::Spacing();
 
-  Texture::OnImgui();
+  auto const baseTextureChange = Texture::OnImgui();
+
+  return noiseScaleChanged || turbulanceScaleChanged || baseColorChanged || baseTextureChange;
 }
 
 auto rt::editor::NoiseTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {

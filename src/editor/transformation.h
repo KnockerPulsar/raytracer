@@ -8,7 +8,7 @@
 namespace rt::editor {
   class Transformation: public IImguiDrawable {
   public:
-    virtual void OnImgui() override;
+    virtual bool OnImgui() override;
 
     vec3 Apply(const vec3 &inVec) const;
     vec3 Inverse(const vec3 &inVec) const;

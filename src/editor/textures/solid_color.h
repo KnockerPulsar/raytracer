@@ -11,7 +11,7 @@ namespace rt {
     class SolidColor : public Texture {
     public:
       SolidColor(vec3 color);
-      virtual void OnImgui() override;
+      virtual bool OnImgui() override;
 
       auto createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
 

@@ -11,7 +11,7 @@ namespace rt::editor {
     virtual void RasterizeWithoutTransformation(vec3 color) override;
     std::optional<float> hit(const rt::Ray &worldspaceRay) const override;
     auto toRaytracable() const -> std::unique_ptr<rt::Raytracable> override;
-    void OnImgui() override;
+    bool OnImgui() override;
 
     // virtual json toJsonSpecific() const override;
   private:

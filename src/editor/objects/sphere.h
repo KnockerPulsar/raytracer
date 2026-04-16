@@ -15,7 +15,7 @@ namespace rt {
       virtual std::optional<float> hit(const Ray &worldspaceRay) const override;
       virtual void                 RasterizeWithoutTransformation(vec3 color) override;
       auto                         toRaytracable() const -> std::unique_ptr<rt::Raytracable> override;
-      void                         OnImgui() override;
+      bool                         OnImgui() override;
 
     private:
       float radius;

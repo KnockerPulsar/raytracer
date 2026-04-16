@@ -9,7 +9,7 @@ namespace rt::editor {
   class Dielectric : public Material {
   public:
     Dielectric(float refractionIndex, vec3 tint = vec3(1.0));
-    virtual void OnImgui() override;
+    virtual bool OnImgui() override;
 
     auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> override;
   private:

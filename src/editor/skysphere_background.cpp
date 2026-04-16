@@ -22,8 +22,9 @@ rt::editor::SkysphereBackground::~SkysphereBackground() {
   UnloadTexture(skysphereeTexture);
 }
 
-void rt::editor::SkysphereBackground::OnImgui() {
+bool rt::editor::SkysphereBackground::OnImgui() {
   // TODO
+  return false;
 }
 
 void rt::editor::SkysphereBackground::drawBackground(vec3 lookFrom) const {

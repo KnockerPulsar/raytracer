@@ -9,7 +9,7 @@ namespace rt::editor {
       CheckerTexture(std::shared_ptr<Texture> _even, std::shared_ptr<Texture> _odd, float s = 6.0f);
       CheckerTexture(vec3 c1, vec3 c2, float s = 6.0f);
 
-      virtual void OnImgui() override;
+      virtual bool OnImgui() override;
 
       auto createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
     private:

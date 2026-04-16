@@ -8,7 +8,7 @@ namespace rt {
       public:
         SolidColorBackground(vec3 backgroundColor);
 
-        void OnImgui() override;
+        bool OnImgui() override;
         void drawBackground(vec3 lookFrom) const override;
 
         auto toRaytracerBackground() const -> std::unique_ptr<raytracer::Background> override;

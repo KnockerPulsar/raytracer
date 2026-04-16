@@ -61,7 +61,7 @@ auto rt::editor::Transformation::toRaytracerTransformation() const -> rt::Transf
   return rt::Transformation(translate, getRotationEuler());
 };
 
-void rt::editor::Transformation::OnImgui() {
+bool rt::editor::Transformation::OnImgui() {
   auto const translationChanged =
       ImGui::DragFloat3(("Translation##" + EditorUtils::GetIDFromPointer(this)).c_str(), &translate.x, 0.05f);
 
@@ -73,4 +73,6 @@ void rt::editor::Transformation::OnImgui() {
   if (rotationChanged) {
     rotateDelta(euler - originalEuler);
   }
+
+  return translationChanged || rotationChanged;
 }

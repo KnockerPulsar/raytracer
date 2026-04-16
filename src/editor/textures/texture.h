@@ -9,9 +9,9 @@ namespace rt {
   namespace editor {
     class Texture : public IImguiDrawable {
     public:
-      void OnImgui() override {
+      bool OnImgui() override {
         previewTexture.possiblyGeneratePreview(*this);
-        previewTexture.OnImgui();
+        return previewTexture.OnImgui();
       }
 
       virtual auto toRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {

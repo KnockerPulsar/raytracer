@@ -3,6 +3,6 @@
 namespace rt {
   class IImguiDrawable {
   public:
-    virtual void OnImgui() {};
+    virtual bool OnImgui() { return false; };
   };
 } // namespace rt

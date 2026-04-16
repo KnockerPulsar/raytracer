@@ -25,7 +25,7 @@ namespace rt {
 
       virtual std::optional<float> hit(const rt::Ray &worldspaceRay) const = 0;
 
-      virtual void OnImgui() override;
+      virtual bool OnImgui() override;
 
       virtual auto toRaytracable() const -> std::unique_ptr<rt::Raytracable> = 0;
 

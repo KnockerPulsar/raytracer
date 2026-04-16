@@ -26,6 +26,6 @@ auto rt::editor::Box::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
                                           getMaterial().toRaytracerMaterial());
 }
 
-void rt::editor::Box::OnImgui() {
-  ImGui::DragFloat3("Extents", reinterpret_cast<float *>(&extents), constants::dragFloatVSpeed);
+bool rt::editor::Box::OnImgui() {
+  return ImGui::DragFloat3("Extents", reinterpret_cast<float *>(&extents), constants::dragFloatVSpeed);
 }

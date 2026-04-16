@@ -59,7 +59,8 @@ void rt::editor::PreviewTexture::possiblyGeneratePreview(Texture &tex) {
   }
 }
 
-void rt::editor::PreviewTexture::OnImgui() {
+bool rt::editor::PreviewTexture::OnImgui() {
+  auto scaleChanged = false;
   ImGui::BeginGroupPanel("Texture preview");
   {
     ImGui::Dummy({-1, 10});
@@ -74,13 +75,15 @@ void rt::editor::PreviewTexture::OnImgui() {
     // `possibleGeneratePreview` is called, the texture will be
     // regenerated.
     auto const id = std::format("Preview Scale##{}", EditorUtils::GetIDFromPointer(this));
-    if (ImGui::InputFloat(id.c_str(), &scale, 0.1f, 0.1f, "%.2f")) {
+    scaleChanged = ImGui::InputFloat(id.c_str(), &scale, 0.1f, 0.1f, "%.2f");
+    if (scaleChanged) {
       scale = std::clamp(scale, 0.1f, 1.0f);
-
       invalidate();
     }
   }
   ImGui::EndGroupPanel();
+
+  return scaleChanged;
 }
 
 auto rt::editor::PreviewTexture::getRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {

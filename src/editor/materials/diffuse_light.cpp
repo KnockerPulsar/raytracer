@@ -3,8 +3,8 @@
 
 rt::editor::DiffuseLight::DiffuseLight(vec3 color) : emssiveTex(ms<SolidColor>(color)) {}
 
-void rt::editor::DiffuseLight::OnImgui() {
-  emssiveTex->OnImgui();
+bool rt::editor::DiffuseLight::OnImgui() {
+  return emssiveTex->OnImgui();
   // ImGui::DragFloat("Emissive intensity", &emissiveIntensity, 0.1, 1.0f);
 }
 

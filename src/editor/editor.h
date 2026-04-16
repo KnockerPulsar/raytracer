@@ -86,14 +86,20 @@ namespace rt {
               numSamples(cliConfig.numSamples), maxDepth(cliConfig.maxDepth),
               seed(cliConfig.seed.value_or(std::random_device{}())) {}
 
-        void OnImgui() override {
+        bool OnImgui() override {
           ImGui::Begin("Other settings");
-          ImGui::Checkbox("Save on render?", &saveOnRender);
-          ImGui::DragInt("Number of threads", reinterpret_cast<int*>(&numThreads), 1, 1, 128);
-          ImGui::DragInt("Samples per pixel", reinterpret_cast<int *>(&numSamples), 1, 1, 500);
-          ImGui::DragInt("Maximum depth", reinterpret_cast<int *>(&maxDepth), 1, 1, 100);
-          ImGui::InputScalar("Seed", ImGuiDataType_U64, &seed);
+          auto const saveOnRenderChanged = ImGui::Checkbox("Save on render?", &saveOnRender);
+          auto const numberOfThreadsChanged =
+              ImGui::DragInt("Number of threads", reinterpret_cast<int *>(&numThreads), 1, 1, 128);
+          auto const samplesPerPixelChanged =
+              ImGui::DragInt("Samples per pixel", reinterpret_cast<int *>(&numSamples), 1, 1, 500);
+          auto const maximumDepthChanged =
+              ImGui::DragInt("Maximum depth", reinterpret_cast<int *>(&maxDepth), 1, 1, 100);
+          auto const seedChanged = ImGui::InputScalar("Seed", ImGuiDataType_U64, &seed);
           ImGui::End();
+
+          return saveOnRenderChanged || numberOfThreadsChanged || samplesPerPixelChanged || maximumDepthChanged ||
+                 seedChanged;
         }
       };
 

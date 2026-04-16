@@ -4,8 +4,9 @@
 
 rt::editor::SolidColorBackground::SolidColorBackground(vec3 backgroundColor) : backgroundColor(backgroundColor) {}
 
-void rt::editor::SolidColorBackground::OnImgui() {
+bool rt::editor::SolidColorBackground::OnImgui() {
   // TODO
+  return false;
 }
 
 void rt::editor::SolidColorBackground::drawBackground(vec3 /*lookFrom*/) const {

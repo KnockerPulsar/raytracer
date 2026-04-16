@@ -16,7 +16,7 @@ namespace rt::editor {
     ~PreviewTexture();
 
     void possiblyGeneratePreview(Texture &tex);
-    void OnImgui() override;
+    bool OnImgui() override;
 
     auto getRaytracerTexture() const -> std::shared_ptr<raytracer::Texture>;
 
@@ -33,4 +33,4 @@ namespace rt::editor {
     std::shared_ptr<raytracer::Texture> raytracerTexture;
     float                               scale{0.1};
   };
-} // namespace rt
+} // namespace r

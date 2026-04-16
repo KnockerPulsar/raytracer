@@ -12,7 +12,7 @@ namespace rt::editor {
     Lambertian(vec3 albedo);
     Lambertian(std::shared_ptr<Texture> albedo);
 
-    virtual void OnImgui() override;
+    virtual bool OnImgui() override;
 
     auto toRaytracerMaterial() const -> std::unique_ptr<raytracer::Material> override;
     // json toJson() const override { return json{{"type", "lambertian"}, {"texture", albedo->toJson()}}; }

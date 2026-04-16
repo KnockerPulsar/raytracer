@@ -59,7 +59,7 @@ auto rt::editor::Mesh::toRaytracable() const -> std::unique_ptr<rt::Raytracable>
                                            getMaterial().toRaytracerMaterial());
 }
 
-void rt::editor::Mesh::OnImgui() {
+bool rt::editor::Mesh::OnImgui() {
   ImGui::BeginGroup();
   ImGui::InputText("File path", &filepathStr, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
   ImGui::SameLine();
@@ -81,4 +81,5 @@ void rt::editor::Mesh::OnImgui() {
 
 
   ImGui::EndGroup();
+  return false;
 }

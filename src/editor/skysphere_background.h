@@ -9,7 +9,7 @@ namespace rt {
         SkysphereBackground(std::filesystem::path const& texturePath);
         ~SkysphereBackground();
 
-        void OnImgui() override;
+        bool OnImgui() override;
         void drawBackground(vec3 lookFrom) const override;
 
         auto toRaytracerBackground() const -> std::unique_ptr<raytracer::Background> override;

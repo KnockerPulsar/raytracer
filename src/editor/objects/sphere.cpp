@@ -25,6 +25,6 @@ auto rt::editor::Sphere::toRaytracable() const -> std::unique_ptr<rt::Raytracabl
                                              getMaterial().toRaytracerMaterial());
 }
 
-void rt::editor::Sphere::OnImgui() {
-  ImGui::DragFloat("Radius", &radius, constants::dragFloatVSpeed);
+bool rt::editor::Sphere::OnImgui() {
+  return ImGui::DragFloat("Radius", &radius, constants::dragFloatVSpeed);
 }

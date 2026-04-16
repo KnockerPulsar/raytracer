@@ -28,6 +28,6 @@ auto rt::editor::Plane::toRaytracable() const -> std::unique_ptr<rt::Raytracable
                                             getMaterial().toRaytracerMaterial());
 }
 
-void rt::editor::Plane::OnImgui() {
-  ImGui::DragFloat("Plane Dimensions", (&w), constants::dragFloatVSpeed);
+bool rt::editor::Plane::OnImgui() {
+  return ImGui::DragFloat("Plane Dimensions", (&w), constants::dragFloatVSpeed);
 }

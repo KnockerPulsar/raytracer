@@ -9,24 +9,28 @@ rt::editor::CheckerTexture::CheckerTexture(std::shared_ptr<Texture> _even, std::
 rt::editor::CheckerTexture::CheckerTexture(vec3 c1, vec3 c2, float s)
     : even(std::make_shared<SolidColor>(c1)), odd(std::make_shared<SolidColor>(c2)), scale(s) {}
 
-void rt::editor::CheckerTexture::OnImgui() {
-  Texture::OnImgui();
+bool rt::editor::CheckerTexture::OnImgui() {
+  auto const baseTextureChanged = Texture::OnImgui();
+  auto const textureScaleChanged = ImGui::DragFloat("Checker scale", &scale);
 
-  if (ImGui::DragFloat("Checker scale", &scale))
+  if (textureScaleChanged)
     invalidatePreview();
 
   ImGui::Spacing();
 
+  auto evenTextureChanged = false;
   if (ImGui::TreeNodeEx("Even Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
-    even->OnImgui();
+    evenTextureChanged = even->OnImgui();
     ImGui::Spacing();
   }
 
-
+  auto oddTextureChanged = false;
   if (ImGui::TreeNodeEx("Odd Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
-    odd->OnImgui();
+    oddTextureChanged = odd->OnImgui();
     ImGui::Spacing();
   }
+
+  return baseTextureChanged || textureScaleChanged || evenTextureChanged || oddTextureChanged;
 }
 
 auto rt::editor::CheckerTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
