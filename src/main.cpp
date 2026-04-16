@@ -1,5 +1,7 @@
 #include "app.h"
 
+#include "editor/scene.h"
+
 #include <argumentum/argparse.h>
 #include "glm/ext/vector_float2.hpp"
 #include "glm/ext/vector_int2.hpp"
@@ -8,6 +10,7 @@
 #include <cstdlib>
 #include <format>
 #include <random>
+#include <ranges>
 #include <string>
 
 /*
@@ -103,7 +106,7 @@ CliConfig setupArguments(int argc, char **argv) {
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "editor-size"); })
       .help("Window resolution width in pixels");
 
-  params.add_parameter(config.pathToScene, "--scene")
+  params.add_parameter(config.pathToScene, "--scene-path")
       .absent("")
       .maxargs(1)
       .metavar("STRING PATH")
@@ -177,6 +180,20 @@ CliConfig setupArguments(int argc, char **argv) {
         if (auto const parsedValue = parseInt(value, "max-depth"))
           target = *parsedValue;
       });
+
+  auto const builtInSceneNames = rt::editor::Scene::builtInScenes |
+                                 std::views::transform([](auto const &scene) { return scene.first; }) |
+                                 std::ranges::to<std::vector>();
+  auto const builtInScenesCommaSeparated =
+      builtInSceneNames | std::views::join_with(std::string_view{", "}) | std::ranges::to<std::string>();
+
+  params.add_parameter(config.initialScene, "--scene")
+      .absent(config.initialScene)
+      .maxargs(1)
+      .metavar("STRING")
+      .choices(builtInSceneNames)
+      .help(std::format("A built in scene to start the editor with. Possible options are: {{{}}}",
+                        builtInScenesCommaSeparated));
 
   if (!parser.parse_args(argc, argv, 1))
     std::exit(1);

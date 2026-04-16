@@ -14,6 +14,7 @@ struct CliConfig {
   bool         saveOnRender{true};
 
   std::string  pathToScene;
+  std::string  initialScene{"Cornell"};
 
   uint64_t numSamples{100};
   uint64_t maxDepth{10};

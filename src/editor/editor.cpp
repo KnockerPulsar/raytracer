@@ -28,6 +28,8 @@
 #include <rlgl.h>
 
 #include <algorithm>
+#include <iostream>
+#include <memory>
 #include <string>
 
 using namespace rt::constants;
@@ -369,12 +371,26 @@ namespace rt::editor {
     return closestObject;
   }
 
+  auto loadInitialScene(CliConfig const &config) -> std::unique_ptr<Scene> {
+    if (!config.initialScene.empty() && !config.pathToScene.empty())
+      // TODO proper logging?
+      std::cerr << "Both built in scene and path to scene specified, loading scene from path...\n";
+
+    if (!config.pathToScene.empty())
+      return std::make_unique<editor::Scene>(Scene::Load(config.imageSize, config.pathToScene));
+
+    if (!config.initialScene.empty()) {
+      auto const &sceneBuilder = std::ranges::find_if(
+          Scene::builtInScenes, [&](auto const &pair) { return pair.first == config.initialScene; });
+
+      return sceneBuilder->second(config.imageSize.x, config.imageSize.y);
+    }
+
+    std::unreachable();
+  }
+
   Editor::Editor(App *const app, CliConfig const &config)
-      : IState(app),
-        scene(std::make_unique<editor::Scene>(config.pathToScene.empty()
-                                                  ? editor::Scene::Earth(config.imageSize.x, config.imageSize.y)
-                                                  : editor::Scene::Load(config.imageSize, config.pathToScene))),
-        camera(config.editorSize, config.imageSize, scene->getCamera()),
+      : IState(app), scene(loadInitialScene(config)), camera(config.editorSize, config.imageSize, scene->getCamera()),
         rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)), config(config, *scene) {}
 
   Editor::~Editor() { UnloadRenderTexture(rasterRT); }
@@ -489,6 +505,7 @@ namespace rt::editor {
     }
   }
 
+  // TODO texture changer
   std::optional<sPtr<editor::Material>> Editor::MaterialChanger() {
 
     static const char   *materialTypes[]      = {"Diffuse", "Dielectric", "Metal", "Emissive"};
