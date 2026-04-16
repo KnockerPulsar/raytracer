@@ -9,6 +9,8 @@ namespace rt::editor {
 
     auto createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> override;
 
+    bool OnImgui() override;
+
   private:
     void imageFromPath(std::filesystem::path imagePath);
 

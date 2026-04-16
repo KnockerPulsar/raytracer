@@ -29,3 +29,10 @@ auto rt::editor::ImageTexture::createRaytracerTexture() const -> std::shared_ptr
   // a handle.
   return std::make_shared<raytracer::ImageTexture>(path, flipV, flipH);
 }
+
+bool rt::editor::ImageTexture::OnImgui() {
+  return previewHeader("Image Texture", [] {
+    // TODO changing textures
+    return false;
+  });
+}

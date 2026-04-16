@@ -10,27 +10,21 @@ rt::editor::CheckerTexture::CheckerTexture(vec3 c1, vec3 c2, float s)
     : even(std::make_shared<SolidColor>(c1)), odd(std::make_shared<SolidColor>(c2)), scale(s) {}
 
 bool rt::editor::CheckerTexture::OnImgui() {
-  auto const baseTextureChanged = Texture::OnImgui();
-  auto const textureScaleChanged = ImGui::DragFloat("Checker scale", &scale);
+  auto const previewChanged =
+      previewHeader("Checker Texture", [&] { return ImGui::DragFloat("Checker scale", &scale); });
 
-  ImGui::Spacing();
+  ImGui::Indent(10);
+  ImGui::SetNextItemOpen(false, ImGuiCond_Once);
+  auto const evenTextureChanged = even->OnImgui();
 
-  auto evenTextureChanged = false;
-  if (ImGui::TreeNodeEx("Even Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
-    evenTextureChanged = even->OnImgui();
-    ImGui::Spacing();
-  }
+  ImGui::SetNextItemOpen(false, ImGuiCond_Once);
+  auto const oddTextureChanged = odd->OnImgui();
+  ImGui::Indent(-10);
 
-  auto oddTextureChanged = false;
-  if (ImGui::TreeNodeEx("Odd Texture", ImGuiTreeNodeFlags_CollapsingHeader)) {
-    oddTextureChanged = odd->OnImgui();
-    ImGui::Spacing();
-  }
-
-  if (textureScaleChanged || evenTextureChanged || oddTextureChanged)
+  if (evenTextureChanged || oddTextureChanged)
     invalidatePreview();
 
-  return baseTextureChanged || textureScaleChanged || evenTextureChanged || oddTextureChanged;
+  return evenTextureChanged || oddTextureChanged;
 }
 
 auto rt::editor::CheckerTexture::createRaytracerTexture() const -> std::shared_ptr<raytracer::Texture> {
