@@ -26,7 +26,6 @@ namespace rt::editor {
     auto GetImTextureID() const -> ImTextureID;
     auto FitDisplayArea(ImVec2 availableArea) const -> ImVec2;
 
-    auto const inline static minDimensionSize = 32;
 
     std::function<vec3(float, float)> const projection;
     std::optional<Texture2D>            texture;

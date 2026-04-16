@@ -1,3 +1,6 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui_internal.h"
+
 #include "preview_texture.h"
 #include "texture.h"
 
@@ -5,6 +8,9 @@
 
 #include "editor/Utils.h"
 #include <raylib.h>
+
+auto constexpr maxPreviewSize = 256.0f;
+auto constexpr maxPreviewRatio = 0.75f;
 
 rt::editor::PreviewTexture::PreviewTexture() : projection([](float u, float v) { return vec3(u, v, 1); }) {}
 
@@ -14,29 +20,13 @@ rt::editor::PreviewTexture::~PreviewTexture() {
 }
 
 void rt::editor::PreviewTexture::possiblyGeneratePreview(Texture &tex) {
-  auto const regionMax     = ImGui::GetWindowContentRegionMax();
-  auto const regionMin     = ImGui::GetWindowContentRegionMin();
-  auto const availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
-
   if (!texture) {
     raytracerTexture = tex.createRaytracerTexture();
 
-    auto const [width, height] = [&] -> std::pair<int, int> {
-      auto const initialWidth  = availableArea.x * scale;
-      auto const initialHeight = availableArea.y * scale;
-
-      if (initialWidth > PreviewTexture::minDimensionSize && initialHeight > PreviewTexture::minDimensionSize)
-        return {initialWidth, initialHeight};
-
-      auto const aspectRatio = initialWidth / initialHeight;
-
-      // Wide image, set height to minimum size and width is guaranteed to be larger
-      if (aspectRatio > 1.0f)
-        return {aspectRatio * PreviewTexture::minDimensionSize, PreviewTexture::minDimensionSize};
-
-      // Tall image
-      return {PreviewTexture::minDimensionSize, PreviewTexture::minDimensionSize / aspectRatio};
-    }();
+    // 1:1 ratio for now
+    auto const availableWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
+    auto const width          = static_cast<int>(std::min(availableWidth * maxPreviewRatio, maxPreviewSize));
+    auto const height         = width;
 
     auto *previewData = new vec3[width * height];
     for (int y = 0; y < height; ++y) {
@@ -63,19 +53,21 @@ bool rt::editor::PreviewTexture::OnImgui() {
   auto scaleChanged = false;
   ImGui::BeginGroupPanel("Texture preview");
   {
-    ImGui::Dummy({-1, 10});
+    auto const availableWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
+    auto const previewWidth = std::min(availableWidth * maxPreviewRatio, maxPreviewSize);
+    auto const previewSize    = ImVec2{previewWidth, previewWidth};
 
-    auto const regionMax     = ImGui::GetWindowContentRegionMax();
-    auto const regionMin     = ImGui::GetWindowContentRegionMin();
-    auto const availableArea = ImVec2{regionMax.x - regionMin.x, regionMax.y - regionMin.y};
+    // Center the cursor on the X before placing the image
+    auto centerPosition = (ImGui::GetWindowSize().x - previewSize.x) * 0.5f;
+    ImGui::SetCursorPosX(centerPosition);
 
-    ImGui::Image(GetImTextureID(), FitDisplayArea(availableArea));
+    ImGui::Image(GetImTextureID(), previewSize);
 
     // If the scale changed, free the texture. The next time
     // `possibleGeneratePreview` is called, the texture will be
     // regenerated.
     auto const id = std::format("Preview Scale##{}", EditorUtils::GetIDFromPointer(this));
-    scaleChanged = ImGui::InputFloat(id.c_str(), &scale, 0.1f, 0.1f, "%.2f");
+    scaleChanged  = ImGui::InputFloat(id.c_str(), &scale, 0.1f, 0.1f, "%.2f");
     if (scaleChanged) {
       scale = std::clamp(scale, 0.1f, 1.0f);
       invalidate();
