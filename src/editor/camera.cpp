@@ -43,6 +43,8 @@ void rt::editor::Camera::RenderImgui() {
 
     ImGui::DragFloat("Vertical FOV", &vFov, 1.0, 5.0, 179.0f);
 
+    ImGui::DragFloat("Focus Distance", &focusDist_, 0.1, 0.01, 1e3);
+
     {
       ImGui::Checkbox("Frame size affects crop?", &frameSizeAffectsCrop);
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
