@@ -362,7 +362,7 @@ Scene Scene::Light(int imageWidth, int imageHeight) {
       HittableBuilder<Sphere>(2).withTranslation(vec3(0, 2, 0)).withMaterial(perMat).withName("Sphere"),
       HittableBuilder<Plane>(2, 2)
           .withTranslation(vec3(2, 2, -2))
-          .withRotation(vec3(0, 90, 0))
+          .withRotation(vec3(90, 0, 0))
           .withMaterial(diffLight)
           .withName("Light"),
   };
