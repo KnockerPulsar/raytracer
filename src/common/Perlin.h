@@ -3,6 +3,11 @@
 #include "data_structures/vec3.h"
 #include <cmath>
 #include <type_traits>
+
+// TODO split into header and source
+// TODO modernize code
+// TODO take seed from editor. A fixed seed should allow previews to be regenerated without the whole noise being
+// regenerated.
 namespace rt {
   class Perlin {
   public:

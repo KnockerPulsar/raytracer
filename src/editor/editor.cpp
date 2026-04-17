@@ -94,6 +94,8 @@ namespace rt::editor {
 
       // TODO bounding box visualizations
 
+
+      // TODO better focus distance visualization?
       DrawSphere(camera.getLookFrom() + camera.localForward() * camera.focusDist(), 0.05f, LIME);
 
       DrawLine3D(editor::Camera::lineStart, editor::Camera::lineEnd, BLUE);
@@ -228,6 +230,9 @@ namespace rt::editor {
       const auto selectedObjectUniqueName = selectedObject->getName() + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
 
+      // TODO Button for centering object in screen
+      //  Momentary and persistent
+      // TODO Button to set focal distance to object distance
       selectedObject->getTransformation().OnImgui();
       ImGui::Spacing();
       selectedObject->OnImgui();
