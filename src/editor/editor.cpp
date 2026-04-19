@@ -1,3 +1,4 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "editor.h"
 
 #include "Utils.h"
@@ -119,7 +120,21 @@ namespace rt::editor {
 
     // ImGui::End();
 
+    auto* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    auto const windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                             ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+    ImGui::Begin("Dockspace", nullptr, windowFlags);
+
     TopMenuImgui();
+
+    auto const dockspaceId = ImGui::GetID("Dockspace");
+    ImGui::DockSpace(dockspaceId, ImVec2{0.0f, 0.0f}, ImGuiDockNodeFlags_None);
 
     RenderViewport();
 
@@ -139,6 +154,8 @@ namespace rt::editor {
       camera.RenderImgui();
 
     SelectedObjectImGui();
+
+    ImGui::End();
   }
 
   void Editor::FileMenuImGui() {
@@ -224,8 +241,6 @@ namespace rt::editor {
     if (selectedObject != nullptr) {
       ImGui::Begin("Selected object", 0);
 
-      SelectedObjectGizmo();
-
       // TODO double clicks should allow rename
       const auto selectedObjectUniqueName = selectedObject->getName() + "##" + EditorUtils::GetIDFromPointer(selectedObject);
       ImGui::Button(selectedObjectUniqueName.c_str(), {-1, 0});
@@ -246,13 +261,12 @@ namespace rt::editor {
   void Editor::SelectedObjectGizmo() {
     assert(selectedObject != nullptr);
 
-    // ImGuizmo seems to have some issues with ImGui's docking branch. Should
-    // apply the patch mentioned in this thread:
-    // https://github.com/CedricGuillemet/ImGuizmo/issues/327
     ImGuizmo::BeginFrame();
 
-    ImGuiIO &io = ImGui::GetIO();
-    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+    assert(viewport.window != nullptr);
+    ImGuizmo::SetAlternativeWindow(viewport.window);
+    ImGuizmo::SetDrawlist();
+    ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport.size.x, viewport.size.y);
 
     auto const rotation = selectedObject->getTransformation().getRotationEuler();
 
@@ -285,30 +299,6 @@ namespace rt::editor {
   }
 
   void Editor::CheckInput() {
-    ImGuiIO &io = ImGui::GetIO();
-    if (IsMouseButtonPressed(0) && !io.WantCaptureMouse) {
-      float mouseX = GetMouseX();
-      float mouseY = GetMouseY();
-
-      selectedObject = CastRay({mouseX, mouseY});
-    }
-
-    if (!io.WantCaptureKeyboard) {
-
-      if (IsKeyDown(KEY_R)) {
-        imguizmoOp = ImGuizmo::OPERATION::ROTATE;
-      }
-      if (IsKeyDown(KEY_T)) {
-        imguizmoOp = ImGuizmo::OPERATION::TRANSLATE;
-      }
-      if (IsKeyDown(KEY_Y)) {
-        imguizmoOp = ImGuizmo::OPERATION::SCALE;
-      }
-      if (IsKeyPressed(KEY_X)) {
-        imguizmoMode = imguizmoMode == ImGuizmo::MODE::LOCAL ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
-      }
-    }
-
     FileMenuCheckInputs();
     ViewMenuCheckInputs();
     BuiltInMenuCheckInputs();
@@ -352,10 +342,9 @@ namespace rt::editor {
     }
   }
 
-  editor::Object *Editor::CastRay(Vector2 mousePos) {
-
-    ::Ray raylibRay = GetMouseRay(mousePos, camera.toRaylibCamera3D());
-    Ray   r         = {raylibRay.position, raylibRay.direction, 0};
+  editor::Object *Editor::CastRay(Vector2 clickUv) {
+    // Raytracing and the editor have flipped Y axis
+    auto const r = camera.toRaytracerCamera(Camera::Target::editor).GetRay(clickUv.x, 1.0f - clickUv.y);
 
     editor::Camera::lineStart = r.origin.toGlm();
     editor::Camera::lineEnd   = r.At(1000).toGlm();
@@ -395,16 +384,14 @@ namespace rt::editor {
   }
 
   Editor::Editor(App *const app, CliConfig const &config)
-      : IState(app), scene(loadInitialScene(config)), camera(config.editorSize, config.imageSize, scene->getCamera()),
-        rasterRT(LoadRenderTexture(config.editorSize.x, config.editorSize.y)), config(config, *scene) {}
+      : IState(app), scene(loadInitialScene(config)), camera(config.windowSize, config.imageSize, scene->getCamera()),
+        rasterRT(LoadRenderTexture(config.windowSize.x, config.windowSize.y)), config(config, *scene) {}
 
   Editor::~Editor() { UnloadRenderTexture(rasterRT); }
 
   void Editor::onUpdate() {
 
     CheckInput();
-
-    camera.Update(GetFrameTime());
 
     // Renders into the render texture below ImGui
     Rasterize();
@@ -470,10 +457,54 @@ namespace rt::editor {
         std::make_shared<rt::raytracer::Raytracer>(app, std::move(raytracerConfig), config.saveOnRender, config.editorSize));
   }
 
-  void Editor::RenderViewport() const {
-    // Flip on Y axis since ImGui and opengl/raylib use different axis
-    DrawTextureRec(rasterRT.texture, {0, 0, float(rasterRT.texture.width), -float(rasterRT.texture.height)}, {0, 0},
-                   WHITE);
+  void Editor::RenderViewport() {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
+    ImGui::Begin("Viewport");
+
+    viewport = {ImGui::GetCurrentWindow(), ImGui::GetContentRegionAvail()};
+
+    if (rasterRT.texture.width != viewport.size.x || rasterRT.texture.height != viewport.size.y)
+    {
+      UnloadRenderTexture(rasterRT);
+      rasterRT = LoadRenderTexture(viewport.size.x, viewport.size.y);
+      camera.updateViewportSize({viewport.size.x, viewport.size.y});
+    }
+
+    // Flip on Y axis since ImGui and us use flipped vertical axes.
+    ImGui::Image(reinterpret_cast<ImTextureID>(&rasterRT.texture.id), viewport.size, ImVec2{0, 1}, ImVec2{1, 0});
+
+    if (ImGui::IsWindowHovered()) {
+      camera.Update(GetFrameTime());
+
+      if (ImGui::IsWindowHovered() && IsMouseButtonPressed(0)) {
+        auto const viewportOffset   = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+        auto const mousePosRelative = ImGui::GetMousePos() - viewportOffset;
+
+        auto const clickUv = mousePosRelative / viewport.size;
+        selectedObject     = CastRay({clickUv.x, clickUv.y});
+      }
+
+    }
+
+    if (selectedObject != nullptr) {
+      if (ImGui::IsKeyPressed(ImGuiKey_R)) {
+        imguizmoOp = ImGuizmo::OPERATION::ROTATE;
+      }
+      if (ImGui::IsKeyPressed(ImGuiKey_T)) {
+        imguizmoOp = ImGuizmo::OPERATION::TRANSLATE;
+      }
+      if (ImGui::IsKeyPressed(ImGuiKey_Y)) {
+        imguizmoOp = ImGuizmo::OPERATION::SCALE;
+      }
+      if (ImGui::IsKeyPressed(ImGuiKey_X)) {
+        imguizmoMode = imguizmoMode == ImGuizmo::MODE::LOCAL ? ImGuizmo::MODE::WORLD : ImGuizmo::MODE::LOCAL;
+      }
+      SelectedObjectGizmo();
+    }
+
+    ImGui::End();
+    ImGui::PopStyleVar();
+
   }
 
   void Editor::ObjectListImgui() {

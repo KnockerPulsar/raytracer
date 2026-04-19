@@ -15,7 +15,7 @@
 namespace rt {
   App::App(CliConfig config) {
 
-    InitWindow(config.editorSize.x, config.editorSize.y, rt::constants::title);
+    InitWindow(config.windowSize.x, config.windowSize.y, rt::constants::title);
 
     // Editor MUST be initialized after the window is created
     editor       = std::make_shared<editor::Editor>(this, config);

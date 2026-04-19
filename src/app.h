@@ -8,7 +8,7 @@
 
 struct CliConfig {
   glm::ivec2   imageSize{900, 900};
-  glm::ivec2   editorSize{1280, 720};
+  glm::ivec2   windowSize{1600, 900};
   uint64_t     numThreads{std::thread::hardware_concurrency()};
   bool         potatoMode{false};
   bool         saveOnRender{true};

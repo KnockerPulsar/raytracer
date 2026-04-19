@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "common/Defs.h"
 #include "editor/IImguiDrawable.h"
+#include "imgui_internal.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -82,7 +83,7 @@ namespace rt {
         uint64_t seed;
 
         Config(CliConfig const &cliConfig, Scene const &scene)
-            : editorSize(cliConfig.editorSize), numThreads(cliConfig.numThreads), saveOnRender(cliConfig.saveOnRender),
+            : editorSize(cliConfig.windowSize), numThreads(cliConfig.numThreads), saveOnRender(cliConfig.saveOnRender),
               numSamples(cliConfig.numSamples), maxDepth(cliConfig.maxDepth),
               seed(cliConfig.seed.value_or(std::random_device{}())) {}
 
@@ -126,9 +127,9 @@ namespace rt {
       void BuiltInMenuCheckInputs();
       void SelectedObjectImGui();
       // Tests a ray against the world and returns whatever it hits (can be null)
-      editor::Object *CastRay(Vector2 mousePos);
+      editor::Object *CastRay(Vector2 clickUv);
       void AddObjectImgui();
-      void RenderViewport() const;
+      void RenderViewport();
       void ObjectListImgui();
       void TopMenuImgui();
       void ChangeScene(std::unique_ptr<Scene> newScene);
@@ -150,6 +151,11 @@ namespace rt {
       std::unique_ptr<Scene> scene;
       editor::Camera  camera;
       RenderTexture2D rasterRT;
+      struct ViewPortState {
+        ImGuiWindow *window;
+        ImVec2       size;
+        // TODO maybe move the rasterRT here?
+      } viewport;
 
       ViewState viewState;
       Config    config;

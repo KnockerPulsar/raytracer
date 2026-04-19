@@ -99,12 +99,12 @@ CliConfig setupArguments(int argc, char **argv) {
       .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "image-size"); })
       .help("rendering resolution width in pixels");
 
-  params.add_parameter(config.editorSize, "--editor-size")
-      .absent(config.editorSize)
+  params.add_parameter(config.windowSize, "--window-size")
+      .absent(config.windowSize)
       .maxargs(1)
       .metavar("<width>x<height>")
-      .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "editor-size"); })
-      .help("Window resolution width in pixels");
+      .action([&](glm::ivec2 &toAssign, const std::string &passed) { toAssign = parseSize(passed, "window-size"); })
+      .help("Window size in pixels");
 
   params.add_parameter(config.pathToScene, "--scene-path")
       .absent("")
