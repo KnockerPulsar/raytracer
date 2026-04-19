@@ -28,14 +28,12 @@ public:
   {
   public:
     Camera(Camera const &other) = default;
-    Camera(vec3 lookFrom, vec3 lookAt, float vFov, float aspectRatio, float aperature,
-           float focusDist);
+    Camera(vec3 lookFrom, vec3 lookAt, float vFov, float aperature, float focusDist);
 
     vec3  getLookFrom() const { return lookFrom; }
   protected:
     vec3  lookFrom, lookAt;
     float focusDist_;
-    float aspectRatio;
     float vFov;
     float aperature;
 
@@ -58,7 +56,7 @@ public:
   static Scene Earth(int imageWidth, int imageHeight);
   static Scene Light(int imageWidth, int imageHeight);
   static Scene CornellBox(int imageWidth, int imageHeight);
-  static Scene Load(glm::ivec2 imageSize, std::string path);
+  static Scene Load(std::string path);
   // static Scene TransformationTest(int imageWidth, int imageHeight);
   // static Scene PlaneTest(int imageWidth, int imageHeight);
   // static Scene RasterTest(int imageWidth, int imageHeight);

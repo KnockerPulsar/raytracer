@@ -62,7 +62,7 @@ namespace rt::editor {
     vec3  moveDir     = vec3(10.0f, 0, 0);
     int   fov         = 60.0;
 
-    Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+    Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
     auto mat   = std::make_shared<Lambertian>(vec3(0.6, 0.6, 0.6));
     auto light = std::make_shared<DiffuseLight>(vec3(3, 3, 3));
@@ -89,7 +89,7 @@ Scene Scene::Scene1(int imageWidth, int imageHeight) {
   vec3  moveDir     = vec3(10.0f, 0, 0);
   int   fov         = 60.0;
 
-  Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   auto materialGround = std::make_shared<Lambertian>(vec3(0.8, 0.8, 0.0));
   auto materialCenter = std::make_shared<Lambertian>(vec3(0.1, 0.2, 0.5));
@@ -143,7 +143,7 @@ Scene Scene::Scene2(int imageWidth, int imageHeight) {
   vec3  moveDir     = vec3(0.1f, 0, 0);
   int   fov         = 20.0;
 
-  Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   auto materialLeft  = std::make_shared<Lambertian>(vec3(0, 0, 1));
   auto materialRight = std::make_shared<Lambertian>(vec3(1, 0, 0));
@@ -167,7 +167,7 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
   vec3  moveDir     = vec3(1.0f, 0, 0);
   int   fov         = 20.0;
 
-  Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   std::vector<std::shared_ptr<Object>> world = {
       HittableBuilder<Sphere>(1.0)
@@ -291,7 +291,7 @@ Scene Scene::Random(int imageWidth, int imageHeight, int ballGridWidth, int ball
 Scene Scene::TwoSpheres(int imageWidth, int imageHeight) {
   vec3 backgroundColor = vec3(0.70, 0.80, 1.00);
 
-  Camera cam(vec3(13, 2, 3), vec3(0, 0, 0), 20.0, (float)imageWidth / imageHeight, 0.0, 10);
+  Camera cam(vec3(13, 2, 3), vec3(0, 0, 0), 20.0, 0.0, 10);
 
 
   // auto checker =
@@ -329,7 +329,7 @@ Scene Scene::Earth(int imageWidth, int imageHeight) {
   vec3  moveDir     = vec3(0.0f, 0, 0.0);
   int   fov         = 20.0;
 
-  Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   auto earthTexture = std::make_shared<ImageTexture>("assets/textures/earthmap.png");
   auto earthSurface = std::make_shared<Lambertian>(earthTexture);
@@ -351,7 +351,7 @@ Scene Scene::Light(int imageWidth, int imageHeight) {
   vec3  moveDir     = vec3(0.0f, 0, 0.0);
   int   fov         = 20.0;
 
-  Camera cam(lookFrom, lookAt, fov, (float)imageWidth / imageHeight, aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   auto perText   = std::make_shared<NoiseTexture>(4.0f);
   auto perMat    = std::make_shared<Lambertian>(perText);
@@ -381,7 +381,7 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
   vec3  moveDir     = vec3(0.0f, 0, 0.0);
   int   fov         = 40.0;
 
-  Camera cam(lookFrom, lookAt, fov, float(imageWidth) / float(imageHeight), aperature, distToFocus);
+  Camera cam(lookFrom, lookAt, fov, aperature, distToFocus);
 
   auto red           = std::make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
   auto white         = std::make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
@@ -440,14 +440,12 @@ Scene Scene::CornellBox(int imageWidth, int imageHeight) {
   return Scene(std::move(world), cam, std::make_unique<SolidColorBackground>(backgroundColor));
 }
 
-Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
+Scene Scene::Load(std::string path) {
   std::ifstream jsonFile(path);
   std::cout << "Loading scene from file " << path << '\n';
 
   json readScene;
   jsonFile >> readScene;
-
-  float aspectRatio = static_cast<float>(imageSize.x) / imageSize.y;
 
   auto world = std::vector<std::shared_ptr<Object>>();
   world.reserve(readScene["objects"].size());
@@ -461,7 +459,7 @@ Scene Scene::Load(glm::ivec2 imageSize, std::string path) {
   auto const camera = [&] {
     auto const cameraJson = readScene["camera"];
     return Camera(cameraJson["look_from"].get<vec3>(), cameraJson["look_at"].get<vec3>(),
-                  cameraJson["fov"].get<float>(), aspectRatio, cameraJson["aperature"].get<float>(),
+                  cameraJson["fov"].get<float>(), cameraJson["aperature"].get<float>(),
                   cameraJson["focus_dist"].get<float>());
   }();
 
@@ -604,8 +602,8 @@ auto Scene::compile(rt::Camera const &camera) const -> std::unique_ptr<raytracer
                                             background->toRaytracerBackground());
 }
 
-Scene::Camera::Camera(vec3 lookFrom, vec3 lookAt, float fov, float aspectRatio, float aperature, float focusDist)
-    : lookFrom(lookFrom), lookAt(lookAt), vFov(fov), aspectRatio(aspectRatio), aperature(aperature),
+Scene::Camera::Camera(vec3 lookFrom, vec3 lookAt, float fov, float aperature, float focusDist)
+    : lookFrom(lookFrom), lookAt(lookAt), vFov(fov), aperature(aperature),
       focusDist_(focusDist) {}
 
 } // namespace rt::editor

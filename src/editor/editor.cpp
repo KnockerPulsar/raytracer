@@ -382,7 +382,7 @@ namespace rt::editor {
       std::cerr << "Both built in scene and path to scene specified, loading scene from path...\n";
 
     if (!config.pathToScene.empty())
-      return std::make_unique<editor::Scene>(Scene::Load(config.imageSize, config.pathToScene));
+      return std::make_unique<editor::Scene>(Scene::Load(config.pathToScene));
 
     if (!config.initialScene.empty()) {
       auto const &sceneBuilder = std::ranges::find_if(
