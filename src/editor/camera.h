@@ -11,12 +11,7 @@ namespace rt::editor {
 
     inline static vec3 lineStart, lineEnd;
 
-    Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, editor::Scene::Camera const &initialSceneCamera);
-
-    void lookAtAngle(vec3 angle);
-    void forwardToAngle(vec3 fwd);
-
-    void MouseLook(Vector2 mousePositionDelta);
+    Camera(glm::ivec2 viewportSize, glm::ivec2 imageSize, editor::Scene::Camera const &initialSceneCamera);
 
     void DrawFrameOutline() const;
     void RenderImgui();
@@ -31,21 +26,23 @@ namespace rt::editor {
 
     glm::mat4 getProjectionMatrix() const;
 
-    std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
-
     auto imageSize() const -> glm::ivec2 { return _imageSize; }
-    auto editorSize() const -> glm::ivec2 { return editorSize_; }
 
-    float GetCorrectedCropFov() const;
+    enum class Target : uint8_t { raytracer, editor };
+    rt::Camera toRaytracerCamera(Target target = Target::raytracer) const;
 
-    rt::Camera toRaytracerCamera() const;
-
+    void updateFromSceneCamera(Scene::Camera const &camera);
+    void updateViewportSize(glm::ivec2 viewportSize);
 
   private:
-    glm::ivec2 editorSize_; // TODO should be const but that deletes `editor::Scene`'s copy ctor
-    glm::ivec2 _imageSize;
+    void lookAtAngle(vec3 angle);
+    void forwardToAngle(vec3 fwd);
+    void MouseLook(Vector2 mousePositionDelta);
+    float GetCorrectedCropFov() const;
+    std::tuple<vec3, vec3, vec3> getScaledDirectionVectors(float dt) const;
 
-    vec3 moveDir;
+    glm::ivec2 viewportSize_; // TODO should be const but that deletes `editor::Scene`'s copy ctor
+    glm::ivec2 _imageSize; // TODO underscore suffix
 
     Vector2 preHideCursorLocation;
     bool    frameSizeAffectsCrop{false};

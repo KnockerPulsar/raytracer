@@ -572,7 +572,7 @@ namespace rt::editor {
   }
 
   void Editor::ChangeScene(std::unique_ptr<Scene> newScene) {
-    camera         = Camera(camera.editorSize(), camera.imageSize(), newScene->getCamera());
+    camera.updateFromSceneCamera(newScene->getCamera());
     selectedObject = nullptr;
 
     scene = std::move(newScene);

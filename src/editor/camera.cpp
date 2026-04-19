@@ -17,8 +17,8 @@ void rt::editor::Camera::DrawFrameOutline() const {
   auto constexpr thickness = 5.0;
   // Account for titlebar
   auto constexpr titlebarClearence = 4;
-  auto rectX                       = (editorSize_.x - _imageSize.x) / 2;
-  auto rectY                       = (editorSize_.y - _imageSize.y) / 2;
+  auto rectX                       = (viewportSize_.x - _imageSize.x) / 2;
+  auto rectY                       = (viewportSize_.y - _imageSize.y) / 2;
   DrawRectangleLinesEx(::Rectangle(rectX, rectY + (thickness * titlebarClearence), _imageSize.x - thickness,
                                    _imageSize.y - (thickness * titlebarClearence)),
                        thickness, MAGENTA);
@@ -66,8 +66,8 @@ void rt::editor::Camera::RenderImgui() {
   ImGui::End();
 }
 
-rt::editor::Camera::Camera(glm::ivec2 editorSize, glm::ivec2 imageSize, Scene::Camera const &initialSceneCamera)
-    : Scene::Camera(initialSceneCamera), editorSize_(editorSize), _imageSize(imageSize),
+rt::editor::Camera::Camera(glm::ivec2 viewportSize, glm::ivec2 imageSize, Scene::Camera const &initialSceneCamera)
+    : Scene::Camera(initialSceneCamera), viewportSize_(viewportSize), _imageSize(imageSize),
       controlType(ControlType::flyCam) {
   forwardToAngle((lookAt - lookFrom).Normalize());
 }
@@ -172,22 +172,33 @@ Camera3D rt::editor::Camera::toRaylibCamera3D() const {
 }
 
 glm::mat4 rt::editor::Camera::getProjectionMatrix() const {
-  return glm::perspective(glm::radians(vFov), static_cast<float>(editorSize_.x) / editorSize_.y, 0.01f, 100.0f);
+  return glm::perspective(glm::radians(vFov), static_cast<float>(viewportSize_.x) / viewportSize_.y, 0.01f, 100.0f);
 }
 
 float rt::editor::Camera::GetCorrectedCropFov() const {
   // Clamp the scale in case the image is larger than the editor window.
-  auto const scale = std::min(static_cast<float>(_imageSize.y) / editorSize_.y, 1.0f);
+  auto const scale = std::min(static_cast<float>(_imageSize.y) / viewportSize_.y, 1.0f);
   return glm::degrees(2 * std::atan(scale * std::tan(DegressToRadians(vFov) / 2)));
 }
 
-rt::Camera rt::editor::Camera::toRaytracerCamera() const {
-  auto const aspectRatio = static_cast<float>(_imageSize.x) / _imageSize.y;
+rt::Camera rt::editor::Camera::toRaytracerCamera(Target target) const {
+  auto const aspectRatio = target == Target::editor ? static_cast<float>(viewportSize_.x) / viewportSize_.y
+                                                    : static_cast<float>(_imageSize.x) / _imageSize.y;
+
+  auto const finalAperature = target == Target::editor ? 0 : this->aperature;
+
   auto correctedVerticalFov = vFov;
 
   if (frameSizeAffectsCrop) {
     correctedVerticalFov = GetCorrectedCropFov();
   }
 
-  return rt::Camera(lookFrom, lookAt, {0, 1, 0}, correctedVerticalFov, aspectRatio, aperature, focusDist_, 0, 1);
+  return rt::Camera(lookFrom, lookAt, {0, 1, 0}, correctedVerticalFov, aspectRatio, finalAperature, focusDist_, 0, 1);
 }
+void rt::editor::Camera::updateFromSceneCamera(Scene::Camera const &camera) {
+  // Assign to the `Scene::Camera` part
+  static_cast<Scene::Camera &>(*this) = camera;
+  forwardToAngle((lookAt - lookFrom).Normalize());
+}
+
+void rt::editor::Camera::updateViewportSize(glm::ivec2 viewportSize) { viewportSize_ = viewportSize; }

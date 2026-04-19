@@ -9,20 +9,7 @@
 namespace rt {
 
   class Camera {
-  private:
-    float lensRadius;
-
   public:
-    vec3 lookFrom, lookAt;
-    vec3 lowerLeftCorner, horizontal, vertical;
-    vec3 localRight, localUp, localForward, worldUp;
-
-    float time0, time1;
-    float vFov; // vertical field-of-view in degrees
-    float aspectRatio, aperature, focusDist;
-
-    Camera() = default;
-
     Camera(
         vec3  lookFrom,
         vec3  lookAt,
@@ -37,8 +24,13 @@ namespace rt {
 
     rt::Ray GetRay(float s, float t) const;
 
-    void RenderImgui();
+  private:
+    vec3 lookFrom, lookAt;
+    vec3 lowerLeftCorner, horizontal, vertical;
+    vec3 localRight, localUp, localForward, worldUp;
 
-    void RecomputeLocalBases();
+    float time0, time1;
+    float vFov; // vertical field-of-view in degrees
+    float aspectRatio, lensRadius, focusDist;
   };
 } // namespace rt

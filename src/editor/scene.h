@@ -30,14 +30,11 @@ public:
     Camera(Camera const &other) = default;
     Camera(vec3 lookFrom, vec3 lookAt, float vFov, float aperature, float focusDist);
 
-    vec3  getLookFrom() const { return lookFrom; }
   protected:
     vec3  lookFrom, lookAt;
     float focusDist_;
     float vFov;
     float aperature;
-
-    static inline const vec3 vUp = vec3(0, 1, 0); // TODO make customizable
   };
 
   struct Config {
