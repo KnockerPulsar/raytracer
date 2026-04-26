@@ -2,6 +2,7 @@
 #include "common/Defs.h"
 #include "app.h"
 
+// TODO to be nuked
 namespace rt {
   namespace raytracer { class Raytracer; }
   class IState {
@@ -11,10 +12,6 @@ namespace rt {
     virtual void onEnter() {}
     virtual void onExit() {}
     virtual void onUpdate() = 0;
-
-    void rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> const& newRaytracer) {
-      app->rebuildRaytracer(newRaytracer);
-    }
 
   protected:
     App *app;

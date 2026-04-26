@@ -1,3 +1,5 @@
+#pragma once
+
 #include "common/IState.h"
 #include "common/Ray.h"
 #include "common/AsyncRenderData.h"
@@ -9,33 +11,40 @@
 namespace rt::raytracer {
   class Scene;
   class Config;
+
+  struct Frame {
+    ::Texture texture;
+  };
+
   class Raytracer : public IState {
   public:
-    Raytracer(App *const app, Config &&config, bool saveOnRender, glm::ivec2 editorSize);
+    Raytracer(App *const app, Config &&config, std::function<void(Frame)>);
 
     virtual void onEnter() override;
     virtual void onExit() override;
     virtual void onUpdate() override;
 
-  private:
     void startRaytracing();
-    void BlitToBuffer();
-    bool onFinished();
+    void stopRaytracing();
+
+    float progress() const;
+    bool isRaytracing() const;
+
+  private:
     void RenderImGui();
-    void Autosave();
 
     static void TraceRay(AsyncRenderData &ard, int threadIndex);
     static vec3 RayColor(const rt::Ray &r, std::unique_ptr<Scene> const &compiledScene, int depth);
 
-    bool allFinished = false;
+    bool raytracingDone = false;
 
     AsyncRenderData ard;
-    bool const saveOnRender;
-    glm::ivec2 const editorSize;
 
     struct ViewState {
       bool showProgress = true;
       bool detailedThreadProgress = false;
     } viewState;
+
+    std::function<void(Frame)> const onRenderDone;
   };
 } // namespace rt

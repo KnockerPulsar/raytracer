@@ -1,11 +1,14 @@
 #pragma once
 
-#include "common/IState.h"
 #include "app.h"
 #include "camera.h"
-#include "common/Defs.h"
+
+#include "editor/rendered_frames_window.h"
+#include "raytracer/raytracer.h"
 #include "editor/IImguiDrawable.h"
-#include "imgui_internal.h"
+
+#include "common/IState.h"
+#include "common/Defs.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -160,6 +163,8 @@ namespace rt {
       ViewState viewState;
       Config    config;
 
+      std::unique_ptr<raytracer::Raytracer> raytracer;
+      RenderedFramesWindow renderedFramesWindow;
     }; // namespace Editor
   } // namespace editor
 } // namespace rt

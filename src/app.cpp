@@ -19,7 +19,6 @@ namespace rt {
 
     // Editor MUST be initialized after the window is created
     editor       = std::make_shared<editor::Editor>(this, config);
-    currentState = editor;
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
@@ -32,11 +31,9 @@ namespace rt {
   void App::run() {
     while (!WindowShouldClose() && !shouldQuit) {
       checkInput();
-      currentState.lock()->onUpdate();
+      editor->onUpdate();
     }
   }
-
-  void App::rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> newState) { rt = newState; }
 
   void App::checkInput() {
     int keyPressed = GetKeyPressed();
@@ -47,16 +44,6 @@ namespace rt {
       return;
 
     switch (keyPressed) {
-    case KEY_E: {
-      auto currentStateLocked = currentState.lock();
-      currentStateLocked->onExit();
-      auto const nextState = currentStateLocked == editor ? std::shared_ptr<IState>{rt} : std::shared_ptr<IState>{editor};
-      nextState->onEnter();
-
-      currentState = nextState;
-
-      break;
-    }
     case KEY_Q: {
       if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
         quit();
@@ -77,7 +64,6 @@ namespace rt {
     // Destroy the editor and raytracer before we close the window so the
     // raster and raytrace textures can be unloaded properly.
     editor.reset();
-    rt.reset();
 
     rlImGuiShutdown();
     CloseWindow();

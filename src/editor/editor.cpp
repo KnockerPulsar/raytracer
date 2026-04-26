@@ -23,6 +23,7 @@
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <raylib.h>
 #include <rlImGui.h>
@@ -32,6 +33,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <print>
 
 using namespace rt::constants;
 
@@ -111,14 +113,6 @@ namespace rt::editor {
   }
 
   void Editor::RenderImgui() {
-
-    // ImGui::Begin(
-    //     "Editor", 0, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove);
-
-    // float imguiWidth = ImGui::GetContentRegionAvail().x;
-    // float height     = imguiWidth * float(screenRT.texture.height) / screenRT.texture.width;
-
-    // ImGui::End();
 
     auto* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -390,8 +384,10 @@ namespace rt::editor {
   Editor::~Editor() { UnloadRenderTexture(rasterRT); }
 
   void Editor::onUpdate() {
-
     CheckInput();
+
+    if(raytracer)
+      raytracer->onUpdate();
 
     // Renders into the render texture below ImGui
     Rasterize();
@@ -443,19 +439,7 @@ namespace rt::editor {
     }
   }
 
-  void Editor::onExit() {
-    auto raytracerConfig = raytracer::Config{
-        scene->compile(camera.toRaytracerCamera()),
-        config.seed,
-        config.numSamples,
-        config.maxDepth,
-        config.numThreads,
-        camera.imageSize(),
-    };
-
-    rebuildRaytracer(
-        std::make_shared<rt::raytracer::Raytracer>(app, std::move(raytracerConfig), config.saveOnRender, config.editorSize));
-  }
+  void Editor::onExit() {}
 
   void Editor::RenderViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
@@ -505,6 +489,41 @@ namespace rt::editor {
     ImGui::End();
     ImGui::PopStyleVar();
 
+    renderedFramesWindow.draw();
+
+    ImGui::Begin("Raytrace Controls", nullptr, ImGuiWindowFlags_NoTitleBar);
+    if (ImGui::Button("Start Raytracing")) {
+      auto raytracerConfig = raytracer::Config{
+          scene->compile(camera.toRaytracerCamera()),
+          config.seed,
+          config.numSamples,
+          config.maxDepth,
+          config.numThreads,
+          camera.imageSize(),
+      };
+
+      raytracer = std::make_unique<rt::raytracer::Raytracer>(app, std::move(raytracerConfig), [this](auto frame) {
+        renderedFramesWindow.onFrameRendered(frame);
+        ImGui::SetWindowFocus("Rendered Frames");
+      });
+
+      raytracer->startRaytracing();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Stop Raytracing")) {
+      raytracer->stopRaytracing();
+    }
+
+    if (raytracer && raytracer->isRaytracing()) {
+      ImGui::SameLine();
+      auto const progress = raytracer->progress();
+
+      if (progress < 1.0f)
+        ImGui::ProgressBar(progress * 100.0f);
+    }
+
+    ImGui::End();
   }
 
   void Editor::ObjectListImgui() {

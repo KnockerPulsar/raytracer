@@ -24,13 +24,14 @@ namespace rt::raytracer {
 
     bool exit = false; // To make threads exit their loops
 
-    RenderTexture2D raytraceRT;
-
   public:
     AsyncRenderData(Config &&config);
     ~AsyncRenderData();
 
     void KillThreads();
+    float progress() const;
+    bool isRaytracing() const;
+    bool finishedRaytracing() const;
 
     Config const config;
   };

@@ -16,42 +16,38 @@
 
 #include <iostream>
 
-rt::raytracer::Raytracer::Raytracer(App *const app, Config &&config, bool saveOnRender, glm::ivec2 editorSize)
-    : IState(app), ard(std::move(config)), saveOnRender(saveOnRender), editorSize(editorSize) {}
+rt::raytracer::Raytracer::Raytracer(App *const app, Config &&config, std::function<void(Frame)> onRenderDone)
+    : IState(app), ard(std::move(config)), onRenderDone(onRenderDone) {}
 
 void rt::raytracer::Raytracer::onEnter() { startRaytracing(); }
 
-void rt::raytracer::Raytracer::onExit() {
-  ard.KillThreads();
-
-  // Reset job queue chunks
-  ard.pixelJobs.setCurrentChunkStart(0);
-
-  ard.finishedThreads = 0;
-  // Reset thread times and progress
-  for (int i = 0; i < ard.config.numThreads; i++) {
-    ard.threadTimes[i]     = 0;
-    ard.threadProgress[i]  = 0;
-  }
-
-  // Clear results from previous job.
-  for (auto it = ard.pixelJobs.getJobsVector().begin(); it != ard.pixelJobs.getJobsVector().end(); ++it) {
-    it->color = vec3(0);
-  }
-
-  allFinished = false;
-}
+void rt::raytracer::Raytracer::onExit() { stopRaytracing(); }
 
 void rt::raytracer::Raytracer::onUpdate() {
-  if(IsKeyPressed(KEY_SPACE))
-    viewState.showProgress = !viewState.showProgress;
+  if (ard.isRaytracing() && ard.finishedRaytracing() && !raytracingDone) {
+    raytracingDone = true;
+    ard.KillThreads();
 
-  BeginDrawing();
+    auto const imageSize = ard.config.imageSize;
+    auto      *pixelData = new Color[static_cast<int>(imageSize.x * imageSize.y)];
+    auto       jobs      = ard.pixelJobs.getJobsVector();
 
-  onFinished();
-  RenderImGui();
+    // Copy over only the color data
+    for (int i = 0; i < jobs.size(); ++i) {
+      pixelData[i] = jobs[i].color.toRaylibColor(255);
+    }
 
-  EndDrawing();
+    // Create texture from image containing the color data
+    Image raytraced = {
+        .data    = pixelData,
+        .width   = imageSize.x,
+        .height  = imageSize.y,
+        .mipmaps = 1,
+        .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+    };
+
+    onRenderDone(Frame{LoadTextureFromImage(raytraced)});
+  }
 }
 
 void rt::raytracer::Raytracer::startRaytracing() {
@@ -66,61 +62,25 @@ void rt::raytracer::Raytracer::startRaytracing() {
   }
 }
 
-void rt::raytracer::Raytracer::BlitToBuffer() {
+void rt::raytracer::Raytracer::stopRaytracing() {
+  ard.KillThreads();
 
-  auto const imageSize = ard.config.imageSize;
-  auto *pixelData = new Color[static_cast<int>(imageSize.x * imageSize.y)];
-  auto  jobs      = ard.pixelJobs.getJobsVector();
+  // Reset job queue chunks
+  ard.pixelJobs.setCurrentChunkStart(0);
 
-  // Copy over only the color data
-  for (int i = 0; i < jobs.size(); ++i) {
-    pixelData[i] = jobs[i].color.toRaylibColor(255);
+  ard.finishedThreads = 0;
+  // Reset thread times and progress
+  for (int i = 0; i < ard.config.numThreads; i++) {
+    ard.threadTimes[i]    = 0;
+    ard.threadProgress[i] = 0;
   }
 
-  // Unload old texture
-  UnloadTexture(ard.raytraceRT.texture);
-
-  // Create texture from image containing the color data
-  Image raytraced = {.data    = pixelData,
-                     .width   = imageSize.x,
-                     .height  = imageSize.y,
-                     .mipmaps = 1,
-                     .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8};
-
-  // Deletes pixelData afte copying it to another buffer
-  ImageFlipVertical(&raytraced);
-
-  ard.raytraceRT.texture = LoadTextureFromImage(raytraced);
-
-  UnloadImage(raytraced);
-}
-
-bool rt::raytracer::Raytracer::onFinished() {
-  ClearBackground(BLACK);
-
-  if (ard.finishedThreads == ard.config.numThreads && !allFinished) {
-    allFinished = true;
-
-    ard.KillThreads();
-
-    BlitToBuffer();
-
-    if (saveOnRender)
-      Autosave();
+  // Clear results from previous job.
+  for (auto it = ard.pixelJobs.getJobsVector().begin(); it != ard.pixelJobs.getJobsVector().end(); ++it) {
+    it->color = vec3(0);
   }
 
-  auto const editorSize = ImVec2(this->editorSize.x, this->editorSize.y);
-  auto const fitSize = EditorUtils::FitIntoArea(editorSize,
-                                                ImVec2(ard.raytraceRT.texture.width, ard.raytraceRT.texture.height));
-
-  float const dWidth  = editorSize.x - fitSize.x;
-  float const dHeight = editorSize.y - fitSize.y;
-
-  auto const imageSize = ard.config.imageSize;
-  DrawTexturePro(ard.raytraceRT.texture,
-                 (Rectangle){0, 0, static_cast<float>(imageSize.x), static_cast<float>(imageSize.y)},
-                 (Rectangle){dWidth / 2, dHeight / 2, fitSize.x, fitSize.y}, (Vector2){0, 0}, 0.0f, WHITE);
-  return allFinished;
+  raytracingDone = false;
 }
 
 void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, int threadIndex) {
@@ -199,7 +159,6 @@ vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, std::unique_ptr<Scene>
 }
 
 void rt::raytracer::Raytracer::RenderImGui() {
-
   rlImGuiBegin();
 
   if (viewState.showProgress) {
@@ -242,24 +201,10 @@ void rt::raytracer::Raytracer::RenderImGui() {
   rlImGuiEnd();
 }
 
-void rt::raytracer::Raytracer::Autosave() {
-  std::stringstream ss;
-
-  auto t  = std::time(nullptr);
-  auto tm = *std::localtime(&t);
-  auto const imageSize = ard.config.imageSize;
-  ss << "screenshots/" << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << "_" << imageSize.x << "x"
-     << imageSize.y << "_" << ard.config.numSamples << "_" << ard.config.maxDepth
-     << ".bmp";
-
-  std::cout << "Finished render: " << ss.str() << '\n';
-
-  Image raytraced = LoadImageFromTexture(ard.raytraceRT.texture);
-
-  // 4 components for RGBA;
-  // Couldn't get raylibs ExportImage to work with BMP. It did work with PNG however
-  stbi_write_bmp(ss.str().c_str(), raytraced.width, raytraced.height, 4, raytraced.data);
-
-  UnloadImage(raytraced);
+float rt::raytracer::Raytracer::progress() const {
+  return ard.progress();
 }
 
+bool rt::raytracer::Raytracer::isRaytracing() const {
+  return ard.isRaytracing();
+}

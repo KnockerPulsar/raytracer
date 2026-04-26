@@ -31,18 +31,14 @@ namespace rt {
   class App {
     //  We don't intend to point the editor to new instances.
     sPtr<editor::Editor> editor;
-    sPtr<raytracer::Raytracer> rt;
 
-    std::weak_ptr<IState> currentState;
     bool shouldQuit = false;
-    bool saveOnRender = true;
 
   public:
     App(CliConfig);
     ~App();
 
     void run();
-    void rebuildRaytracer(std::shared_ptr<raytracer::Raytracer> newState);
     void checkInput();
     void quit();
 

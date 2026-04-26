@@ -23,6 +23,7 @@ namespace rt::raytracer {
 
     std::function<void(int)> const onThreadDone;
 
+    bool isDone() const { return currentChunkStart > jobs.size() - 1; }
   public:
     JobQueue(int numberOfJobs, int chunkSize, std::function<void(int)> onThreadDone)
         : chunkSize(chunkSize), numberOfJobs(numberOfJobs), onThreadDone(onThreadDone), currentChunkStart(0) {
@@ -40,7 +41,7 @@ namespace rt::raytracer {
 
       // All jobs consumed, wait untill the main thread refreshes jobs and notifies threads.
       // Or main thread wants to stop threads
-      if (currentChunkStart > jobs.size() - 1) {
+      if (isDone()) {
         onThreadDone(threadIndex);
         threadBarrier.wait(lk);
       }
@@ -66,5 +67,7 @@ namespace rt::raytracer {
     }
 
     void setCurrentChunkStart(int ccs) { currentChunkStart = ccs; }
+
+    float progress() const { return static_cast<float>(currentChunkStart) / numberOfJobs * 0.01f; }
   };
 } // namespace rt

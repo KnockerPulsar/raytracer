@@ -69,6 +69,7 @@ set(SOURCES
   src/editor/transformation.cpp
   src/editor/solid_color_background.cpp
   src/editor/skysphere_background.cpp
+  src/editor/rendered_frames_window.cpp
 
   vendor/argumentum/src/argparser.cpp
 
