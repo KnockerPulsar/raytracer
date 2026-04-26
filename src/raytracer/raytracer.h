@@ -13,6 +13,9 @@ namespace rt::raytracer {
 
   struct Frame {
     ::Texture texture;
+    std::chrono::milliseconds renderTime;
+    // TODO record raytracing config for rendered frames window?
+    // Samples, max depth, seed (when I make the raytracer deterministic...)
   };
 
   class Raytracer {

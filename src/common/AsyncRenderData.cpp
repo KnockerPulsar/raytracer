@@ -1,23 +1,17 @@
 #include "AsyncRenderData.h"
-// Deletes pixelData afte copying it to another buffer
 
 #include "data_structures/JobQueue.h"
 #include "data_structures/Pixel.h"
-#include <algorithm>
 #include <cstdint>
-#include <print>
 #include <random>
-#include <ranges>
 
 namespace rt::raytracer {
   // TODO tiles instead of lines?
   // Every thread gets 4 lines of the output
   AsyncRenderData::AsyncRenderData(Config &&config)
-      : threadProgress(config.numThreads, 0), threadTimes(config.numThreads, 0L), finishedThreads(0),
-        pixelJobs(config.imageSize.x * config.imageSize.y, config.imageSize.x * 4,
-                  [this](int threadIndex) {
-                    finishedThreads++;
-                  }),
+      : threadProgress(config.numThreads, 0), threadTimes(config.numThreads, std::chrono::milliseconds{0}),
+        finishedThreads(0), pixelJobs(config.imageSize.x * config.imageSize.y, config.imageSize.x * 4,
+                                      [this](int threadIndex) { finishedThreads++; }),
         config(std::move(config)) {
 
     std::uniform_int_distribution<uint64_t> distribution;

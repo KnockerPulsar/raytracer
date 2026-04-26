@@ -1,6 +1,41 @@
 #include "rendered_frames_window.h"
 
 #include "editor/Utils.h"
+#include "imgui.h"
+
+#include <chrono>
+#include <format>
+#include <string_view>
+
+namespace {
+  void centerImage(std::string_view id, ImVec2 const &size, rt::raytracer::Frame const &frame) {
+    // 1. Pass the unique ID to the child window
+    if (ImGui::BeginChild(id.data(), size, ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar)) {
+      ImVec2 availSpace = ImGui::GetContentRegionAvail();
+      auto const frameSize  = ImVec2(frame.texture.width, frame.texture.height);
+      auto const fittedArea = EditorUtils::FitIntoArea(availSpace, frameSize);
+
+      float offsetX = (availSpace.x - fittedArea.x) * 0.5f;
+      // 2. Fixed typo (changed fittedArea.x to fittedArea.y)
+      float offsetY = (availSpace.y - fittedArea.y) * 0.5f;
+
+      // 3. SetCursorPos inside a child window is strictly local.
+      // No need to add GetCursorPos() to it.
+      ImGui::SetCursorPos(ImVec2(offsetX, offsetY));
+
+      ImGui::Image(reinterpret_cast<ImTextureID>(&frame.texture.id), fittedArea, ImVec2{0, 1}, ImVec2{1, 0});
+    }
+    ImGui::EndChild();
+  }
+
+  template <typename... Args> auto formatWithNull(std::format_string<Args...> fmt, Args &&...args) -> const char * {
+    static std::array<char, 32> buf;
+    auto const [out, _] = std::format_to_n(buf.data(), buf.size(), fmt, args...);
+    *out                = '\0';
+
+    return buf.data();
+  }
+}
 
 void rt::editor::RenderedFramesWindow::draw() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
@@ -20,42 +55,44 @@ void rt::editor::RenderedFramesWindow::draw() {
         ImGui::TableNextRow();
 
         ImGui::TableSetColumnIndex(0);
-        // Use a child window so it occupies the exact column space without overflowing
-        if (ImGui::BeginChild("ImageRegion", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar)) {
-          ImVec2 availSpace = ImGui::GetContentRegionAvail();
-
-          auto const &selectedFrame = renderedFrames[selectedItem.value_or(0)];
-          auto const  frameSize     = ImVec2(selectedFrame.texture.width, selectedFrame.texture.height);
-          auto const  fittedArea    = EditorUtils::FitIntoArea(availSpace, frameSize);
-
-          // Optional: Center the image in the available space
-          float offsetX = (availSpace.x - fittedArea.x) * 0.5f;
-          float offsetY = (availSpace.y - fittedArea.x) * 0.5f;
-          ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + offsetX, ImGui::GetCursorPosY() + offsetY));
-
-          // Draw the image
-          ImGui::Image(reinterpret_cast<ImTextureID>(&selectedFrame.texture.id), fittedArea, ImVec2{0, 1},
-                       ImVec2{1, 0});
-        }
-        ImGui::EndChild();
+        centerImage("MainPreviewImage", ImVec2{0, 0}, renderedFrames[selectedItem.value_or(0)].frame);
 
         ImGui::TableSetColumnIndex(1);
-        // Use a child window to create an independent scrolling region
         if (ImGui::BeginChild("ListRegion", ImVec2(0, 0), ImGuiChildFlags_None)) {
-          std::array<char, 32> buf;
-          for (auto i = 0u; i < renderedFrames.size(); i++) {
+          // One master table for the entire list
+          if (ImGui::BeginTable("MainListTable", 2, ImGuiTableFlags_SizingStretchProp)) {
+            ImGui::TableSetupColumn("ImageCol", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+            ImGui::TableSetupColumn("DataCol", ImGuiTableColumnFlags_WidthStretch, 0.7f);
+            auto const rowHeight = 70.0f;
 
-            auto const formatResult = std::format_to_n(buf.data(), buf.size(), "Item {}", i);
-            buf[formatResult.size] = '\0';
+            for (auto i = 0u; i < renderedFrames.size(); i++) {
+              ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+              ImGui::TableNextColumn();
 
-            if (ImGui::Selectable(buf.data(), selectedItem == i)) {
-              selectedItem = i;
-              // Handle selection logic here
+              float startY = ImGui::GetCursorPosY();
+
+              if (ImGui::Selectable(formatWithNull("##item_{}", i), selectedItem == i,
+                                    ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap,
+                                    ImVec2(0, rowHeight))) {
+                selectedItem = i;
+              }
+
+              ImGui::SetCursorPosY(startY);
+              auto const& frame = renderedFrames[i];
+              centerImage(formatWithNull("list_image_{}", i), ImVec2{0, rowHeight}, frame.frame);
+
+              ImGui::TableNextColumn();
+
+              ImGui::BeginGroup();
+              ImGui::Text("%s", std::format("{:%Y-%m-%d %H:%M:%S}", frame.renderFinishTime).c_str());
+              ImGui::Text("%dx%d", frame.frame.texture.width, frame.frame.texture.height);
+              ImGui::Text("%ldms", frame.frame.renderTime.count());
+              ImGui::EndGroup();
             }
+            ImGui::EndTable();
           }
+          ImGui::EndChild();
         }
-        ImGui::EndChild();
-
         ImGui::EndTable();
       }
     }
@@ -64,7 +101,7 @@ void rt::editor::RenderedFramesWindow::draw() {
 }
 
 void rt::editor::RenderedFramesWindow::onFrameRendered(raytracer::Frame const &frame) {
-  renderedFrames.push_back(frame);
+  renderedFrames.push_back(Frame{frame, std::chrono::system_clock::now()});
   selectedItem = renderedFrames.size() - 1;
 }
 

@@ -10,6 +10,7 @@
 
 #include "editor/Utils.h"
 
+#include <chrono>
 #include <imgui.h>
 #include <raylib.h>
 
@@ -39,7 +40,8 @@ void rt::raytracer::Raytracer::onUpdate() {
         .format  = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
     };
 
-    onRenderDone(Frame{LoadTextureFromImage(raytraced)});
+    auto const renderTime = std::ranges::max(ard.threadTimes);
+    onRenderDone(Frame{LoadTextureFromImage(raytraced), renderTime});
   }
 }
 
@@ -64,7 +66,7 @@ void rt::raytracer::Raytracer::stopRaytracing() {
   ard.finishedThreads = 0;
   // Reset thread times and progress
   for (int i = 0; i < ard.config.numThreads; i++) {
-    ard.threadTimes[i]    = 0;
+    ard.threadTimes[i]    = std::chrono::milliseconds{0};
     ard.threadProgress[i] = 0;
   }
 
@@ -125,7 +127,7 @@ void rt::raytracer::Raytracer::TraceRay(AsyncRenderData &ard, int threadIndex) {
       ard.threadProgress[threadIndex] = ((float)(currentJob - jobsStart) / (jobsEnd - jobsStart)) * 100;
     }
     auto stop      = std::chrono::high_resolution_clock::now();
-    auto batchTime = duration_cast<std::chrono::milliseconds>(stop - start).count();
+    auto batchTime = duration_cast<std::chrono::milliseconds>(stop - start);
     ard.threadTimes[threadIndex] += batchTime;
   }
 }
@@ -149,49 +151,6 @@ vec3 rt::raytracer::Raytracer::RayColor(const rt::Ray &r, std::unique_ptr<Scene>
     return emitted;
 
   return emitted + attenuation * RayColor(scattered, compiledScene, depth - 1);
-}
-
-void rt::raytracer::Raytracer::RenderImGui() {
-  rlImGuiBegin();
-
-  if (viewState.showProgress) {
-    if (ImGui::Begin("Thread status", 0)) {
-      ImGui::Text("%s", "Press space to toggle this menu, escape to quit");
-      // ImGui::Checkbox("Incremental rendering", &ard.incRender);
-
-      ImGui::Separator();
-
-      ImGui::Text("Rendering progress");
-      ImGui::SameLine();
-      ImGui::ProgressBar(float(ard.pixelJobs.getCurrentChunkStart()) / ard.pixelJobs.getJobsVector().size());
-
-      ImGui::Separator();
-
-      ImGui::Checkbox("Show detailed thread progress", &viewState.detailedThreadProgress);
-
-      if (viewState.detailedThreadProgress) {
-        if (ImGui::BeginTable("Thread status", 3)) {
-          ImGui::TableNextRow();
-
-          for (int t = 0; t < ard.config.numThreads; t++) {
-            // Thread labels
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
-            ImGui::Text("Thread %d: ", t);
-            ImGui::TableNextColumn();
-            ImGui::ProgressBar(ard.threadProgress[t] / 100.0f);
-            ImGui::TableNextColumn();
-            ImGui::Text("Time: %ld ms", ard.threadTimes[t]);
-          }
-
-          ImGui::EndTable();
-        }
-      }
-    }
-    ImGui::End();
-  }
-
-  rlImGuiEnd();
 }
 
 float rt::raytracer::Raytracer::progress() const {

@@ -18,7 +18,7 @@ namespace rt::raytracer {
 
     JobQueue<Pixel> pixelJobs;
 
-    std::vector<long> threadTimes;
+    std::vector<std::chrono::milliseconds> threadTimes;
     std::vector<int>  threadProgress;
     std::atomic<int>  finishedThreads;
 
