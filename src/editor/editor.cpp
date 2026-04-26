@@ -33,7 +33,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <print>
 
 using namespace rt::constants;
 
@@ -173,7 +172,7 @@ namespace rt::editor {
       ImGui::Separator();
 
       if (ImGui::MenuItem("Quit")) {
-        app->quit();
+        app.quit();
       }
 
       ImGui::EndMenu();
@@ -377,9 +376,9 @@ namespace rt::editor {
     std::unreachable();
   }
 
-  Editor::Editor(App *const app, CliConfig const &config)
-      : IState(app), scene(loadInitialScene(config)), camera(config.windowSize, config.imageSize, scene->getCamera()),
-        rasterRT(LoadRenderTexture(config.windowSize.x, config.windowSize.y)), config(config, *scene) {}
+  Editor::Editor(App &app, CliConfig const &config)
+      : scene(loadInitialScene(config)), camera(config.windowSize, config.imageSize, scene->getCamera()),
+        rasterRT(LoadRenderTexture(config.windowSize.x, config.windowSize.y)), config(config, *scene), app(app) {}
 
   Editor::~Editor() { UnloadRenderTexture(rasterRT); }
 
@@ -438,8 +437,6 @@ namespace rt::editor {
       scene->getWorld().push_back(added);
     }
   }
-
-  void Editor::onExit() {}
 
   void Editor::RenderViewport() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
@@ -502,7 +499,7 @@ namespace rt::editor {
           camera.imageSize(),
       };
 
-      raytracer = std::make_unique<rt::raytracer::Raytracer>(app, std::move(raytracerConfig), [this](auto frame) {
+      raytracer = std::make_unique<rt::raytracer::Raytracer>(std::move(raytracerConfig), [this](auto frame) {
         renderedFramesWindow.onFrameRendered(frame);
         ImGui::SetWindowFocus("Rendered Frames");
       });

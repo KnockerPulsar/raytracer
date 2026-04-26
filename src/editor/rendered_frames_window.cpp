@@ -7,7 +7,6 @@ void rt::editor::RenderedFramesWindow::draw() {
     ImGui::Begin("Rendered Frames");
     if(!renderedFrames.empty())
     {
-      // TODO remove IState and commit "Roll raytraced image viewer into editor"
       // TODO if we close the application with this window open, the next
       // launch shouldn't open onto it
       // TODO list of renders in memory, with the ability to single/batch

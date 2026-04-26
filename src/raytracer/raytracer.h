@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/IState.h"
 #include "common/Ray.h"
 #include "common/AsyncRenderData.h"
 
@@ -16,14 +15,11 @@ namespace rt::raytracer {
     ::Texture texture;
   };
 
-  class Raytracer : public IState {
+  class Raytracer {
   public:
-    Raytracer(App *const app, Config &&config, std::function<void(Frame)>);
+    Raytracer(Config &&config, std::function<void(Frame)>);
 
-    virtual void onEnter() override;
-    virtual void onExit() override;
-    virtual void onUpdate() override;
-
+    void onUpdate();
     void startRaytracing();
     void stopRaytracing();
 

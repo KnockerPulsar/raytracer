@@ -7,7 +7,6 @@
 #include "raytracer/raytracer.h"
 #include "editor/IImguiDrawable.h"
 
-#include "common/IState.h"
 #include "common/Defs.h"
 
 #include <imgui.h>
@@ -35,7 +34,7 @@ namespace rt {
     class Hittable;
 
 
-    class Editor : public IState {
+    class Editor {
     public:
       struct ViewState {
         struct FileMenu {
@@ -56,15 +55,14 @@ namespace rt {
         BuiltInMenu builtInMenu;
       };
 
-      Editor(App *const app, CliConfig const &config);
+      Editor(App &app, CliConfig const &config);
       ~Editor();
 
       /*
         Checks for inputs, updates the editor camera and its GUI,
         rasterizes object, renders editor GUI.
       */
-      virtual void onUpdate() override;
-      virtual void onExit() override;
+      void onUpdate();
 
       static std::optional<sPtr<editor::Material>> MaterialChanger();
 
@@ -165,6 +163,7 @@ namespace rt {
 
       std::unique_ptr<raytracer::Raytracer> raytracer;
       RenderedFramesWindow renderedFramesWindow;
+      App& app;
     }; // namespace Editor
   } // namespace editor
 } // namespace rt

@@ -2,7 +2,6 @@
 #include "common/Hittable.h"
 
 #include "common/Scene.h"
-#include "common/IState.h"
 #include "common/Util.h"
 #include "materials//Material.h"
 
@@ -14,14 +13,8 @@
 #include <imgui.h>
 #include <raylib.h>
 
-#include <iostream>
-
-rt::raytracer::Raytracer::Raytracer(App *const app, Config &&config, std::function<void(Frame)> onRenderDone)
-    : IState(app), ard(std::move(config)), onRenderDone(onRenderDone) {}
-
-void rt::raytracer::Raytracer::onEnter() { startRaytracing(); }
-
-void rt::raytracer::Raytracer::onExit() { stopRaytracing(); }
+rt::raytracer::Raytracer::Raytracer(Config &&config, std::function<void(Frame)> onRenderDone)
+    : ard(std::move(config)), onRenderDone(onRenderDone) {}
 
 void rt::raytracer::Raytracer::onUpdate() {
   if (ard.isRaytracing() && ard.finishedRaytracing() && !raytracingDone) {

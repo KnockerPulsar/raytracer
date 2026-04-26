@@ -18,7 +18,7 @@ namespace rt {
     InitWindow(config.windowSize.x, config.windowSize.y, rt::constants::title);
 
     // Editor MUST be initialized after the window is created
-    editor       = std::make_shared<editor::Editor>(this, config);
+    editor       = std::make_shared<editor::Editor>(*this, config);
 
     rlImGuiSetup(true);
     SetTargetFPS(60); // Not like we're gonna hit it...
