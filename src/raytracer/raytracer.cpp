@@ -41,7 +41,13 @@ void rt::raytracer::Raytracer::onUpdate() {
     };
 
     auto const renderTime = std::ranges::max(ard.threadTimes);
-    onRenderDone(Frame{LoadTextureFromImage(raytraced), renderTime});
+    onRenderDone(Frame{
+        LoadTextureFromImage(raytraced),
+        renderTime,
+        ard.config.seed,
+        ard.config.numSamples,
+        ard.config.maxDepth,
+    });
   }
 }
 
